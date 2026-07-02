@@ -1,0 +1,35 @@
+@use '@/styles/variables' as *;
+
+.skeleton {
+  display: block;
+  width: 100%;
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    $color-surface 25%,
+    #EBEBEB 50%,
+    $color-surface 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: $radius-sm;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.cardSkeleton {
+  background: $color-white;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.cardContent {
+  padding: $spacing-4;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}

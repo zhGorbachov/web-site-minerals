@@ -1,0 +1,34 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.emptyState {
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: $spacing-16 $spacing-4;
+  gap: $spacing-4;
+}
+
+.icon {
+  color: $color-text-muted;
+  opacity: 0.4;
+
+  svg {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.description {
+  font-size: $font-size-base;
+  color: $color-text-muted;
+  max-width: 360px;
+  line-height: $line-height-relaxed;
+}

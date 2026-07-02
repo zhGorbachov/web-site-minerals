@@ -1,0 +1,164 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.footer {
+  background: $color-surface;
+  border-top: 1px solid $color-border;
+  margin-top: auto;
+}
+
+.inner {
+  @include container;
+  padding-block: $spacing-12 $spacing-8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-8;
+
+  @include tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include desktop-up {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: $spacing-12;
+  }
+}
+
+// Brand
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  text-decoration: none;
+}
+
+.logoGem {
+  font-size: 20px;
+  color: $color-primary;
+}
+
+.logoText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.tagline {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  line-height: $line-height-relaxed;
+  max-width: 260px;
+}
+
+.socials {
+  display: flex;
+  gap: $spacing-3;
+}
+
+.socialLink {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  background: $color-border;
+  color: $color-text-muted;
+  transition: background $transition-base, color $transition-base;
+
+  &:hover {
+    background: $color-primary;
+    color: $color-white;
+  }
+}
+
+// Column groups
+.linkColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-6 $spacing-8;
+
+  @include tablet-up {
+    display: contents;
+  }
+}
+
+// Column
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.columnTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  list-style: none;
+}
+
+.link {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+// Contacts
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  list-style: none;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  color: $color-text-muted;
+
+  svg {
+    flex-shrink: 0;
+    color: $color-primary;
+  }
+}
+
+.contactText {
+  font-size: $font-size-sm;
+}
+
+// Bottom
+.bottom {
+  @include flex-between;
+  flex-wrap: wrap;
+  gap: $spacing-3;
+  padding-top: $spacing-8;
+  margin-top: $spacing-8;
+  border-top: 1px solid $color-border;
+}
+
+.copyright, .made {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}

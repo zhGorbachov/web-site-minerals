@@ -1,0 +1,16 @@
+@use '@/styles/variables' as *;
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  padding-top: $header-height-mobile;
+
+  @media (min-width: $bp-md) {
+    padding-top: $header-height;
+  }
+}

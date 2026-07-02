@@ -1,0 +1,147 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+}
+
+.attrRow {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding-bottom: $spacing-3;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.attrLabel {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  flex-shrink: 0;
+}
+
+.attrValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  text-align: right;
+}
+
+.optionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.sectionDivider {
+  display: block;
+  height: 1px;
+  background: $color-border;
+  margin-block: $spacing-1;
+}
+
+.optionLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+// Square bead size selectors
+.sizeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.sizeChip {
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-sm;
+  border: 1.5px solid $color-border;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  background: $color-white;
+  transition: border-color $transition-base, background $transition-base, color $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+
+  &.sizeChipActive {
+    border-color: $color-primary;
+    background: $color-primary;
+    color: $color-white;
+  }
+}
+
+// Pill length / color selectors
+.lengthPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.lengthPill {
+  min-height: 44px;
+  padding-inline: $spacing-4;
+  border-radius: $radius-sm;
+  border: 1.5px solid $color-border;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  background: $color-white;
+  transition: border-color $transition-base, background $transition-base, color $transition-base;
+  cursor: pointer;
+  text-align: center;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+
+  &.lengthPillActive {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.08);
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-3;
+  padding-top: $spacing-2;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.metaLabel {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.metaValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+}
+
+.hint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  font-style: italic;
+}

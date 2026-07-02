@@ -1,0 +1,96 @@
+@use '@/styles/variables' as *;
+
+.breadcrumbs {
+  margin-bottom: $spacing-6;
+
+  &.compact {
+    margin-bottom: 0;
+  }
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-1;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+
+  &:last-child {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.link {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  transition: color $transition-base;
+  white-space: nowrap;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.linkActive {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  white-space: nowrap;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.separator {
+  width: 14px;
+  height: 14px;
+  color: $color-border;
+  flex-shrink: 0;
+}
+
+.current {
+  font-size: $font-size-sm;
+  color: $color-text;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact {
+  .link,
+  .linkActive,
+  .current {
+    font-size: $font-size-xs;
+  }
+
+  .separator {
+    width: 12px;
+    height: 12px;
+  }
+
+  .list {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .item:last-child {
+    min-width: 0;
+
+    .current {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

@@ -1,0 +1,53 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.desktopNav {
+  display: none;
+
+  @include desktop-up {
+    display: block;
+    background: $color-white;
+    border-radius: $radius-md;
+    box-shadow: $shadow-card;
+    padding: $spacing-5;
+    position: sticky;
+    top: calc($header-height + $spacing-4);
+  }
+}
+
+.desktopNavTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-text-muted;
+  margin-bottom: $spacing-4;
+}
+
+.desktopNavList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  list-style: none;
+}
+
+.desktopNavLink {
+  display: block;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+  transition: background $transition-base, color $transition-base;
+
+  &:hover {
+    background: $color-surface;
+    color: $color-text;
+  }
+
+  &.desktopNavLinkActive {
+    background: rgba($color-primary, 0.08);
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}

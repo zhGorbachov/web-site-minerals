@@ -1,0 +1,28 @@
+@use '@/styles/variables' as *;
+
+.spinner {
+  display: inline-block;
+  border-style: solid;
+  border-color: $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.sm { width: 20px; height: 20px; border-width: 2px; }
+.md { width: 36px; height: 36px; border-width: 3px; }
+.lg { width: 56px; height: 56px; border-width: 4px; }
+
+.fullPage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($color-white, 0.8);
+  z-index: $z-modal;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

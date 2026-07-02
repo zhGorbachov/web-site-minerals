@@ -1,0 +1,39 @@
+// ============================================================
+// Global Styles Entry Point
+// ============================================================
+
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'reset' as _reset;
+@use 'typography' as _type;
+
+// Container utility
+.container {
+  width: 100%;
+  max-width: $container-max-width;
+  margin-inline: auto;
+  padding-inline: $container-padding;
+
+  @media (min-width: $bp-md) {
+    padding-inline: $container-padding-md;
+  }
+
+  @media (min-width: $bp-xl) {
+    padding-inline: $container-padding-xl;
+  }
+}
+
+// Section spacing
+.section {
+  padding-block: $spacing-12;
+
+  @media (min-width: $bp-xl) {
+    padding-block: $spacing-20;
+  }
+}
+
+// Page wrapper
+.page {
+  min-height: calc(100vh - $header-height);
+  padding-top: $header-height;
+}

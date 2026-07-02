@@ -1,0 +1,38 @@
+@use '@/styles/variables' as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px $spacing-2;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.primary  { background: rgba($color-primary, 0.12); color: $color-primary; }
+.success  { background: rgba($color-success, 0.12); color: $color-success; }
+.warning  { background: rgba($color-warning, 0.12); color: $color-warning; }
+.error    { background: rgba($color-error, 0.12); color: $color-error; }
+.neutral  { background: $color-surface; color: $color-text-muted; }
+
+.cartBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 4px;
+  background: $color-primary;
+  color: $color-white;
+  border-radius: $radius-full;
+  font-size: 10px;
+  font-weight: $font-weight-bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 2px solid $color-white;
+}

@@ -1,0 +1,286 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.page {
+  padding-block: $spacing-4 $spacing-12;
+
+  @include tablet-up {
+    padding-block: $spacing-8 $spacing-16;
+  }
+}
+
+.breadcrumbs {
+  margin-bottom: $spacing-4;
+
+  @include tablet-up {
+    margin-bottom: $spacing-6;
+  }
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+  margin-bottom: $spacing-12;
+
+  @include tablet-up {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-12;
+    align-items: start;
+    margin-bottom: $spacing-16;
+  }
+
+  @include desktop-up {
+    grid-template-columns: 3fr 2fr;
+    gap: $spacing-16;
+  }
+}
+
+.galleryCol {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+
+  @include tablet-up {
+    position: sticky;
+    top: calc($header-height + $spacing-4);
+  }
+}
+
+.infoCol {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.productTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  line-height: $line-height-tight;
+
+  @include tablet-up {
+    font-size: $font-size-2xl;
+  }
+
+  @include desktop-up {
+    font-size: $font-size-3xl;
+  }
+}
+
+.availability {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  flex-wrap: wrap;
+  margin-top: calc($spacing-1 * -1);
+}
+
+.inStock {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-success;
+  text-transform: lowercase;
+}
+
+.stockCount {
+  font-weight: $font-weight-semibold;
+  text-transform: none;
+}
+
+.outOfStock {
+  font-size: $font-size-sm;
+  color: $color-error;
+  font-weight: $font-weight-medium;
+  text-transform: lowercase;
+}
+
+.priceBlock {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-3;
+}
+
+.price {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+
+  @include tablet-up {
+    font-size: $font-size-3xl;
+  }
+}
+
+.oldPrice {
+  font-size: $font-size-base;
+  color: $color-text-muted;
+  text-decoration: line-through;
+}
+
+.optionsBlock {
+  padding-top: $spacing-2;
+}
+
+.purchaseRow {
+  display: flex;
+  gap: $spacing-3;
+  align-items: stretch;
+  padding-top: $spacing-2;
+}
+
+.qtyStepper {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-sm;
+  background: $color-white;
+  overflow: hidden;
+}
+
+.qtyBtn {
+  width: 44px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  transition: background $transition-base;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: $color-surface;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.qtyValue {
+  min-width: 36px;
+  text-align: center;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  border-inline: 1.5px solid $color-border;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addToCartBtn {
+  flex: 1;
+  min-width: 0;
+}
+
+.wishlistBtn {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: $radius-sm;
+  border: 1.5px solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-muted;
+  background: $color-white;
+  transition: border-color $transition-base, color $transition-base, background $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-error;
+    color: $color-error;
+  }
+
+  &.wishlistActive {
+    border-color: $color-error;
+    color: $color-error;
+    background: rgba($color-error, 0.06);
+  }
+}
+
+.descriptionBlock {
+  padding-top: $spacing-6;
+  border-top: 1px solid $color-border;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  margin-top: $spacing-2;
+}
+
+.descTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.description {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  line-height: $line-height-relaxed;
+  white-space: pre-line;
+}
+
+.related {
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-10;
+
+  @include tablet-up {
+    padding-top: $spacing-12;
+  }
+}
+
+.relatedTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin-bottom: $spacing-6;
+
+  @include tablet-up {
+    font-size: $font-size-2xl;
+  }
+}
+
+// Skeleton
+.skeletonLayout {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+
+  @include tablet-up {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-8;
+  }
+}
+
+.skeletonGallery {
+  aspect-ratio: 1 / 1;
+  border-radius: $radius-md;
+  background: linear-gradient(90deg, $color-surface 25%, #EBEBEB 50%, $color-surface 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeletonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.skeletonLine {
+  border-radius: $radius-sm;
+  background: linear-gradient(90deg, $color-surface 25%, #EBEBEB 50%, $color-surface 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  width: 100%;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

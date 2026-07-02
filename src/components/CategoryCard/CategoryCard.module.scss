@@ -1,0 +1,81 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.card {
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: $color-white;
+  box-shadow: $shadow-card;
+  transition: box-shadow $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+}
+
+.imageWrapper {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+
+  &:hover .image {
+    transform: scale(1.05);
+  }
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform $transition-slow;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba($color-black, 0.25) 0%, transparent 50%);
+}
+
+.body {
+  padding: $spacing-5 $spacing-6;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  flex: 1;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.description {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  line-height: $line-height-relaxed;
+  @include text-clamp(2);
+  flex: 1;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  margin-top: $spacing-3;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  transition: gap $transition-base;
+
+  .card:hover & {
+    gap: $spacing-3;
+  }
+}

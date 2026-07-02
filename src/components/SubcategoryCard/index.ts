@@ -1,0 +1,1 @@
+export { SubcategoryCard } from './SubcategoryCard'

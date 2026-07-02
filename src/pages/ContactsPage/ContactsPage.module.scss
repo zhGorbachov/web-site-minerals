@@ -1,0 +1,126 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.page {
+  padding-block: $spacing-8 $spacing-16;
+}
+
+.header {
+  margin-bottom: $spacing-10;
+}
+
+.title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin-bottom: $spacing-3;
+}
+
+.subtitle {
+  font-size: $font-size-md;
+  color: $color-text-muted;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-8;
+
+  @include tablet-up {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.contactCards {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.contactCard {
+  display: flex;
+  gap: $spacing-4;
+  background: $color-white;
+  border-radius: $radius-md;
+  padding: $spacing-5;
+  box-shadow: $shadow-card;
+  align-items: flex-start;
+}
+
+.contactIcon {
+  width: 52px;
+  height: 52px;
+  background: rgba($color-primary, 0.1);
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.contactBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.contactTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.contactValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.contactNote {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+// Map
+.mapPlaceholder {
+  border-radius: $radius-lg;
+  background: $color-surface;
+  border: 2px dashed $color-border;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-3;
+  text-align: center;
+  padding: $spacing-8;
+}
+
+.mapIcon {
+  color: $color-text-muted;
+  opacity: 0.4;
+}
+
+.mapText {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+}
+
+.mapSubText {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}

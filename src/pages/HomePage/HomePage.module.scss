@@ -1,0 +1,405 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.page {
+  overflow-x: hidden;
+}
+
+// ── Mobile layout ─────────────────────────────────────────────
+.mobileHome {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+  padding: $spacing-5 $spacing-4 $spacing-6;
+
+  @include tablet-up {
+    display: none;
+  }
+}
+
+.mobileTagline {
+  font-size: calc($font-size-sm + 2px);
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $color-text-muted;
+  text-align: center;
+}
+
+.mobileCatalogBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: $spacing-4;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  background: $color-primary;
+  color: $color-white;
+  font-size: calc($font-size-sm + 2px);
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: $radius-md;
+  transition: background $transition-base;
+
+  &:hover {
+    background: $color-primary-dark;
+  }
+}
+
+.mobileCategoryRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-3;
+}
+
+.mobileCategoryTile {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  text-decoration: none;
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: $color-surface;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba($color-black, 0.4);
+    pointer-events: none;
+  }
+}
+
+.mobileCategoryImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobileCategoryLabel {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1;
+  font-size: clamp(calc($font-size-xs + 2px), 3.6vw, calc($font-size-sm + 4px));
+  font-weight: $font-weight-bold;
+  color: $color-white;
+  text-align: left;
+  line-height: $line-height-tight;
+  text-shadow: 0 1px 4px rgba($color-black, 0.6);
+}
+
+.mobileCategorySkeleton {
+  aspect-ratio: 1 / 1;
+  border-radius: $radius-md;
+  background: $color-surface;
+}
+
+.desktopSection {
+  display: none;
+
+  @include tablet-up {
+    display: block;
+  }
+}
+
+.mobileNewSection {
+  padding-block: $spacing-10;
+  margin-top: $spacing-2;
+
+  @include tablet-up {
+    padding-block: $spacing-16;
+    margin-top: 0;
+  }
+
+  .sectionHeader {
+    margin-bottom: $spacing-6;
+  }
+}
+
+// ── Hero ─────────────────────────────────────────────────────
+.hero {
+  position: relative;
+  display: none;
+  min-height: 60vh;
+  align-items: center;
+  overflow: hidden;
+
+  @include tablet-up {
+    display: flex;
+  }
+}
+
+.heroMedia {
+  position: absolute;
+  inset: 0;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba($color-black, 0.62) 0%,
+    rgba($color-black, 0.28) 60%,
+    rgba($color-black, 0.1) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  @include container;
+  padding-block: $spacing-12;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+  max-width: 680px;
+
+  @include tablet-up {
+    padding-block: $spacing-16;
+  }
+}
+
+.heroEyebrow {
+  display: inline-block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $color-accent;
+}
+
+.heroTitle {
+  font-size: clamp($font-size-3xl, 6vw, $font-size-4xl);
+  font-weight: $font-weight-bold;
+  color: $color-white;
+  line-height: $line-height-tight;
+}
+
+.heroSubtitle {
+  font-size: $font-size-md;
+  color: rgba($color-white, 0.85);
+  line-height: $line-height-relaxed;
+}
+
+.heroBreak {
+  display: none;
+
+  @include tablet-up {
+    display: inline;
+  }
+}
+
+.heroCtas {
+  display: flex;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+  margin-top: $spacing-2;
+
+  a {
+    text-decoration: none;
+  }
+}
+
+// ── Sections ─────────────────────────────────────────────────
+.section {
+  padding-block: $spacing-16;
+
+  @include desktop-up {
+    padding-block: $spacing-20;
+  }
+}
+
+.sectionGray {
+  background: $color-surface;
+}
+
+.sectionHeader {
+  @include flex-between;
+  flex-wrap: wrap;
+  gap: $spacing-4;
+  margin-bottom: $spacing-8;
+
+  @include desktop-up {
+    margin-bottom: $spacing-10;
+  }
+}
+
+.sectionTitle {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+
+  @include tablet-up {
+    font-size: $font-size-3xl;
+  }
+}
+
+.sectionSubtitle {
+  font-size: $font-size-base;
+  color: $color-text-muted;
+  margin-top: $spacing-2;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  transition: gap $transition-base;
+  white-space: nowrap;
+
+  &:hover {
+    gap: $spacing-3;
+  }
+}
+
+// ── Category Grid ─────────────────────────────────────────────
+.categoryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-5;
+
+  @include tablet-up {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.categorySkeleton {
+  aspect-ratio: 4 / 3;
+  border-radius: $radius-lg;
+  background: linear-gradient(90deg, $color-surface 25%, #EBEBEB 50%, $color-surface 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+// ── Product Grid ──────────────────────────────────────────────
+.productGrid {
+  @include product-grid;
+}
+
+// ── Popular horizontal scroll ─────────────────────────────────
+.popularScroll {
+  display: flex;
+  gap: $spacing-4;
+  overflow-x: auto;
+  padding-bottom: $spacing-4;
+  @include hide-scrollbar;
+
+  @include tablet-up {
+    @include product-grid;
+    overflow-x: unset;
+    padding-bottom: 0;
+  }
+}
+
+.popularItem {
+  flex-shrink: 0;
+  width: 220px;
+
+  @include tablet-up {
+    width: auto;
+  }
+}
+
+// ── Advantages ────────────────────────────────────────────────
+.advantagesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-5;
+
+  @include desktop-up {
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-6;
+  }
+}
+
+.advantageCard {
+  background: $color-white;
+  border-radius: $radius-md;
+  padding: $spacing-6;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.advantageIcon {
+  width: 52px;
+  height: 52px;
+  background: rgba($color-primary, 0.1);
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-primary;
+}
+
+.advantageTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.advantageText {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  line-height: $line-height-relaxed;
+}
+
+// ── About ─────────────────────────────────────────────────────
+.aboutGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-10;
+  align-items: center;
+
+  @include tablet-up {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.aboutImage {
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-lg;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.aboutContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+}
+
+.aboutText {
+  font-size: $font-size-base;
+  color: $color-text-muted;
+  line-height: $line-height-relaxed;
+}

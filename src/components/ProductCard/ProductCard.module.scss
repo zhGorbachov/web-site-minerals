@@ -1,0 +1,121 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.card {
+  background: $color-white;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow $transition-base, transform $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-card-hover;
+    transform: translateY(-4px);
+  }
+}
+
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
+}
+
+.imageWrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: $color-surface;
+
+  &:hover .image {
+    transform: scale(1.04);
+  }
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform $transition-slow;
+}
+
+.badgeNew,
+.badgeSale {
+  position: absolute;
+  top: $spacing-3;
+  padding: 3px $spacing-3;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  line-height: 1.4;
+}
+
+.badgeNew {
+  left: $spacing-3;
+  background: $color-primary;
+  color: $color-white;
+}
+
+.badgeSale {
+  right: $spacing-3;
+  background: $color-error;
+  color: $color-white;
+}
+
+.body {
+  padding: $spacing-4;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  flex: 1;
+}
+
+.name {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  line-height: $line-height-tight;
+  @include text-clamp(2);
+  transition: color $transition-base;
+  margin: 0;
+}
+
+.cardLink:hover .name {
+  color: $color-primary;
+}
+
+.shortDesc {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  @include text-clamp(2);
+  line-height: $line-height-normal;
+  flex: 1;
+}
+
+.footer {
+  @include flex-between;
+  gap: $spacing-2;
+  margin-top: $spacing-2;
+  flex-wrap: wrap;
+}
+
+.priceGroup {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-2;
+}
+
+.price {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.oldPrice {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  text-decoration: line-through;
+}
