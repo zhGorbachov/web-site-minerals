@@ -1,0 +1,42 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flagBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  border: 1px solid transparent;
+  background: transparent;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity $transition-base, border-color $transition-base;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  @include focus-ring;
+}
+
+.flagBtnActive {
+  opacity: 1;
+  border-color: $color-border;
+}
+
+.flagSvg {
+  width: 18px;
+  height: auto;
+  display: block;
+  border-radius: 1px;
+}

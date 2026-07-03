@@ -1,13 +1,39 @@
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Phone, Mail, MapPin, Send, Clock } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
+import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 import { Breadcrumbs } from '@/components/ui'
+import { MESSENGER_ICON_MAP } from '@/components/ContactDetails'
+import { PHONE_CONTACTS } from '@/config/ContactInfo'
+import { scrollToHashTarget } from '@/utils/hashNav'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ContactsPage.module.scss'
 
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+}
+
 export function ContactsPage() {
+  const location = useLocation()
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    if (location.pathname !== '/contacts') return
+
+    const timer = window.setTimeout(() => {
+      scrollToHashTarget(location.hash)
+    }, 200)
+
+    return () => window.clearTimeout(timer)
+  }, [location.pathname, location.hash])
+
+  let cardIndex = 0
+
   return (
     <div className={styles.page}>
       <div className="container">
-        <Breadcrumbs items={[{ label: 'Головна', href: '/' }, { label: 'Контакти' }]} />
+        <Breadcrumbs items={[{ label: t('about.breadcrumbHome'), href: '/' }, { label: t('nav.contacts') }]} />
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -15,34 +41,126 @@ export function ContactsPage() {
           transition={{ duration: 0.3 }}
           className={styles.header}
         >
-          <h1 className={styles.title}>Контакти</h1>
-          <p className={styles.subtitle}>Будемо раді відповісти на всі ваші питання</p>
+          <h1 className={styles.title}>{t('nav.contacts')}</h1>
+          <p className={styles.subtitle}>{t('contacts.subtitle')}</p>
         </motion.div>
 
         <div className={styles.layout}>
           <div className={styles.contactCards}>
-            {CONTACTS.map((item, i) => (
-              <motion.div
-                key={item.title}
-                className={styles.contactCard}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.08 }}
-              >
-                <div className={styles.contactIcon}>{item.icon}</div>
-                <div className={styles.contactBody}>
-                  <h4 className={styles.contactTitle}>{item.title}</h4>
-                  {item.href ? (
-                    <a href={item.href} className={styles.contactValue} target={item.external ? '_blank' : undefined} rel="noopener noreferrer">
-                      {item.value}
+            {PHONE_CONTACTS.map((phone) => {
+              const delay = cardIndex++ * 0.08
+              if (phone.messengers?.length) {
+                return (
+                  <motion.div
+                    key={phone.href}
+                    className={[styles.contactCard, styles.phoneGroupCard].join(' ')}
+                    {...fadeUp}
+                    transition={{ duration: 0.3, delay }}
+                  >
+                    <div className={styles.phoneGroupHeader}>
+                      <div className={styles.contactIcon}>
+                        <Phone size={24} />
+                      </div>
+                      <div className={styles.contactBody}>
+                        <h4 className={styles.contactTitle}>{t('contacts.phoneTitle')}</h4>
+                        <a href={phone.href} className={styles.contactValue}>
+                          {phone.display}
+                        </a>
+                      </div>
+                    </div>
+                    <div className={styles.messengerSubTiles}>
+                      {phone.messengers.map((messenger) => {
+                        const Icon = MESSENGER_ICON_MAP[messenger.id]
+                        return (
+                          <a
+                            key={messenger.id}
+                            href={messenger.href}
+                            className={styles.messengerSubTile}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={messenger.label}
+                          >
+                            <div className={styles.messengerSubIcon}>
+                              <Icon />
+                            </div>
+                            <span className={styles.messengerSubLabel}>{messenger.label}</span>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  </motion.div>
+                )
+              }
+              return (
+                <motion.div
+                  key={phone.href}
+                  className={styles.contactCard}
+                  {...fadeUp}
+                  transition={{ duration: 0.3, delay }}
+                >
+                  <div className={styles.contactIcon}>
+                    <Phone size={24} />
+                  </div>
+                  <div className={styles.contactBody}>
+                    <h4 className={styles.contactTitle}>{t('contacts.phoneTitle')}</h4>
+                    <a href={phone.href} className={styles.contactValue}>
+                      {phone.display}
                     </a>
-                  ) : (
-                    <span className={styles.contactValue}>{item.value}</span>
-                  )}
-                  {item.note && <p className={styles.contactNote}>{item.note}</p>}
+                  </div>
+                </motion.div>
+              )
+            })}
+
+            {OTHER_CONTACTS.map((item) => {
+              const delay = cardIndex++ * 0.08
+              return (
+                <motion.div
+                  key={item.titleKey}
+                  className={styles.contactCard}
+                  {...fadeUp}
+                  transition={{ duration: 0.3, delay }}
+                >
+                  <div className={styles.contactIcon}>{item.icon}</div>
+                  <div className={styles.contactBody}>
+                    <h4 className={styles.contactTitle}>{t(item.titleKey)}</h4>
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        className={styles.contactValue}
+                        target={item.external ? '_blank' : undefined}
+                        rel="noopener noreferrer"
+                      >
+                        {item.value}
+                      </a>
+                    ) : (
+                      <span className={styles.contactValue}>
+                        {item.valueKey ? t(item.valueKey) : item.value}
+                      </span>
+                    )}
+                    {item.noteKey && <p className={styles.contactNote}>{t(item.noteKey)}</p>}
+                  </div>
+                </motion.div>
+              )
+            })}
+
+            <motion.section
+              className={styles.scheduleSection}
+              id="schedule"
+              {...fadeUp}
+              transition={{ duration: 0.3, delay: cardIndex * 0.08 }}
+            >
+              <p className={styles.scheduleSectionLabel}>{t('contacts.scheduleSectionLabel')}</p>
+              <div className={styles.scheduleCard}>
+                <div className={styles.scheduleIcon}>
+                  <Clock size={24} />
                 </div>
-              </motion.div>
-            ))}
+                <div className={styles.contactBody}>
+                  <h4 className={styles.scheduleTitle}>{t('contacts.scheduleTitle')}</h4>
+                  <p className={styles.scheduleValue}>{t('contacts.scheduleValue')}</p>
+                  <p className={styles.scheduleNote}>{t('contacts.scheduleNote')}</p>
+                </div>
+              </div>
+            </motion.section>
           </div>
 
           <motion.div
@@ -53,8 +171,8 @@ export function ContactsPage() {
           >
             <div className={styles.mapInner}>
               <MapPin size={40} className={styles.mapIcon} />
-              <p className={styles.mapText}>Інтерактивна карта — незабаром</p>
-              <p className={styles.mapSubText}>Україна, доставляємо по всій країні</p>
+              <p className={styles.mapText}>{t('contacts.mapSoon')}</p>
+              <p className={styles.mapSubText}>{t('contacts.mapSubtext')}</p>
             </div>
           </motion.div>
         </div>
@@ -63,34 +181,12 @@ export function ContactsPage() {
   )
 }
 
-const CONTACTS = [
-  {
-    icon: <Phone size={24} />,
-    title: 'Телефон',
-    value: '+38 (099) 123-45-67',
-    href: 'tel:+380991234567',
-    note: 'Пн–Пт: 9:00 – 19:00',
-  },
+const OTHER_CONTACTS = [
   {
     icon: <Mail size={24} />,
-    title: 'Email',
+    titleKey: 'contacts.emailTitle' as const,
     value: 'hello@crystal.ua',
     href: 'mailto:hello@crystal.ua',
-    note: 'Відповідаємо протягом 24 годин',
-  },
-  {
-    icon: <Send size={24} />,
-    title: 'Telegram',
-    value: '@crystal_store',
-    href: 'https://t.me/crystal_store',
-    external: true,
-    note: 'Найшвидший спосіб зв\'язку',
-  },
-  {
-    icon: <Clock size={24} />,
-    title: 'Графік роботи',
-    value: 'Пн–Пт: 9:00 – 19:00',
-    href: undefined,
-    note: 'Сб: 10:00 – 16:00 | Нд: вихідний',
+    noteKey: 'contacts.emailNote' as const,
   },
 ]

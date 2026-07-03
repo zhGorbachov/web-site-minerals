@@ -194,6 +194,15 @@
   }
 }
 
+.desktopLanguageSwitcher {
+  display: none;
+
+  @include tablet-up {
+    display: flex;
+    flex-shrink: 0;
+  }
+}
+
 // Search
 .headerMain {
   display: contents;
@@ -370,6 +379,9 @@
 }
 
 .mobileDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: $spacing-3 $spacing-5;
   border-bottom: 1px solid $color-border;
   flex-shrink: 0;
@@ -387,7 +399,9 @@
 }
 
 .mobileMenuLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
   width: 100%;
   padding: $spacing-4 $spacing-5;
   font-size: $font-size-base;
@@ -406,6 +420,10 @@
     background: rgba($color-primary, 0.04);
   }
 
+  &:hover:not(:disabled) .mobileMenuLinkIcon {
+    color: $color-primary;
+  }
+
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
@@ -414,6 +432,62 @@
   &.mobileMenuLinkActive {
     color: $color-primary;
     background: rgba($color-primary, 0.06);
+
+    .mobileMenuLinkIcon {
+      color: $color-primary;
+    }
+  }
+}
+
+.mobileMenuLinkIcon {
+  flex-shrink: 0;
+  color: $color-text-muted;
+  transition: color $transition-base;
+}
+
+.mobileMenuLoginWrap {
+  border-top: 1px solid $color-border;
+  border-bottom: 1px solid $color-border;
+}
+
+.mobileMenuLogin {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-4 $spacing-5;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color $transition-base, background $transition-base;
+
+  .mobileMenuLinkIcon {
+    color: $color-primary;
+  }
+
+  &:hover:not(:disabled) {
+    color: $color-primary;
+    background: rgba($color-primary, 0.04);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
+.mobileMenuContactBlock {
+  .mobileMenuLink {
+    border-bottom: none;
+  }
+
+  .mobileMenuScheduleLink {
+    border-bottom: 1px solid $color-border;
   }
 }
 
@@ -422,25 +496,28 @@
   padding: $spacing-5;
   border-top: 1px solid $color-border;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   flex-shrink: 0;
 }
 
 .mobileCallBtn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   padding: $spacing-3 $spacing-5;
-  border: 1px solid $color-text;
+  border: none;
   border-radius: $radius-sm;
   font-size: $font-size-sm;
   font-weight: $font-weight-semibold;
-  color: $color-text;
+  color: $color-white;
+  background: #3B82F6;
   text-decoration: none;
-  transition: background $transition-base, color $transition-base;
+  text-align: center;
+  transition: background $transition-base;
 
   &:hover {
-    background: $color-text;
+    background: #2563EB;
     color: $color-white;
   }
 }
