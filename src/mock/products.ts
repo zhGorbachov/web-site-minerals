@@ -1,7 +1,11 @@
 import type { Product } from '@/types'
 import { mockImages } from '@/assets/mock/Images'
+import {
+  generateMockNewProducts,
+  MOCK_EXTRA_NEW_PRODUCTS_COUNT,
+} from './GenerateNewProducts'
 
-export const products: Product[] = [
+const baseProducts: Product[] = [
   // ── Мінерали / Агат ──────────────────────────────────────
   {
     id: 'prod-1',
@@ -632,4 +636,9 @@ export const products: Product[] = [
     createdAt: '2024-06-01T00:00:00Z',
     updatedAt: '2024-06-01T00:00:00Z',
   },
+]
+
+export const products: Product[] = [
+  ...baseProducts,
+  ...generateMockNewProducts(MOCK_EXTRA_NEW_PRODUCTS_COUNT),
 ]

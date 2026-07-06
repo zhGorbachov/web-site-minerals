@@ -8,14 +8,11 @@ import { useUIStore } from '@/store'
 import { useScrollLock } from '@/hooks/useScrollLock'
 import styles from './CatalogDrawer.module.scss'
 
-const MINERAL_SLUG = 'mineraly'
-
 export function CatalogDrawer() {
   const { isCatalogOpen, closeCatalog } = useUIStore()
   const [categories, setCategories] = useState<Category[]>([])
-  const [mineralSubcategories, setMineralSubcategories] = useState<SubCategory[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loaded, setLoaded] = useState(false)
+  const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, SubCategory[]>>({})
+  const [loading, setLoading] = useState(false)
   const [canHover, setCanHover] = useState(false)
 
   useScrollLock(isCatalogOpen)
@@ -31,19 +28,21 @@ export function CatalogDrawer() {
   }, [isCatalogOpen])
 
   useEffect(() => {
-    if (!isCatalogOpen || loaded) return
+    if (!isCatalogOpen) return
 
     setLoading(true)
-    void Promise.all([
-      CategoryService.getAll(),
-      SubCategoryService.getByCategory(MINERAL_SLUG),
-    ]).then(([cats, subs]) => {
+    void Promise.all([CategoryService.getAll(), SubCategoryService.getAll()]).then(([cats, subs]) => {
+      const grouped = subs.reduce<Record<string, SubCategory[]>>((acc, sub) => {
+        if (!acc[sub.categorySlug]) acc[sub.categorySlug] = []
+        acc[sub.categorySlug].push(sub)
+        return acc
+      }, {})
+
       setCategories(cats)
-      setMineralSubcategories(subs)
+      setSubcategoriesByCategory(grouped)
       setLoading(false)
-      setLoaded(true)
     })
-  }, [isCatalogOpen, loaded])
+  }, [isCatalogOpen])
 
   useEffect(() => {
     if (!isCatalogOpen) return
@@ -79,7 +78,7 @@ export function CatalogDrawer() {
           >
             <CatalogMenu
               categories={categories}
-              mineralSubcategories={mineralSubcategories}
+              subcategoriesByCategory={subcategoriesByCategory}
               loading={loading}
               canHover={canHover}
               onNavigate={closeCatalog}

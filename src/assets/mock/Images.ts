@@ -1,3 +1,4 @@
+import HomeHero from '../HomeHero.png'
 import MineralsHero from './MineralsHero.jpg'
 import MineralsCategory from './MineralsCategory.jpg'
 import Threads from './Threads.jpg'
@@ -26,6 +27,7 @@ import LimitedBracelet from './LimitedBracelet.jpg'
 import AboutStore from './AboutStore.jpg'
 
 export const mockImages = {
+  homeHero: HomeHero,
   mineralsHero: MineralsHero,
   mineralsCategory: MineralsCategory,
   threads: Threads,

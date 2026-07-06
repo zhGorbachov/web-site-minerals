@@ -37,7 +37,6 @@
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: $spacing-2;
   text-decoration: none;
 }
 
@@ -61,7 +60,26 @@
 
 .socials {
   display: flex;
+  flex-wrap: wrap;
   gap: $spacing-3;
+}
+
+.instagramLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2 $spacing-4;
+}
+
+.instagramLink {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+  text-decoration: none;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary;
+  }
 }
 
 .socialLink {

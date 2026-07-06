@@ -1,0 +1,47 @@
+@use '@/styles/variables' as *;
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  letter-spacing: -0.01em;
+}
+
+.line {
+  white-space: nowrap;
+}
+
+.ampersand {
+  padding-left: 2.75em;
+  font-weight: $font-weight-regular;
+  color: $color-warm;
+}
+
+.compact {
+  font-size: clamp(0.6875rem, 3.2vw, 0.8125rem);
+  line-height: 1;
+
+  .ampersand {
+    padding-left: 2.5em;
+  }
+
+  @media (min-width: 768px) {
+    font-size: $font-size-xs;
+
+    .ampersand {
+      padding-left: 2.75em;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    font-size: $font-size-sm;
+
+    .ampersand {
+      padding-left: 3em;
+    }
+  }
+}

@@ -3,8 +3,9 @@ import { Phone, Mail, MapPin } from 'lucide-react'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import { MESSENGER_ICON_MAP } from '@/components/ContactDetails'
-import { PHONE_CONTACTS, MESSENGER_CONTACTS } from '@/config/ContactInfo'
+import { PHONE_CONTACTS, SOCIAL_ICON_CONTACTS, INSTAGRAM_CONTACTS } from '@/config/ContactInfo'
 import { SITE_NAME } from '@/config/Site'
+import { SiteLogo } from '@/components/SiteLogo'
 import styles from './Footer.module.scss'
 
 export function Footer() {
@@ -18,12 +19,11 @@ export function Footer() {
         <div className={styles.grid}>
           <div className={styles.brand}>
             <Link to="/" className={styles.logo}>
-              <span className={styles.logoGem}>◆</span>
-              <span className={styles.logoText}>{SITE_NAME}</span>
+              <SiteLogo />
             </Link>
             <p className={styles.tagline}>{t('footer.tagline')}</p>
             <div className={styles.socials}>
-              {MESSENGER_CONTACTS.map((messenger) => {
+              {SOCIAL_ICON_CONTACTS.map((messenger) => {
                 const Icon = MESSENGER_ICON_MAP[messenger.id]
                 return (
                   <a
@@ -39,6 +39,20 @@ export function Footer() {
                 )
               })}
             </div>
+            <div className={styles.instagramLinks}>
+              {INSTAGRAM_CONTACTS.map((instagram) => (
+                <a
+                  key={instagram.id}
+                  href={instagram.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.instagramLink}
+                  aria-label={instagram.label}
+                >
+                  {instagram.label}
+                </a>
+              ))}
+            </div>
           </div>
 
           <div className={styles.linkColumns}>
@@ -50,6 +64,7 @@ export function Footer() {
                 <li><Link to="/catalog/mineraly" className={styles.link}>{t('footer.minerals')}</Link></li>
                 <li><Link to="/catalog/nytky" className={styles.link}>{t('footer.threads')}</Link></li>
                 <li><Link to="/catalog/brаslety" className={styles.link}>{t('footer.bracelets')}</Link></li>
+                <li><Link to="/catalog/pidvisky" className={styles.link}>{t('footer.pendants')}</Link></li>
               </ul>
             </div>
 
@@ -59,6 +74,7 @@ export function Footer() {
                 <li><Link to="/about" className={styles.link}>{t('nav.about')}</Link></li>
                 <li><Link to="/about#delivery" className={styles.link}>{t('nav.delivery')}</Link></li>
                 <li><Link to="/about#returns" className={styles.link}>{t('nav.returns')}</Link></li>
+                <li><Link to="/about#discounts" className={styles.link}>{t('nav.discounts')}</Link></li>
                 <li><Link to="/about#reviews" className={styles.link}>{t('nav.reviews')}</Link></li>
                 <li><Link to="/about#values" className={styles.link}>{t('nav.values')}</Link></li>
                 <li><Link to="/about#faq" className={styles.link}>{t('nav.faq')}</Link></li>

@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 import { Breadcrumbs } from '@/components/ui'
 import { MESSENGER_ICON_MAP } from '@/components/ContactDetails'
-import { PHONE_CONTACTS } from '@/config/ContactInfo'
+import { PHONE_CONTACTS, INSTAGRAM_CONTACTS } from '@/config/ContactInfo'
 import { scrollToHashTarget } from '@/utils/hashNav'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ContactsPage.module.scss'
@@ -110,6 +110,36 @@ export function ContactsPage() {
                 </motion.div>
               )
             })}
+
+            <motion.div
+              className={[styles.contactCard, styles.phoneGroupCard].join(' ')}
+              {...fadeUp}
+              transition={{ duration: 0.3, delay: cardIndex++ * 0.08 }}
+            >
+              <div className={styles.phoneGroupHeader}>
+                <div className={[styles.contactIcon, styles.instagramGroupIcon].join(' ')}>
+                  <MESSENGER_ICON_MAP.instagram_stones />
+                </div>
+                <div className={styles.contactBody}>
+                  <h4 className={styles.contactTitle}>{t('contacts.instagramTitle')}</h4>
+                  <p className={styles.contactNote}>{t('contacts.instagramNote')}</p>
+                </div>
+              </div>
+              <div className={styles.messengerSubTiles}>
+                {INSTAGRAM_CONTACTS.map((instagram) => (
+                  <a
+                    key={instagram.id}
+                    href={instagram.href}
+                    className={styles.textSubTile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={instagram.label}
+                  >
+                    <span className={styles.messengerSubLabel}>{instagram.label}</span>
+                  </a>
+                ))}
+              </div>
+            </motion.div>
 
             {OTHER_CONTACTS.map((item) => {
               const delay = cardIndex++ * 0.08

@@ -29,4 +29,13 @@ export const categories: Category[] = [
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
+  {
+    id: 'cat-4',
+    name: 'Підвіски',
+    slug: 'pidvisky',
+    image: mockImages.moonstone,
+    description: 'Підвіски та кулони з натуральних мінералів ручної роботи',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
 ]

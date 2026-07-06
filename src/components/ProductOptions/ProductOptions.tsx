@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { Children, useState, type ReactNode } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 import type { Product, MineralAttributes, ThreadAttributes, BraceletAttributes } from '@/types'
 import styles from './ProductOptions.module.scss'
 
@@ -27,7 +29,7 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
         <div className={styles.options}>
           {attrs.beadSizes && attrs.beadSizes.length > 0 && (
             <div className={styles.optionGroup}>
-              <span className={styles.optionLabel}>Р. намистини</span>
+              <span className={styles.optionLabel}>Розмір намистини</span>
               <div className={styles.sizeGrid}>
                 {attrs.beadSizes.map((size) => (
                   <button
@@ -69,12 +71,14 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
 
     return (
       <div className={styles.options}>
-        {attrs.size && <AttributeRow label="Розмір" value={attrs.size} />}
-        {attrs.weight && <AttributeRow label="Вага" value={attrs.weight} />}
-        {attrs.color && <AttributeRow label="Колір" value={attrs.color} />}
-        {attrs.origin && <AttributeRow label="Походження" value={attrs.origin} />}
-        {attrs.hardness && <AttributeRow label="Твердість" value={`${attrs.hardness} (за Моосом)`} />}
-        {attrs.shape && <AttributeRow label="Форма" value={attrs.shape} />}
+        <CharacteristicsPanel>
+          {attrs.size && <AttributeRow label="Розмір" value={attrs.size} />}
+          {attrs.weight && <AttributeRow label="Вага" value={attrs.weight} />}
+          {attrs.color && <AttributeRow label="Колір" value={attrs.color} />}
+          {attrs.origin && <AttributeRow label="Походження" value={attrs.origin} />}
+          {attrs.hardness && <AttributeRow label="Твердість" value={`${attrs.hardness} (за Моосом)`} />}
+          {attrs.shape && <AttributeRow label="Форма" value={attrs.shape} />}
+        </CharacteristicsPanel>
       </div>
     )
   }
@@ -84,9 +88,11 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
     const colors = ['Чорний', 'Білий', 'Бежевий', 'Рожевий', 'Синій', 'Зелений', 'Бордовий']
     return (
       <div className={styles.options}>
-        {attrs.length && <AttributeRow label="Довжина" value={attrs.length} />}
-        {attrs.diameter && <AttributeRow label="Товщина" value={attrs.diameter} />}
-        {attrs.material && <AttributeRow label="Матеріал" value={attrs.material} />}
+        <CharacteristicsPanel>
+          {attrs.length && <AttributeRow label="Довжина" value={attrs.length} />}
+          {attrs.diameter && <AttributeRow label="Товщина" value={attrs.diameter} />}
+          {attrs.material && <AttributeRow label="Матеріал" value={attrs.material} />}
+        </CharacteristicsPanel>
         <div className={styles.optionGroup}>
           <span className={styles.sectionDivider} />
           <span className={styles.optionLabel}>Колір</span>
@@ -112,11 +118,13 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
     const wristSizes = ['14 см', '15 см', '16 см', '17 см', '18 см', '19 см', '20 см', '21 см']
     return (
       <div className={styles.options}>
-        {attrs.stones && attrs.stones.length > 0 && (
-          <AttributeRow label="Каміння" value={attrs.stones.join(', ')} />
-        )}
-        {attrs.material && <AttributeRow label="Матеріал" value={attrs.material} />}
-        {attrs.threadColor && <AttributeRow label="Колір нитки" value={attrs.threadColor} />}
+        <CharacteristicsPanel>
+          {attrs.stones && attrs.stones.length > 0 && (
+            <AttributeRow label="Каміння" value={attrs.stones.join(', ')} />
+          )}
+          {attrs.material && <AttributeRow label="Матеріал" value={attrs.material} />}
+          {attrs.threadColor && <AttributeRow label="Колір нитки" value={attrs.threadColor} />}
+        </CharacteristicsPanel>
         <div className={styles.optionGroup}>
           <span className={styles.sectionDivider} />
           <span className={styles.optionLabel}>Розмір зап'ястка</span>
@@ -153,13 +161,53 @@ function StrandMeta({ attrs }: { attrs: MineralAttributes }) {
   if (meta.length === 0) return null
 
   return (
-    <div className={styles.metaGrid}>
-      {meta.map(({ label, value }) => (
-        <div key={label} className={styles.metaItem}>
-          <span className={styles.metaLabel}>{label}</span>
-          <span className={styles.metaValue}>{value}</span>
-        </div>
-      ))}
+    <CharacteristicsPanel>
+      <div className={styles.metaGrid}>
+        {meta.map(({ label, value }) => (
+          <div key={label} className={styles.metaItem}>
+            <span className={styles.metaLabel}>{label}</span>
+            <span className={styles.metaValue}>{value}</span>
+          </div>
+        ))}
+      </div>
+    </CharacteristicsPanel>
+  )
+}
+
+function CharacteristicsPanel({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const content = Children.toArray(children).filter(Boolean)
+  if (content.length === 0) return null
+
+  return (
+    <div className={styles.characteristics}>
+      <button
+        type="button"
+        className={[styles.characteristicsTitle, open ? styles.characteristicsTitleOpen : ''].filter(Boolean).join(' ')}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+      >
+        <span>Характеристики</span>
+        <ChevronDown
+          size={18}
+          className={[styles.chevron, open ? styles.chevronOpen : ''].filter(Boolean).join(' ')}
+          aria-hidden="true"
+        />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="characteristics-body"
+            className={styles.characteristicsCollapse}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <div className={styles.characteristicsBody}>{content}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

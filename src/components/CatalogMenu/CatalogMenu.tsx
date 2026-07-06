@@ -1,11 +1,12 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronRight, X } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ChevronDown, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { Category, SubCategory } from '@/types'
 import styles from './CatalogMenu.module.scss'
 
 const MINERAL_SLUG = 'mineraly'
-const PRIMARY_SLUGS = ['nytky', 'brаslety', MINERAL_SLUG] as const
+const PRIMARY_SLUGS = ['nytky', 'pidvisky', 'brаslety', MINERAL_SLUG] as const
 
 const listVariants = {
   hidden: { opacity: 0 },
@@ -26,7 +27,7 @@ const itemVariants = {
 
 interface CatalogMenuProps {
   categories: Category[]
-  mineralSubcategories: SubCategory[]
+  subcategoriesByCategory: Record<string, SubCategory[]>
   loading?: boolean
   canHover?: boolean
   onNavigate?: () => void
@@ -35,19 +36,37 @@ interface CatalogMenuProps {
 
 export function CatalogMenu({
   categories,
-  mineralSubcategories,
+  subcategoriesByCategory,
   loading,
   canHover = true,
   onNavigate,
   onClose,
 }: CatalogMenuProps) {
   const location = useLocation()
+  const [openSlugs, setOpenSlugs] = useState<Set<string>>(() => new Set([MINERAL_SLUG]))
+
   const primaryCategories = PRIMARY_SLUGS.map((slug) =>
     categories.find((c) => c.slug === slug),
   ).filter((c): c is Category => Boolean(c))
 
-  const isSubcategoryActive = (slug: string) =>
-    location.pathname === `/catalog/${MINERAL_SLUG}/${slug}`
+  useEffect(() => {
+    const parts = location.pathname.split('/').filter(Boolean)
+    if (parts[0] === 'catalog' && parts[1]) {
+      setOpenSlugs((prev) => new Set([...prev, parts[1]]))
+    }
+  }, [location.pathname])
+
+  const toggleCategory = (slug: string) => {
+    setOpenSlugs((prev) => {
+      const next = new Set(prev)
+      if (next.has(slug)) next.delete(slug)
+      else next.add(slug)
+      return next
+    })
+  }
+
+  const isSubcategoryActive = (categorySlug: string, subSlug: string) =>
+    location.pathname === `/catalog/${categorySlug}/${subSlug}`
 
   return (
     <nav
@@ -70,39 +89,73 @@ export function CatalogMenu({
         animate="visible"
       >
         {loading
-          ? Array.from({ length: 3 }).map((_, i) => (
+          ? Array.from({ length: 4 }).map((_, i) => (
               <li key={i} className={styles.categoryItem}>
                 <div className={styles.skeleton} />
               </li>
             ))
-          : primaryCategories.map((cat) => (
-              <motion.li key={cat.id} className={styles.categoryItem} variants={itemVariants}>
-                <Link to={`/catalog/${cat.slug}`} className={styles.primaryLink} onClick={onNavigate}>
-                  <span>{cat.name}</span>
-                  <ChevronRight size={18} className={styles.chevron} aria-hidden="true" />
-                </Link>
-                {cat.slug === MINERAL_SLUG && mineralSubcategories.length > 0 && (
-                  <ul className={styles.subList}>
-                    {mineralSubcategories.map((sub) => (
-                      <li key={sub.id}>
-                        <Link
-                          to={`/catalog/${MINERAL_SLUG}/${sub.slug}`}
-                          className={[
-                            styles.subLink,
-                            isSubcategoryActive(sub.slug) ? styles.subLinkActive : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          onClick={onNavigate}
-                        >
-                          {sub.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </motion.li>
-            ))}
+          : primaryCategories.map((cat) => {
+              const subs = subcategoriesByCategory[cat.slug] ?? []
+              const isOpen = openSlugs.has(cat.slug)
+              const hasSubs = subs.length > 0
+
+              return (
+                <motion.li key={cat.id} className={styles.categoryItem} variants={itemVariants}>
+                  <div className={styles.categoryHeader}>
+                    <Link
+                      to={`/catalog/${cat.slug}`}
+                      className={styles.primaryLink}
+                      onClick={onNavigate}
+                    >
+                      {cat.name}
+                    </Link>
+                    {hasSubs && (
+                      <button
+                        type="button"
+                        className={[styles.expandBtn, isOpen ? styles.expandBtnOpen : ''].filter(Boolean).join(' ')}
+                        onClick={() => toggleCategory(cat.slug)}
+                        aria-expanded={isOpen}
+                        aria-label={isOpen ? `Згорнути ${cat.name}` : `Розгорнути ${cat.name}`}
+                      >
+                        <ChevronDown size={18} className={styles.chevron} aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+
+                  <AnimatePresence initial={false}>
+                    {hasSubs && isOpen && (
+                      <motion.div
+                        key={`${cat.slug}-subs`}
+                        className={styles.subCollapse}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                      >
+                        <ul className={styles.subList}>
+                          {subs.map((sub) => (
+                            <li key={sub.id}>
+                              <Link
+                                to={`/catalog/${cat.slug}/${sub.slug}`}
+                                className={[
+                                  styles.subLink,
+                                  isSubcategoryActive(cat.slug, sub.slug) ? styles.subLinkActive : '',
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')}
+                                onClick={onNavigate}
+                              >
+                                {sub.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.li>
+              )
+            })}
       </motion.ul>
     </nav>
   )

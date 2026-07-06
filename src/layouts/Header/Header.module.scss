@@ -7,7 +7,7 @@
   left: 0;
   right: 0;
   z-index: $z-sticky;
-  background: rgba($color-white, 0.95);
+  background: rgba($color-header, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid transparent;
@@ -24,7 +24,7 @@
   position: relative;
   height: $header-height-mobile;
   display: grid;
-  grid-template-columns: 40px 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: $spacing-2;
 
@@ -37,17 +37,18 @@
 
 // Logo
 .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: $spacing-2;
   text-decoration: none;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
   grid-column: 2;
   justify-self: center;
 
   @include tablet-up {
     grid-column: auto;
     justify-self: auto;
+    flex-shrink: 0;
   }
 }
 
@@ -58,10 +59,19 @@
 }
 
 .logoText {
-  font-size: $font-size-lg;
+  font-size: clamp($font-size-xs, 3.4vw, $font-size-md);
   font-weight: $font-weight-bold;
   color: $color-text;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: $line-height-tight;
+
+  @include tablet-up {
+    font-size: $font-size-sm;
+  }
+
+  @include desktop-up {
+    font-size: $font-size-base;
+  }
 }
 
 // Desktop Nav
@@ -107,6 +117,7 @@
   gap: $spacing-1;
   grid-column: 3;
   justify-self: end;
+  flex-shrink: 0;
 
   @include tablet-up {
     grid-column: auto;
@@ -167,7 +178,6 @@
   border-radius: $radius-full;
   color: $color-text;
   flex-shrink: 0;
-  grid-column: 1;
 
   &:hover {
     background: $color-surface;
@@ -206,6 +216,17 @@
 // Search
 .headerMain {
   display: contents;
+}
+
+.headerLeft {
+  display: contents;
+
+  @include mobile-only {
+    display: flex;
+    align-items: center;
+    grid-column: 1;
+    flex-shrink: 0;
+  }
 }
 
 .mobileSearch {
@@ -504,7 +525,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: 60%;
   padding: $spacing-3 $spacing-5;
   border: none;
   border-radius: $radius-sm;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Menu, Search, User, Heart, ShoppingCart, X, Building2, Truck, RefreshCw, Star, HelpCircle, Phone, Clock, type LucideIcon } from 'lucide-react'
+import { Menu, Search, User, Heart, ShoppingCart, X, Building2, Truck, RefreshCw, Percent, Star, HelpCircle, Phone, Clock, type LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore, useUIStore } from '@/store'
 import { CartBadge } from '@/components/ui'
@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/useMediaQuery'
 import { useTranslation } from '@/i18n/useTranslation'
 import { isHashNavLinkActive } from '@/utils/hashNav'
 import { SITE_NAME } from '@/config/Site'
+import { SiteLogo } from '@/components/SiteLogo'
 import styles from './Header.module.scss'
 
 const NAV_LINK_KEYS = [
@@ -26,6 +27,7 @@ const MOBILE_NAV_LINK_KEYS = [
   { labelKey: 'nav.about' as const, to: '/about', icon: Building2 },
   { labelKey: 'nav.delivery' as const, to: '/about#delivery', icon: Truck },
   { labelKey: 'nav.returns' as const, to: '/about#returns', icon: RefreshCw },
+  { labelKey: 'nav.discounts' as const, to: '/about#discounts', icon: Percent },
   { labelKey: 'nav.reviews' as const, to: '/about#reviews', icon: Star },
   { labelKey: 'nav.values' as const, to: '/about#values', icon: Heart },
   { labelKey: 'nav.faq' as const, to: '/about#faq', icon: HelpCircle },
@@ -226,6 +228,7 @@ export function Header() {
           </AnimatePresence>
 
           <div className={styles.headerMain}>
+            <div className={styles.headerLeft}>
             <motion.button
               className={styles.burgerBtn}
               onClick={toggleBurger}
@@ -241,6 +244,7 @@ export function Header() {
             >
               <Menu size={24} />
             </motion.button>
+            </div>
 
             <MotionLink
               to="/"
@@ -255,8 +259,7 @@ export function Header() {
               transition={MOBILE_HEADER_SPRING}
               style={{ pointerEvents: mobileSearchActive ? 'none' : 'auto' }}
             >
-              <span className={styles.logoGem}>◆</span>
-              <span className={styles.logoText}>{SITE_NAME}</span>
+              <SiteLogo compact />
             </MotionLink>
 
             <nav className={styles.desktopNav} aria-label={t('header.mainMenu')}>

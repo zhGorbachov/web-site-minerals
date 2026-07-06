@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Gem, Heart, Truck, RefreshCw, HelpCircle, Shield, Star } from 'lucide-react'
+import { Gem, Heart, Truck, RefreshCw, Percent, HelpCircle, Shield, Star } from 'lucide-react'
 import { Breadcrumbs } from '@/components/ui'
 import { mockImages } from '@/assets/mock/Images'
 import { scrollToHashTarget } from '@/utils/hashNav'
@@ -78,7 +78,18 @@ export function AboutPage() {
           </div>
         </motion.section>
 
-        <motion.section {...fadeIn} className={[styles.section, styles.sectionGray].join(' ')} id="reviews">
+        <motion.section {...fadeIn} className={[styles.section, styles.sectionGray].join(' ')} id="discounts">
+          <div className={styles.sectionHeader}>
+            <Percent className={styles.sectionIcon} />
+            <h2 className={styles.sectionTitle}>{t('about.discountsTitle')}</h2>
+          </div>
+          <div className={styles.textContent}>
+            <p>{t('about.discountsP1')}</p>
+            <p>{t('about.discountsP2')}</p>
+          </div>
+        </motion.section>
+
+        <motion.section {...fadeIn} className={styles.section} id="reviews">
           <div className={styles.sectionHeader}>
             <Star className={styles.sectionIcon} />
             <h2 className={styles.sectionTitle}>{t('about.reviewsTitle')}</h2>

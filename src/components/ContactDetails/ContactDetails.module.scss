@@ -27,17 +27,34 @@
 
 .messengers {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.socialRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: $spacing-2;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .messengerIconBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
   border-radius: $radius-full;
   padding: 0;
   background: transparent;
@@ -63,16 +80,4 @@
   flex-direction: column;
   gap: $spacing-4;
   padding: $spacing-4 $spacing-5 $spacing-2;
-
-  .messengers {
-    flex-direction: row;
-    align-items: center;
-    gap: $spacing-3;
-  }
-
-  .phoneWithMessengers {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-3;
-  }
 }

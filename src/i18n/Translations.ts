@@ -13,6 +13,7 @@ export type TranslationSchema = {
     contacts: string
     delivery: string
     returns: string
+    discounts: string
     reviews: string
     values: string
     faq: string
@@ -46,6 +47,7 @@ export type TranslationSchema = {
     minerals: string
     threads: string
     bracelets: string
+    pendants: string
     country: string
     rights: string
     made: string
@@ -61,6 +63,9 @@ export type TranslationSchema = {
     returnsTitle: string
     returnsP1: string
     returnsP2: string
+    discountsTitle: string
+    discountsP1: string
+    discountsP2: string
     reviewsTitle: string
     reviewRating: string
     valuesTitle: string
@@ -83,6 +88,8 @@ export type TranslationSchema = {
     scheduleNote: string
     mapSoon: string
     mapSubtext: string
+    instagramTitle: string
+    instagramNote: string
   }
 }
 
@@ -95,6 +102,7 @@ export const translations: Record<Language, TranslationSchema> = {
       contacts: 'Контакти',
       delivery: 'Доставка і оплата',
       returns: 'Обмін та повернення',
+      discounts: 'Знижки',
       reviews: 'Відгуки',
       values: 'Наші цінності',
       faq: 'Часті запитання',
@@ -128,6 +136,7 @@ export const translations: Record<Language, TranslationSchema> = {
       minerals: 'Мінерали',
       threads: 'Нитки',
       bracelets: 'Браслети',
+      pendants: 'Підвіски',
       country: 'Україна',
       rights: 'Всі права захищено.',
       made: 'Натуральні мінерали та ручна робота з любов\'ю 💎',
@@ -145,6 +154,10 @@ export const translations: Record<Language, TranslationSchema> = {
       returnsP1: 'Ми приймаємо повернення та обміни протягом 14 днів з моменту отримання замовлення.',
       returnsP2:
         'Товар повинен бути у незміненому стані, у оригінальній упаковці. Для повернення зв\'яжіться з нами за телефоном або у Telegram.',
+      discountsTitle: 'Знижки та програма лояльності',
+      discountsP1: 'Ми цінуємо наших постійних клієнтів і пропонуємо програму лояльності.',
+      discountsP2:
+        'Після 3 замовлень ви отримуєте знижку 10% на всі наступні покупки. Також регулярно проводимо акції на окремі категорії товарів — слідкуйте за оновленнями в каталозі.',
       reviewsTitle: 'Відгуки',
       reviewRating: 'Оцінка {rating} з 5',
       valuesTitle: 'Наші цінності',
@@ -214,6 +227,8 @@ export const translations: Record<Language, TranslationSchema> = {
       scheduleNote: 'Сб: 10:00 – 16:00 | Нд: вихідний',
       mapSoon: 'Інтерактивна карта — незабаром',
       mapSubtext: 'Україна, доставляємо по всій країні',
+      instagramTitle: 'Instagram',
+      instagramNote: 'Слідкуйте за новинками та роботами',
     },
   },
   en: {
@@ -224,6 +239,7 @@ export const translations: Record<Language, TranslationSchema> = {
       contacts: 'Contacts',
       delivery: 'Delivery & payment',
       returns: 'Returns & exchanges',
+      discounts: 'Discounts',
       reviews: 'Reviews',
       values: 'Our values',
       faq: 'FAQ',
@@ -257,6 +273,7 @@ export const translations: Record<Language, TranslationSchema> = {
       minerals: 'Minerals',
       threads: 'Threads',
       bracelets: 'Bracelets',
+      pendants: 'Pendants',
       country: 'Ukraine',
       rights: 'All rights reserved.',
       made: 'Natural minerals and handmade with love 💎',
@@ -274,6 +291,10 @@ export const translations: Record<Language, TranslationSchema> = {
       returnsP1: 'We accept returns and exchanges within 14 days of receiving your order.',
       returnsP2:
         'Items must be unused and in original packaging. To return an item, contact us by phone or Telegram.',
+      discountsTitle: 'Discounts & loyalty program',
+      discountsP1: 'We value our regular customers and offer a loyalty program.',
+      discountsP2:
+        'After 3 orders you get 10% off all future purchases. We also run promotions on selected product categories — check the catalog for updates.',
       reviewsTitle: 'Reviews',
       reviewRating: 'Rating {rating} out of 5',
       valuesTitle: 'Our values',
@@ -343,6 +364,8 @@ export const translations: Record<Language, TranslationSchema> = {
       scheduleNote: 'Sat: 10:00 AM – 4:00 PM | Sun: closed',
       mapSoon: 'Interactive map — coming soon',
       mapSubtext: 'Ukraine, we deliver nationwide',
+      instagramTitle: 'Instagram',
+      instagramNote: 'Follow us for new arrivals and handmade pieces',
     },
   },
 }

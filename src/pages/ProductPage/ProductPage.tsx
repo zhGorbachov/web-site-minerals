@@ -132,7 +132,6 @@ export function ProductPage() {
               {product.stock > 0 ? (
                 <span className={styles.inStock}>
                   в наявності
-                  <span className={styles.stockCount}> · {product.stock} шт.</span>
                 </span>
               ) : (
                 <span className={styles.outOfStock}>немає в наявності</span>
@@ -159,7 +158,7 @@ export function ProductPage() {
                   disabled={product.stock === 0}
                   aria-label="Зменшити кількість"
                 >
-                  <Minus size={18} />
+                  <Minus size={16} />
                 </button>
                 <span className={styles.qtyValue}>{quantity}</span>
                 <button
@@ -169,16 +168,16 @@ export function ProductPage() {
                   disabled={product.stock === 0 || maxSelectable === 0 || quantity >= maxSelectable}
                   aria-label="Збільшити кількість"
                 >
-                  <Plus size={18} />
+                  <Plus size={16} />
                 </button>
               </div>
 
               <Button
                 onClick={handleAddToCart}
-                size="lg"
+                size="md"
                 className={styles.addToCartBtn}
                 disabled={product.stock === 0 || maxSelectable === 0}
-                leftIcon={addedToCart ? <CheckCircle size={20} /> : <ShoppingCart size={20} />}
+                leftIcon={addedToCart ? <CheckCircle size={16} /> : <ShoppingCart size={16} />}
               >
                 {addedToCart ? 'Додано!' : maxSelectable === 0 ? 'Максимум у кошику' : 'В кошик'}
               </Button>
@@ -189,7 +188,7 @@ export function ProductPage() {
                 onClick={() => toggleWishlist(product.id)}
                 aria-label={inWishlist ? 'Видалити з обраних' : 'Додати до обраних'}
               >
-                <Heart size={22} fill={inWishlist ? 'currentColor' : 'none'} />
+                <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
               </button>
             </div>
 

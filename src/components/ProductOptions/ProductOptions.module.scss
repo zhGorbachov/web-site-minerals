@@ -48,7 +48,7 @@
 
 .optionLabel {
   font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
+  font-weight: $font-weight-bold;
   color: $color-text;
 }
 
@@ -120,7 +120,58 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: $spacing-3;
-  padding-top: $spacing-2;
+}
+
+.characteristics {
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-3;
+}
+
+.characteristicsTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  cursor: pointer;
+  user-select: none;
+  transition: color $transition-base;
+  text-align: left;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.characteristicsTitleOpen {
+  color: $color-primary;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: $color-text-muted;
+  transition: transform 0.25s ease, color $transition-base;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: $color-primary;
+}
+
+.characteristicsCollapse {
+  overflow: hidden;
+}
+
+.characteristicsBody {
+  padding-top: $spacing-3;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
 }
 
 .metaItem {

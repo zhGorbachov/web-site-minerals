@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Shield, Truck, Gem, Star } from 'lucide-react'
+import {
+  ArrowRight,
+  Shield,
+  Truck,
+  Gem,
+  Star,
+  LayoutGrid,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
 import type { Category, Product } from '@/types'
 import { CategoryService } from '@/services/CategoryService'
 import { ProductService } from '@/services/ProductService'
@@ -11,13 +20,36 @@ import { ProductCard } from '@/components/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui'
 import { Button } from '@/components/ui'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
+import { useIsMobile } from '@/hooks/useMediaQuery'
 import { SITE_NAME } from '@/config/Site'
 import styles from './HomePage.module.scss'
 
+const MOBILE_NEW_ROWS = 5
+const MOBILE_NEW_COLS = 2
+const MOBILE_NEW_PAGE_SIZE = MOBILE_NEW_ROWS * MOBILE_NEW_COLS
+const DESKTOP_NEW_LIMIT = 8
+const VISIBLE_PAGE_NUMBERS = 5
+
+function getVisiblePageNumbers(currentPage: number, totalPages: number): number[] {
+  if (totalPages <= VISIBLE_PAGE_NUMBERS) {
+    return Array.from({ length: totalPages }, (_, i) => i)
+  }
+
+  let start = currentPage - Math.floor(VISIBLE_PAGE_NUMBERS / 2)
+  if (start < 0) start = 0
+  if (start + VISIBLE_PAGE_NUMBERS > totalPages) {
+    start = totalPages - VISIBLE_PAGE_NUMBERS
+  }
+
+  return Array.from({ length: VISIBLE_PAGE_NUMBERS }, (_, i) => start + i)
+}
+
 export function HomePage() {
   const openCatalog = useOpenCatalog()
+  const isMobile = useIsMobile()
   const [categories, setCategories] = useState<Category[]>([])
   const [newProducts, setNewProducts] = useState<Product[]>([])
+  const [newProductsPage, setNewProductsPage] = useState(0)
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -28,25 +60,61 @@ export function HomePage() {
       ProductService.getPopular(),
     ]).then(([cats, newP, popP]) => {
       setCategories(cats)
-      setNewProducts(newP.slice(0, 8))
-      setPopularProducts(popP.slice(0, 8))
+      setNewProducts(newP)
+      setPopularProducts(popP.slice(0, DESKTOP_NEW_LIMIT))
       setLoading(false)
     })
   }, [])
 
+  const newTotalPages = Math.max(1, Math.ceil(newProducts.length / MOBILE_NEW_PAGE_SIZE))
+  const visiblePageNumbers = getVisiblePageNumbers(newProductsPage, newTotalPages)
+  const visibleNewProducts = isMobile
+    ? newProducts.slice(
+        newProductsPage * MOBILE_NEW_PAGE_SIZE,
+        (newProductsPage + 1) * MOBILE_NEW_PAGE_SIZE,
+      )
+    : newProducts.slice(0, DESKTOP_NEW_LIMIT)
+
+  useEffect(() => {
+    if (newProductsPage > newTotalPages - 1) {
+      setNewProductsPage(Math.max(0, newTotalPages - 1))
+    }
+  }, [newProductsPage, newTotalPages])
+
   return (
     <div className={styles.page}>
-      {/* Mobile home */}
-      <section className={styles.mobileHome}>
-        <p className={styles.mobileTagline}>Якесь описання сайту в дві-три строки</p>
+      {/* Hero banner — between header and catalog */}
+      <section className={styles.hero}>
+        <div className={styles.heroMedia}>
+          <img
+            src={mockImages.homeHero}
+            alt=""
+            className={styles.heroImage}
+          />
+          <div className={styles.heroOverlay} />
+        </div>
+        <motion.div
+          className={styles.heroContent}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        >
+          <p className={styles.heroDescription}>
+            Справжній простір для поціновувачів природної краси та унікальних мінералів
+          </p>
+        </motion.div>
+      </section>
 
+      {/* Mobile home — catalog shortcuts */}
+      <section className={styles.mobileHome}>
         <button type="button" className={styles.mobileCatalogBar} onClick={openCatalog}>
+          <LayoutGrid size={20} aria-hidden />
           Каталог товарів
         </button>
 
         <div className={styles.mobileCategoryRow}>
           {loading
-            ? Array.from({ length: 3 }).map((_, i) => (
+            ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className={styles.mobileCategorySkeleton} />
               ))
             : categories.map((cat) => (
@@ -62,48 +130,16 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Hero — desktop only */}
-      <section className={styles.hero}>
-        <div className={styles.heroMedia}>
-          <img
-            src={mockImages.mineralsHero}
-            alt="Натуральні мінерали"
-            className={styles.heroImage}
-          />
-          <div className={styles.heroOverlay} />
-        </div>
-        <motion.div
-          className={styles.heroContent}
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        >
-          <span className={styles.heroEyebrow}>Натуральні мінерали та браслети</span>
-          <h1 className={styles.heroTitle}>
-            Відкрийте силу<br />природних каменів
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Унікальні мінерали, нитки та браслети ручної роботи<br className={styles.heroBreak} />
-            з любов'ю для вас
-          </p>
-          <div className={styles.heroCtas}>
-            <Button size="lg" onClick={openCatalog}>
-              Переглянути каталог
-            </Button>
-          </div>
-        </motion.div>
-      </section>
-
       {/* Categories — desktop only */}
       <section className={[styles.section, styles.desktopSection].join(' ')}>
         <div className="container">
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Каталог товорів</h2>
-            <p className={styles.sectionSubtitle}>Три основні категорії для вашого натхнення</p>
+            <p className={styles.sectionSubtitle}>Категорії для вашого натхнення</p>
           </div>
           <div className={styles.categoryGrid}>
             {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
+              ? Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className={styles.categorySkeleton} />
                 ))
               : categories.map((cat) => (
@@ -114,7 +150,7 @@ export function HomePage() {
       </section>
 
       {/* New Products */}
-      <section className={[styles.section, styles.sectionGray, styles.mobileNewSection].join(' ')}>
+      <section className={[styles.section, styles.mobileNewSection].join(' ')}>
         <div className="container">
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Новинки</h2>
@@ -124,9 +160,52 @@ export function HomePage() {
           </div>
           <div className={styles.productGrid}>
             {loading
-              ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
-              : newProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+              ? Array.from({ length: isMobile ? MOBILE_NEW_PAGE_SIZE : 4 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))
+              : visibleNewProducts.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
+          {isMobile && !loading && newTotalPages > 1 && (
+            <nav className={styles.mobilePagination} aria-label="Сторінки новинок">
+              <button
+                type="button"
+                className={styles.paginationBtn}
+                onClick={() => setNewProductsPage((p) => Math.max(0, p - 1))}
+                disabled={newProductsPage === 0}
+                aria-label="Попередня сторінка"
+              >
+                <ChevronLeft size={15} />
+              </button>
+              <div className={styles.paginationNumbers}>
+                {visiblePageNumbers.map((pageIndex) => (
+                  <button
+                    key={pageIndex}
+                    type="button"
+                    className={[
+                      styles.paginationNumber,
+                      pageIndex === newProductsPage ? styles.paginationNumberActive : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => setNewProductsPage(pageIndex)}
+                    aria-label={`Сторінка ${pageIndex + 1}`}
+                    aria-current={pageIndex === newProductsPage ? 'page' : undefined}
+                  >
+                    {pageIndex + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className={styles.paginationBtn}
+                onClick={() => setNewProductsPage((p) => Math.min(newTotalPages - 1, p + 1))}
+                disabled={newProductsPage >= newTotalPages - 1}
+                aria-label="Наступна сторінка"
+              >
+                <ChevronRight size={15} />
+              </button>
+            </nav>
+          )}
         </div>
       </section>
 

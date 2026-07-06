@@ -39,7 +39,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className={styles.body}>
           <h3 className={styles.name}>{product.name}</h3>
-          <p className={styles.shortDesc}>{product.shortDescription}</p>
 
           <div className={styles.footer}>
             <div className={styles.priceGroup}>
