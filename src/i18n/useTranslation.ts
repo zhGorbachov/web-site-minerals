@@ -40,7 +40,21 @@ export function useTranslation() {
     )
   }
 
-  return { t, language, setLanguage }
+  function tp(count: number): string {
+    if (language === 'en') {
+      return t(count === 1 ? 'common.productOne' : 'common.productMany', { count })
+    }
+
+    const mod10 = count % 10
+    const mod100 = count % 100
+    if (mod10 === 1 && mod100 !== 11) return t('common.productOne', { count })
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
+      return t('common.productFew', { count })
+    }
+    return t('common.productMany', { count })
+  }
+
+  return { t, tp, language, setLanguage }
 }
 
 export function getLanguageLabel(language: Language) {

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Category, SubCategory } from '@/types'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CatalogMenu.module.scss'
 
 const MINERAL_SLUG = 'mineraly'
@@ -42,6 +43,7 @@ export function CatalogMenu({
   onNavigate,
   onClose,
 }: CatalogMenuProps) {
+  const { t } = useTranslation()
   const location = useLocation()
   const [openSlugs, setOpenSlugs] = useState<Set<string>>(() => new Set([MINERAL_SLUG]))
 
@@ -71,12 +73,12 @@ export function CatalogMenu({
   return (
     <nav
       className={[styles.menu, canHover ? styles.canHover : ''].filter(Boolean).join(' ')}
-      aria-label="Каталог товарів"
+      aria-label={t('catalog.title')}
     >
       <div className={styles.header}>
-        <h1 className={styles.title}>Каталог товарів</h1>
+        <h1 className={styles.title}>{t('catalog.title')}</h1>
         {onClose && (
-          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Закрити каталог">
+          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t('catalog.close')}>
             <X size={22} />
           </button>
         )}
@@ -115,7 +117,7 @@ export function CatalogMenu({
                         className={[styles.expandBtn, isOpen ? styles.expandBtnOpen : ''].filter(Boolean).join(' ')}
                         onClick={() => toggleCategory(cat.slug)}
                         aria-expanded={isOpen}
-                        aria-label={isOpen ? `Згорнути ${cat.name}` : `Розгорнути ${cat.name}`}
+                        aria-label={isOpen ? t('catalog.collapse', { name: cat.name }) : t('catalog.expand', { name: cat.name })}
                       >
                         <ChevronDown size={18} className={styles.chevron} aria-hidden="true" />
                       </button>

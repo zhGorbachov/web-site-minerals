@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Category } from '@/types'
 import { ArrowRight } from 'lucide-react'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CategoryCard.module.scss'
 
 interface CategoryCardProps {
@@ -9,6 +10,8 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
+  const { t } = useTranslation()
+
   return (
     <motion.div
       className={styles.card}
@@ -32,7 +35,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
           <h3 className={styles.title}>{category.name}</h3>
           <p className={styles.description}>{category.description}</p>
           <span className={styles.cta}>
-            Переглянути <ArrowRight size={16} />
+            {t('common.view')} <ArrowRight size={16} />
           </span>
         </div>
       </Link>

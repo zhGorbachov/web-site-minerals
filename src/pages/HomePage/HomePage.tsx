@@ -7,7 +7,6 @@ import {
   Truck,
   Gem,
   Star,
-  LayoutGrid,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
@@ -16,12 +15,14 @@ import { CategoryService } from '@/services/CategoryService'
 import { ProductService } from '@/services/ProductService'
 import { mockImages } from '@/assets/mock/Images'
 import { CategoryCard } from '@/components/CategoryCard'
+import { CatalogButton } from '@/components/CatalogButton'
 import { ProductCard } from '@/components/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui'
 import { Button } from '@/components/ui'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { SITE_NAME } from '@/config/Site'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './HomePage.module.scss'
 
 const MOBILE_NEW_ROWS = 5
@@ -45,6 +46,7 @@ function getVisiblePageNumbers(currentPage: number, totalPages: number): number[
 }
 
 export function HomePage() {
+  const { t, language } = useTranslation()
   const openCatalog = useOpenCatalog()
   const isMobile = useIsMobile()
   const [categories, setCategories] = useState<Category[]>([])
@@ -52,6 +54,33 @@ export function HomePage() {
   const [newProductsPage, setNewProductsPage] = useState(0)
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+
+  const advantages = [
+    {
+      key: 'natural',
+      icon: <Gem size={28} />,
+      title: t('home.advantageNaturalTitle'),
+      text: t('home.advantageNaturalText'),
+    },
+    {
+      key: 'handmade',
+      icon: <Star size={28} />,
+      title: t('home.advantageHandmadeTitle'),
+      text: t('home.advantageHandmadeText'),
+    },
+    {
+      key: 'delivery',
+      icon: <Truck size={28} />,
+      title: t('home.advantageDeliveryTitle'),
+      text: t('home.advantageDeliveryText'),
+    },
+    {
+      key: 'quality',
+      icon: <Shield size={28} />,
+      title: t('home.advantageQualityTitle'),
+      text: t('home.advantageQualityText'),
+    },
+  ]
 
   useEffect(() => {
     void Promise.all([
@@ -64,7 +93,7 @@ export function HomePage() {
       setPopularProducts(popP.slice(0, DESKTOP_NEW_LIMIT))
       setLoading(false)
     })
-  }, [])
+  }, [language])
 
   const newTotalPages = Math.max(1, Math.ceil(newProducts.length / MOBILE_NEW_PAGE_SIZE))
   const visiblePageNumbers = getVisiblePageNumbers(newProductsPage, newTotalPages)
@@ -100,17 +129,14 @@ export function HomePage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
           <p className={styles.heroDescription}>
-            Справжній простір для поціновувачів природної краси та унікальних мінералів
+            {t('home.heroDescription')}
           </p>
         </motion.div>
       </section>
 
       {/* Mobile home — catalog shortcuts */}
       <section className={styles.mobileHome}>
-        <button type="button" className={styles.mobileCatalogBar} onClick={openCatalog}>
-          <LayoutGrid size={20} aria-hidden />
-          Каталог товарів
-        </button>
+        <CatalogButton className={styles.mobileCatalogBar} onClick={openCatalog} />
 
         <div className={styles.mobileCategoryRow}>
           {loading
@@ -134,8 +160,8 @@ export function HomePage() {
       <section className={[styles.section, styles.desktopSection].join(' ')}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Каталог товорів</h2>
-            <p className={styles.sectionSubtitle}>Категорії для вашого натхнення</p>
+            <h2 className={styles.sectionTitle}>{t('home.catalogTitle')}</h2>
+            <p className={styles.sectionSubtitle}>{t('home.catalogSubtitle')}</p>
           </div>
           <div className={styles.categoryGrid}>
             {loading
@@ -153,9 +179,9 @@ export function HomePage() {
       <section className={[styles.section, styles.mobileNewSection].join(' ')}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Новинки</h2>
+            <h2 className={styles.sectionTitle}>{t('home.newTitle')}</h2>
             <Link to="/catalog" className={styles.sectionLink} onClick={openCatalog}>
-              Всі товари <ArrowRight size={16} />
+              {t('common.allProducts')} <ArrowRight size={16} />
             </Link>
           </div>
           <div className={styles.productGrid}>
@@ -166,13 +192,13 @@ export function HomePage() {
               : visibleNewProducts.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
           {isMobile && !loading && newTotalPages > 1 && (
-            <nav className={styles.mobilePagination} aria-label="Сторінки новинок">
+            <nav className={styles.mobilePagination} aria-label={t('home.newPaginationAria')}>
               <button
                 type="button"
                 className={styles.paginationBtn}
                 onClick={() => setNewProductsPage((p) => Math.max(0, p - 1))}
                 disabled={newProductsPage === 0}
-                aria-label="Попередня сторінка"
+                aria-label={t('common.paginationPrev')}
               >
                 <ChevronLeft size={15} />
               </button>
@@ -188,7 +214,7 @@ export function HomePage() {
                       .filter(Boolean)
                       .join(' ')}
                     onClick={() => setNewProductsPage(pageIndex)}
-                    aria-label={`Сторінка ${pageIndex + 1}`}
+                    aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
                     aria-current={pageIndex === newProductsPage ? 'page' : undefined}
                   >
                     {pageIndex + 1}
@@ -200,7 +226,7 @@ export function HomePage() {
                 className={styles.paginationBtn}
                 onClick={() => setNewProductsPage((p) => Math.min(newTotalPages - 1, p + 1))}
                 disabled={newProductsPage >= newTotalPages - 1}
-                aria-label="Наступна сторінка"
+                aria-label={t('common.paginationNext')}
               >
                 <ChevronRight size={15} />
               </button>
@@ -213,9 +239,9 @@ export function HomePage() {
       <section className={[styles.section, styles.desktopSection].join(' ')}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Популярні товари</h2>
+            <h2 className={styles.sectionTitle}>{t('home.popularTitle')}</h2>
             <Link to="/catalog" className={styles.sectionLink} onClick={openCatalog}>
-              Всі товари <ArrowRight size={16} />
+              {t('common.allProducts')} <ArrowRight size={16} />
             </Link>
           </div>
           <div className={styles.popularScroll}>
@@ -238,12 +264,12 @@ export function HomePage() {
       <section className={[styles.section, styles.sectionGray, styles.desktopSection].join(' ')}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Наші переваги</h2>
+            <h2 className={styles.sectionTitle}>{t('home.advantagesTitle')}</h2>
           </div>
           <div className={styles.advantagesGrid}>
-            {ADVANTAGES.map((adv) => (
+            {advantages.map((adv) => (
               <motion.div
-                key={adv.title}
+                key={adv.key}
                 className={styles.advantageCard}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -272,7 +298,7 @@ export function HomePage() {
             >
               <img
                 src={mockImages.aboutStore}
-                alt="Наш магазин"
+                alt={t('about.storeAlt')}
               />
             </motion.div>
             <motion.div
@@ -282,17 +308,16 @@ export function HomePage() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <span className={styles.heroEyebrow}>Про магазин</span>
-              <h2 className={styles.sectionTitle}>Ми любимо мінерали так само, як і ви</h2>
+              <span className={styles.heroEyebrow}>{t('home.aboutEyebrow')}</span>
+              <h2 className={styles.sectionTitle}>{t('about.heroTitle')}</h2>
               <p className={styles.aboutText}>
-                {SITE_NAME} — це невеликий сімейний магазин натуральних мінералів, ниток та браслетів ручної роботи.
-                Ми ретельно відбираємо кожен камінь та матеріал, щоб ви отримали тільки справжнє та якісне.
+                {t('home.aboutDescription1', { siteName: SITE_NAME })}
               </p>
               <p className={styles.aboutText}>
-                Кожен браслет — унікальний. Кожен мінерал — справжній. Кожна нитка — перевірена.
+                {t('home.aboutDescription2')}
               </p>
               <Button as={Link} to="/about" variant="outline" size="md">
-                Дізнатись більше
+                {t('home.aboutCta')}
               </Button>
             </motion.div>
           </div>
@@ -301,26 +326,3 @@ export function HomePage() {
     </div>
   )
 }
-
-const ADVANTAGES = [
-  {
-    icon: <Gem size={28} />,
-    title: 'Натуральні матеріали',
-    text: 'Тільки справжні мінерали та натуральні нитки без синтетики',
-  },
-  {
-    icon: <Star size={28} />,
-    title: 'Ручна робота',
-    text: 'Кожен браслет виготовляється вручну з увагою до деталей',
-  },
-  {
-    icon: <Truck size={28} />,
-    title: 'Швидка доставка',
-    text: 'Відправляємо Новою Поштою та Укрпоштою по всій Україні',
-  },
-  {
-    icon: <Shield size={28} />,
-    title: 'Гарантія якості',
-    text: 'Обмін або повернення протягом 14 днів без зайвих питань',
-  },
-]

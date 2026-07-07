@@ -3,18 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
+import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
+import { attributeValueEn } from '@/i18n/CatalogEn'
+import { localizeProduct } from '@/i18n/localizeCatalog'
 import { formatPrice } from '@/utils'
 import { Button, EmptyState } from '@/components/ui'
 import styles from './CartPage.module.scss'
 
-const OPTION_LABELS: Record<string, string> = {
-  beadSize: 'Розмір',
-  strandLength: 'Довжина',
-  color: 'Колір',
-  wristSize: 'Розмір',
+const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
+  beadSize: 'productOptions.beadSize',
+  strandLength: 'productOptions.strandLength',
+  color: 'productOptions.color',
+  wristSize: 'productOptions.wristSize',
 }
 
 export function CartPage() {
+  const { t, tp, language } = useTranslation()
   const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCartStore()
   const openCatalog = useOpenCatalog()
   const total = totalPrice()
@@ -26,9 +30,9 @@ export function CartPage() {
         <div className="container">
           <EmptyState
             icon={<ShoppingCart />}
-            title="Кошик порожній"
-            description="Додайте товари з каталогу, щоб почати покупки"
-            action={{ label: 'До каталогу', onClick: openCatalog }}
+            title={t('cart.emptyTitle')}
+            description={t('cart.emptyDescription')}
+            action={{ label: t('common.toCatalog'), onClick: openCatalog, variant: 'catalog' }}
           />
         </div>
       </div>
@@ -44,15 +48,25 @@ export function CartPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          Кошик
-          <span className={styles.titleCount}>{count} {pluralize(count)}</span>
+          {t('header.cart')}
+          <span className={styles.titleCount}>{tp(count)}</span>
         </motion.h1>
 
         <div className={styles.layout}>
           <div className={styles.itemsList}>
             <AnimatePresence initial={false}>
               {items.map((item) => {
-                const unitPrice = item.product.discountPrice ?? item.product.price
+                const product = localizeProduct(item.product, language)
+                const unitPrice = product.discountPrice ?? product.price
+
+                const formatOptionValue = (key: string, value: string) => {
+                  if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
+                  if (language === 'en') {
+                    return attributeValueEn[value] ?? value.replace(/\s*см/gi, ' cm')
+                  }
+                  return value
+                }
+
                 return (
                   <motion.article
                     key={item.id}
@@ -63,34 +77,34 @@ export function CartPage() {
                     transition={{ duration: 0.25 }}
                     className={styles.cartItem}
                   >
-                    <Link to={`/product/${item.product.slug}`} className={styles.itemImage}>
-                      <img src={item.product.images[0]} alt={item.product.name} />
+                    <Link to={`/product/${product.slug}`} className={styles.itemImage}>
+                      <img src={product.images[0]} alt={product.name} />
                     </Link>
 
                     <div className={styles.itemBody}>
                       <div className={styles.itemHeader}>
-                        <Link to={`/product/${item.product.slug}`} className={styles.itemName}>
-                          {item.product.name}
+                        <Link to={`/product/${product.slug}`} className={styles.itemName}>
+                          {product.name}
                         </Link>
                         <button
                           type="button"
                           className={styles.removeBtn}
                           onClick={() => removeItem(item.id)}
-                          aria-label="Видалити товар"
+                          aria-label={t('cart.removeItem')}
                         >
                           <Trash2 size={16} />
                         </button>
                       </div>
 
-                      {item.product.subCategoryName && (
-                        <span className={styles.itemCategory}>{item.product.subCategoryName}</span>
+                      {product.subCategoryName && (
+                        <span className={styles.itemCategory}>{product.subCategoryName}</span>
                       )}
 
                       {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
                         <div className={styles.itemOptions}>
                           {Object.entries(item.selectedOptions).map(([key, value]) => (
                             <span key={key} className={styles.optionChip}>
-                              {OPTION_LABELS[key] ?? key}: {key === 'beadSize' ? `${value} мм` : value}
+                              {OPTION_LABEL_KEYS[key] ? t(OPTION_LABEL_KEYS[key]) : key}: {formatOptionValue(key, value)}
                             </span>
                           ))}
                         </div>
@@ -102,7 +116,7 @@ export function CartPage() {
                             type="button"
                             className={styles.qtyBtn}
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            aria-label="Зменшити кількість"
+                            aria-label={t('common.decreaseQty')}
                           >
                             <Minus size={16} />
                           </button>
@@ -111,16 +125,16 @@ export function CartPage() {
                             type="button"
                             className={styles.qtyBtn}
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={item.quantity >= item.product.stock}
-                            aria-label="Збільшити кількість"
+                            disabled={item.quantity >= product.stock}
+                            aria-label={t('common.increaseQty')}
                           >
                             <Plus size={16} />
                           </button>
                         </div>
                         <div className={styles.priceCol}>
-                          <span className={styles.itemPrice}>{formatPrice(unitPrice * item.quantity)}</span>
+                          <span className={styles.itemPrice}>{formatPrice(unitPrice * item.quantity, language)}</span>
                           {item.quantity > 1 && (
-                            <span className={styles.unitPrice}>{formatPrice(unitPrice)} / шт.</span>
+                            <span className={styles.unitPrice}>{formatPrice(unitPrice, language)} {t('cart.perUnit')}</span>
                           )}
                         </div>
                       </div>
@@ -137,31 +151,31 @@ export function CartPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.1 }}
           >
-            <h2 className={styles.summaryTitle}>Підсумок</h2>
+            <h2 className={styles.summaryTitle}>{t('cart.summary')}</h2>
 
             <div className={styles.summaryRows}>
               <div className={styles.summaryRow}>
-                <span>Товарів</span>
-                <span>{count} шт.</span>
+                <span>{t('cart.itemsLabel')}</span>
+                <span>{t('cart.itemsCount', { count })}</span>
               </div>
               <div className={styles.summaryRow}>
-                <span>Доставка</span>
-                <span className={styles.deliveryNote}>за тарифами перевізника</span>
+                <span>{t('cart.delivery')}</span>
+                <span className={styles.deliveryNote}>{t('cart.deliveryNote')}</span>
               </div>
             </div>
 
             <div className={styles.totalRow}>
-              <span>Разом</span>
-              <span className={styles.totalAmount}>{formatPrice(total)}</span>
+              <span>{t('cart.total')}</span>
+              <span className={styles.totalAmount}>{formatPrice(total, language)}</span>
             </div>
 
             <Button size="lg" fullWidth rightIcon={<ArrowRight size={18} />} disabled>
-              Оформити замовлення
+              {t('cart.checkout')}
             </Button>
-            <p className={styles.checkoutNote}>Оформлення замовлення — незабаром</p>
+            <p className={styles.checkoutNote}>{t('cart.checkoutSoon')}</p>
 
             <Link to="/catalog" className={styles.continueShopping} onClick={openCatalog}>
-              Продовжити покупки
+              {t('cart.continueShopping')}
             </Link>
           </motion.aside>
         </div>
@@ -169,19 +183,13 @@ export function CartPage() {
 
       <div className={styles.mobileBar}>
         <div className={styles.mobileBarTotal}>
-          <span className={styles.mobileBarLabel}>Разом</span>
-          <span className={styles.mobileBarAmount}>{formatPrice(total)}</span>
+          <span className={styles.mobileBarLabel}>{t('cart.total')}</span>
+          <span className={styles.mobileBarAmount}>{formatPrice(total, language)}</span>
         </div>
         <Button size="lg" rightIcon={<ArrowRight size={18} />} disabled className={styles.mobileBarBtn}>
-          Оформити
+          {t('cart.checkoutShort')}
         </Button>
       </div>
     </div>
   )
-}
-
-function pluralize(n: number) {
-  if (n % 10 === 1 && n % 100 !== 11) return 'товар'
-  if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) return 'товари'
-  return 'товарів'
 }

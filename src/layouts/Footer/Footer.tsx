@@ -3,7 +3,7 @@ import { Phone, Mail, MapPin } from 'lucide-react'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import { MESSENGER_ICON_MAP } from '@/components/ContactDetails'
-import { PHONE_CONTACTS, SOCIAL_ICON_CONTACTS, INSTAGRAM_CONTACTS } from '@/config/ContactInfo'
+import { PHONE_CONTACTS, MESSENGER_CONTACTS } from '@/config/ContactInfo'
 import { SITE_NAME } from '@/config/Site'
 import { SiteLogo } from '@/components/SiteLogo'
 import styles from './Footer.module.scss'
@@ -23,35 +23,22 @@ export function Footer() {
             </Link>
             <p className={styles.tagline}>{t('footer.tagline')}</p>
             <div className={styles.socials}>
-              {SOCIAL_ICON_CONTACTS.map((messenger) => {
-                const Icon = MESSENGER_ICON_MAP[messenger.id]
+              {MESSENGER_CONTACTS.map((contact) => {
+                const Icon = MESSENGER_ICON_MAP[contact.id]
                 return (
                   <a
-                    key={messenger.id}
-                    href={messenger.href}
+                    key={contact.id}
+                    href={contact.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.socialLink}
-                    aria-label={messenger.label}
+                    aria-label={contact.label}
+                    title={contact.label}
                   >
                     <Icon className={styles.socialSvg} />
                   </a>
                 )
               })}
-            </div>
-            <div className={styles.instagramLinks}>
-              {INSTAGRAM_CONTACTS.map((instagram) => (
-                <a
-                  key={instagram.id}
-                  href={instagram.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.instagramLink}
-                  aria-label={instagram.label}
-                >
-                  {instagram.label}
-                </a>
-              ))}
             </div>
           </div>
 

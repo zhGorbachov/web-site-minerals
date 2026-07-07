@@ -1,0 +1,100 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  height: 36px;
+  padding-inline: $spacing-3;
+  border: 1px solid $color-border;
+  border-radius: $radius-full;
+  background: $color-white;
+  color: $color-text;
+  font-family: inherit;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: border-color $transition-base, color $transition-base, background $transition-base;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+    color: $color-primary;
+  }
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+    background: $color-background;
+  }
+
+  @include focus-ring;
+}
+
+.triggerActive {
+  border-color: $color-primary;
+  color: $color-primary;
+  background: $color-background;
+}
+
+.triggerLabel {
+  display: none;
+
+  @include tablet-up {
+    display: inline;
+  }
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + $spacing-2);
+  right: 0;
+  z-index: $z-dropdown;
+  min-width: 220px;
+  margin: 0;
+  padding: $spacing-2;
+  list-style: none;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  box-shadow: $shadow-card;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-2 $spacing-3;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $color-text;
+  font-family: inherit;
+  font-size: $font-size-sm;
+  text-align: left;
+  cursor: pointer;
+  transition: background $transition-base, color $transition-base;
+
+  svg {
+    flex-shrink: 0;
+    color: $color-primary;
+  }
+
+  &:hover {
+    background: $color-surface;
+    color: $color-primary;
+  }
+}
+
+.optionActive {
+  background: rgba($color-primary, 0.08);
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}

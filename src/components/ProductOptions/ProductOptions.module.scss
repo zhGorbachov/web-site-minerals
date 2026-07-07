@@ -7,30 +7,83 @@
   gap: $spacing-5;
 }
 
-.attrRow {
-  display: flex;
-  justify-content: space-between;
-  gap: $spacing-4;
-  padding-bottom: $spacing-3;
-  border-bottom: 1px solid $color-border;
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-6 $spacing-10;
 
-  &:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+  @include tablet-up {
+    gap: $spacing-6 $spacing-12;
   }
 }
 
-.attrLabel {
-  font-size: $font-size-sm;
-  color: $color-text-muted;
-  flex-shrink: 0;
+.characteristics {
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-4;
 }
 
-.attrValue {
+.characteristicsTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: $spacing-2 0;
+  border: none;
+  background: transparent;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
+  color: $color-primary;
+  cursor: pointer;
+  user-select: none;
+  transition: color $transition-base;
+  text-align: left;
+
+  &:hover {
+    color: $color-primary-dark;
+  }
+}
+
+.characteristicsTitleOpen {
+  color: $color-primary-dark;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: $color-text-muted;
+  transition: transform 0.25s ease, color $transition-base;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: $color-primary;
+}
+
+.characteristicsCollapse {
+  overflow: hidden;
+}
+
+.characteristicsBody {
+  padding-top: $spacing-5;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.metaLabel {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-regular;
+  color: $color-text-muted;
+  line-height: $line-height-normal;
+}
+
+.metaValue {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
   color: $color-text;
-  text-align: right;
+  line-height: $line-height-tight;
 }
 
 .optionGroup {
@@ -114,81 +167,6 @@
     color: $color-primary;
     font-weight: $font-weight-semibold;
   }
-}
-
-.metaGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-3;
-}
-
-.characteristics {
-  border-top: 1px solid $color-border;
-  padding-top: $spacing-3;
-}
-
-.characteristicsTitle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: transparent;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
-  color: $color-text;
-  cursor: pointer;
-  user-select: none;
-  transition: color $transition-base;
-  text-align: left;
-
-  &:hover {
-    color: $color-primary;
-  }
-}
-
-.characteristicsTitleOpen {
-  color: $color-primary;
-}
-
-.chevron {
-  flex-shrink: 0;
-  color: $color-text-muted;
-  transition: transform 0.25s ease, color $transition-base;
-}
-
-.chevronOpen {
-  transform: rotate(180deg);
-  color: $color-primary;
-}
-
-.characteristicsCollapse {
-  overflow: hidden;
-}
-
-.characteristicsBody {
-  padding-top: $spacing-3;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-3;
-}
-
-.metaItem {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-1;
-}
-
-.metaLabel {
-  font-size: $font-size-xs;
-  color: $color-text-muted;
-}
-
-.metaValue {
-  font-size: $font-size-sm;
-  font-weight: $font-weight-medium;
-  color: $color-text;
 }
 
 .hint {

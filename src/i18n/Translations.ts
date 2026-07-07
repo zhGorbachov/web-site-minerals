@@ -1,3 +1,5 @@
+import { uiTranslationsEn, uiTranslationsUk, type UiTranslationSchema } from './UiTranslations'
+
 export type Language = 'uk' | 'en'
 
 export type DeliveryItem = { title: string; text: string }
@@ -5,7 +7,7 @@ export type ReviewItem = { author: string; rating: number; text: string }
 export type ValueItem = { title: string; text: string }
 export type FaqItem = { q: string; a: string }
 
-export type TranslationSchema = {
+export type TranslationSchema = UiTranslationSchema & {
   nav: {
     home: string
     catalog: string
@@ -95,6 +97,7 @@ export type TranslationSchema = {
 
 export const translations: Record<Language, TranslationSchema> = {
   uk: {
+    ...uiTranslationsUk,
     nav: {
       home: 'Головна',
       catalog: 'Каталог',
@@ -232,6 +235,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
   },
   en: {
+    ...uiTranslationsEn,
     nav: {
       home: 'Home',
       catalog: 'Catalog',

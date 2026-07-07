@@ -1,0 +1,86 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.page {
+  padding-block: $spacing-4 $spacing-16;
+
+  @include tablet-up {
+    padding-block: $spacing-8 $spacing-16;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  margin-bottom: $spacing-6;
+
+  @include tablet-up {
+    margin-bottom: $spacing-8;
+  }
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-3;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+
+  @include tablet-up {
+    font-size: $font-size-3xl;
+  }
+}
+
+.titleCount {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+
+  @include tablet-up {
+    font-size: $font-size-base;
+  }
+}
+
+.clearBtn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  flex-shrink: 0;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+  transition: color $transition-base, background $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-error;
+    background: rgba($color-error, 0.08);
+  }
+
+  span {
+    display: none;
+
+    @include tablet-up {
+      display: inline;
+    }
+  }
+}
+
+.continueShopping {
+  display: block;
+  margin-top: $spacing-8;
+  font-size: $font-size-sm;
+  color: $color-primary;
+  text-align: center;
+  font-weight: $font-weight-medium;
+  transition: opacity $transition-base;
+
+  &:hover {
+    opacity: 0.75;
+  }
+}

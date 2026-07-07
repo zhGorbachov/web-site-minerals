@@ -6,9 +6,11 @@ import { SubCategoryService } from '@/services/SubCategoryService'
 import { CatalogMenu } from '@/components/CatalogMenu'
 import { useUIStore } from '@/store'
 import { useScrollLock } from '@/hooks/useScrollLock'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CatalogDrawer.module.scss'
 
 export function CatalogDrawer() {
+  const { t, language } = useTranslation()
   const { isCatalogOpen, closeCatalog } = useUIStore()
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, SubCategory[]>>({})
@@ -42,7 +44,7 @@ export function CatalogDrawer() {
       setSubcategoriesByCategory(grouped)
       setLoading(false)
     })
-  }, [isCatalogOpen])
+  }, [isCatalogOpen, language])
 
   useEffect(() => {
     if (!isCatalogOpen) return
@@ -74,7 +76,7 @@ export function CatalogDrawer() {
             exit={{ x: '-100%', opacity: 0.6 }}
             transition={{ type: 'spring', damping: 26, stiffness: 260, mass: 0.85 }}
             className={styles.drawer}
-            aria-label="Каталог товарів"
+            aria-label={t('catalog.title')}
           >
             <CatalogMenu
               categories={categories}

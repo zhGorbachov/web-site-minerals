@@ -191,9 +191,7 @@
 }
 
 .wishlistBtn {
-  @include tablet-up {
-    display: none;
-  }
+  position: relative;
 }
 
 .profileBtn {

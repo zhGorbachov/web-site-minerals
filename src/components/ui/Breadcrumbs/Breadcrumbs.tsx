@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './Breadcrumbs.module.scss'
 
 export interface BreadcrumbItem {
@@ -14,9 +15,11 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ items, variant = 'default', className }: BreadcrumbsProps) {
+  const { t } = useTranslation()
+
   return (
     <nav
-      aria-label="Навігаційний ланцюжок"
+      aria-label={t('common.breadcrumbsAria')}
       className={[styles.breadcrumbs, styles[variant], className ?? ''].filter(Boolean).join(' ')}
     >
       <ol className={styles.list}>

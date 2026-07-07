@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { useLanguageStore } from '@/store/languageStore'
 import type { Language } from '@/i18n/Translations'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './LanguageSwitcher.module.scss'
 
 function FlagUa() {
@@ -34,6 +35,7 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
+  const { t } = useTranslation()
   const language = useLanguageStore((state) => state.language)
   const setLanguage = useLanguageStore((state) => state.setLanguage)
 
@@ -49,7 +51,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             type="button"
             className={[styles.flagBtn, isActive ? styles.flagBtnActive : ''].filter(Boolean).join(' ')}
             onClick={() => setLanguage(code)}
-            aria-label={code === 'uk' ? 'Українська' : 'English'}
+            aria-label={code === 'uk' ? t('header.switchToUk') : t('header.switchToEn')}
             aria-pressed={isActive}
           >
             <Flag />

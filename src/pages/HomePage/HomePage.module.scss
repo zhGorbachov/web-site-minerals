@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-5;
-  padding: $spacing-5 $spacing-4 $spacing-6;
+  padding: $spacing-5 $spacing-4 $spacing-4;
   background: $color-panel;
   border-top: 1px solid $color-border;
 
@@ -25,35 +25,7 @@
 }
 
 .mobileCatalogBar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   align-self: center;
-  gap: $spacing-3;
-  padding: $spacing-3 $spacing-6;
-  border: 1px solid $color-accent;
-  cursor: pointer;
-  font-family: inherit;
-  background: $color-header;
-  color: $color-text;
-  font-size: $font-size-base;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.01em;
-  text-transform: none;
-  text-decoration: none;
-  border-radius: $radius-full;
-  transition: color $transition-base, border-color $transition-base, background $transition-base;
-
-  svg {
-    flex-shrink: 0;
-    color: $color-primary;
-  }
-
-  &:hover {
-    border-color: $color-primary;
-    color: $color-primary;
-    background: $color-background;
-  }
 }
 
 .mobileCategoryRow {
@@ -195,9 +167,9 @@
   }
 }
 
-.mobileNewSection {
-  padding-block: $spacing-10;
-  margin-top: $spacing-2;
+.section.mobileNewSection {
+  padding-block: 2rem $spacing-10;
+  margin-top: 0;
   background: $color-background;
 
   @include tablet-up {

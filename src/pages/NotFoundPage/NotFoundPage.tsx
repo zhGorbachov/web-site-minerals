@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Home, ArrowLeft } from 'lucide-react'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Button } from '@/components/ui'
 import styles from './NotFoundPage.module.scss'
 
 export function NotFoundPage() {
+  const { t } = useTranslation()
   const openCatalog = useOpenCatalog()
   return (
     <div className={styles.page}>
@@ -17,16 +19,16 @@ export function NotFoundPage() {
       >
         <div className={styles.gem} aria-hidden="true">◆</div>
         <h1 className={styles.code}>404</h1>
-        <h2 className={styles.title}>Сторінку не знайдено</h2>
+        <h2 className={styles.title}>{t('notFound.title')}</h2>
         <p className={styles.text}>
-          На жаль, сторінка, яку ви шукаєте, не існує або була переміщена.
+          {t('notFound.description')}
         </p>
         <div className={styles.actions}>
           <Button as={Link} to="/" leftIcon={<Home size={18} />}>
-            На головну
+            {t('notFound.goHome')}
           </Button>
           <Button variant="outline" leftIcon={<ArrowLeft size={18} />} onClick={openCatalog}>
-            До каталогу
+            {t('common.toCatalog')}
           </Button>
         </div>
       </motion.div>

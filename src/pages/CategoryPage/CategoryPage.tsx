@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { PackageSearch } from 'lucide-react'
@@ -9,10 +9,14 @@ import { ProductService } from '@/services/ProductService'
 import { SubcategoryNav } from '@/components/SubcategoryNav'
 import { SubcategoryCard } from '@/components/SubcategoryCard'
 import { ProductGrid } from '@/components/ProductGrid'
+import { ProductSort } from '@/components/ProductSort'
 import { Breadcrumbs, EmptyState } from '@/components/ui'
+import { sortProducts, type ProductSortOption } from '@/utils'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CategoryPage.module.scss'
 
 export function CategoryPage() {
+  const { t, language } = useTranslation()
   const { category: categorySlug, subcategory: subcategorySlug } = useParams<{
     category: string
     subcategory?: string
@@ -22,6 +26,7 @@ export function CategoryPage() {
   const [subcategories, setSubcategories] = useState<SubCategory[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState<ProductSortOption>('default')
 
   const isSubcategoryView = Boolean(subcategorySlug)
 
@@ -29,6 +34,7 @@ export function CategoryPage() {
     if (!categorySlug) return
 
     setLoading(true)
+    setSortBy('default')
     void Promise.all([
       CategoryService.getBySlug(categorySlug),
       SubCategoryService.getByCategory(categorySlug),
@@ -41,13 +47,17 @@ export function CategoryPage() {
       setProducts(prods)
       setLoading(false)
     })
-  }, [categorySlug, subcategorySlug, isSubcategoryView])
+  }, [categorySlug, subcategorySlug, isSubcategoryView, language])
 
   const activeSubcategory = subcategories.find((s) => s.slug === subcategorySlug)
+  const sortedProducts = useMemo(
+    () => sortProducts(products, sortBy, language),
+    [products, sortBy, language],
+  )
 
   const breadcrumbs = [
-    { label: 'Головна', href: '/' },
-    { label: 'Каталог', href: '/catalog' },
+    { label: t('nav.home'), href: '/' },
+    { label: t('nav.catalog'), href: '/catalog' },
     { label: category?.name ?? '...', href: `/catalog/${categorySlug}` },
     ...(activeSubcategory ? [{ label: activeSubcategory.name }] : []),
   ]
@@ -67,7 +77,10 @@ export function CategoryPage() {
             {activeSubcategory?.name ?? category?.name ?? '...'}
           </h1>
           {isSubcategoryView && !loading && (
-            <p className={styles.count}>{products.length} товарів</p>
+            <div className={styles.headerActions}>
+              <p className={styles.count}>{t('category.productCount', { count: products.length })}</p>
+              <ProductSort value={sortBy} onChange={setSortBy} />
+            </div>
           )}
         </motion.div>
 
@@ -93,9 +106,9 @@ export function CategoryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
                 className={styles.bottomSection}
-                aria-label="Про категорію"
+                aria-label={t('category.aboutSection')}
               >
-                <h2 className={styles.bottomTitle}>Про категорію</h2>
+                <h2 className={styles.bottomTitle}>{t('category.aboutSection')}</h2>
                 <div className={styles.featuredPhoto}>
                   <img
                     src={category.image}
@@ -123,11 +136,11 @@ export function CategoryPage() {
               {!loading && products.length === 0 ? (
                 <EmptyState
                   icon={<PackageSearch />}
-                  title="Товарів не знайдено"
-                  description="У цій підкатегорії поки немає товарів"
+                  title={t('category.emptyTitle')}
+                  description={t('category.emptyDescription')}
                 />
               ) : (
-                <ProductGrid products={products} loading={loading} />
+                <ProductGrid products={sortedProducts} loading={loading} />
               )}
             </div>
           </div>

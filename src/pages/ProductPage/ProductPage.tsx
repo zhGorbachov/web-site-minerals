@@ -10,11 +10,13 @@ import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
+import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils'
 import styles from './ProductPage.module.scss'
 
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>()
+  const { t, language } = useTranslation()
   const [product, setProduct] = useState<Product | undefined>()
   const [related, setRelated] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -46,7 +48,7 @@ export function ProductPage() {
       }
       setLoading(false)
     })
-  }, [slug])
+  }, [slug, language])
 
   const maxSelectable = product ? Math.max(0, product.stock - cartQuantity) : 0
 
@@ -56,7 +58,7 @@ export function ProductPage() {
   }, [product?.id, product?.stock, maxSelectable, selectedOptions])
 
   const handleAddToCart = () => {
-    if (!product || maxSelectable <= 0) return
+    if (!product || addedToCart || maxSelectable <= 0) return
     addItem(product, selectedOptions, Math.min(quantity, maxSelectable))
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2500)
@@ -87,9 +89,9 @@ export function ProductPage() {
         <div className="container">
           <EmptyState
             icon={<PackageSearch />}
-            title="Товар не знайдено"
-            description="Можливо, товар було видалено або посилання застаріле"
-            action={{ label: 'До каталогу', onClick: openCatalog }}
+            title={t('product.notFoundTitle')}
+            description={t('product.notFoundDescription')}
+            action={{ label: t('common.toCatalog'), onClick: openCatalog, variant: 'catalog' }}
           />
         </div>
       </div>
@@ -101,8 +103,8 @@ export function ProductPage() {
   const categoryLabel = product.subCategoryName ?? product.subCategorySlug
 
   const breadcrumbs = [
-    { label: 'Головна', href: '/' },
-    { label: 'Каталог', href: '/catalog' },
+    { label: t('nav.home'), href: '/' },
+    { label: t('nav.catalog'), href: '/catalog' },
     { label: product.categoryName ?? product.categorySlug, href: `/catalog/${product.categorySlug}` },
     {
       label: categoryLabel,
@@ -131,17 +133,17 @@ export function ProductPage() {
             <div className={styles.availability}>
               {product.stock > 0 ? (
                 <span className={styles.inStock}>
-                  в наявності
+                  {t('product.inStock')}
                 </span>
               ) : (
-                <span className={styles.outOfStock}>немає в наявності</span>
+                <span className={styles.outOfStock}>{t('product.outOfStock')}</span>
               )}
             </div>
 
             <div className={styles.priceBlock}>
-              <span className={styles.price}>{formatPrice(displayPrice)}</span>
+              <span className={styles.price}>{formatPrice(displayPrice, language)}</span>
               {product.discountPrice && (
-                <span className={styles.oldPrice}>{formatPrice(product.price)}</span>
+                <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
               )}
             </div>
 
@@ -156,7 +158,7 @@ export function ProductPage() {
                   className={styles.qtyBtn}
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={product.stock === 0}
-                  aria-label="Зменшити кількість"
+                  aria-label={t('common.decreaseQty')}
                 >
                   <Minus size={16} />
                 </button>
@@ -166,7 +168,7 @@ export function ProductPage() {
                   className={styles.qtyBtn}
                   onClick={() => setQuantity((q) => Math.min(maxSelectable, q + 1))}
                   disabled={product.stock === 0 || maxSelectable === 0 || quantity >= maxSelectable}
-                  aria-label="Збільшити кількість"
+                  aria-label={t('common.increaseQty')}
                 >
                   <Plus size={16} />
                 </button>
@@ -176,24 +178,24 @@ export function ProductPage() {
                 onClick={handleAddToCart}
                 size="md"
                 className={styles.addToCartBtn}
-                disabled={product.stock === 0 || maxSelectable === 0}
+                disabled={product.stock === 0 || maxSelectable === 0 || addedToCart}
                 leftIcon={addedToCart ? <CheckCircle size={16} /> : <ShoppingCart size={16} />}
               >
-                {addedToCart ? 'Додано!' : maxSelectable === 0 ? 'Максимум у кошику' : 'В кошик'}
+                {addedToCart ? t('cart.added') : maxSelectable === 0 ? t('cart.maxInCart') : t('cart.addToCart')}
               </Button>
 
               <button
                 type="button"
                 className={[styles.wishlistBtn, inWishlist ? styles.wishlistActive : ''].filter(Boolean).join(' ')}
                 onClick={() => toggleWishlist(product.id)}
-                aria-label={inWishlist ? 'Видалити з обраних' : 'Додати до обраних'}
+                aria-label={inWishlist ? t('wishlist.remove') : t('wishlist.add')}
               >
                 <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
               </button>
             </div>
 
             <div className={styles.descriptionBlock}>
-              <h2 className={styles.descTitle}>Опис</h2>
+              <h2 className={styles.descTitle}>{t('product.description')}</h2>
               <p className={styles.description}>{product.description}</p>
             </div>
           </div>
@@ -201,7 +203,7 @@ export function ProductPage() {
 
         {related.length > 0 && (
           <section className={styles.related}>
-            <h2 className={styles.relatedTitle}>Схожі товари</h2>
+            <h2 className={styles.relatedTitle}>{t('product.related')}</h2>
             <ProductGrid products={related} />
           </section>
         )}

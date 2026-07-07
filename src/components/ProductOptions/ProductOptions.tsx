@@ -1,7 +1,17 @@
-import { Children, useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
-import type { Product, MineralAttributes, ThreadAttributes, BraceletAttributes } from '@/types'
+import type {
+  Product,
+  MineralAttributes,
+  ThreadAttributes,
+  BraceletAttributes,
+  ProductAttributes,
+} from '@/types'
+import type { Language } from '@/i18n/Translations'
+import { attributeValueEn, colorKeyByUk } from '@/i18n/CatalogEn'
+import { getColorOptions } from '@/i18n/localizeCatalog'
+import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import styles from './ProductOptions.module.scss'
 
 interface ProductOptionsProps {
@@ -9,7 +19,43 @@ interface ProductOptionsProps {
   onOptionsChange: (options: Record<string, string>) => void
 }
 
+type CharacteristicItem = {
+  label: string
+  value: string
+}
+
+const WRIST_SIZES = ['14 см', '15 см', '16 см', '17 см', '18 см', '19 см', '20 см', '21 см']
+
+const GENERIC_ATTR_KEYS: Record<string, TranslationKey> = {
+  size: 'productOptions.attrSize',
+  weight: 'productOptions.attrWeight',
+  color: 'productOptions.attrColor',
+  origin: 'productOptions.attrOrigin',
+  hardness: 'productOptions.attrHardness',
+  shape: 'productOptions.attrShape',
+  length: 'productOptions.attrLength',
+  diameter: 'productOptions.attrDiameter',
+  material: 'productOptions.attrMaterial',
+  wristSize: 'productOptions.attrSize',
+  threadColor: 'productOptions.attrThreadColor',
+}
+
+function translateAttrValue(value: string, language: Language): string {
+  if (language === 'uk') return value
+  return attributeValueEn[value] ?? value
+}
+
+function formatWristSize(size: string, language: Language): string {
+  if (language === 'uk') return size
+  return size.replace(/\s*см/gi, ' cm')
+}
+
+function getStoredColorValue(key: string): string {
+  return Object.entries(colorKeyByUk).find(([, value]) => value === key)?.[0] ?? key
+}
+
 export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps) {
+  const { t, language } = useTranslation()
   const [selected, setSelected] = useState<Record<string, string>>({})
 
   const handleSelect = (key: string, value: string) => {
@@ -29,7 +75,7 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
         <div className={styles.options}>
           {attrs.beadSizes && attrs.beadSizes.length > 0 && (
             <div className={styles.optionGroup}>
-              <span className={styles.optionLabel}>Розмір намистини</span>
+              <span className={styles.optionLabel}>{t('productOptions.beadSize')}</span>
               <div className={styles.sizeGrid}>
                 {attrs.beadSizes.map((size) => (
                   <button
@@ -48,7 +94,7 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
           {attrs.strandLengths && attrs.strandLengths.length > 0 && (
             <div className={styles.optionGroup}>
               <span className={styles.sectionDivider} />
-              <span className={styles.optionLabel}>Довжина низки</span>
+              <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>
               <div className={styles.lengthPills}>
                 {attrs.strandLengths.map((length) => (
                   <button
@@ -64,49 +110,50 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
             </div>
           )}
 
-          <StrandMeta attrs={attrs} />
+          <CharacteristicsPanel
+            items={buildMineralCharacteristics(attrs, t, language, { strand: true })}
+            characteristicsLabel={t('productOptions.characteristics')}
+          />
         </div>
       )
     }
 
     return (
       <div className={styles.options}>
-        <CharacteristicsPanel>
-          {attrs.size && <AttributeRow label="Розмір" value={attrs.size} />}
-          {attrs.weight && <AttributeRow label="Вага" value={attrs.weight} />}
-          {attrs.color && <AttributeRow label="Колір" value={attrs.color} />}
-          {attrs.origin && <AttributeRow label="Походження" value={attrs.origin} />}
-          {attrs.hardness && <AttributeRow label="Твердість" value={`${attrs.hardness} (за Моосом)`} />}
-          {attrs.shape && <AttributeRow label="Форма" value={attrs.shape} />}
-        </CharacteristicsPanel>
+        <CharacteristicsPanel
+          items={buildMineralCharacteristics(attrs, t, language)}
+          characteristicsLabel={t('productOptions.characteristics')}
+        />
       </div>
     )
   }
 
   if (categorySlug === 'nytky') {
     const attrs = product.attributes as ThreadAttributes
-    const colors = ['Чорний', 'Білий', 'Бежевий', 'Рожевий', 'Синій', 'Зелений', 'Бордовий']
+    const colors = getColorOptions(language)
     return (
       <div className={styles.options}>
-        <CharacteristicsPanel>
-          {attrs.length && <AttributeRow label="Довжина" value={attrs.length} />}
-          {attrs.diameter && <AttributeRow label="Товщина" value={attrs.diameter} />}
-          {attrs.material && <AttributeRow label="Матеріал" value={attrs.material} />}
-        </CharacteristicsPanel>
+        <CharacteristicsPanel
+          items={buildThreadCharacteristics(attrs, t, language)}
+          characteristicsLabel={t('productOptions.characteristics')}
+        />
         <div className={styles.optionGroup}>
           <span className={styles.sectionDivider} />
-          <span className={styles.optionLabel}>Колір</span>
+          <span className={styles.optionLabel}>{t('productOptions.color')}</span>
           <div className={styles.lengthPills}>
-            {colors.map((color) => (
-              <button
-                key={color}
-                type="button"
-                className={[styles.lengthPill, selected.color === color ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
-                onClick={() => handleSelect('color', color)}
-              >
-                {color}
-              </button>
-            ))}
+            {colors.map((color) => {
+              const storedValue = getStoredColorValue(color.key)
+              return (
+                <button
+                  key={color.key}
+                  type="button"
+                  className={[styles.lengthPill, selected.color === storedValue ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => handleSelect('color', storedValue)}
+                >
+                  {color.label}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -115,79 +162,207 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
 
   if (categorySlug === 'brаslety') {
     const attrs = product.attributes as BraceletAttributes
-    const wristSizes = ['14 см', '15 см', '16 см', '17 см', '18 см', '19 см', '20 см', '21 см']
     return (
       <div className={styles.options}>
-        <CharacteristicsPanel>
-          {attrs.stones && attrs.stones.length > 0 && (
-            <AttributeRow label="Каміння" value={attrs.stones.join(', ')} />
-          )}
-          {attrs.material && <AttributeRow label="Матеріал" value={attrs.material} />}
-          {attrs.threadColor && <AttributeRow label="Колір нитки" value={attrs.threadColor} />}
-        </CharacteristicsPanel>
+        <CharacteristicsPanel
+          items={buildBraceletCharacteristics(attrs, t, language)}
+          characteristicsLabel={t('productOptions.characteristics')}
+        />
         <div className={styles.optionGroup}>
           <span className={styles.sectionDivider} />
-          <span className={styles.optionLabel}>Розмір зап'ястка</span>
+          <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
           <div className={styles.lengthPills}>
-            {wristSizes.map((size) => (
+            {WRIST_SIZES.map((size) => (
               <button
                 key={size}
                 type="button"
                 className={[styles.lengthPill, selected.wristSize === size ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
                 onClick={() => handleSelect('wristSize', size)}
               >
-                {size}
+                {formatWristSize(size, language)}
               </button>
             ))}
           </div>
           {attrs.wristSize && (
-            <p className={styles.hint}>Доступний розмір: {attrs.wristSize}</p>
+            <p className={styles.hint}>
+              {t('productOptions.availableWristSize', {
+                size: formatWristSize(attrs.wristSize, language),
+              })}
+            </p>
           )}
         </div>
       </div>
     )
   }
 
-  return null
-}
-
-function StrandMeta({ attrs }: { attrs: MineralAttributes }) {
-  const meta = [
-    attrs.color && { label: 'Колір', value: attrs.color },
-    attrs.origin && { label: 'Походження', value: attrs.origin },
-    attrs.hardness && { label: 'Твердість', value: attrs.hardness },
-  ].filter(Boolean) as { label: string; value: string }[]
-
-  if (meta.length === 0) return null
+  const genericItems = buildGenericCharacteristics(product.attributes, t, language)
+  if (genericItems.length === 0) return null
 
   return (
-    <CharacteristicsPanel>
-      <div className={styles.metaGrid}>
-        {meta.map(({ label, value }) => (
-          <div key={label} className={styles.metaItem}>
-            <span className={styles.metaLabel}>{label}</span>
-            <span className={styles.metaValue}>{value}</span>
-          </div>
-        ))}
-      </div>
-    </CharacteristicsPanel>
+    <div className={styles.options}>
+      <CharacteristicsPanel
+        items={genericItems}
+        characteristicsLabel={t('productOptions.characteristics')}
+      />
+    </div>
   )
 }
 
-function CharacteristicsPanel({ children }: { children: ReactNode }) {
+function buildMineralCharacteristics(
+  attrs: MineralAttributes,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+  language: Language,
+  options?: { strand?: boolean },
+): CharacteristicItem[] {
+  const items: CharacteristicItem[] = []
+
+  if (!options?.strand) {
+    if (attrs.size) {
+      items.push({
+        label: t('productOptions.attrSize'),
+        value: translateAttrValue(attrs.size, language),
+      })
+    }
+    if (attrs.weight) {
+      items.push({
+        label: t('productOptions.attrWeight'),
+        value: translateAttrValue(attrs.weight, language),
+      })
+    }
+  }
+  if (attrs.color) {
+    items.push({
+      label: t('productOptions.attrColor'),
+      value: translateAttrValue(attrs.color, language),
+    })
+  }
+  if (attrs.origin) {
+    items.push({
+      label: t('productOptions.attrOrigin'),
+      value: translateAttrValue(attrs.origin, language),
+    })
+  }
+  if (attrs.hardness) {
+    items.push({
+      label: t('productOptions.attrHardness'),
+      value: options?.strand
+        ? translateAttrValue(attrs.hardness, language)
+        : `${translateAttrValue(attrs.hardness, language)}${t('productOptions.mohsScale')}`,
+    })
+  }
+  if (!options?.strand && attrs.shape) {
+    items.push({
+      label: t('productOptions.attrShape'),
+      value: translateAttrValue(attrs.shape, language),
+    })
+  }
+
+  return items
+}
+
+function buildThreadCharacteristics(
+  attrs: ThreadAttributes,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+  language: Language,
+): CharacteristicItem[] {
+  const items: CharacteristicItem[] = []
+  if (attrs.length) {
+    items.push({
+      label: t('productOptions.attrLength'),
+      value: translateAttrValue(attrs.length, language),
+    })
+  }
+  if (attrs.diameter) {
+    items.push({
+      label: t('productOptions.attrDiameter'),
+      value: translateAttrValue(attrs.diameter, language),
+    })
+  }
+  if (attrs.material) {
+    items.push({
+      label: t('productOptions.attrMaterial'),
+      value: translateAttrValue(attrs.material, language),
+    })
+  }
+  if (attrs.color) {
+    items.push({
+      label: t('productOptions.attrColor'),
+      value: translateAttrValue(attrs.color, language),
+    })
+  }
+  return items
+}
+
+function buildBraceletCharacteristics(
+  attrs: BraceletAttributes,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+  language: Language,
+): CharacteristicItem[] {
+  const items: CharacteristicItem[] = []
+  if (attrs.stones?.length) {
+    items.push({
+      label: t('productOptions.attrStones'),
+      value: attrs.stones.map((stone) => translateAttrValue(stone, language)).join(', '),
+    })
+  }
+  if (attrs.material) {
+    items.push({
+      label: t('productOptions.attrMaterial'),
+      value: translateAttrValue(attrs.material, language),
+    })
+  }
+  if (attrs.threadColor) {
+    items.push({
+      label: t('productOptions.attrThreadColor'),
+      value: translateAttrValue(attrs.threadColor, language),
+    })
+  }
+  if (attrs.wristSize) {
+    items.push({
+      label: t('productOptions.attrSize'),
+      value: formatWristSize(attrs.wristSize, language),
+    })
+  }
+  return items
+}
+
+function buildGenericCharacteristics(
+  attributes: ProductAttributes,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+  language: Language,
+): CharacteristicItem[] {
+  return Object.entries(attributes)
+    .filter(([key, value]) => {
+      if (Array.isArray(value) || typeof value === 'object') return false
+      return key in GENERIC_ATTR_KEYS && Boolean(value)
+    })
+    .map(([key, value]) => ({
+      label: t(GENERIC_ATTR_KEYS[key]),
+      value: key === 'wristSize'
+        ? formatWristSize(String(value), language)
+        : translateAttrValue(String(value), language),
+    }))
+}
+
+function CharacteristicsPanel({
+  items,
+  characteristicsLabel,
+}: {
+  items: CharacteristicItem[]
+  characteristicsLabel: string
+}) {
   const [open, setOpen] = useState(false)
-  const content = Children.toArray(children).filter(Boolean)
-  if (content.length === 0) return null
+  if (items.length === 0) return null
 
   return (
-    <div className={styles.characteristics}>
+    <section className={styles.characteristics} aria-label={characteristicsLabel}>
       <button
         type="button"
         className={[styles.characteristicsTitle, open ? styles.characteristicsTitleOpen : ''].filter(Boolean).join(' ')}
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
       >
-        <span>Характеристики</span>
+        <span>{characteristicsLabel}</span>
         <ChevronDown
           size={18}
           className={[styles.chevron, open ? styles.chevronOpen : ''].filter(Boolean).join(' ')}
@@ -204,19 +379,19 @@ function CharacteristicsPanel({ children }: { children: ReactNode }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-            <div className={styles.characteristicsBody}>{content}</div>
+            <div className={styles.characteristicsBody}>
+              <div className={styles.metaGrid}>
+                {items.map((item) => (
+                  <div key={item.label} className={styles.metaItem}>
+                    <span className={styles.metaLabel}>{item.label}</span>
+                    <span className={styles.metaValue}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  )
-}
-
-function AttributeRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className={styles.attrRow}>
-      <span className={styles.attrLabel}>{label}</span>
-      <span className={styles.attrValue}>{value}</span>
-    </div>
+    </section>
   )
 }

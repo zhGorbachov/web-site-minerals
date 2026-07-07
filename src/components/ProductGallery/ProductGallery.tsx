@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ProductGallery.module.scss'
 
 interface ProductGalleryProps {
@@ -11,6 +12,7 @@ interface ProductGalleryProps {
 const SWIPE_THRESHOLD = 48
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
+  const { t } = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
   const thumbsRef = useRef<HTMLDivElement>(null)
   const touchStartX = useRef(0)
@@ -82,7 +84,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           <motion.img
             key={images[activeIndex]}
             src={images[activeIndex]}
-            alt={`${productName} — фото ${activeIndex + 1}`}
+            alt={t('productGallery.photoAlt', { name: productName, n: activeIndex + 1 })}
             className={styles.mainImage}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -98,7 +100,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               type="button"
               className={[styles.navBtn, styles.navPrev].join(' ')}
               onClick={goPrev}
-              aria-label="Попереднє фото"
+              aria-label={t('productGallery.prev')}
             >
               <ChevronLeft size={22} />
             </button>
@@ -106,7 +108,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               type="button"
               className={[styles.navBtn, styles.navNext].join(' ')}
               onClick={goNext}
-              aria-label="Наступне фото"
+              aria-label={t('productGallery.next')}
             >
               <ChevronRight size={22} />
             </button>
@@ -119,7 +121,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
       {hasMultiple && (
         <>
-          <div className={styles.dots} role="tablist" aria-label="Фото товару">
+          <div className={styles.dots} role="tablist" aria-label={t('productGallery.tabsAria')}>
             {images.map((_, index) => (
               <button
                 key={index}
@@ -127,7 +129,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 role="tab"
                 className={[styles.dot, activeIndex === index ? styles.dotActive : ''].filter(Boolean).join(' ')}
                 onClick={() => goTo(index)}
-                aria-label={`Фото ${index + 1}`}
+                aria-label={t('productGallery.photo', { n: index + 1 })}
                 aria-selected={activeIndex === index}
               />
             ))}
@@ -140,10 +142,14 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 type="button"
                 className={[styles.thumb, activeIndex === index ? styles.thumbActive : ''].filter(Boolean).join(' ')}
                 onClick={() => goTo(index)}
-                aria-label={`Фото ${index + 1}`}
+                aria-label={t('productGallery.photo', { n: index + 1 })}
                 aria-current={activeIndex === index}
               >
-                <img src={src} alt={`${productName} мініатюра ${index + 1}`} draggable={false} />
+                <img
+                  src={src}
+                  alt={t('productGallery.thumbnailAlt', { name: productName, n: index + 1 })}
+                  draggable={false}
+                />
               </button>
             ))}
           </div>

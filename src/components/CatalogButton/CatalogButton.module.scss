@@ -1,0 +1,71 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-6;
+  border-radius: $radius-full;
+  font-family: inherit;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color $transition-base, border-color $transition-base,
+    background $transition-base, box-shadow $transition-base;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  @include focus-ring;
+}
+
+.outline {
+  border: 1px solid $color-accent;
+  background: $color-header;
+  color: $color-text;
+
+  svg {
+    color: $color-primary;
+  }
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+    background: $color-background;
+  }
+}
+
+.filled {
+  border: none;
+  background: $color-primary;
+  color: $color-white;
+
+  svg {
+    color: $color-white;
+  }
+
+  &:hover {
+    background: $color-primary-light;
+    color: $color-primary-dark;
+    box-shadow: 0 4px 16px rgba($color-primary, 0.35);
+
+    svg {
+      color: $color-primary-dark;
+    }
+  }
+
+  &:active {
+    background: $color-primary-dark;
+    color: $color-white;
+
+    svg {
+      color: $color-white;
+    }
+  }
+}

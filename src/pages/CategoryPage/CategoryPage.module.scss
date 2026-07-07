@@ -25,6 +25,17 @@
 .count {
   font-size: $font-size-sm;
   color: $color-text-muted;
+  white-space: nowrap;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+
+  @include tablet-up {
+    gap: $spacing-4;
+  }
 }
 
 // Subcategory overview grid (category landing)

@@ -1,6 +1,10 @@
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import type { Product } from '@/types'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Heart, ShoppingCart, Minus, Plus, CheckCircle } from 'lucide-react'
+import type { MineralAttributes, Product } from '@/types'
+import { useCartStore, useWishlistStore } from '@/store'
+import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils'
 import styles from './ProductCard.module.scss'
 
@@ -8,9 +12,72 @@ interface ProductCardProps {
   product: Product
 }
 
+function productRequiresOptions(product: Product): boolean {
+  if (product.categorySlug === 'mineraly') {
+    const attrs = product.attributes as MineralAttributes
+    return Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
+  }
+  return product.categorySlug === 'nytky' || product.categorySlug === 'brаslety'
+}
+
 export function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate()
+  const { t, language } = useTranslation()
+  const cartMenuRef = useRef<HTMLDivElement>(null)
+  const [cartMenuOpen, setCartMenuOpen] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+  const [addedToCart, setAddedToCart] = useState(false)
+
+  const addItem = useCartStore((s) => s.addItem)
+  const cartQuantity = useCartStore((s) => s.getCartQuantity(product.id))
+  const { toggleWishlist, isInWishlist } = useWishlistStore()
+
   const displayPrice = product.discountPrice ?? product.price
   const productUrl = `/product/${product.slug}`
+  const inWishlist = isInWishlist(product.id)
+  const needsOptions = productRequiresOptions(product)
+  const maxSelectable = Math.max(0, product.stock - cartQuantity)
+
+  useEffect(() => {
+    if (!cartMenuOpen) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartMenuRef.current && !cartMenuRef.current.contains(event.target as Node)) {
+        setCartMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [cartMenuOpen])
+
+  useEffect(() => {
+    if (maxSelectable <= 0) return
+    setQuantity((q) => Math.min(Math.max(1, q), maxSelectable))
+  }, [maxSelectable, product.id])
+
+  const handleCartToggle = (event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (product.stock === 0) return
+    setCartMenuOpen((open) => !open)
+    setAddedToCart(false)
+  }
+
+  const handleAddToCart = () => {
+    if (addedToCart) return
+    if (needsOptions) {
+      navigate(productUrl)
+      return
+    }
+    if (maxSelectable <= 0) return
+    addItem(product, undefined, Math.min(quantity, maxSelectable))
+    setAddedToCart(true)
+    setTimeout(() => {
+      setAddedToCart(false)
+      setCartMenuOpen(false)
+    }, 1200)
+  }
 
   return (
     <motion.article
@@ -28,7 +95,7 @@ export function ProductCard({ product }: ProductCardProps) {
             loading="lazy"
           />
           {product.isNew && (
-            <span className={styles.badgeNew}>Новинка</span>
+            <span className={styles.badgeNew}>{t('product.badgeNew')}</span>
           )}
           {product.discountPrice && (
             <span className={styles.badgeSale}>
@@ -36,20 +103,122 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
         </div>
+      </Link>
 
-        <div className={styles.body}>
-          <h3 className={styles.name}>{product.name}</h3>
+      <div className={styles.body}>
+        <div className={styles.contentRow}>
+          <div className={styles.info}>
+            <Link to={productUrl} className={styles.name}>
+              {product.name}
+            </Link>
 
-          <div className={styles.footer}>
             <div className={styles.priceGroup}>
-              <span className={styles.price}>{formatPrice(displayPrice)}</span>
+              <span className={styles.price}>{formatPrice(displayPrice, language)}</span>
               {product.discountPrice && (
-                <span className={styles.oldPrice}>{formatPrice(product.price)}</span>
+                <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
               )}
             </div>
           </div>
+
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={[styles.actionBtn, styles.wishlistBtn, inWishlist ? styles.wishlistActive : ''].filter(Boolean).join(' ')}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                toggleWishlist(product.id)
+              }}
+              aria-label={inWishlist ? t('wishlist.remove') : t('wishlist.add')}
+            >
+              <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
+            </button>
+
+            <div className={styles.cartWrap} ref={cartMenuRef}>
+              <button
+                type="button"
+                className={[styles.actionBtn, styles.cartBtn, cartMenuOpen ? styles.cartBtnActive : ''].filter(Boolean).join(' ')}
+                onClick={handleCartToggle}
+                disabled={product.stock === 0}
+                aria-label={t('cart.addToCartAria')}
+                aria-expanded={cartMenuOpen}
+              >
+                <ShoppingCart size={16} />
+              </button>
+
+              <AnimatePresence>
+                {cartMenuOpen && (
+                  <motion.div
+                    className={styles.cartMenu}
+                    initial={{ opacity: 0, y: 6, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {needsOptions ? (
+                      <>
+                        <p className={styles.cartMenuHint}>
+                          {t('productCard.selectOptionsHint')}
+                        </p>
+                        <button
+                          type="button"
+                          className={styles.cartMenuSubmit}
+                          onClick={() => navigate(productUrl)}
+                        >
+                          {t('productCard.goToProduct')}
+                        </button>
+                      </>
+                    ) : maxSelectable === 0 ? (
+                      <p className={styles.cartMenuHint}>{t('productCard.maxInCart')}</p>
+                    ) : (
+                      <>
+                        <span className={styles.cartMenuLabel}>{t('common.quantity')}</span>
+                        <div className={styles.qtyStepper}>
+                          <button
+                            type="button"
+                            className={styles.qtyBtn}
+                            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                            disabled={quantity <= 1}
+                            aria-label={t('common.decreaseQty')}
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className={styles.qtyValue}>{quantity}</span>
+                          <button
+                            type="button"
+                            className={styles.qtyBtn}
+                            onClick={() => setQuantity((q) => Math.min(maxSelectable, q + 1))}
+                            disabled={quantity >= maxSelectable}
+                            aria-label={t('common.increaseQty')}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          className={[styles.cartMenuSubmit, addedToCart ? styles.cartMenuSubmitDone : ''].filter(Boolean).join(' ')}
+                          onClick={handleAddToCart}
+                          disabled={addedToCart}
+                        >
+                          {addedToCart ? (
+                            <>
+                              <CheckCircle size={14} />
+                              {t('cart.addedShort')}
+                            </>
+                          ) : (
+                            t('cart.addToCart')
+                          )}
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
-      </Link>
+      </div>
     </motion.article>
   )
 }

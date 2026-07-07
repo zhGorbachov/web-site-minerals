@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import styles from './Badge.module.scss'
+import { useTranslation } from '@/i18n/useTranslation'
 
 type BadgeVariant = 'primary' | 'success' | 'warning' | 'error' | 'neutral'
 
@@ -22,9 +23,11 @@ interface CartBadgeProps {
 }
 
 export function CartBadge({ count }: CartBadgeProps) {
+  const { t } = useTranslation()
+
   if (count === 0) return null
   return (
-    <span className={styles.cartBadge} aria-label={`${count} товарів у кошику`}>
+    <span className={styles.cartBadge} aria-label={t('badge.cartCount', { count })}>
       {count > 99 ? '99+' : count}
     </span>
   )

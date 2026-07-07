@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, Search, User, Heart, ShoppingCart, X, Building2, Truck, RefreshCw, Percent, Star, HelpCircle, Phone, Clock, type LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useCartStore, useUIStore } from '@/store'
+import { useCartStore, useUIStore, useWishlistStore } from '@/store'
 import { CartBadge } from '@/components/ui'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ContactDetails } from '@/components/ContactDetails'
@@ -118,6 +118,7 @@ export function Header() {
   const { t } = useTranslation()
   const { isBurgerOpen, toggleBurger, closeBurger, isSearchOpen, toggleSearch, closeSearch, openCatalog } = useUIStore()
   const totalItems = useCartStore((s) => s.totalItems())
+  const wishlistCount = useWishlistStore((s) => s.productIds.length)
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -355,9 +356,10 @@ export function Header() {
                 <Search size={22} />
               </button>
 
-              <button className={`${styles.iconBtn} ${styles.wishlistBtn}`} aria-label={t('header.wishlist')} disabled>
+              <Link to="/wishlist" className={`${styles.iconBtn} ${styles.wishlistBtn}`} aria-label={t('header.wishlist')}>
                 <Heart size={22} />
-              </button>
+                <CartBadge count={wishlistCount} />
+              </Link>
 
               <button className={`${styles.iconBtn} ${styles.profileBtn}`} aria-label={t('header.profile')} disabled>
                 <User size={22} />

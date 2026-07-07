@@ -8,6 +8,7 @@ const CatalogPage    = lazy(() => import('@/pages/CatalogPage').then((m) => ({ d
 const CategoryPage   = lazy(() => import('@/pages/CategoryPage').then((m) => ({ default: m.CategoryPage })))
 const ProductPage    = lazy(() => import('@/pages/ProductPage').then((m) => ({ default: m.ProductPage })))
 const CartPage       = lazy(() => import('@/pages/CartPage').then((m) => ({ default: m.CartPage })))
+const WishlistPage   = lazy(() => import('@/pages/WishlistPage').then((m) => ({ default: m.WishlistPage })))
 const AboutPage      = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })))
 const ContactsPage   = lazy(() => import('@/pages/ContactsPage').then((m) => ({ default: m.ContactsPage })))
 const NotFoundPage   = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
@@ -77,6 +78,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageFallback />}>
             <CartPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'wishlist',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <WishlistPage />
           </Suspense>
         ),
       },
