@@ -1,0 +1,88 @@
+// ============================================================
+// Theme palettes — runtime CSS custom properties
+// ============================================================
+
+:root,
+[data-theme='sage'] {
+  --color-brand-cool: #DDE8E2;
+  --color-brand-warm: #F0E8DA;
+  --color-accent: #DDE8E2;
+  --color-accent-warm: #F0E8DA;
+  --color-primary: #4A6B55;
+  --color-primary-rgb: 74, 107, 85;
+  --color-primary-light: #DDE8E2;
+  --color-primary-dark: #3A5444;
+  --color-primary-dark-rgb: 58, 84, 68;
+  --color-warm: #B8956A;
+  --color-background: #FAFAF8;
+  --color-header: #FFFFFE;
+  --color-header-rgb: 255, 255, 254;
+  --color-panel: #F5F6F4;
+  --color-surface: #F0F3F1;
+  --color-text: #1E2420;
+  --color-text-muted: #6B736C;
+  --color-border: #E2E8E4;
+}
+
+[data-theme='purple'] {
+  --color-brand-cool: #E8E2F0;
+  --color-brand-warm: #F2E8F5;
+  --color-accent: #E8E2F0;
+  --color-accent-warm: #F2E8F5;
+  --color-primary: #6B5B8A;
+  --color-primary-rgb: 107, 91, 138;
+  --color-primary-light: #E8E2F0;
+  --color-primary-dark: #544870;
+  --color-primary-dark-rgb: 84, 72, 112;
+  --color-warm: #A68B9A;
+  --color-background: #FAF9FC;
+  --color-header: #FEFEFE;
+  --color-header-rgb: 254, 254, 254;
+  --color-panel: #F5F3F8;
+  --color-surface: #F0EEF4;
+  --color-text: #1E1A24;
+  --color-text-muted: #6E6878;
+  --color-border: #E4E0EA;
+}
+
+[data-theme='agate'] {
+  --color-brand-cool: #D8E4F0;
+  --color-brand-warm: #E8EDF5;
+  --color-accent: #D8E4F0;
+  --color-accent-warm: #E8EDF5;
+  --color-primary: #5A7A9A;
+  --color-primary-rgb: 90, 122, 154;
+  --color-primary-light: #D8E4F0;
+  --color-primary-dark: #476178;
+  --color-primary-dark-rgb: 71, 97, 120;
+  --color-warm: #8A9BB0;
+  --color-background: #F9FAFC;
+  --color-header: #FEFEFF;
+  --color-header-rgb: 254, 254, 255;
+  --color-panel: #F3F5F8;
+  --color-surface: #EEF2F6;
+  --color-text: #1A2028;
+  --color-text-muted: #687080;
+  --color-border: #E0E6EE;
+}
+
+[data-theme='brown'] {
+  --color-brand-cool: #EDE6DC;
+  --color-brand-warm: #F5EDE4;
+  --color-accent: #EDE6DC;
+  --color-accent-warm: #F5EDE4;
+  --color-primary: #7A6352;
+  --color-primary-rgb: 122, 99, 82;
+  --color-primary-light: #EDE6DC;
+  --color-primary-dark: #5E4D40;
+  --color-primary-dark-rgb: 94, 77, 64;
+  --color-warm: #A68B6E;
+  --color-background: #FAF8F5;
+  --color-header: #FFFFFE;
+  --color-header-rgb: 255, 255, 254;
+  --color-panel: #F6F3EF;
+  --color-surface: #F0EBE5;
+  --color-text: #241E18;
+  --color-text-muted: #756A60;
+  --color-border: #E8E2DA;
+}

@@ -25,56 +25,6 @@
   }
 }
 
-.messengers {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $spacing-3;
-}
-
-.socialRow {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: $spacing-2;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.messengerIconBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: $radius-full;
-  padding: 0;
-  background: transparent;
-  text-decoration: none;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba($color-black, 0.12);
-  transition: transform $transition-base, box-shadow $transition-base;
-
-  &:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 14px rgba($color-black, 0.18);
-  }
-}
-
-.messengerSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 .menu {
   display: flex;
   flex-direction: column;

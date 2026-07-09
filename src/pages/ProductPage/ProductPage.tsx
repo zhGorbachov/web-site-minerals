@@ -5,7 +5,7 @@ import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lu
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { ProductGallery } from '@/components/ProductGallery'
-import { ProductOptions } from '@/components/ProductOptions'
+import { ProductSelections, ProductCharacteristics } from '@/components/ProductOptions'
 import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
@@ -130,25 +130,36 @@ export function ProductPage() {
           <div className={styles.infoCol}>
             <h1 className={styles.productTitle}>{product.name}</h1>
 
-            <div className={styles.availability}>
+            <div className={styles.metaRow}>
               {product.stock > 0 ? (
-                <span className={styles.inStock}>
-                  {t('product.inStock')}
-                </span>
+                <span className={styles.inStock}>{t('product.inStock')}</span>
               ) : (
                 <span className={styles.outOfStock}>{t('product.outOfStock')}</span>
               )}
-            </div>
 
-            <div className={styles.priceBlock}>
-              <span className={styles.price}>{formatPrice(displayPrice, language)}</span>
-              {product.discountPrice && (
-                <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
-              )}
+              <div className={styles.priceBlock}>
+                {product.discountPrice && (
+                  <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
+                )}
+                <span
+                  className={[
+                    styles.price,
+                    product.discountPrice ? styles.priceDiscounted : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  {formatPrice(displayPrice, language)}
+                </span>
+              </div>
             </div>
 
             <div className={styles.optionsBlock}>
-              <ProductOptions product={product} onOptionsChange={setSelectedOptions} />
+              <ProductSelections
+                key={product.id}
+                product={product}
+                onOptionsChange={setSelectedOptions}
+              />
             </div>
 
             <div className={styles.purchaseRow}>
@@ -192,6 +203,10 @@ export function ProductPage() {
               >
                 <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
               </button>
+            </div>
+
+            <div className={styles.characteristicsBlock}>
+              <ProductCharacteristics product={product} />
             </div>
 
             <div className={styles.descriptionBlock}>

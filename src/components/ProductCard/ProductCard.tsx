@@ -113,7 +113,16 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
 
             <div className={styles.priceGroup}>
-              <span className={styles.price}>{formatPrice(displayPrice, language)}</span>
+              <span
+                className={[
+                  styles.price,
+                  product.discountPrice ? styles.priceDiscounted : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {formatPrice(displayPrice, language)}
+              </span>
               {product.discountPrice && (
                 <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
               )}

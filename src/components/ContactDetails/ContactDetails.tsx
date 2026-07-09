@@ -1,6 +1,6 @@
 import { Phone } from 'lucide-react'
-import { PHONE_CONTACTS, MESSENGER_CONTACTS } from '@/config/ContactInfo'
-import { MESSENGER_ICON_MAP } from './MessengerIcons'
+import { PHONE_CONTACTS } from '@/config/ContactInfo'
+import { SocialLinks } from './SocialLinks'
 import styles from './ContactDetails.module.scss'
 
 interface ContactDetailsProps {
@@ -23,24 +23,7 @@ export function ContactDetails({ variant = 'page', onLinkClick }: ContactDetails
           </li>
         ))}
       </ul>
-      <div className={styles.socialRow}>
-        {MESSENGER_CONTACTS.map((contact) => {
-          const Icon = MESSENGER_ICON_MAP[contact.id]
-          return (
-            <a
-              key={contact.id}
-              href={contact.href}
-              className={styles.messengerIconBtn}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={contact.label}
-              onClick={onLinkClick}
-            >
-              <Icon className={styles.messengerSvg} />
-            </a>
-          )
-        })}
-      </div>
+      <SocialLinks variant="menu" onLinkClick={onLinkClick} />
     </div>
   )
 }

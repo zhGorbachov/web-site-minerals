@@ -69,12 +69,12 @@
   }
 }
 
-.availability {
+.metaRow {
   display: flex;
   align-items: center;
-  gap: $spacing-2;
+  justify-content: space-between;
+  gap: $spacing-3;
   flex-wrap: wrap;
-  margin-top: calc($spacing-1 * -1);
 }
 
 .inStock {
@@ -99,26 +99,37 @@
 .priceBlock {
   display: flex;
   align-items: baseline;
-  gap: $spacing-3;
+  justify-content: flex-end;
+  gap: $spacing-2;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .price {
-  font-size: $font-size-2xl;
+  font-size: $font-size-xl;
   font-weight: $font-weight-bold;
-  color: $color-text;
+  color: #1F9D55;
 
   @include tablet-up {
-    font-size: $font-size-3xl;
+    font-size: $font-size-2xl;
   }
 }
 
+.priceDiscounted {
+  color: #15803D;
+}
+
 .oldPrice {
-  font-size: $font-size-base;
+  font-size: $font-size-sm;
   color: $color-text-muted;
   text-decoration: line-through;
 }
 
 .optionsBlock {
+  padding-top: $spacing-1;
+}
+
+.characteristicsBlock {
   padding-top: $spacing-2;
 }
 
@@ -135,7 +146,7 @@
   flex-shrink: 0;
   height: 40px;
   border: 1px solid $color-border;
-  border-radius: $radius-sm;
+  border-radius: $radius-button;
   background: $color-white;
   overflow: hidden;
 }
@@ -180,7 +191,7 @@
   height: 40px !important;
   padding-inline: $spacing-4 !important;
   font-size: $font-size-sm !important;
-  border-radius: $radius-sm !important;
+  border-radius: $radius-button !important;
   font-weight: $font-weight-medium !important;
   box-shadow: none !important;
 
@@ -193,7 +204,7 @@
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  border-radius: $radius-sm;
+  border-radius: $radius-circle;
   border: 1px solid $color-border;
   display: flex;
   align-items: center;

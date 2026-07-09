@@ -54,8 +54,7 @@ function getStoredColorValue(key: string): string {
   return Object.entries(colorKeyByUk).find(([, value]) => value === key)?.[0] ?? key
 }
 
-export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps) {
-  const { t, language } = useTranslation()
+function useProductOptionState(onOptionsChange: (options: Record<string, string>) => void) {
   const [selected, setSelected] = useState<Record<string, string>>({})
 
   const handleSelect = (key: string, value: string) => {
@@ -64,81 +63,66 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
     onOptionsChange(updated)
   }
 
+  return { selected, handleSelect }
+}
+
+export function ProductSelections({ product, onOptionsChange }: ProductOptionsProps) {
+  const { t, language } = useTranslation()
+  const { selected, handleSelect } = useProductOptionState(onOptionsChange)
   const { categorySlug } = product
 
   if (categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
     const hasStrandOptions = Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
-
-    if (hasStrandOptions) {
-      return (
-        <div className={styles.options}>
-          {attrs.beadSizes && attrs.beadSizes.length > 0 && (
-            <div className={styles.optionGroup}>
-              <span className={styles.optionLabel}>{t('productOptions.beadSize')}</span>
-              <div className={styles.sizeGrid}>
-                {attrs.beadSizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    className={[styles.sizeChip, selected.beadSize === size ? styles.sizeChipActive : ''].filter(Boolean).join(' ')}
-                    onClick={() => handleSelect('beadSize', size)}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {attrs.strandLengths && attrs.strandLengths.length > 0 && (
-            <div className={styles.optionGroup}>
-              <span className={styles.sectionDivider} />
-              <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>
-              <div className={styles.lengthPills}>
-                {attrs.strandLengths.map((length) => (
-                  <button
-                    key={length.value}
-                    type="button"
-                    className={[styles.lengthPill, selected.strandLength === length.label ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
-                    onClick={() => handleSelect('strandLength', length.label)}
-                  >
-                    {length.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <CharacteristicsPanel
-            items={buildMineralCharacteristics(attrs, t, language, { strand: true })}
-            characteristicsLabel={t('productOptions.characteristics')}
-          />
-        </div>
-      )
-    }
+    if (!hasStrandOptions) return null
 
     return (
       <div className={styles.options}>
-        <CharacteristicsPanel
-          items={buildMineralCharacteristics(attrs, t, language)}
-          characteristicsLabel={t('productOptions.characteristics')}
-        />
+        {attrs.beadSizes && attrs.beadSizes.length > 0 && (
+          <div className={styles.optionGroup}>
+            <span className={styles.optionLabel}>{t('productOptions.beadSize')}</span>
+            <div className={styles.sizeGrid}>
+              {attrs.beadSizes.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  className={[styles.sizeChip, selected.beadSize === size ? styles.sizeChipActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => handleSelect('beadSize', size)}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {attrs.strandLengths && attrs.strandLengths.length > 0 && (
+          <div className={styles.optionGroup}>
+            {attrs.beadSizes?.length ? <span className={styles.sectionDivider} /> : null}
+            <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>
+            <div className={styles.lengthPills}>
+              {attrs.strandLengths.map((length) => (
+                <button
+                  key={length.value}
+                  type="button"
+                  className={[styles.lengthPill, selected.strandLength === length.label ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => handleSelect('strandLength', length.label)}
+                >
+                  {length.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
 
   if (categorySlug === 'nytky') {
-    const attrs = product.attributes as ThreadAttributes
     const colors = getColorOptions(language)
     return (
       <div className={styles.options}>
-        <CharacteristicsPanel
-          items={buildThreadCharacteristics(attrs, t, language)}
-          characteristicsLabel={t('productOptions.characteristics')}
-        />
         <div className={styles.optionGroup}>
-          <span className={styles.sectionDivider} />
           <span className={styles.optionLabel}>{t('productOptions.color')}</span>
           <div className={styles.lengthPills}>
             {colors.map((color) => {
@@ -164,12 +148,7 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
     const attrs = product.attributes as BraceletAttributes
     return (
       <div className={styles.options}>
-        <CharacteristicsPanel
-          items={buildBraceletCharacteristics(attrs, t, language)}
-          characteristicsLabel={t('productOptions.characteristics')}
-        />
         <div className={styles.optionGroup}>
-          <span className={styles.sectionDivider} />
           <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
           <div className={styles.lengthPills}>
             {WRIST_SIZES.map((size) => (
@@ -195,16 +174,61 @@ export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps
     )
   }
 
+  return null
+}
+
+export function ProductCharacteristics({ product }: Pick<ProductOptionsProps, 'product'>) {
+  const { t, language } = useTranslation()
+  const { categorySlug } = product
+
+  if (categorySlug === 'mineraly') {
+    const attrs = product.attributes as MineralAttributes
+    const hasStrandOptions = Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
+    return (
+      <CharacteristicsPanel
+        items={buildMineralCharacteristics(attrs, t, language, { strand: hasStrandOptions })}
+        characteristicsLabel={t('productOptions.characteristics')}
+      />
+    )
+  }
+
+  if (categorySlug === 'nytky') {
+    const attrs = product.attributes as ThreadAttributes
+    return (
+      <CharacteristicsPanel
+        items={buildThreadCharacteristics(attrs, t, language)}
+        characteristicsLabel={t('productOptions.characteristics')}
+      />
+    )
+  }
+
+  if (categorySlug === 'brаslety') {
+    const attrs = product.attributes as BraceletAttributes
+    return (
+      <CharacteristicsPanel
+        items={buildBraceletCharacteristics(attrs, t, language)}
+        characteristicsLabel={t('productOptions.characteristics')}
+      />
+    )
+  }
+
   const genericItems = buildGenericCharacteristics(product.attributes, t, language)
   if (genericItems.length === 0) return null
 
   return (
-    <div className={styles.options}>
-      <CharacteristicsPanel
-        items={genericItems}
-        characteristicsLabel={t('productOptions.characteristics')}
-      />
-    </div>
+    <CharacteristicsPanel
+      items={genericItems}
+      characteristicsLabel={t('productOptions.characteristics')}
+    />
+  )
+}
+
+export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps) {
+  return (
+    <>
+      <ProductSelections product={product} onOptionsChange={onOptionsChange} />
+      <ProductCharacteristics product={product} />
+    </>
   )
 }
 

@@ -12,7 +12,7 @@
   height: 36px;
   padding-inline: $spacing-3;
   border: 1px solid $color-border;
-  border-radius: $radius-full;
+  border-radius: $radius-button;
   background: $color-white;
   color: $color-text;
   font-family: inherit;
@@ -73,7 +73,7 @@
   width: 100%;
   padding: $spacing-2 $spacing-3;
   border: none;
-  border-radius: $radius-sm;
+  border-radius: $radius-button;
   background: transparent;
   color: $color-text;
   font-family: inherit;
@@ -94,7 +94,7 @@
 }
 
 .optionActive {
-  background: rgba($color-primary, 0.08);
+  background: rgba(var(--color-primary-rgb), 0.08);
   color: $color-primary;
   font-weight: $font-weight-semibold;
 }

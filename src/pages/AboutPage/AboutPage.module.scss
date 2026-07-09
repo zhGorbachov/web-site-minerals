@@ -188,7 +188,7 @@
 .valueIcon {
   width: 48px;
   height: 48px;
-  background: rgba($color-primary, 0.1);
+  background: rgba(var(--color-primary-rgb), 0.1);
   border-radius: $radius-md;
   display: flex;
   align-items: center;

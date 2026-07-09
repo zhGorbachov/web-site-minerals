@@ -113,26 +113,29 @@
 }
 
 .sizeChip {
-  width: 48px;
-  height: 48px;
-  border-radius: $radius-sm;
-  border: 1.5px solid $color-border;
-  font-size: $font-size-base;
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-circle;
+  border: 1.5px solid rgba(var(--color-primary-dark-rgb), 0.38);
+  font-size: $font-size-sm;
   font-weight: $font-weight-semibold;
   color: $color-text;
   background: $color-white;
-  transition: border-color $transition-base, background $transition-base, color $transition-base;
+  box-shadow: 0 1px 2px rgba(var(--color-primary-dark-rgb), 0.07);
+  transition: border-color $transition-base, background $transition-base, color $transition-base, box-shadow $transition-base;
   cursor: pointer;
 
   &:hover {
     border-color: $color-primary;
     color: $color-primary;
+    box-shadow: 0 1px 4px rgba(var(--color-primary-rgb), 0.12);
   }
 
   &.sizeChipActive {
     border-color: $color-primary;
     background: $color-primary;
     color: $color-white;
+    box-shadow: none;
   }
 }
 
@@ -144,28 +147,31 @@
 }
 
 .lengthPill {
-  min-height: 44px;
-  padding-inline: $spacing-4;
-  border-radius: $radius-sm;
-  border: 1.5px solid $color-border;
+  min-height: 40px;
+  padding-inline: $spacing-3;
+  border-radius: $radius-button;
+  border: 1.5px solid rgba(var(--color-primary-dark-rgb), 0.38);
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   color: $color-text;
   background: $color-white;
-  transition: border-color $transition-base, background $transition-base, color $transition-base;
+  box-shadow: 0 1px 2px rgba(var(--color-primary-dark-rgb), 0.07);
+  transition: border-color $transition-base, background $transition-base, color $transition-base, box-shadow $transition-base;
   cursor: pointer;
   text-align: center;
 
   &:hover {
     border-color: $color-primary;
     color: $color-primary;
+    box-shadow: 0 1px 4px rgba(var(--color-primary-rgb), 0.12);
   }
 
   &.lengthPillActive {
     border-color: $color-primary;
-    background: rgba($color-primary, 0.08);
+    background: rgba(var(--color-primary-rgb), 0.08);
     color: $color-primary;
     font-weight: $font-weight-semibold;
+    box-shadow: none;
   }
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowRight,
   Shield,
@@ -22,6 +22,7 @@ import { Button } from '@/components/ui'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { SITE_NAME } from '@/config/Site'
+import { SiteLogo } from '@/components/SiteLogo'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './HomePage.module.scss'
 
@@ -52,6 +53,7 @@ export function HomePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [newProducts, setNewProducts] = useState<Product[]>([])
   const [newProductsPage, setNewProductsPage] = useState(0)
+  const [pageDirection, setPageDirection] = useState(0)
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -110,28 +112,36 @@ export function HomePage() {
     }
   }, [newProductsPage, newTotalPages])
 
+  const goToNewProductsPage = (page: number) => {
+    setPageDirection(page === newProductsPage ? 0 : page > newProductsPage ? 1 : -1)
+    setNewProductsPage(page)
+  }
+
   return (
     <div className={styles.page}>
       {/* Hero banner — between header and catalog */}
       <section className={styles.hero}>
-        <div className={styles.heroMedia}>
-          <img
-            src={mockImages.homeHero}
-            alt=""
-            className={styles.heroImage}
-          />
-          <div className={styles.heroOverlay} />
+        <img
+          src={mockImages.homeHero}
+          alt=""
+          className={styles.heroImage}
+        />
+        <div className={styles.heroPanel}>
+          <motion.div
+            className={styles.heroContent}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          >
+            <SiteLogo className={styles.heroLogo} compact />
+            <h1 className={styles.heroTitle}>
+              {t('home.heroTitle', { siteName: SITE_NAME })}
+            </h1>
+            <p className={styles.heroDescription}>
+              {t('home.heroDescription')}
+            </p>
+          </motion.div>
         </div>
-        <motion.div
-          className={styles.heroContent}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        >
-          <p className={styles.heroDescription}>
-            {t('home.heroDescription')}
-          </p>
-        </motion.div>
       </section>
 
       {/* Mobile home — catalog shortcuts */}
@@ -184,52 +194,92 @@ export function HomePage() {
               {t('common.allProducts')} <ArrowRight size={16} />
             </Link>
           </div>
-          <div className={styles.productGrid}>
-            {loading
-              ? Array.from({ length: isMobile ? MOBILE_NEW_PAGE_SIZE : 4 }).map((_, i) => (
-                  <ProductCardSkeleton key={i} />
-                ))
-              : visibleNewProducts.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
+          <AnimatePresence mode="wait" custom={pageDirection}>
+            <motion.div
+              key={newProductsPage}
+              className={styles.productGrid}
+              custom={pageDirection}
+              variants={{
+                enter: (direction: number) => ({
+                  opacity: 0,
+                  x: direction >= 0 ? 28 : -28,
+                }),
+                center: {
+                  opacity: 1,
+                  x: 0,
+                },
+                exit: (direction: number) => ({
+                  opacity: 0,
+                  x: direction >= 0 ? -28 : 28,
+                }),
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {loading
+                ? Array.from({ length: isMobile ? MOBILE_NEW_PAGE_SIZE : 4 }).map((_, i) => (
+                    <ProductCardSkeleton key={i} />
+                  ))
+                : visibleNewProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+            </motion.div>
+          </AnimatePresence>
           {isMobile && !loading && newTotalPages > 1 && (
             <nav className={styles.mobilePagination} aria-label={t('home.newPaginationAria')}>
-              <button
+              <motion.button
                 type="button"
                 className={styles.paginationBtn}
-                onClick={() => setNewProductsPage((p) => Math.max(0, p - 1))}
+                onClick={() => goToNewProductsPage(newProductsPage - 1)}
                 disabled={newProductsPage === 0}
                 aria-label={t('common.paginationPrev')}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 28 }}
               >
                 <ChevronLeft size={15} />
-              </button>
+              </motion.button>
               <div className={styles.paginationNumbers}>
-                {visiblePageNumbers.map((pageIndex) => (
-                  <button
-                    key={pageIndex}
-                    type="button"
-                    className={[
-                      styles.paginationNumber,
-                      pageIndex === newProductsPage ? styles.paginationNumberActive : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => setNewProductsPage(pageIndex)}
-                    aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
-                    aria-current={pageIndex === newProductsPage ? 'page' : undefined}
-                  >
-                    {pageIndex + 1}
-                  </button>
-                ))}
+                {visiblePageNumbers.map((pageIndex) => {
+                  const isActive = pageIndex === newProductsPage
+                  return (
+                    <motion.button
+                      key={pageIndex}
+                      type="button"
+                      className={[
+                        styles.paginationNumber,
+                        isActive ? styles.paginationNumberActive : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      onClick={() => goToNewProductsPage(pageIndex)}
+                      aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
+                      aria-current={isActive ? 'page' : undefined}
+                      whileTap={{ scale: 0.92 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="homeNewProductsPaginationPill"
+                          className={styles.paginationPill}
+                          transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                        />
+                      )}
+                      <span className={styles.paginationNumberLabel}>{pageIndex + 1}</span>
+                    </motion.button>
+                  )
+                })}
               </div>
-              <button
+              <motion.button
                 type="button"
                 className={styles.paginationBtn}
-                onClick={() => setNewProductsPage((p) => Math.min(newTotalPages - 1, p + 1))}
+                onClick={() => goToNewProductsPage(newProductsPage + 1)}
                 disabled={newProductsPage >= newTotalPages - 1}
                 aria-label={t('common.paginationNext')}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 28 }}
               >
                 <ChevronRight size={15} />
-              </button>
+              </motion.button>
             </nav>
           )}
         </div>

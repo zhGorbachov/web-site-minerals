@@ -7,7 +7,7 @@
   justify-content: center;
   gap: $spacing-3;
   padding: $spacing-3 $spacing-6;
-  border-radius: $radius-full;
+  border-radius: $radius-button;
   font-family: inherit;
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
@@ -53,7 +53,7 @@
   &:hover {
     background: $color-primary-light;
     color: $color-primary-dark;
-    box-shadow: 0 4px 16px rgba($color-primary, 0.35);
+    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.35);
 
     svg {
       color: $color-primary-dark;

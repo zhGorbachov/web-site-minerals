@@ -58,37 +58,6 @@
   max-width: 260px;
 }
 
-.socials {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: $spacing-3;
-}
-
-.socialLink {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius-full;
-  padding: 0;
-  background: transparent;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba($color-black, 0.1);
-  transition: transform $transition-base, box-shadow $transition-base;
-
-  &:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 12px rgba($color-black, 0.16);
-  }
-}
-
-.socialSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 // Column groups
 .linkColumns {
   display: grid;
@@ -154,6 +123,10 @@
 
 .contactText {
   font-size: $font-size-sm;
+}
+
+.contactSocials {
+  margin-top: $spacing-4;
 }
 
 // Bottom

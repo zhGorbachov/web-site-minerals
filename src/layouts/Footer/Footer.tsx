@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom'
 import { Phone, Mail, MapPin } from 'lucide-react'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
-import { MESSENGER_ICON_MAP } from '@/components/ContactDetails'
-import { PHONE_CONTACTS, MESSENGER_CONTACTS } from '@/config/ContactInfo'
+import { SocialLinks } from '@/components/ContactDetails'
+import { ThemeSwitcher } from '@/components/ThemeSwitcher'
+import { PHONE_CONTACTS, EMAIL_CONTACTS, LOCATION_LINK } from '@/config/ContactInfo'
 import { SITE_NAME } from '@/config/Site'
 import { SiteLogo } from '@/components/SiteLogo'
 import styles from './Footer.module.scss'
@@ -22,24 +23,6 @@ export function Footer() {
               <SiteLogo />
             </Link>
             <p className={styles.tagline}>{t('footer.tagline')}</p>
-            <div className={styles.socials}>
-              {MESSENGER_CONTACTS.map((contact) => {
-                const Icon = MESSENGER_ICON_MAP[contact.id]
-                return (
-                  <a
-                    key={contact.id}
-                    href={contact.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.socialLink}
-                    aria-label={contact.label}
-                    title={contact.label}
-                  >
-                    <Icon className={styles.socialSvg} />
-                  </a>
-                )
-              })}
-            </div>
           </div>
 
           <div className={styles.linkColumns}>
@@ -79,17 +62,31 @@ export function Footer() {
                   <a href={phone.href} className={styles.link}>{phone.display}</a>
                 </li>
               ))}
-              <li className={styles.contactItem}>
-                <Mail size={16} />
-                <a href="mailto:hello@crystal.ua" className={styles.link}>hello@crystal.ua</a>
-              </li>
+              {EMAIL_CONTACTS.map((email) => (
+                <li key={email.href} className={styles.contactItem}>
+                  <Mail size={16} />
+                  <a href={email.href} className={styles.link}>{email.display}</a>
+                </li>
+              ))}
               <li className={styles.contactItem}>
                 <MapPin size={16} />
-                <span className={styles.contactText}>{t('footer.country')}</span>
+                <a
+                  href={LOCATION_LINK}
+                  className={styles.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t('footer.city')}, {t('footer.country')}
+                </a>
               </li>
             </ul>
+            <div className={styles.contactSocials}>
+              <SocialLinks variant="footer" />
+            </div>
           </div>
         </div>
+
+        <ThemeSwitcher />
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>

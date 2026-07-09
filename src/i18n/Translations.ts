@@ -50,9 +50,15 @@ export type TranslationSchema = UiTranslationSchema & {
     threads: string
     bracelets: string
     pendants: string
+    city: string
     country: string
     rights: string
     made: string
+    themeTest: string
+    themeSage: string
+    themePurple: string
+    themeAgate: string
+    themeBrown: string
   }
   about: {
     breadcrumbHome: string
@@ -84,11 +90,13 @@ export type TranslationSchema = UiTranslationSchema & {
     messengerAction: string
     emailTitle: string
     emailNote: string
+    locationTitle: string
+    mapTitle: string
     scheduleTitle: string
     scheduleSectionLabel: string
     scheduleValue: string
     scheduleNote: string
-    mapSoon: string
+    mapOpen: string
     mapSubtext: string
     instagramTitle: string
     instagramNote: string
@@ -140,9 +148,15 @@ export const translations: Record<Language, TranslationSchema> = {
       threads: 'Нитки',
       bracelets: 'Браслети',
       pendants: 'Підвіски',
+      city: 'Кропивницький',
       country: 'Україна',
       rights: 'Всі права захищено.',
       made: 'Натуральні мінерали та ручна робота з любов\'ю 💎',
+      themeTest: 'Тест кольорів',
+      themeSage: 'Зелений',
+      themePurple: 'Фіолетовий',
+      themeAgate: 'Агат',
+      themeBrown: 'Коричневий',
     },
     about: {
       breadcrumbHome: 'Головна',
@@ -224,11 +238,13 @@ export const translations: Record<Language, TranslationSchema> = {
       messengerAction: 'Написати нам',
       emailTitle: 'Email',
       emailNote: 'Відповідаємо протягом 24 годин',
+      locationTitle: 'Локація',
+      mapTitle: 'Карта магазину',
       scheduleTitle: 'Графік роботи',
       scheduleSectionLabel: 'Коли ми працюємо',
       scheduleValue: 'Пн–Пт: 9:00 – 19:00',
       scheduleNote: 'Сб: 10:00 – 16:00 | Нд: вихідний',
-      mapSoon: 'Інтерактивна карта — незабаром',
+      mapOpen: 'Відкрити в Google Maps',
       mapSubtext: 'Україна, доставляємо по всій країні',
       instagramTitle: 'Instagram',
       instagramNote: 'Слідкуйте за новинками та роботами',
@@ -278,9 +294,15 @@ export const translations: Record<Language, TranslationSchema> = {
       threads: 'Threads',
       bracelets: 'Bracelets',
       pendants: 'Pendants',
+      city: 'Kropyvnytskyi',
       country: 'Ukraine',
       rights: 'All rights reserved.',
       made: 'Natural minerals and handmade with love 💎',
+      themeTest: 'Theme test',
+      themeSage: 'Sage',
+      themePurple: 'Purple',
+      themeAgate: 'Agate',
+      themeBrown: 'Brown',
     },
     about: {
       breadcrumbHome: 'Home',
@@ -362,11 +384,13 @@ export const translations: Record<Language, TranslationSchema> = {
       messengerAction: 'Message us',
       emailTitle: 'Email',
       emailNote: 'We reply within 24 hours',
+      locationTitle: 'Location',
+      mapTitle: 'Store map',
       scheduleTitle: 'Working hours',
       scheduleSectionLabel: 'When we\'re open',
       scheduleValue: 'Mon–Fri: 9:00 AM – 7:00 PM',
       scheduleNote: 'Sat: 10:00 AM – 4:00 PM | Sun: closed',
-      mapSoon: 'Interactive map — coming soon',
+      mapOpen: 'Open in Google Maps',
       mapSubtext: 'Ukraine, we deliver nationwide',
       instagramTitle: 'Instagram',
       instagramNote: 'Follow us for new arrivals and handmade pieces',

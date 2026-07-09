@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, LayoutGrid, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Category, SubCategory } from '@/types'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -76,7 +76,10 @@ export function CatalogMenu({
       aria-label={t('catalog.title')}
     >
       <div className={styles.header}>
-        <h1 className={styles.title}>{t('catalog.title')}</h1>
+        <div className={styles.titleWrap}>
+          <LayoutGrid size={20} className={styles.titleIcon} aria-hidden="true" />
+          <h1 className={styles.title}>{t('catalog.title')}</h1>
+        </div>
         {onClose && (
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t('catalog.close')}>
             <X size={22} />

@@ -34,7 +34,7 @@
 .desktopNavLink {
   display: block;
   padding: $spacing-2 $spacing-3;
-  border-radius: $radius-sm;
+  border-radius: $radius-button;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   color: $color-text-muted;
@@ -46,7 +46,7 @@
   }
 
   &.desktopNavLinkActive {
-    background: rgba($color-primary, 0.08);
+    background: rgba(var(--color-primary-rgb), 0.08);
     color: $color-primary;
     font-weight: $font-weight-semibold;
   }

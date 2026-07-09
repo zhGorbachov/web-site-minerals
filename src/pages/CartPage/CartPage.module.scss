@@ -160,7 +160,7 @@
   display: flex;
   align-items: center;
   border: 1.5px solid $color-border;
-  border-radius: $radius-sm;
+  border-radius: $radius-button;
   overflow: hidden;
   background: $color-white;
 }
@@ -218,7 +218,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-sm;
+  border-radius: $radius-circle;
   color: $color-text-muted;
   transition: color $transition-base, background $transition-base;
   cursor: pointer;

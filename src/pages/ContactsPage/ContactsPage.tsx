@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 import { Breadcrumbs } from '@/components/ui'
 import { MESSENGER_ICON_MAP } from '@/components/ContactDetails'
-import { PHONE_CONTACTS, INSTAGRAM_CONTACTS } from '@/config/ContactInfo'
+import { PHONE_CONTACTS, INSTAGRAM_CONTACTS, EMAIL_CONTACTS, LOCATION_LINK, LOCATION_ADDRESS, LOCATION_EMBED_URL } from '@/config/ContactInfo'
 import { scrollToHashTarget } from '@/utils/hashNav'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ContactsPage.module.scss'
@@ -141,37 +141,48 @@ export function ContactsPage() {
               </div>
             </motion.div>
 
-            {OTHER_CONTACTS.map((item) => {
-              const delay = cardIndex++ * 0.08
-              return (
-                <motion.div
-                  key={item.titleKey}
-                  className={styles.contactCard}
-                  {...fadeUp}
-                  transition={{ duration: 0.3, delay }}
+            <motion.div
+              className={styles.contactCard}
+              {...fadeUp}
+              transition={{ duration: 0.3, delay: cardIndex++ * 0.08 }}
+            >
+              <div className={styles.contactIcon}>
+                <Mail size={24} />
+              </div>
+              <div className={styles.contactBody}>
+                <h4 className={styles.contactTitle}>{t('contacts.emailTitle')}</h4>
+                <div className={styles.emailList}>
+                  {EMAIL_CONTACTS.map((email) => (
+                    <a key={email.href} href={email.href} className={styles.contactValue}>
+                      {email.display}
+                    </a>
+                  ))}
+                </div>
+                <p className={styles.contactNote}>{t('contacts.emailNote')}</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className={styles.contactCard}
+              {...fadeUp}
+              transition={{ duration: 0.3, delay: cardIndex++ * 0.08 }}
+            >
+              <div className={styles.contactIcon}>
+                <MapPin size={24} />
+              </div>
+              <div className={styles.contactBody}>
+                <h4 className={styles.contactTitle}>{t('contacts.locationTitle')}</h4>
+                <a
+                  href={LOCATION_LINK}
+                  className={styles.contactValue}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <div className={styles.contactIcon}>{item.icon}</div>
-                  <div className={styles.contactBody}>
-                    <h4 className={styles.contactTitle}>{t(item.titleKey)}</h4>
-                    {item.href ? (
-                      <a
-                        href={item.href}
-                        className={styles.contactValue}
-                        target={item.external ? '_blank' : undefined}
-                        rel="noopener noreferrer"
-                      >
-                        {item.value}
-                      </a>
-                    ) : (
-                      <span className={styles.contactValue}>
-                        {item.valueKey ? t(item.valueKey) : item.value}
-                      </span>
-                    )}
-                    {item.noteKey && <p className={styles.contactNote}>{t(item.noteKey)}</p>}
-                  </div>
-                </motion.div>
-              )
-            })}
+                  {LOCATION_ADDRESS}
+                </a>
+                <p className={styles.contactNote}>{t('contacts.mapSubtext')}</p>
+              </div>
+            </motion.div>
 
             <motion.section
               className={styles.scheduleSection}
@@ -194,29 +205,30 @@ export function ContactsPage() {
           </div>
 
           <motion.div
-            className={styles.mapPlaceholder}
+            className={styles.mapSection}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <div className={styles.mapInner}>
-              <MapPin size={40} className={styles.mapIcon} />
-              <p className={styles.mapText}>{t('contacts.mapSoon')}</p>
-              <p className={styles.mapSubText}>{t('contacts.mapSubtext')}</p>
-            </div>
+            <iframe
+              className={styles.mapFrame}
+              src={LOCATION_EMBED_URL}
+              title={t('contacts.mapTitle')}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            <a
+              href={LOCATION_LINK}
+              className={styles.mapOpenLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('contacts.mapOpen')}
+            </a>
           </motion.div>
         </div>
       </div>
     </div>
   )
 }
-
-const OTHER_CONTACTS = [
-  {
-    icon: <Mail size={24} />,
-    titleKey: 'contacts.emailTitle' as const,
-    value: 'hello@crystal.ua',
-    href: 'mailto:hello@crystal.ua',
-    noteKey: 'contacts.emailNote' as const,
-  },
-]

@@ -16,6 +16,7 @@ export type UiTranslationSchema = {
     breadcrumbsAria: string
   }
   home: {
+    heroTitle: string
     heroDescription: string
     catalogTitle: string
     catalogSubtitle: string
@@ -175,6 +176,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     breadcrumbsAria: 'Навігаційний ланцюжок',
   },
   home: {
+    heroTitle: 'Ласкаво просимо до «{siteName}»',
     heroDescription: 'Справжній простір для поціновувачів природної краси та унікальних мінералів',
     catalogTitle: 'Каталог товарів',
     catalogSubtitle: 'Категорії для вашого натхнення',
@@ -336,6 +338,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     breadcrumbsAria: 'Breadcrumb',
   },
   home: {
+    heroTitle: 'Welcome to "{siteName}"',
     heroDescription: 'A genuine space for lovers of natural beauty and unique minerals',
     catalogTitle: 'Product catalog',
     catalogSubtitle: 'Categories for your inspiration',

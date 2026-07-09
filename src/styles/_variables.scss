@@ -2,24 +2,22 @@
 // Design System Variables
 // ============================================================
 
-// Brand palette — cool blue + warm complementary
-$color-brand-cool: #DAE3F2;
-$color-brand-warm: #F2E9DA;
-
-// Mapped tokens
-$color-accent: $color-brand-cool;
-$color-accent-warm: $color-brand-warm;
-$color-primary: #7B8FA8;
-$color-primary-light: $color-brand-cool;
-$color-primary-dark: #5E7189;
-$color-warm: #B8A690;
-$color-background: #FAFBFD;
-$color-header: #FEFEFF;
-$color-panel: #F4F6F8;
-$color-surface: #F4F6F8;
-$color-text: #202020;
-$color-text-muted: #707070;
-$color-border: #E4E9F0;
+// Themeable colors — driven by CSS custom properties (see _themes.scss)
+$color-brand-cool: var(--color-brand-cool);
+$color-brand-warm: var(--color-brand-warm);
+$color-accent: var(--color-accent);
+$color-accent-warm: var(--color-accent-warm);
+$color-primary: var(--color-primary);
+$color-primary-light: var(--color-primary-light);
+$color-primary-dark: var(--color-primary-dark);
+$color-warm: var(--color-warm);
+$color-background: var(--color-background);
+$color-header: var(--color-header);
+$color-panel: var(--color-panel);
+$color-surface: var(--color-surface);
+$color-text: var(--color-text);
+$color-text-muted: var(--color-text-muted);
+$color-border: var(--color-border);
 $color-white: #FFFFFF;
 $color-black: #000000;
 $color-error: #EF4444;
@@ -68,14 +66,16 @@ $radius-md: 12px;
 $radius-lg: 16px;
 $radius-xl: 24px;
 $radius-full: 9999px;
+$radius-button: $radius-lg;
+$radius-circle: 50%;
 
 // Shadows
 $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
 $shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.05);
 $shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.12);
-$shadow-card: 0 2px 16px rgba(123, 143, 168, 0.10);
-$shadow-card-hover: 0 8px 32px rgba(123, 143, 168, 0.18);
+$shadow-card: 0 2px 16px rgba(var(--color-primary-rgb), 0.10);
+$shadow-card-hover: 0 8px 32px rgba(var(--color-primary-rgb), 0.18);
 
 // Breakpoints
 $bp-xs: 375px;
