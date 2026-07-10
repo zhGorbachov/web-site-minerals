@@ -1,0 +1,124 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.page {
+  padding-block: $spacing-4 $spacing-24;
+  min-height: 60vh;
+
+  @include tablet-up {
+    padding-block: $spacing-8 $spacing-16;
+  }
+}
+
+.card {
+  max-width: 520px;
+  margin-inline: auto;
+  margin-top: $spacing-4;
+  padding: $spacing-6;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+
+  @include tablet-up {
+    margin-top: $spacing-6;
+    padding: $spacing-8;
+    box-shadow: $shadow-card;
+    border: none;
+  }
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  margin-bottom: $spacing-6;
+  padding-bottom: $spacing-6;
+  border-bottom: 1px solid $color-border;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-circle;
+  background: rgba(var(--color-primary-rgb), 0.12);
+  color: $color-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.02em;
+}
+
+.heroText {
+  min-width: 0;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin-bottom: $spacing-1;
+  word-break: break-word;
+
+  @include tablet-up {
+    font-size: $font-size-2xl;
+  }
+}
+
+.memberSince {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.details {
+  list-style: none;
+  margin: 0 0 $spacing-6;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.detail {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+}
+
+.detailIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  background: $color-surface;
+  color: $color-primary;
+}
+
+.detailLabel {
+  display: block;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: $spacing-1;
+}
+
+.detailValue {
+  display: block;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-3;
+}

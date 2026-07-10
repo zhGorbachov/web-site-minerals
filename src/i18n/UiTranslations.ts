@@ -39,6 +39,7 @@ export type UiTranslationSchema = {
   }
   category: {
     productCount: string
+    paginationAria: string
     aboutSection: string
     emptyTitle: string
     emptyDescription: string
@@ -156,6 +157,112 @@ export type UiTranslationSchema = {
     currency: string
     perUnit: string
   }
+  auth: {
+    tabsAria: string
+    loginTab: string
+    registerTab: string
+    loginTitle: string
+    registerTitle: string
+    loginSubtitle: string
+    registerSubtitle: string
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
+    phoneOptional: string
+    password: string
+    showPassword: string
+    hidePassword: string
+    loginSubmit: string
+    registerSubmit: string
+    continueGoogle: string
+    continueApple: string
+    orEmail: string
+    continue: string
+    cancel: string
+    noAccount: string
+    hasAccount: string
+    backHome: string
+    backToLogin: string
+    oauthProcessing: string
+    oauthErrorTitle: string
+    errorEmailTaken: string
+    errorInvalidCredentials: string
+    errorWeakPassword: string
+    errorRequired: string
+    errorInvalidEmail: string
+    errorNameRequired: string
+    errorOauthNotConfigured: string
+    errorOauthDenied: string
+    errorOauthFailed: string
+  }
+  profile: {
+    title: string
+    memberSince: string
+    role: string
+    roleCustomer: string
+    roleAdmin: string
+    openAdmin: string
+    signedInWith: string
+    providerEmail: string
+    providerGoogle: string
+    providerApple: string
+    logout: string
+  }
+  admin: {
+    title: string
+    subtitle: string
+    tabProducts: string
+    tabAddProduct: string
+    tabSubcategories: string
+    forbidden: string
+    loading: string
+    searchPlaceholder: string
+    stock: string
+    saveStock: string
+    edit: string
+    remove: string
+    removeConfirm: string
+    createProduct: string
+    updateProduct: string
+    cancelEdit: string
+    name: string
+    slug: string
+    sku: string
+    price: string
+    discountPrice: string
+    shortDescription: string
+    description: string
+    images: string
+    imagesHint: string
+    media: string
+    mediaDropTitle: string
+    mediaDropHint: string
+    addImages: string
+    addVideo: string
+    video: string
+    uploading: string
+    uploadError: string
+    removeMedia: string
+    imagesRequired: string
+    subcategory: string
+    featured: string
+    popular: string
+    isNew: string
+    createSubcategory: string
+    category: string
+    subName: string
+    subSlug: string
+    subImage: string
+    successSaved: string
+    successCreated: string
+    successDeleted: string
+    successSubCreated: string
+    errorGeneric: string
+    errorSlugTaken: string
+    errorSkuTaken: string
+    errorInOrders: string
+  }
 }
 
 export const uiTranslationsUk: UiTranslationSchema = {
@@ -185,7 +292,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     popularTitle: 'Популярні товари',
     advantagesTitle: 'Наші переваги',
     advantageNaturalTitle: 'Натуральні матеріали',
-    advantageNaturalText: 'Тільки справжні мінерали та натуральні нитки без синтетики',
+    advantageNaturalText: 'Тільки справжні мінерали та натуральні низки без синтетики',
     advantageHandmadeTitle: 'Ручна робота',
     advantageHandmadeText: 'Кожен браслет виготовляється вручну з увагою до деталей',
     advantageDeliveryTitle: 'Швидка доставка',
@@ -201,6 +308,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
   },
   category: {
     productCount: '{count} товарів',
+    paginationAria: 'Сторінки товарів',
     aboutSection: 'Про категорію',
     emptyTitle: 'Товарів не знайдено',
     emptyDescription: 'У цій підкатегорії поки немає товарів',
@@ -288,7 +396,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     attrDiameter: 'Товщина',
     attrMaterial: 'Матеріал',
     attrStones: 'Каміння',
-    attrThreadColor: 'Колір нитки',
+    attrThreadColor: 'Колір низки',
     beadSizeMm: '{value} мм',
     colors: {
       black: 'Чорний',
@@ -317,6 +425,113 @@ export const uiTranslationsUk: UiTranslationSchema = {
   price: {
     currency: 'грн',
     perUnit: 'шт.',
+  },
+  auth: {
+    tabsAria: 'Вхід або реєстрація',
+    loginTab: 'Вхід',
+    registerTab: 'Реєстрація',
+    loginTitle: 'Вхід до кабінету',
+    registerTitle: 'Створити акаунт',
+    loginSubtitle: 'Увійдіть, щоб переглядати профіль та зберігати замовлення',
+    registerSubtitle: 'Зареєструйтесь, щоб швидше оформлювати покупки',
+    firstName: "Ім'я",
+    lastName: 'Прізвище',
+    email: 'Email',
+    phone: 'Телефон',
+    phoneOptional: 'Необовʼязково',
+    password: 'Пароль',
+    showPassword: 'Показати пароль',
+    hidePassword: 'Сховати пароль',
+    loginSubmit: 'Увійти',
+    registerSubmit: 'Зареєструватися',
+    continueGoogle: 'Продовжити з Google',
+    continueApple: 'Продовжити з Apple',
+    orEmail: 'або email',
+    continue: 'Продовжити',
+    cancel: 'Скасувати',
+    noAccount: 'Ще немає акаунту?',
+    hasAccount: 'Вже є акаунт?',
+    backHome: 'На головну',
+    backToLogin: 'Повернутися до входу',
+    oauthProcessing: 'Завершуємо вхід...',
+    oauthErrorTitle: 'Не вдалося увійти',
+    errorEmailTaken: 'Користувач з таким email вже існує',
+    errorInvalidCredentials: 'Невірний email або пароль',
+    errorWeakPassword: 'Пароль має містити щонайменше 6 символів',
+    errorRequired: 'Заповніть усі обовʼязкові поля',
+    errorInvalidEmail: 'Введіть коректний email',
+    errorNameRequired: "Вкажіть ім'я та прізвище",
+    errorOauthNotConfigured:
+      'OAuth не налаштовано на сервері. Додайте GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET у server/.env',
+    errorOauthDenied: 'Вхід скасовано. Спробуйте ще раз',
+    errorOauthFailed: 'Не вдалося завершити вхід через провайдера. Спробуйте ще раз',
+  },
+  profile: {
+    title: 'Профіль',
+    memberSince: 'З нами з {date}',
+    role: 'Роль',
+    roleCustomer: 'Клієнт',
+    roleAdmin: 'Адміністратор',
+    openAdmin: 'Адмін-панель',
+    signedInWith: 'Спосіб входу',
+    providerEmail: 'Email і пароль',
+    providerGoogle: 'Google',
+    providerApple: 'Apple',
+    logout: 'Вийти',
+  },
+  admin: {
+    title: 'Адмін-панель',
+    subtitle: 'Керування товарами, залишками та підкатегоріями',
+    tabProducts: 'Товари',
+    tabAddProduct: 'Новий товар',
+    tabSubcategories: 'Підкатегорії',
+    forbidden: 'Доступ лише для адміністратора',
+    loading: 'Завантаження...',
+    searchPlaceholder: 'Пошук за назвою або SKU...',
+    stock: 'Залишок',
+    saveStock: 'Зберегти',
+    edit: 'Редагувати',
+    remove: 'Видалити',
+    removeConfirm: 'Видалити цей товар?',
+    createProduct: 'Створити товар',
+    updateProduct: 'Зберегти зміни',
+    cancelEdit: 'Скасувати',
+    name: 'Назва',
+    slug: 'Slug',
+    sku: 'SKU',
+    price: 'Ціна',
+    discountPrice: 'Ціна зі знижкою',
+    shortDescription: 'Короткий опис',
+    description: 'Опис',
+    images: 'Зображення (URL через кому)',
+    imagesHint: 'Наприклад: /media/BeadsAgate.jpg',
+    media: 'Медіа',
+    mediaDropTitle: 'Вставте, перетягніть або оберіть файли',
+    mediaDropHint: 'Можна вставити одне чи кілька зображень з буфера (Ctrl+V / ⌘V), або завантажити фото та відео',
+    addImages: 'Додати фото',
+    addVideo: 'Додати відео',
+    video: 'Відео',
+    uploading: 'Завантаження...',
+    uploadError: 'Не вдалося завантажити файл',
+    removeMedia: 'Видалити',
+    imagesRequired: 'Додайте хоча б одне зображення',
+    subcategory: 'Підкатегорія',
+    featured: 'Рекомендований',
+    popular: 'Популярний',
+    isNew: 'Новинка',
+    createSubcategory: 'Додати підкатегорію',
+    category: 'Категорія',
+    subName: 'Назва підкатегорії',
+    subSlug: 'Slug підкатегорії',
+    subImage: 'Зображення (URL)',
+    successSaved: 'Збережено',
+    successCreated: 'Товар створено',
+    successDeleted: 'Товар видалено',
+    successSubCreated: 'Підкатегорію створено',
+    errorGeneric: 'Щось пішло не так',
+    errorSlugTaken: 'Такий slug уже зайнятий',
+    errorSkuTaken: 'Такий SKU уже зайнятий',
+    errorInOrders: 'Неможливо видалити: товар є в замовленнях',
   },
 }
 
@@ -363,6 +578,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
   },
   category: {
     productCount: '{count} products',
+    paginationAria: 'Product pages',
     aboutSection: 'About category',
     emptyTitle: 'No products found',
     emptyDescription: 'There are no products in this subcategory yet',
@@ -479,5 +695,112 @@ export const uiTranslationsEn: UiTranslationSchema = {
   price: {
     currency: 'UAH',
     perUnit: 'pc.',
+  },
+  auth: {
+    tabsAria: 'Login or registration',
+    loginTab: 'Login',
+    registerTab: 'Register',
+    loginTitle: 'Sign in',
+    registerTitle: 'Create account',
+    loginSubtitle: 'Sign in to view your profile and keep your orders',
+    registerSubtitle: 'Register to check out faster next time',
+    firstName: 'First name',
+    lastName: 'Last name',
+    email: 'Email',
+    phone: 'Phone',
+    phoneOptional: 'Optional',
+    password: 'Password',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    loginSubmit: 'Sign in',
+    registerSubmit: 'Create account',
+    continueGoogle: 'Continue with Google',
+    continueApple: 'Continue with Apple',
+    orEmail: 'or email',
+    continue: 'Continue',
+    cancel: 'Cancel',
+    noAccount: 'No account yet?',
+    hasAccount: 'Already have an account?',
+    backHome: 'Back to home',
+    backToLogin: 'Back to login',
+    oauthProcessing: 'Finishing sign-in...',
+    oauthErrorTitle: 'Sign-in failed',
+    errorEmailTaken: 'An account with this email already exists',
+    errorInvalidCredentials: 'Invalid email or password',
+    errorWeakPassword: 'Password must be at least 6 characters',
+    errorRequired: 'Please fill in all required fields',
+    errorInvalidEmail: 'Enter a valid email address',
+    errorNameRequired: 'Enter your first and last name',
+    errorOauthNotConfigured:
+      'OAuth is not configured on the server. Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET to server/.env',
+    errorOauthDenied: 'Sign-in was cancelled. Please try again',
+    errorOauthFailed: 'Could not complete provider sign-in. Please try again',
+  },
+  profile: {
+    title: 'Profile',
+    memberSince: 'Member since {date}',
+    role: 'Role',
+    roleCustomer: 'Customer',
+    roleAdmin: 'Administrator',
+    openAdmin: 'Admin panel',
+    signedInWith: 'Signed in with',
+    providerEmail: 'Email & password',
+    providerGoogle: 'Google',
+    providerApple: 'Apple',
+    logout: 'Log out',
+  },
+  admin: {
+    title: 'Admin panel',
+    subtitle: 'Manage products, stock and subcategories',
+    tabProducts: 'Products',
+    tabAddProduct: 'New product',
+    tabSubcategories: 'Subcategories',
+    forbidden: 'Admin access only',
+    loading: 'Loading...',
+    searchPlaceholder: 'Search by name or SKU...',
+    stock: 'Stock',
+    saveStock: 'Save',
+    edit: 'Edit',
+    remove: 'Delete',
+    removeConfirm: 'Delete this product?',
+    createProduct: 'Create product',
+    updateProduct: 'Save changes',
+    cancelEdit: 'Cancel',
+    name: 'Name',
+    slug: 'Slug',
+    sku: 'SKU',
+    price: 'Price',
+    discountPrice: 'Discount price',
+    shortDescription: 'Short description',
+    description: 'Description',
+    images: 'Images (comma-separated URLs)',
+    imagesHint: 'Example: /media/BeadsAgate.jpg',
+    media: 'Media',
+    mediaDropTitle: 'Paste, drop or choose files',
+    mediaDropHint: 'Paste one or more images from clipboard (Ctrl+V / ⌘V), or upload photos and a video',
+    addImages: 'Add photos',
+    addVideo: 'Add video',
+    video: 'Video',
+    uploading: 'Uploading...',
+    uploadError: 'Could not upload file',
+    removeMedia: 'Remove',
+    imagesRequired: 'Add at least one image',
+    subcategory: 'Subcategory',
+    featured: 'Featured',
+    popular: 'Popular',
+    isNew: 'New',
+    createSubcategory: 'Add subcategory',
+    category: 'Category',
+    subName: 'Subcategory name',
+    subSlug: 'Subcategory slug',
+    subImage: 'Image URL',
+    successSaved: 'Saved',
+    successCreated: 'Product created',
+    successDeleted: 'Product deleted',
+    successSubCreated: 'Subcategory created',
+    errorGeneric: 'Something went wrong',
+    errorSlugTaken: 'This slug is already taken',
+    errorSkuTaken: 'This SKU is already taken',
+    errorInOrders: 'Cannot delete: product is used in orders',
   },
 }

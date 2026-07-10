@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, Search, User, Heart, ShoppingCart, X, Building2, Truck, RefreshCw, Percent, Star, HelpCircle, Phone, Clock, type LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useCartStore, useUIStore, useWishlistStore } from '@/store'
+import { useCartStore, useUIStore, useWishlistStore, useAuthStore } from '@/store'
 import { CartBadge } from '@/components/ui'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ContactDetails } from '@/components/ContactDetails'
@@ -119,6 +119,7 @@ export function Header() {
   const { isBurgerOpen, toggleBurger, closeBurger, isSearchOpen, toggleSearch, closeSearch, openCatalog } = useUIStore()
   const totalItems = useCartStore((s) => s.totalItems())
   const wishlistCount = useWishlistStore((s) => s.productIds.length)
+  const user = useAuthStore((s) => s.user)
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -361,9 +362,25 @@ export function Header() {
                 <CartBadge count={wishlistCount} />
               </Link>
 
-              <button className={`${styles.iconBtn} ${styles.profileBtn}`} aria-label={t('header.profile')} disabled>
-                <User size={22} />
-              </button>
+              <Link
+                to={user ? '/profile' : '/login'}
+                className={[
+                  styles.iconBtn,
+                  styles.profileBtn,
+                  user ? styles.profileBtnActive : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                aria-label={user ? t('header.profile') : t('header.clientLogin')}
+              >
+                {user ? (
+                  <span className={styles.profileAvatar} aria-hidden="true">
+                    {`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()}
+                  </span>
+                ) : (
+                  <User size={22} />
+                )}
+              </Link>
 
               <Link to="/cart" className={styles.cartBtn} aria-label={t('header.cart')}>
                 <ShoppingCart size={22} />
@@ -433,10 +450,20 @@ export function Header() {
                   )
                 })}
                 <li className={styles.mobileMenuLoginWrap}>
-                  <button type="button" className={styles.mobileMenuLogin} disabled>
-                    <User size={MOBILE_ICON_SIZE} className={styles.mobileMenuLinkIcon} aria-hidden="true" />
-                    {t('header.clientLogin')}
-                  </button>
+                  <Link
+                    to={user ? '/profile' : '/login'}
+                    className={styles.mobileMenuLogin}
+                    onClick={closeBurger}
+                  >
+                    {user ? (
+                      <span className={styles.mobileProfileAvatar} aria-hidden="true">
+                        {`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()}
+                      </span>
+                    ) : (
+                      <User size={MOBILE_ICON_SIZE} className={styles.mobileMenuLinkIcon} aria-hidden="true" />
+                    )}
+                    {user ? t('header.profile') : t('header.clientLogin')}
+                  </Link>
                 </li>
                 <li className={styles.mobileMenuContactBlock}>
                   <Link

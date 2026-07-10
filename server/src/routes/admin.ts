@@ -1,0 +1,263 @@
+import { Router } from 'express'
+import { z } from 'zod'
+import { prisma } from '../lib/prisma.js'
+import { requireAdmin } from '../lib/auth.js'
+import { serializeProduct, serializeSubCategory } from '../lib/serialize.js'
+
+export const adminRouter = Router()
+
+adminRouter.use(requireAdmin)
+
+const productInclude = {
+  subCategory: { include: { category: true } },
+} as const
+
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9а-яіїєґ]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+}
+
+const productBodySchema = z.object({
+  name: z.string().trim().min(1),
+  slug: z.string().trim().min(1).optional(),
+  sku: z.string().trim().min(1),
+  shortDescription: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  price: z.number().positive(),
+  discountPrice: z.number().positive().nullable().optional(),
+  stock: z.number().int().min(0),
+  images: z.array(z.string().min(1)).min(1),
+  video: z.string().trim().min(1).nullable().optional(),
+  attributes: z.record(z.unknown()).optional(),
+  featured: z.boolean().optional(),
+  popular: z.boolean().optional(),
+  isNew: z.boolean().optional(),
+  subCategoryId: z.string().min(1),
+})
+
+const stockSchema = z.object({
+  stock: z.number().int().min(0),
+})
+
+const subcategoryBodySchema = z.object({
+  name: z.string().trim().min(1),
+  slug: z.string().trim().min(1).optional(),
+  categoryId: z.string().min(1),
+  image: z.string().trim().min(1).optional(),
+})
+
+adminRouter.get('/products', async (_req, res) => {
+  const products = await prisma.product.findMany({
+    include: productInclude,
+    orderBy: { updatedAt: 'desc' },
+  })
+  res.json(products.map(serializeProduct))
+})
+
+adminRouter.post('/products', async (req, res) => {
+  const parsed = productBodySchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() })
+    return
+  }
+
+  const sub = await prisma.subCategory.findUnique({ where: { id: parsed.data.subCategoryId } })
+  if (!sub) {
+    res.status(400).json({ error: 'Invalid subcategory' })
+    return
+  }
+
+  const slug = parsed.data.slug?.trim() || slugify(parsed.data.name)
+  const existingSlug = await prisma.product.findUnique({ where: { slug } })
+  if (existingSlug) {
+    res.status(409).json({ error: 'slug_taken' })
+    return
+  }
+
+  const existingSku = await prisma.product.findUnique({ where: { sku: parsed.data.sku } })
+  if (existingSku) {
+    res.status(409).json({ error: 'sku_taken' })
+    return
+  }
+
+  const product = await prisma.product.create({
+    data: {
+      id: `prod-${Date.now()}`,
+      name: parsed.data.name,
+      slug,
+      sku: parsed.data.sku,
+      shortDescription: parsed.data.shortDescription,
+      description: parsed.data.description,
+      price: parsed.data.price,
+      discountPrice: parsed.data.discountPrice ?? null,
+      stock: parsed.data.stock,
+      images: parsed.data.images,
+      video: parsed.data.video ?? null,
+      attributes: parsed.data.attributes ?? {},
+      featured: parsed.data.featured ?? false,
+      popular: parsed.data.popular ?? false,
+      isNew: parsed.data.isNew ?? true,
+      subCategoryId: sub.id,
+      subCategorySlug: sub.slug,
+      categorySlug: sub.categorySlug,
+    },
+    include: productInclude,
+  })
+
+  res.status(201).json(serializeProduct(product))
+})
+
+adminRouter.patch('/products/:id', async (req, res) => {
+  const parsed = productBodySchema.partial().safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() })
+    return
+  }
+
+  const existing = await prisma.product.findUnique({ where: { id: req.params.id } })
+  if (!existing) {
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  let subCategoryId = existing.subCategoryId
+  let subCategorySlug = existing.subCategorySlug
+  let categorySlug = existing.categorySlug
+
+  if (parsed.data.subCategoryId) {
+    const sub = await prisma.subCategory.findUnique({ where: { id: parsed.data.subCategoryId } })
+    if (!sub) {
+      res.status(400).json({ error: 'Invalid subcategory' })
+      return
+    }
+    subCategoryId = sub.id
+    subCategorySlug = sub.slug
+    categorySlug = sub.categorySlug
+  }
+
+  if (parsed.data.slug && parsed.data.slug !== existing.slug) {
+    const clash = await prisma.product.findUnique({ where: { slug: parsed.data.slug } })
+    if (clash) {
+      res.status(409).json({ error: 'slug_taken' })
+      return
+    }
+  }
+
+  if (parsed.data.sku && parsed.data.sku !== existing.sku) {
+    const clash = await prisma.product.findUnique({ where: { sku: parsed.data.sku } })
+    if (clash) {
+      res.status(409).json({ error: 'sku_taken' })
+      return
+    }
+  }
+
+  const product = await prisma.product.update({
+    where: { id: existing.id },
+    data: {
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      sku: parsed.data.sku,
+      shortDescription: parsed.data.shortDescription,
+      description: parsed.data.description,
+      price: parsed.data.price,
+      discountPrice:
+        parsed.data.discountPrice === undefined ? undefined : parsed.data.discountPrice,
+      stock: parsed.data.stock,
+      images: parsed.data.images,
+      video: parsed.data.video === undefined ? undefined : parsed.data.video,
+      attributes: parsed.data.attributes,
+      featured: parsed.data.featured,
+      popular: parsed.data.popular,
+      isNew: parsed.data.isNew,
+      subCategoryId,
+      subCategorySlug,
+      categorySlug,
+    },
+    include: productInclude,
+  })
+
+  res.json(serializeProduct(product))
+})
+
+adminRouter.patch('/products/:id/stock', async (req, res) => {
+  const parsed = stockSchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload' })
+    return
+  }
+
+  try {
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { stock: parsed.data.stock },
+      include: productInclude,
+    })
+    res.json(serializeProduct(product))
+  } catch {
+    res.status(404).json({ error: 'Not found' })
+  }
+})
+
+adminRouter.delete('/products/:id', async (req, res) => {
+  const existing = await prisma.product.findUnique({ where: { id: req.params.id } })
+  if (!existing) {
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  const orderCount = await prisma.orderItem.count({ where: { productId: existing.id } })
+  if (orderCount > 0) {
+    res.status(409).json({ error: 'product_in_orders' })
+    return
+  }
+
+  await prisma.$transaction([
+    prisma.cartItem.deleteMany({ where: { productId: existing.id } }),
+    prisma.wishlistItem.deleteMany({ where: { productId: existing.id } }),
+    prisma.product.delete({ where: { id: existing.id } }),
+  ])
+
+  res.status(204).send()
+})
+
+adminRouter.post('/subcategories', async (req, res) => {
+  const parsed = subcategoryBodySchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() })
+    return
+  }
+
+  const category = await prisma.category.findUnique({ where: { id: parsed.data.categoryId } })
+  if (!category) {
+    res.status(400).json({ error: 'Invalid category' })
+    return
+  }
+
+  const slug = parsed.data.slug?.trim() || slugify(parsed.data.name)
+  const clash = await prisma.subCategory.findFirst({
+    where: { categorySlug: category.slug, slug },
+  })
+  if (clash) {
+    res.status(409).json({ error: 'slug_taken' })
+    return
+  }
+
+  const sub = await prisma.subCategory.create({
+    data: {
+      id: `sub-${Date.now()}`,
+      name: parsed.data.name,
+      slug,
+      categoryId: category.id,
+      categorySlug: category.slug,
+      image: parsed.data.image || category.image,
+    },
+  })
+
+  res.status(201).json(serializeSubCategory(sub))
+})

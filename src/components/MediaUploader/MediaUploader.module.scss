@@ -1,0 +1,165 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-5 $spacing-4;
+  border: 1.5px dashed $color-border;
+  border-radius: $radius-md;
+  background: $color-surface;
+  text-align: center;
+  color: $color-text-muted;
+  outline: none;
+  transition: border-color $transition-base, background $transition-base, box-shadow $transition-base;
+
+  &:focus,
+  &.dropzoneActive {
+    border-color: $color-primary;
+    background: rgba(var(--color-primary-rgb), 0.04);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  }
+}
+
+.dropTitle {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.dropHint {
+  margin: 0;
+  font-size: $font-size-xs;
+  line-height: $line-height-normal;
+  max-width: 28rem;
+}
+
+.dropActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $spacing-2;
+  margin-top: $spacing-2;
+  width: 100%;
+}
+
+.pickBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  flex: 1 1 140px;
+  min-height: 40px;
+  padding: $spacing-2 $spacing-3;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-button;
+  background: $color-white;
+  color: $color-text;
+  font: inherit;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+}
+
+.status {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.error {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $color-error;
+}
+
+.previewBlock {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.previewLabel {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.previewGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-2;
+
+  @include tablet-up {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.previewItem,
+.videoPreview {
+  position: relative;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  background: $color-surface;
+  border: 1px solid $color-border;
+}
+
+.previewItem {
+  aspect-ratio: 1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.videoPreview {
+  video {
+    width: 100%;
+    max-height: 240px;
+    display: block;
+    background: #111;
+  }
+}
+
+.removeBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: $radius-circle;
+  background: rgba($color-black, 0.65);
+  color: $color-white;
+  cursor: pointer;
+}

@@ -1,5 +1,7 @@
 export type UserRole = 'customer' | 'admin' | 'manager'
 
+export type AuthProvider = 'email' | 'google' | 'apple'
+
 export interface User {
   id: string
   firstName: string
@@ -7,5 +9,6 @@ export interface User {
   email: string
   phone?: string
   role: UserRole
+  provider?: AuthProvider
   createdAt: string
 }

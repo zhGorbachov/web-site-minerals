@@ -11,6 +11,12 @@ const CartPage       = lazy(() => import('@/pages/CartPage').then((m) => ({ defa
 const WishlistPage   = lazy(() => import('@/pages/WishlistPage').then((m) => ({ default: m.WishlistPage })))
 const AboutPage      = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })))
 const ContactsPage   = lazy(() => import('@/pages/ContactsPage').then((m) => ({ default: m.ContactsPage })))
+const AuthPage       = lazy(() => import('@/pages/AuthPage').then((m) => ({ default: m.AuthPage })))
+const ProfilePage    = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const AdminPage      = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })))
+const AuthCallbackPage = lazy(() =>
+  import('@/pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })),
+)
 const NotFoundPage   = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
 
 const PageFallback = () => (
@@ -102,6 +108,38 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageFallback />}>
             <ContactsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'login',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <AuthPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'profile',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <ProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'admin',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <AdminPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'auth/callback',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <AuthCallbackPage />
           </Suspense>
         ),
       },

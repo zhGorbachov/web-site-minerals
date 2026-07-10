@@ -83,7 +83,7 @@ export const subcategories: SubCategory[] = [
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
-  // Нитки
+  // Низки
   {
     id: 'sub-9',
     categoryId: 'cat-2',

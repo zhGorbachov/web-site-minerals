@@ -1,9 +1,7 @@
 import type { Category } from '@/types'
-import { categories } from '@/mock'
+import { CatalogApi } from '@/api'
 import { localizeCategories, localizeCategory } from '@/i18n/localizeCatalog'
 import { useLanguageStore } from '@/store/languageStore'
-
-const delay = (ms = 200) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 function getLanguage() {
   return useLanguageStore.getState().language
@@ -11,13 +9,16 @@ function getLanguage() {
 
 export const CategoryService = {
   async getAll(): Promise<Category[]> {
-    await delay()
+    const categories = await CatalogApi.getCategories()
     return localizeCategories(categories, getLanguage())
   },
 
   async getBySlug(slug: string): Promise<Category | undefined> {
-    await delay()
-    const category = categories.find((c) => c.slug === slug)
-    return category ? localizeCategory(category, getLanguage()) : undefined
+    try {
+      const category = await CatalogApi.getCategoryBySlug(slug)
+      return localizeCategory(category, getLanguage())
+    } catch {
+      return undefined
+    }
   },
 }

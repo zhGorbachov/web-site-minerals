@@ -44,28 +44,28 @@
 .filled {
   border: none;
   background: $color-primary;
-  color: $color-white;
+  color: $color-on-primary;
 
   svg {
-    color: $color-white;
+    color: $color-on-primary;
   }
 
   &:hover {
     background: $color-primary-light;
-    color: $color-primary-dark;
+    color: $color-on-primary;
     box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.35);
 
     svg {
-      color: $color-primary-dark;
+      color: $color-on-primary;
     }
   }
 
   &:active {
     background: $color-primary-dark;
-    color: $color-white;
+    color: $color-on-primary;
 
     svg {
-      color: $color-white;
+      color: $color-on-primary;
     }
   }
 }

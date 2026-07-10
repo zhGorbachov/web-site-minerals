@@ -13,10 +13,10 @@ export const categories: Category[] = [
   },
   {
     id: 'cat-2',
-    name: 'Нитки',
+    name: 'Низки',
     slug: 'nytky',
     image: mockImages.threads,
-    description: 'Нитки для плетіння браслетів: вощені, еластичні, бавовняні та шовкові',
+    description: 'Низки для плетіння браслетів: вощені, еластичні, бавовняні та шовкові',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },

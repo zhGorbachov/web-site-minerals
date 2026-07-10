@@ -46,6 +46,7 @@ export interface Product {
   discountPrice?: number
   stock: number
   images: string[]
+  video?: string
   attributes: ProductAttributes
   featured: boolean
   popular: boolean

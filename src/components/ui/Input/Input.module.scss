@@ -59,7 +59,6 @@
   align-items: center;
   justify-content: center;
   color: $color-text-muted;
-  pointer-events: none;
 
   svg {
     width: 18px;
@@ -67,8 +66,19 @@
   }
 }
 
-.leftIcon  { left: $spacing-3; }
-.rightIcon { right: $spacing-3; }
+.leftIcon {
+  left: $spacing-3;
+  pointer-events: none;
+}
+
+.rightIcon {
+  right: $spacing-3;
+  pointer-events: none;
+
+  &:has(button) {
+    pointer-events: auto;
+  }
+}
 
 .error {
   font-size: $font-size-xs;

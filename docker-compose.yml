@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: minerals-postgres
+    restart: unless-stopped
+    ports:
+      - '55432:5432'
+    environment:
+      POSTGRES_USER: minerals
+      POSTGRES_PASSWORD: minerals
+      POSTGRES_DB: minerals
+    volumes:
+      - minerals_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U minerals -d minerals']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  minerals_pg_data:

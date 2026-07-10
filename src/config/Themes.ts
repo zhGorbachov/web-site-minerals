@@ -9,10 +9,10 @@ export type ThemeOption = {
 }
 
 export const THEME_OPTIONS: ThemeOption[] = [
-  { id: 'sage', labelKey: 'footer.themeSage', swatch: '#4A6B55' },
-  { id: 'purple', labelKey: 'footer.themePurple', swatch: '#6B5B8A' },
-  { id: 'agate', labelKey: 'footer.themeAgate', swatch: '#5A7A9A' },
-  { id: 'brown', labelKey: 'footer.themeBrown', swatch: '#7A6352' },
+  { id: 'sage', labelKey: 'footer.themeSage', swatch: '#73E3F5' },
+  { id: 'purple', labelKey: 'footer.themePurple', swatch: '#8EE8F4' },
+  { id: 'agate', labelKey: 'footer.themeAgate', swatch: '#20CFF3' },
+  { id: 'brown', labelKey: 'footer.themeBrown', swatch: '#57DCF3' },
 ]
 
 export const DEFAULT_THEME: ThemeId = 'sage'

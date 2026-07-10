@@ -1,9 +1,7 @@
 import type { SubCategory } from '@/types'
-import { subcategories } from '@/mock'
+import { CatalogApi } from '@/api'
 import { localizeSubcategories, localizeSubcategory } from '@/i18n/localizeCatalog'
 import { useLanguageStore } from '@/store/languageStore'
-
-const delay = (ms = 200) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 function getLanguage() {
   return useLanguageStore.getState().language
@@ -11,21 +9,21 @@ function getLanguage() {
 
 export const SubCategoryService = {
   async getAll(): Promise<SubCategory[]> {
-    await delay()
+    const subcategories = await CatalogApi.getSubcategories()
     return localizeSubcategories(subcategories, getLanguage())
   },
 
   async getByCategory(categorySlug: string): Promise<SubCategory[]> {
-    await delay()
-    return localizeSubcategories(
-      subcategories.filter((s) => s.categorySlug === categorySlug),
-      getLanguage(),
-    )
+    const subcategories = await CatalogApi.getSubcategories(categorySlug)
+    return localizeSubcategories(subcategories, getLanguage())
   },
 
   async getBySlug(slug: string): Promise<SubCategory | undefined> {
-    await delay()
-    const subcategory = subcategories.find((s) => s.slug === slug)
-    return subcategory ? localizeSubcategory(subcategory, getLanguage()) : undefined
+    try {
+      const subcategory = await CatalogApi.getSubcategoryBySlug(slug)
+      return localizeSubcategory(subcategory, getLanguage())
+    } catch {
+      return undefined
+    }
   },
 }

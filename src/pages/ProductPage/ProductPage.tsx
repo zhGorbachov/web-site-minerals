@@ -125,6 +125,15 @@ export function ProductPage() {
         >
           <div className={styles.galleryCol}>
             <ProductGallery images={product.images} productName={product.name} />
+            {product.video && (
+              <video
+                className={styles.productVideo}
+                src={product.video}
+                controls
+                playsInline
+                preload="metadata"
+              />
+            )}
           </div>
 
           <div className={styles.infoCol}>

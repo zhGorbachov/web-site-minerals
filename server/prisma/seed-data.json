@@ -1,0 +1,2007 @@
+{
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Мінерали",
+      "slug": "mineraly",
+      "image": "/media/MineralsCategory.jpg",
+      "description": "Натуральні мінерали та кристали для медитації, декору та створення прикрас",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat-2",
+      "name": "Низки",
+      "slug": "nytky",
+      "image": "/media/Threads.jpg",
+      "description": "Низки для плетіння браслетів: вощені, еластичні, бавовняні та шовкові",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat-3",
+      "name": "Браслети",
+      "slug": "brаslety",
+      "image": "/media/Bracelets.jpg",
+      "description": "Браслети ручної роботи з натуральних мінералів для чоловіків, жінок та дітей",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "cat-4",
+      "name": "Підвіски",
+      "slug": "pidvisky",
+      "image": "/media/Moonstone.jpg",
+      "description": "Підвіски та кулони з натуральних мінералів ручної роботи",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "subcategories": [
+    {
+      "id": "sub-1",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Агат",
+      "slug": "agat",
+      "image": "/media/BeadsAgate.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-2",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Аметист",
+      "slug": "ametyst",
+      "image": "/media/Amethyst.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-3",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Кварц",
+      "slug": "kvarts",
+      "image": "/media/QuartzCrystal.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-4",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Обсидіан",
+      "slug": "obsydian",
+      "image": "/media/ObsidianRock.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-5",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Лабрадорит",
+      "slug": "labradoryt",
+      "image": "/media/Labradorite.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-6",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Місячний камінь",
+      "slug": "misyachnyy-kamin",
+      "image": "/media/Moonstone.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-7",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Тигрове око",
+      "slug": "tyhrove-oko",
+      "image": "/media/TigerEye.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-8",
+      "categoryId": "cat-1",
+      "categorySlug": "mineraly",
+      "name": "Яшма",
+      "slug": "yashma",
+      "image": "/media/Jasper.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-9",
+      "categoryId": "cat-2",
+      "categorySlug": "nytky",
+      "name": "Вощені",
+      "slug": "voshcheni",
+      "image": "/media/WaxThread.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-10",
+      "categoryId": "cat-2",
+      "categorySlug": "nytky",
+      "name": "Еластичні",
+      "slug": "elastychni",
+      "image": "/media/ElasticThread.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-11",
+      "categoryId": "cat-2",
+      "categorySlug": "nytky",
+      "name": "Бавовняні",
+      "slug": "bavovnyani",
+      "image": "/media/CottonThread.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-12",
+      "categoryId": "cat-2",
+      "categorySlug": "nytky",
+      "name": "Шовкові",
+      "slug": "shovkovi",
+      "image": "/media/SilkThread.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-13",
+      "categoryId": "cat-3",
+      "categorySlug": "brаslety",
+      "name": "Чоловічі",
+      "slug": "cholovichi",
+      "image": "/media/MenBracelet.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-14",
+      "categoryId": "cat-3",
+      "categorySlug": "brаslety",
+      "name": "Жіночі",
+      "slug": "zhinochi",
+      "image": "/media/WomenBracelet.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-15",
+      "categoryId": "cat-3",
+      "categorySlug": "brаslety",
+      "name": "Дитячі",
+      "slug": "dytyachi",
+      "image": "/media/KidsBracelet.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-16",
+      "categoryId": "cat-3",
+      "categorySlug": "brаslety",
+      "name": "Ручна робота",
+      "slug": "ruchna-robota",
+      "image": "/media/HandmadeBracelet.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-17",
+      "categoryId": "cat-3",
+      "categorySlug": "brаslety",
+      "name": "Лімітована колекція",
+      "slug": "limitovana-kolektsiya",
+      "image": "/media/LimitedBracelet.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-18",
+      "categoryId": "cat-4",
+      "categorySlug": "pidvisky",
+      "name": "Камінні підвіски",
+      "slug": "kaminni-pidvisky",
+      "image": "/media/Labradorite.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-19",
+      "categoryId": "cat-4",
+      "categorySlug": "pidvisky",
+      "name": "Кулони",
+      "slug": "kulony",
+      "image": "/media/Moonstone.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-20",
+      "categoryId": "cat-4",
+      "categorySlug": "pidvisky",
+      "name": "Серця",
+      "slug": "sertsya",
+      "image": "/media/PinkQuartz.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "sub-21",
+      "categoryId": "cat-4",
+      "categorySlug": "pidvisky",
+      "name": "Ручна робота",
+      "slug": "ruchna-robota",
+      "image": "/media/HandmadeBracelet.jpg",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Агат чорний (кабошон)",
+      "slug": "agat-chornyy-kaboshon",
+      "sku": "MIN-AGT-001",
+      "shortDescription": "Натуральний чорний агат, кабошон 20×15 мм",
+      "description": "Чорний агат — потужний захисний камінь, що відганяє негативну енергію. Ідеально підходить для виготовлення підвісок та перснів. Кожен камінь унікальний за малюнком.",
+      "price": 75,
+      "stock": 24,
+      "images": [
+        "/media/BeadsAgate.jpg"
+      ],
+      "attributes": {
+        "weight": "4 г",
+        "size": "20×15 мм",
+        "color": "Чорний",
+        "origin": "Бразилія",
+        "hardness": "6.5–7",
+        "shape": "Кабошон"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-03-01T00:00:00Z",
+      "updatedAt": "2024-03-01T00:00:00Z"
+    },
+    {
+      "id": "prod-2",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Агат блакитний (намистина)",
+      "slug": "agat-blakytnyy-namistyna",
+      "sku": "MIN-AGT-002",
+      "shortDescription": "Намистина з блакитного агату 10 мм",
+      "description": "Блакитний агат символізує спокій та рівновагу. Гладка намистина 10 мм ідеально підходить для браслетів та намист.",
+      "price": 39,
+      "stock": 50,
+      "images": [
+        "/media/BlueAgate.jpg"
+      ],
+      "attributes": {
+        "weight": "1.5 г",
+        "size": "10 мм",
+        "color": "Блакитний",
+        "origin": "Індія",
+        "hardness": "6.5–7",
+        "shape": "Куля",
+        "beadSizes": [
+          "6",
+          "8",
+          "10"
+        ],
+        "strandLengths": [
+          {
+            "label": "Низка 39 см",
+            "value": "39 см"
+          },
+          {
+            "label": "Пів низки 19.5 см",
+            "value": "19.5 см"
+          }
+        ]
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2024-05-10T00:00:00Z",
+      "updatedAt": "2024-05-10T00:00:00Z"
+    },
+    {
+      "id": "prod-3",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист фіолетовий (кристал)",
+      "slug": "ametyst-fioletovyy-krystal",
+      "sku": "MIN-AMT-001",
+      "shortDescription": "Натуральний кристал аметисту 3–5 см",
+      "description": "Аметист — камінь мудрості та духовного розвитку. Природний кристал з яскравим фіолетовим забарвленням.",
+      "price": 195,
+      "discountPrice": 155,
+      "stock": 12,
+      "images": [
+        "/media/QuartzCrystal.jpg",
+        "/media/Amethyst.jpg"
+      ],
+      "attributes": {
+        "weight": "25–40 г",
+        "size": "3–5 см",
+        "color": "Фіолетовий",
+        "origin": "Уругвай",
+        "hardness": "7",
+        "shape": "Кристал"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-02-15T00:00:00Z",
+      "updatedAt": "2024-02-15T00:00:00Z"
+    },
+    {
+      "id": "prod-4",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист (намистина 8 мм)",
+      "slug": "ametyst-namistyna-8mm",
+      "sku": "MIN-AMT-002",
+      "shortDescription": "Намистина з аметисту 8 мм, ограновування — куля",
+      "description": "Кругла намистина з натурального аметисту, підходить для плетіння браслетів.",
+      "price": 55,
+      "stock": 80,
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
+      "attributes": {
+        "weight": "0.8 г",
+        "size": "8 мм",
+        "color": "Фіолетовий",
+        "origin": "Бразилія",
+        "hardness": "7",
+        "shape": "Куля"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-06-01T00:00:00Z",
+      "updatedAt": "2024-06-01T00:00:00Z"
+    },
+    {
+      "id": "prod-5",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Рожевий кварц (серце)",
+      "slug": "rozhevyy-kvarts-sertse",
+      "sku": "MIN-QTZ-001",
+      "shortDescription": "Рожевий кварц у формі серця, 4 см",
+      "description": "Рожевий кварц — камінь любові та ніжності. Витончена форма серця 4 см стане прекрасним подарунком.",
+      "price": 120,
+      "stock": 15,
+      "images": [
+        "/media/PinkQuartz.jpg"
+      ],
+      "attributes": {
+        "weight": "60 г",
+        "size": "4 см",
+        "color": "Рожевий",
+        "origin": "Мадагаскар",
+        "hardness": "7",
+        "shape": "Серце"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-01-20T00:00:00Z",
+      "updatedAt": "2024-01-20T00:00:00Z"
+    },
+    {
+      "id": "prod-6",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Прозорий кварц (куля 4 см)",
+      "slug": "prozoryy-kvarts-kulya-4sm",
+      "sku": "MIN-QTZ-002",
+      "shortDescription": "Куля з прозорого кварцу діаметром 4 см",
+      "description": "Кришталева куля з натурального прозорого кварцу. Підходить для медитації та декору.",
+      "price": 350,
+      "stock": 5,
+      "images": [
+        "/media/QuartzCrystal.jpg"
+      ],
+      "attributes": {
+        "weight": "150 г",
+        "size": "4 см",
+        "color": "Прозорий",
+        "origin": "Бразилія",
+        "hardness": "7",
+        "shape": "Куля"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-06-15T00:00:00Z",
+      "updatedAt": "2024-06-15T00:00:00Z"
+    },
+    {
+      "id": "prod-7",
+      "subCategoryId": "sub-4",
+      "subCategorySlug": "obsydian",
+      "categorySlug": "mineraly",
+      "name": "Обсидіан чорний (намистина 10 мм)",
+      "slug": "obsydian-chornyy-namistyna-10mm",
+      "sku": "MIN-OBS-001",
+      "shortDescription": "Куляста намистина з чорного обсидіану 10 мм",
+      "description": "Чорний обсидіан — потужний захисний камінь. Гладка куляста намистина для браслетів.",
+      "price": 45,
+      "stock": 100,
+      "images": [
+        "/media/Obsidian.jpg"
+      ],
+      "attributes": {
+        "weight": "2 г",
+        "size": "10 мм",
+        "color": "Чорний",
+        "origin": "Мексика",
+        "hardness": "5–5.5",
+        "shape": "Куля"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-03-05T00:00:00Z",
+      "updatedAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": "prod-8",
+      "subCategoryId": "sub-7",
+      "subCategorySlug": "tyhrove-oko",
+      "categorySlug": "mineraly",
+      "name": "Тигрове око (намистина 8 мм)",
+      "slug": "tyhrove-oko-namistyna-8mm",
+      "sku": "MIN-TGO-001",
+      "shortDescription": "Намистина з тигрового ока 8 мм",
+      "description": "Тигрове oko — камінь впевненості та успіху. Золотисто-коричнева намистина з шовковистим блиском.",
+      "price": 60,
+      "stock": 60,
+      "images": [
+        "/media/TigerEye.jpg"
+      ],
+      "attributes": {
+        "weight": "1.2 г",
+        "size": "8 мм",
+        "color": "Золотисто-коричневий",
+        "origin": "ПАР",
+        "hardness": "6.5–7",
+        "shape": "Куля"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-02-01T00:00:00Z",
+      "updatedAt": "2024-02-01T00:00:00Z"
+    },
+    {
+      "id": "prod-9",
+      "subCategoryId": "sub-8",
+      "subCategorySlug": "yashma",
+      "categorySlug": "mineraly",
+      "name": "Яшма червона (кабошон)",
+      "slug": "yashma-chervona-kaboshon",
+      "sku": "MIN-YSH-001",
+      "shortDescription": "Червона яшма, кабошон овал 18×13 мм",
+      "description": "Червона яшма символізує силу та стабільність. Ідеальна для виготовлення підвісок.",
+      "price": 50,
+      "stock": 30,
+      "images": [
+        "/media/Jasper.jpg"
+      ],
+      "attributes": {
+        "weight": "3 г",
+        "size": "18×13 мм",
+        "color": "Червоний",
+        "origin": "Росія",
+        "hardness": "6.5–7",
+        "shape": "Кабошон-овал"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-07-01T00:00:00Z",
+      "updatedAt": "2024-07-01T00:00:00Z"
+    },
+    {
+      "id": "prod-9b",
+      "subCategoryId": "sub-8",
+      "subCategorySlug": "yashma",
+      "categorySlug": "mineraly",
+      "name": "Яшма червона (низка)",
+      "slug": "yashma-chervona-nyzka",
+      "sku": "MIN-YSH-002",
+      "shortDescription": "Низка з червоної яшми на нитці, натуральні намистини",
+      "description": "Низка з натуральної червоної яшми на міцній нитці. Ідеально підходить для браслетів, намист та інших прикрас ручної роботи. Кожна низка відібрана вручну за якістю та однорідністю кольору.",
+      "price": 195,
+      "discountPrice": 165,
+      "stock": 18,
+      "images": [
+        "/media/Jasper.jpg",
+        "/media/BeadsAgate.jpg"
+      ],
+      "attributes": {
+        "color": "Червоний",
+        "origin": "Росія",
+        "hardness": "6.5–7",
+        "shape": "Низка",
+        "beadSizes": [
+          "6",
+          "8",
+          "10"
+        ],
+        "strandLengths": [
+          {
+            "label": "Низка 39 см",
+            "value": "39 см"
+          },
+          {
+            "label": "Пів низки 19.5 см",
+            "value": "19.5 см"
+          }
+        ]
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2024-07-15T00:00:00Z",
+      "updatedAt": "2024-07-15T00:00:00Z"
+    },
+    {
+      "id": "prod-10",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Нитка вощена чорна 1 мм",
+      "slug": "nytka-voshchena-chorna-1mm",
+      "sku": "THR-WX-001",
+      "shortDescription": "Вощена нитка чорного кольору, 1 мм, 100 м",
+      "description": "Міцна вощена нитка для плетіння браслетів та намист. Стійка до вологи, не розплітається.",
+      "price": 39,
+      "stock": 200,
+      "images": [
+        "/media/WaxThread.jpg"
+      ],
+      "attributes": {
+        "color": "Чорний",
+        "length": "100 м",
+        "diameter": "1 мм",
+        "material": "Вощений поліестер"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-01-10T00:00:00Z",
+      "updatedAt": "2024-01-10T00:00:00Z"
+    },
+    {
+      "id": "prod-11",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Нитка вощена бежева 0.8 мм",
+      "slug": "nytka-voshchena-bezheva-08mm",
+      "sku": "THR-WX-002",
+      "shortDescription": "Вощена нитка бежевого кольору, 0.8 мм, 100 м",
+      "description": "М'яка вощена нитка бежевого кольору для делікатних виробів. Підходить для плетіння мікро-макраме.",
+      "price": 39,
+      "stock": 150,
+      "images": [
+        "/media/BeigeThread.jpg"
+      ],
+      "attributes": {
+        "color": "Бежевий",
+        "length": "100 м",
+        "diameter": "0.8 мм",
+        "material": "Вощений поліестер"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-06-20T00:00:00Z",
+      "updatedAt": "2024-06-20T00:00:00Z"
+    },
+    {
+      "id": "prod-12",
+      "subCategoryId": "sub-10",
+      "subCategorySlug": "elastychni",
+      "categorySlug": "nytky",
+      "name": "Нитка еластична прозора 0.8 мм",
+      "slug": "nytka-elastychna-prozora-08mm",
+      "sku": "THR-EL-001",
+      "shortDescription": "Прозора еластична нитка 0.8 мм, 50 м",
+      "description": "Міцна прозора еластична нитка для браслетів без застібки. Витримує розтягнення до 300%.",
+      "price": 55,
+      "stock": 300,
+      "images": [
+        "/media/ElasticThread.jpg"
+      ],
+      "attributes": {
+        "color": "Прозорий",
+        "length": "50 м",
+        "diameter": "0.8 мм",
+        "material": "Кристальний еластик"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-01-15T00:00:00Z",
+      "updatedAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": "prod-13",
+      "subCategoryId": "sub-10",
+      "subCategorySlug": "elastychni",
+      "categorySlug": "nytky",
+      "name": "Нитка еластична чорна 1 мм",
+      "slug": "nytka-elastychna-chorna-1mm",
+      "sku": "THR-EL-002",
+      "shortDescription": "Чорна еластична нитка 1 мм, 50 м",
+      "description": "Чорна еластична нитка для браслетів з крупними намистинами. Не розтягується з часом.",
+      "price": 55,
+      "stock": 200,
+      "images": [
+        "/media/ElasticThread.jpg"
+      ],
+      "attributes": {
+        "color": "Чорний",
+        "length": "50 м",
+        "diameter": "1 мм",
+        "material": "Кристальний еластик"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-07-05T00:00:00Z",
+      "updatedAt": "2024-07-05T00:00:00Z"
+    },
+    {
+      "id": "prod-14",
+      "subCategoryId": "sub-11",
+      "subCategorySlug": "bavovnyani",
+      "categorySlug": "nytky",
+      "name": "Нитка бавовняна натуральна 1.5 мм",
+      "slug": "nytka-bavovnyani-naturalna-15mm",
+      "sku": "THR-CT-001",
+      "shortDescription": "Бавовняна мотузка 1.5 мм для макраме, 100 м",
+      "description": "Натуральна бавовняна мотузка для макраме та плетіння. М'яка, екологічна, приємна на дотик.",
+      "price": 65,
+      "stock": 120,
+      "images": [
+        "/media/CottonThread.jpg"
+      ],
+      "attributes": {
+        "color": "Натуральний",
+        "length": "100 м",
+        "diameter": "1.5 мм",
+        "material": "Бавовна"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-03-15T00:00:00Z",
+      "updatedAt": "2024-03-15T00:00:00Z"
+    },
+    {
+      "id": "prod-15",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Браслет \"Рожева ніжність\"",
+      "slug": "braslet-rozheva-nizhnist",
+      "sku": "BRC-W-001",
+      "shortDescription": "Браслет з рожевого кварцу та перламутру",
+      "description": "Ніжний жіночий браслет з намистин рожевого кварцу та перламутру на еластичній нитці. Символізує любов та ніжність. Розміри: 14–21 см.",
+      "price": 195,
+      "discountPrice": 165,
+      "stock": 18,
+      "images": [
+        "/media/WomenBracelet.jpg",
+        "/media/Bracelets.jpg"
+      ],
+      "attributes": {
+        "wristSize": "14–21 см",
+        "threadColor": "Прозорий",
+        "stones": [
+          "Рожевий кварц",
+          "Перламутр"
+        ],
+        "material": "Еластична нитка"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-02-14T00:00:00Z",
+      "updatedAt": "2024-02-14T00:00:00Z"
+    },
+    {
+      "id": "prod-16",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Браслет \"Аметистовий сад\"",
+      "slug": "braslet-ametystovyy-sad",
+      "sku": "BRC-W-002",
+      "shortDescription": "Браслет з аметисту та срібних роздільників",
+      "description": "Елегантний браслет з намистин аметисту 8 мм та срібних роздільників. Підходить для повсякденного та вечірнього образу.",
+      "price": 245,
+      "stock": 10,
+      "images": [
+        "/media/Amethyst.jpg",
+        "/media/WomenBracelet.jpg"
+      ],
+      "attributes": {
+        "wristSize": "15–20 см",
+        "threadColor": "Срібний",
+        "stones": [
+          "Аметист"
+        ],
+        "material": "Еластична нитка"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2024-06-10T00:00:00Z",
+      "updatedAt": "2024-06-10T00:00:00Z"
+    },
+    {
+      "id": "prod-17",
+      "subCategoryId": "sub-13",
+      "subCategorySlug": "cholovichi",
+      "categorySlug": "brаslety",
+      "name": "Браслет \"Чорна сила\"",
+      "slug": "braslet-chorna-syla",
+      "sku": "BRC-M-001",
+      "shortDescription": "Чоловічий браслет з обсидіану та тигрового ока",
+      "description": "Потужний чоловічий браслет з намистин чорного обсидіану та тигрового ока. Символізує силу та захист.",
+      "price": 275,
+      "stock": 14,
+      "images": [
+        "/media/MenBracelet.jpg",
+        "/media/Obsidian.jpg"
+      ],
+      "attributes": {
+        "wristSize": "17–22 см",
+        "threadColor": "Чорний",
+        "stones": [
+          "Обсидіан",
+          "Тигрове oko"
+        ],
+        "material": "Вощена нитка"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-01-25T00:00:00Z",
+      "updatedAt": "2024-01-25T00:00:00Z"
+    },
+    {
+      "id": "prod-18",
+      "subCategoryId": "sub-13",
+      "subCategorySlug": "cholovichi",
+      "categorySlug": "brаslety",
+      "name": "Браслет \"Лабрадорит\"",
+      "slug": "braslet-labradoryt",
+      "sku": "BRC-M-002",
+      "shortDescription": "Чоловічий браслет з лабрадориту 10 мм",
+      "description": "Строгий чоловічий браслет з великих намистин лабрадориту. Камінь магії та трансформації.",
+      "price": 320,
+      "stock": 8,
+      "images": [
+        "/media/Labradorite.jpg",
+        "/media/MenBracelet.jpg"
+      ],
+      "attributes": {
+        "wristSize": "18–23 см",
+        "threadColor": "Чорний",
+        "stones": [
+          "Лабрадорит"
+        ],
+        "material": "Еластична нитка"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2024-06-25T00:00:00Z",
+      "updatedAt": "2024-06-25T00:00:00Z"
+    },
+    {
+      "id": "prod-19",
+      "subCategoryId": "sub-16",
+      "subCategorySlug": "ruchna-robota",
+      "categorySlug": "brаslety",
+      "name": "Браслет \"Місяць\" (ручна робота)",
+      "slug": "braslet-misyats-ruchna-robota",
+      "sku": "BRC-HM-001",
+      "shortDescription": "Браслет макраме з місячним каменем",
+      "description": "Браслет ручної роботи в техніці макраме з натуральним місячним каменем. Кожен виріб унікальний. Матеріал — натуральна бавовна.",
+      "price": 395,
+      "stock": 5,
+      "images": [
+        "/media/LimitedBracelet.jpg",
+        "/media/WomenBracelet.jpg"
+      ],
+      "attributes": {
+        "wristSize": "14–20 см",
+        "threadColor": "Бежевий",
+        "stones": [
+          "Місячний камінь"
+        ],
+        "material": "Бавовна"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-07-01T00:00:00Z",
+      "updatedAt": "2024-07-01T00:00:00Z"
+    },
+    {
+      "id": "prod-20",
+      "subCategoryId": "sub-17",
+      "subCategorySlug": "limitovana-kolektsiya",
+      "categorySlug": "brаslety",
+      "name": "Браслет \"Aurora\" (лімітований)",
+      "slug": "braslet-aurora-limitovanyy",
+      "sku": "BRC-LTD-001",
+      "shortDescription": "Лімітований браслет з лабрадориту та золотих деталей",
+      "description": "Ексклюзивний браслет лімітованої колекції Aurora. Поєднує лабрадорит з позолоченими елементами. Лише 20 примірників.",
+      "price": 650,
+      "stock": 3,
+      "images": [
+        "/media/LimitedBracelet.jpg",
+        "/media/Labradorite.jpg"
+      ],
+      "attributes": {
+        "wristSize": "15–21 см",
+        "threadColor": "Золотий",
+        "stones": [
+          "Лабрадорит"
+        ],
+        "material": "Шовкова нитка"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-07-01T00:00:00Z",
+      "updatedAt": "2024-07-01T00:00:00Z"
+    },
+    {
+      "id": "prod-21",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист (друза)",
+      "slug": "ametyst-druza",
+      "sku": "MIN-AMT-003",
+      "shortDescription": "Натуральна друза аметисту 8–12 см",
+      "description": "Красива друза аметисту — ідеальний декоративний мінерал для дому або офісу.",
+      "price": 480,
+      "stock": 7,
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
+      "attributes": {
+        "weight": "200–400 г",
+        "size": "8–12 см",
+        "color": "Фіолетовий",
+        "origin": "Уругвай",
+        "hardness": "7",
+        "shape": "Друза"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-06-30T00:00:00Z",
+      "updatedAt": "2024-06-30T00:00:00Z"
+    },
+    {
+      "id": "prod-22",
+      "subCategoryId": "sub-6",
+      "subCategorySlug": "misyachnyy-kamin",
+      "categorySlug": "mineraly",
+      "name": "Місячний камінь (намистина 6 мм)",
+      "slug": "misyachnyy-kamin-namistyna-6mm",
+      "sku": "MIN-MN-001",
+      "shortDescription": "Намистина з місячного каменю 6 мм, ефект адуляресценції",
+      "description": "Місячний камінь з магічним опалесцентним блиском. Символ інтуїції та жіночності.",
+      "price": 85,
+      "stock": 40,
+      "images": [
+        "/media/Moonstone.jpg"
+      ],
+      "attributes": {
+        "weight": "0.5 г",
+        "size": "6 мм",
+        "color": "Білий/блакитний",
+        "origin": "Шрі-Ланка",
+        "hardness": "6–6.5",
+        "shape": "Куля"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-04-01T00:00:00Z",
+      "updatedAt": "2024-04-01T00:00:00Z"
+    },
+    {
+      "id": "prod-23",
+      "subCategoryId": "sub-5",
+      "subCategorySlug": "labradoryt",
+      "categorySlug": "mineraly",
+      "name": "Лабрадорит (кабошон)",
+      "slug": "labradoryt-kaboshon",
+      "sku": "MIN-LBR-001",
+      "shortDescription": "Лабрадорит, кабошон 20×15 мм, яскравий лабрадоресценс",
+      "description": "Лабрадорит з яскравим блакитно-зеленим відблиском. Потужний магічний камінь.",
+      "price": 130,
+      "stock": 20,
+      "images": [
+        "/media/Labradorite.jpg"
+      ],
+      "attributes": {
+        "weight": "5 г",
+        "size": "20×15 мм",
+        "color": "Сірий/блакитний",
+        "origin": "Мадагаскар",
+        "hardness": "6–6.5",
+        "shape": "Кабошон"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2024-07-01T00:00:00Z",
+      "updatedAt": "2024-07-01T00:00:00Z"
+    },
+    {
+      "id": "prod-24",
+      "subCategoryId": "sub-15",
+      "subCategorySlug": "dytyachi",
+      "categorySlug": "brаslety",
+      "name": "Дитячий браслет \"Веселка\"",
+      "slug": "dytyachyy-braslet-veselka",
+      "sku": "BRC-K-001",
+      "shortDescription": "Яскравий дитячий браслет з кольоровими агатами",
+      "description": "Барвистий дитячий браслет з кольорових агатів 6 мм. М'який та гіпоалергенний.",
+      "price": 125,
+      "stock": 25,
+      "images": [
+        "/media/KidsBracelet.jpg"
+      ],
+      "attributes": {
+        "wristSize": "12–16 см",
+        "threadColor": "Різнокольоровий",
+        "stones": [
+          "Агат кольоровий"
+        ],
+        "material": "Еластична нитка"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": false,
+      "createdAt": "2024-03-20T00:00:00Z",
+      "updatedAt": "2024-03-20T00:00:00Z"
+    },
+    {
+      "id": "prod-25",
+      "subCategoryId": "sub-12",
+      "subCategorySlug": "shovkovi",
+      "categorySlug": "nytky",
+      "name": "Нитка шовкова рожева 0.5 мм",
+      "slug": "nytka-shovkova-rozheva-05mm",
+      "sku": "THR-SK-001",
+      "shortDescription": "Шовкова нитка рожева, 0.5 мм, 50 м",
+      "description": "Натуральна шовкова нитка для плетіння делікатних виробів. М'яка, блискуча, стійка до розтягнення.",
+      "price": 89,
+      "stock": 60,
+      "images": [
+        "/media/SilkThread.jpg"
+      ],
+      "attributes": {
+        "color": "Рожевий",
+        "length": "50 м",
+        "diameter": "0.5 мм",
+        "material": "Натуральний шовк"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2024-06-01T00:00:00Z",
+      "updatedAt": "2024-06-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-1",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Агат натуральний №1",
+      "slug": "mock-novynka-1",
+      "sku": "MOCK-NEW-001",
+      "shortDescription": "Тестова новинка №1 для перевірки пагінації",
+      "description": "Демо-товар №1.",
+      "price": 45,
+      "discountPrice": 38,
+      "stock": 5,
+      "images": [
+        "/media/BeadsAgate.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-2",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист полірований №2",
+      "slug": "mock-novynka-2",
+      "sku": "MOCK-NEW-002",
+      "shortDescription": "Тестова новинка №2 для перевірки пагінації",
+      "description": "Демо-товар №2.",
+      "price": 60,
+      "stock": 6,
+      "images": [
+        "/media/BlueAgate.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-3",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Кварц ручної роботи №3",
+      "slug": "mock-novynka-3",
+      "sku": "MOCK-NEW-003",
+      "shortDescription": "Тестова новинка №3 для перевірки пагінації",
+      "description": "Демо-товар №3.",
+      "price": 75,
+      "stock": 7,
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-4",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Лабрадорит обмежена серія №4",
+      "slug": "mock-novynka-4",
+      "sku": "MOCK-NEW-004",
+      "shortDescription": "Тестова новинка №4 для перевірки пагінації",
+      "description": "Демо-товар №4.",
+      "price": 90,
+      "stock": 8,
+      "images": [
+        "/media/QuartzCrystal.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-5",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Обсидіан преміум №5",
+      "slug": "mock-novynka-5",
+      "sku": "MOCK-NEW-005",
+      "shortDescription": "Тестова новинка №5 для перевірки пагінації",
+      "description": "Демо-товар №5.",
+      "price": 105,
+      "discountPrice": 89,
+      "stock": 9,
+      "images": [
+        "/media/PinkQuartz.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-6",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Яшма класичний №6",
+      "slug": "mock-novynka-6",
+      "sku": "MOCK-NEW-006",
+      "shortDescription": "Тестова новинка №6 для перевірки пагінації",
+      "description": "Демо-товар №6.",
+      "price": 120,
+      "stock": 10,
+      "images": [
+        "/media/Labradorite.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-7",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Розовий кварц м'який блиск №7",
+      "slug": "mock-novynka-7",
+      "sku": "MOCK-NEW-007",
+      "shortDescription": "Тестова новинка №7 для перевірки пагінації",
+      "description": "Демо-товар №7.",
+      "price": 135,
+      "stock": 11,
+      "images": [
+        "/media/Moonstone.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-8",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Місячний камінь матовий №8",
+      "slug": "mock-novynka-8",
+      "sku": "MOCK-NEW-008",
+      "shortDescription": "Тестова новинка №8 для перевірки пагінації",
+      "description": "Демо-товар №8.",
+      "price": 150,
+      "stock": 12,
+      "images": [
+        "/media/TigerEye.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-9",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Нитка натуральний №9",
+      "slug": "mock-novynka-9",
+      "sku": "MOCK-NEW-009",
+      "shortDescription": "Тестова новинка №9 для перевірки пагінації",
+      "description": "Демо-товар №9.",
+      "price": 165,
+      "discountPrice": 140,
+      "stock": 13,
+      "images": [
+        "/media/Jasper.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-10",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Браслет полірований №10",
+      "slug": "mock-novynka-10",
+      "sku": "MOCK-NEW-010",
+      "shortDescription": "Тестова новинка №10 для перевірки пагінації",
+      "description": "Демо-товар №10.",
+      "price": 180,
+      "stock": 14,
+      "images": [
+        "/media/WaxThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-11",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Агат ручної роботи №11",
+      "slug": "mock-novynka-11",
+      "sku": "MOCK-NEW-011",
+      "shortDescription": "Тестова новинка №11 для перевірки пагінації",
+      "description": "Демо-товар №11.",
+      "price": 195,
+      "stock": 15,
+      "images": [
+        "/media/ElasticThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-12",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист обмежена серія №12",
+      "slug": "mock-novynka-12",
+      "sku": "MOCK-NEW-012",
+      "shortDescription": "Тестова новинка №12 для перевірки пагінації",
+      "description": "Демо-товар №12.",
+      "price": 210,
+      "stock": 16,
+      "images": [
+        "/media/CottonThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-13",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Кварц преміум №13",
+      "slug": "mock-novynka-13",
+      "sku": "MOCK-NEW-013",
+      "shortDescription": "Тестова новинка №13 для перевірки пагінації",
+      "description": "Демо-товар №13.",
+      "price": 225,
+      "discountPrice": 191,
+      "stock": 17,
+      "images": [
+        "/media/SilkThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-14",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Лабрадорит класичний №14",
+      "slug": "mock-novynka-14",
+      "sku": "MOCK-NEW-014",
+      "shortDescription": "Тестова новинка №14 для перевірки пагінації",
+      "description": "Демо-товар №14.",
+      "price": 240,
+      "stock": 18,
+      "images": [
+        "/media/WomenBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-15",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Обсидіан м'який блиск №15",
+      "slug": "mock-novynka-15",
+      "sku": "MOCK-NEW-015",
+      "shortDescription": "Тестова новинка №15 для перевірки пагінації",
+      "description": "Демо-товар №15.",
+      "price": 255,
+      "stock": 19,
+      "images": [
+        "/media/MenBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-16",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Яшма матовий №16",
+      "slug": "mock-novynka-16",
+      "sku": "MOCK-NEW-016",
+      "shortDescription": "Тестова новинка №16 для перевірки пагінації",
+      "description": "Демо-товар №16.",
+      "price": 270,
+      "stock": 20,
+      "images": [
+        "/media/KidsBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-17",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Розовий кварц натуральний №17",
+      "slug": "mock-novynka-17",
+      "sku": "MOCK-NEW-017",
+      "shortDescription": "Тестова новинка №17 для перевірки пагінації",
+      "description": "Демо-товар №17.",
+      "price": 285,
+      "discountPrice": 242,
+      "stock": 21,
+      "images": [
+        "/media/HandmadeBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-18",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Місячний камінь полірований №18",
+      "slug": "mock-novynka-18",
+      "sku": "MOCK-NEW-018",
+      "shortDescription": "Тестова новинка №18 для перевірки пагінації",
+      "description": "Демо-товар №18.",
+      "price": 300,
+      "stock": 22,
+      "images": [
+        "/media/LimitedBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-19",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Нитка ручної роботи №19",
+      "slug": "mock-novynka-19",
+      "sku": "MOCK-NEW-019",
+      "shortDescription": "Тестова новинка №19 для перевірки пагінації",
+      "description": "Демо-товар №19.",
+      "price": 315,
+      "stock": 23,
+      "images": [
+        "/media/BeadsAgate.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-20",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Браслет обмежена серія №20",
+      "slug": "mock-novynka-20",
+      "sku": "MOCK-NEW-020",
+      "shortDescription": "Тестова новинка №20 для перевірки пагінації",
+      "description": "Демо-товар №20.",
+      "price": 330,
+      "stock": 24,
+      "images": [
+        "/media/BlueAgate.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-21",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Агат преміум №21",
+      "slug": "mock-novynka-21",
+      "sku": "MOCK-NEW-021",
+      "shortDescription": "Тестова новинка №21 для перевірки пагінації",
+      "description": "Демо-товар №21.",
+      "price": 45,
+      "discountPrice": 38,
+      "stock": 25,
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-22",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист класичний №22",
+      "slug": "mock-novynka-22",
+      "sku": "MOCK-NEW-022",
+      "shortDescription": "Тестова новинка №22 для перевірки пагінації",
+      "description": "Демо-товар №22.",
+      "price": 60,
+      "stock": 26,
+      "images": [
+        "/media/QuartzCrystal.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": true,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-23",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Кварц м'який блиск №23",
+      "slug": "mock-novynka-23",
+      "sku": "MOCK-NEW-023",
+      "shortDescription": "Тестова новинка №23 для перевірки пагінації",
+      "description": "Демо-товар №23.",
+      "price": 75,
+      "stock": 27,
+      "images": [
+        "/media/PinkQuartz.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-24",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Лабрадорит матовий №24",
+      "slug": "mock-novynka-24",
+      "sku": "MOCK-NEW-024",
+      "shortDescription": "Тестова новинка №24 для перевірки пагінації",
+      "description": "Демо-товар №24.",
+      "price": 90,
+      "stock": 28,
+      "images": [
+        "/media/Labradorite.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-25",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Обсидіан натуральний №25",
+      "slug": "mock-novynka-25",
+      "sku": "MOCK-NEW-025",
+      "shortDescription": "Тестова новинка №25 для перевірки пагінації",
+      "description": "Демо-товар №25.",
+      "price": 105,
+      "discountPrice": 89,
+      "stock": 29,
+      "images": [
+        "/media/Moonstone.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-26",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Яшма полірований №26",
+      "slug": "mock-novynka-26",
+      "sku": "MOCK-NEW-026",
+      "shortDescription": "Тестова новинка №26 для перевірки пагінації",
+      "description": "Демо-товар №26.",
+      "price": 120,
+      "stock": 30,
+      "images": [
+        "/media/TigerEye.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-27",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Розовий кварц ручної роботи №27",
+      "slug": "mock-novynka-27",
+      "sku": "MOCK-NEW-027",
+      "shortDescription": "Тестова новинка №27 для перевірки пагінації",
+      "description": "Демо-товар №27.",
+      "price": 135,
+      "stock": 31,
+      "images": [
+        "/media/Jasper.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-28",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Місячний камінь обмежена серія №28",
+      "slug": "mock-novynka-28",
+      "sku": "MOCK-NEW-028",
+      "shortDescription": "Тестова новинка №28 для перевірки пагінації",
+      "description": "Демо-товар №28.",
+      "price": 150,
+      "stock": 32,
+      "images": [
+        "/media/WaxThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-29",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Нитка преміум №29",
+      "slug": "mock-novynka-29",
+      "sku": "MOCK-NEW-029",
+      "shortDescription": "Тестова новинка №29 для перевірки пагінації",
+      "description": "Демо-товар №29.",
+      "price": 165,
+      "discountPrice": 140,
+      "stock": 33,
+      "images": [
+        "/media/ElasticThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-30",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Браслет класичний №30",
+      "slug": "mock-novynka-30",
+      "sku": "MOCK-NEW-030",
+      "shortDescription": "Тестова новинка №30 для перевірки пагінації",
+      "description": "Демо-товар №30.",
+      "price": 180,
+      "stock": 34,
+      "images": [
+        "/media/CottonThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-31",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Агат м'який блиск №31",
+      "slug": "mock-novynka-31",
+      "sku": "MOCK-NEW-031",
+      "shortDescription": "Тестова новинка №31 для перевірки пагінації",
+      "description": "Демо-товар №31.",
+      "price": 195,
+      "stock": 5,
+      "images": [
+        "/media/SilkThread.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-32",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Аметист матовий №32",
+      "slug": "mock-novynka-32",
+      "sku": "MOCK-NEW-032",
+      "shortDescription": "Тестова новинка №32 для перевірки пагінації",
+      "description": "Демо-товар №32.",
+      "price": 210,
+      "stock": 6,
+      "images": [
+        "/media/WomenBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-33",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Кварц натуральний №33",
+      "slug": "mock-novynka-33",
+      "sku": "MOCK-NEW-033",
+      "shortDescription": "Тестова новинка №33 для перевірки пагінації",
+      "description": "Демо-товар №33.",
+      "price": 225,
+      "discountPrice": 191,
+      "stock": 7,
+      "images": [
+        "/media/MenBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-34",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Лабрадорит полірований №34",
+      "slug": "mock-novynka-34",
+      "sku": "MOCK-NEW-034",
+      "shortDescription": "Тестова новинка №34 для перевірки пагінації",
+      "description": "Демо-товар №34.",
+      "price": 240,
+      "stock": 8,
+      "images": [
+        "/media/KidsBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-35",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Обсидіан ручної роботи №35",
+      "slug": "mock-novynka-35",
+      "sku": "MOCK-NEW-035",
+      "shortDescription": "Тестова новинка №35 для перевірки пагінації",
+      "description": "Демо-товар №35.",
+      "price": 255,
+      "stock": 9,
+      "images": [
+        "/media/HandmadeBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-36",
+      "subCategoryId": "sub-1",
+      "subCategorySlug": "agat",
+      "categorySlug": "mineraly",
+      "name": "Яшма обмежена серія №36",
+      "slug": "mock-novynka-36",
+      "sku": "MOCK-NEW-036",
+      "shortDescription": "Тестова новинка №36 для перевірки пагінації",
+      "description": "Демо-товар №36.",
+      "price": 270,
+      "stock": 10,
+      "images": [
+        "/media/LimitedBracelet.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": true,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-37",
+      "subCategoryId": "sub-2",
+      "subCategorySlug": "ametyst",
+      "categorySlug": "mineraly",
+      "name": "Розовий кварц преміум №37",
+      "slug": "mock-novynka-37",
+      "sku": "MOCK-NEW-037",
+      "shortDescription": "Тестова новинка №37 для перевірки пагінації",
+      "description": "Демо-товар №37.",
+      "price": 285,
+      "discountPrice": 242,
+      "stock": 11,
+      "images": [
+        "/media/BeadsAgate.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-38",
+      "subCategoryId": "sub-3",
+      "subCategorySlug": "kvarts",
+      "categorySlug": "mineraly",
+      "name": "Місячний камінь класичний №38",
+      "slug": "mock-novynka-38",
+      "sku": "MOCK-NEW-038",
+      "shortDescription": "Тестова новинка №38 для перевірки пагінації",
+      "description": "Демо-товар №38.",
+      "price": 300,
+      "stock": 12,
+      "images": [
+        "/media/BlueAgate.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-39",
+      "subCategoryId": "sub-9",
+      "subCategorySlug": "voshcheni",
+      "categorySlug": "nytky",
+      "name": "Нитка м'який блиск №39",
+      "slug": "mock-novynka-39",
+      "sku": "MOCK-NEW-039",
+      "shortDescription": "Тестова новинка №39 для перевірки пагінації",
+      "description": "Демо-товар №39.",
+      "price": 315,
+      "stock": 13,
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": false,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "prod-mock-new-40",
+      "subCategoryId": "sub-14",
+      "subCategorySlug": "zhinochi",
+      "categorySlug": "brаslety",
+      "name": "Браслет матовий №40",
+      "slug": "mock-novynka-40",
+      "sku": "MOCK-NEW-040",
+      "shortDescription": "Тестова новинка №40 для перевірки пагінації",
+      "description": "Демо-товар №40.",
+      "price": 330,
+      "stock": 14,
+      "images": [
+        "/media/QuartzCrystal.jpg"
+      ],
+      "attributes": {
+        "note": "mock"
+      },
+      "featured": false,
+      "popular": true,
+      "isNew": true,
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
+    }
+  ]
+}

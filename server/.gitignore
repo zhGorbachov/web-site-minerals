@@ -1,0 +1,4 @@
+# Keep server dependencies local
+server/node_modules
+server/uploads
+
