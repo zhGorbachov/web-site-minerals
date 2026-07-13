@@ -3,7 +3,6 @@ import { Phone, Mail, MapPin } from 'lucide-react'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import { SocialLinks } from '@/components/ContactDetails'
-import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { PHONE_CONTACTS, EMAIL_CONTACTS, LOCATION_LINK } from '@/config/ContactInfo'
 import { SITE_NAME } from '@/config/Site'
 import { SiteLogo } from '@/components/SiteLogo'
@@ -34,6 +33,7 @@ export function Footer() {
                 <li><Link to="/catalog/mineraly" className={styles.link}>{t('footer.minerals')}</Link></li>
                 <li><Link to="/catalog/nytky" className={styles.link}>{t('footer.threads')}</Link></li>
                 <li><Link to="/catalog/brаslety" className={styles.link}>{t('footer.bracelets')}</Link></li>
+                <li><Link to="/catalog/pahoshchi" className={styles.link}>{t('footer.incense')}</Link></li>
                 <li><Link to="/catalog/pidvisky" className={styles.link}>{t('footer.pendants')}</Link></li>
               </ul>
             </div>
@@ -85,8 +85,6 @@ export function Footer() {
             </div>
           </div>
         </div>
-
-        <ThemeSwitcher />
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/store'
@@ -19,10 +19,13 @@ const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
 
 export function CartPage() {
   const { t, tp, language } = useTranslation()
+  const navigate = useNavigate()
   const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCartStore()
   const openCatalog = useOpenCatalog()
   const total = totalPrice()
   const count = totalItems()
+
+  const goToCheckout = () => navigate('/checkout')
 
   if (count === 0) {
     return (
@@ -104,7 +107,8 @@ export function CartPage() {
                         <div className={styles.itemOptions}>
                           {Object.entries(item.selectedOptions).map(([key, value]) => (
                             <span key={key} className={styles.optionChip}>
-                              {OPTION_LABEL_KEYS[key] ? t(OPTION_LABEL_KEYS[key]) : key}: {formatOptionValue(key, value)}
+                              {OPTION_LABEL_KEYS[key] ? t(OPTION_LABEL_KEYS[key]) : key}:{' '}
+                              {formatOptionValue(key, value)}
                             </span>
                           ))}
                         </div>
@@ -132,9 +136,13 @@ export function CartPage() {
                           </button>
                         </div>
                         <div className={styles.priceCol}>
-                          <span className={styles.itemPrice}>{formatPrice(unitPrice * item.quantity, language)}</span>
+                          <span className={styles.itemPrice}>
+                            {formatPrice(unitPrice * item.quantity, language)}
+                          </span>
                           {item.quantity > 1 && (
-                            <span className={styles.unitPrice}>{formatPrice(unitPrice, language)} {t('cart.perUnit')}</span>
+                            <span className={styles.unitPrice}>
+                              {formatPrice(unitPrice, language)} {t('cart.perUnit')}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -169,10 +177,9 @@ export function CartPage() {
               <span className={styles.totalAmount}>{formatPrice(total, language)}</span>
             </div>
 
-            <Button size="lg" fullWidth rightIcon={<ArrowRight size={18} />} disabled>
+            <Button size="lg" fullWidth rightIcon={<ArrowRight size={18} />} onClick={goToCheckout}>
               {t('cart.checkout')}
             </Button>
-            <p className={styles.checkoutNote}>{t('cart.checkoutSoon')}</p>
 
             <Link to="/catalog" className={styles.continueShopping} onClick={openCatalog}>
               {t('cart.continueShopping')}
@@ -186,7 +193,12 @@ export function CartPage() {
           <span className={styles.mobileBarLabel}>{t('cart.total')}</span>
           <span className={styles.mobileBarAmount}>{formatPrice(total, language)}</span>
         </div>
-        <Button size="lg" rightIcon={<ArrowRight size={18} />} disabled className={styles.mobileBarBtn}>
+        <Button
+          size="lg"
+          rightIcon={<ArrowRight size={18} />}
+          className={styles.mobileBarBtn}
+          onClick={goToCheckout}
+        >
           {t('cart.checkoutShort')}
         </Button>
       </div>

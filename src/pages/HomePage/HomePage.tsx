@@ -22,6 +22,7 @@ import { Button } from '@/components/ui'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { SITE_NAME } from '@/config/Site'
+import { HOME_PAGE_CATEGORY_SLUGS } from '@/config/Catalog'
 import { SiteLogo } from '@/components/SiteLogo'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './HomePage.module.scss'
@@ -90,7 +91,10 @@ export function HomePage() {
       ProductService.getNew(),
       ProductService.getPopular(),
     ]).then(([cats, newP, popP]) => {
-      setCategories(cats)
+      const homeCategories = cats.filter((cat) =>
+        (HOME_PAGE_CATEGORY_SLUGS as readonly string[]).includes(cat.slug),
+      )
+      setCategories(homeCategories)
       setNewProducts(newP)
       setPopularProducts(popP.slice(0, DESKTOP_NEW_LIMIT))
       setLoading(false)

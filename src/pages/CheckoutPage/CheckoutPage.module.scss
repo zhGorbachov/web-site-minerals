@@ -1,0 +1,423 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.page {
+  padding-block: $spacing-4 $spacing-24;
+  min-height: 60vh;
+
+  @include tablet-up {
+    padding-block: $spacing-8 $spacing-16;
+  }
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin-top: $spacing-4;
+  margin-bottom: $spacing-2;
+
+  @include tablet-up {
+    font-size: $font-size-2xl;
+    margin-top: $spacing-6;
+  }
+}
+
+.layout {
+  display: grid;
+  gap: $spacing-6;
+  margin-top: $spacing-4;
+  align-items: start;
+
+  @include desktop-up {
+    margin-top: $spacing-6;
+    grid-template-columns: 1fr 340px;
+    gap: $spacing-8;
+  }
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.block {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  overflow: hidden;
+
+  @include tablet-up {
+    box-shadow: $shadow-card;
+    border: none;
+  }
+}
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-4 $spacing-5;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: $color-text;
+  cursor: default;
+
+  &.toggleable {
+    cursor: pointer;
+
+    &:hover .collapseIcon {
+      color: $color-primary-dark;
+    }
+  }
+}
+
+.collapseIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-muted;
+  transition: color $transition-base;
+}
+
+.stepBadge {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-circle;
+  background: $color-surface;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  transition: background $transition-base, color $transition-base;
+
+  &.active {
+    background: $color-primary;
+    color: $color-on-primary;
+  }
+
+  &.done {
+    background: $color-primary;
+    color: $color-on-primary;
+  }
+}
+
+.stepTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+
+  .required {
+    color: $color-error;
+    margin-left: 2px;
+  }
+}
+
+.summaryText {
+  margin: 0;
+  padding: 0 $spacing-5 $spacing-4;
+  padding-left: calc(#{$spacing-5} + 28px + #{$spacing-3});
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  line-height: $line-height-normal;
+}
+
+.blockBody {
+  padding: 0 $spacing-5 $spacing-5;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.formGrid {
+  display: grid;
+  gap: $spacing-4;
+
+  @include tablet-up {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fullWidth {
+  @include tablet-up {
+    grid-column: 1 / -1;
+  }
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.optionCard {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-3 $spacing-4;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  text-align: left;
+  font: inherit;
+  color: $color-text;
+  cursor: pointer;
+  transition: border-color $transition-base, background $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.45);
+    background: $color-surface;
+  }
+
+  &.selected {
+    border-color: $color-primary;
+    background: rgba(var(--color-primary-rgb), 0.08);
+    box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.25);
+  }
+
+  @include focus-ring;
+}
+
+.radio {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border: 2px solid $color-border;
+  border-radius: $radius-circle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color $transition-base;
+
+  .selected & {
+    border-color: $color-primary;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: $radius-circle;
+    background: $color-primary;
+  }
+}
+
+.optionIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  background: $color-surface;
+  color: $color-primary-dark;
+}
+
+.optionContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.optionTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.optionHint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  line-height: $line-height-normal;
+}
+
+.commentToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: $spacing-3 $spacing-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  font: inherit;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+  transition: border-color $transition-base, background $transition-base;
+
+  &:hover {
+    background: $color-surface;
+  }
+
+  @include focus-ring;
+}
+
+.commentField {
+  margin-top: $spacing-2;
+}
+
+.error {
+  margin: 0;
+  padding: $spacing-3;
+  font-size: $font-size-sm;
+  color: $color-error;
+  background: rgba($color-error, 0.08);
+  border-radius: $radius-sm;
+}
+
+.summary {
+  padding: $spacing-5;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  position: sticky;
+  top: calc(#{$header-height} + #{$spacing-4});
+
+  @include tablet-up {
+    padding: $spacing-6;
+    box-shadow: $shadow-card;
+    border: none;
+  }
+}
+
+.summaryTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin-bottom: $spacing-4;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-3;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-bottom: $spacing-2;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: $spacing-3;
+  margin-top: $spacing-4;
+  padding-top: $spacing-4;
+  border-top: 1px solid $color-border;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.totalAmount {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.successCard {
+  max-width: 480px;
+  margin: $spacing-8 auto 0;
+  padding: $spacing-8 $spacing-6;
+  text-align: center;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+
+  @include tablet-up {
+    box-shadow: $shadow-card;
+    border: none;
+  }
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto $spacing-4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-circle;
+  background: rgba(var(--color-primary-rgb), 0.15);
+  color: $color-primary-dark;
+}
+
+.successTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin-bottom: $spacing-2;
+}
+
+.successDescription {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-6;
+}
+
+.mobileBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-sticky;
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  padding-bottom: max($spacing-3, env(safe-area-inset-bottom));
+  background: $color-white;
+  border-top: 1px solid $color-border;
+  box-shadow: 0 -4px 20px rgba(26, 36, 56, 0.08);
+
+  @include desktop-up {
+    display: none;
+  }
+}
+
+.mobileBarTotal {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileBarLabel {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.mobileBarAmount {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.mobileBarBtn {
+  flex-shrink: 0;
+}
+
+.desktopSubmit {
+  display: none;
+  margin-top: $spacing-5;
+
+  @include desktop-up {
+    display: block;
+  }
+}

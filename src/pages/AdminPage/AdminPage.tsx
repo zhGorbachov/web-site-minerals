@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { isAxiosError } from 'axios'
 import { Pencil, Trash2, Plus, Layers } from 'lucide-react'
 import { AdminApi, CatalogApi } from '@/api'
-import type { AdminProductPayload } from '@/api'
+import type { AdminProductPayload, AdminUser } from '@/api'
 import { useAuthStore } from '@/store'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { Button, Input, Breadcrumbs } from '@/components/ui'
@@ -12,7 +12,7 @@ import { MediaUploader } from '@/components/MediaUploader'
 import type { Category, Product, SubCategory } from '@/types'
 import styles from './AdminPage.module.scss'
 
-type Tab = 'products' | 'create' | 'subcategories'
+type Tab = 'products' | 'create' | 'subcategories' | 'users'
 
 const emptyForm: AdminProductPayload = {
   name: '',
@@ -52,10 +52,15 @@ export function AdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategories, setSubcategories] = useState<SubCategory[]>([])
+  const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [userSearch, setUserSearch] = useState('')
+  const [discountDrafts, setDiscountDrafts] = useState<
+    Record<string, { percent: string; label: string }>
+  >({})
   const [stockDrafts, setStockDrafts] = useState<Record<string, number>>({})
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<AdminProductPayload>(emptyForm)
@@ -82,15 +87,28 @@ export function AdminPage() {
     setLoading(true)
     setError(null)
     try {
-      const [prods, cats, subs] = await Promise.all([
+      const [prods, cats, subs, adminUsers] = await Promise.all([
         AdminApi.getProducts(),
         CatalogApi.getCategories(),
         CatalogApi.getSubcategories(),
+        AdminApi.getUsers(),
       ])
       setProducts(prods)
       setCategories(cats)
       setSubcategories(subs)
+      setUsers(adminUsers)
       setStockDrafts(Object.fromEntries(prods.map((p) => [p.id, p.stock])))
+      setDiscountDrafts(
+        Object.fromEntries(
+          adminUsers.map((u) => [
+            u.id,
+            {
+              percent: u.discountPercent != null ? String(u.discountPercent) : '',
+              label: u.discountLabel ?? '',
+            },
+          ]),
+        ),
+      )
       if (!subForm.categoryId && cats[0]) {
         setSubForm((s) => ({ ...s, categoryId: cats[0].id }))
       }
@@ -117,6 +135,51 @@ export function AdminPage() {
     )
   }, [products, search])
 
+  const filteredUsers = useMemo(() => {
+    const q = userSearch.trim().toLowerCase()
+    if (!q) return users
+    return users.filter((u) => {
+      const hay = [u.firstName, u.lastName, u.phone, u.email].filter(Boolean).join(' ').toLowerCase()
+      return hay.includes(q)
+    })
+  }, [users, userSearch])
+
+  const flash = (text: string) => {
+    setMessage(text)
+    setError(null)
+    window.setTimeout(() => setMessage(null), 2500)
+  }
+
+  const saveUserDiscount = async (userId: string, clear = false) => {
+    const draft = discountDrafts[userId] ?? { percent: '', label: '' }
+    const percent = clear ? null : draft.percent.trim() === '' ? null : Number(draft.percent)
+    if (!clear && (percent == null || Number.isNaN(percent) || percent < 0 || percent > 100)) {
+      setError(t('admin.errorGeneric'))
+      return
+    }
+    setSaving(true)
+    setError(null)
+    try {
+      const updated = await AdminApi.setUserDiscount(userId, {
+        discountPercent: percent,
+        discountLabel: clear ? null : draft.label.trim() || null,
+      })
+      setUsers((list) => list.map((u) => (u.id === userId ? updated : u)))
+      setDiscountDrafts((d) => ({
+        ...d,
+        [userId]: {
+          percent: updated.discountPercent != null ? String(updated.discountPercent) : '',
+          label: updated.discountLabel ?? '',
+        },
+      }))
+      flash(t('admin.usersSaved'))
+    } catch (err) {
+      setError(t(mapError(err)))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   if (!user) return null
 
   if (!isAdmin) {
@@ -130,12 +193,6 @@ export function AdminPage() {
         </div>
       </div>
     )
-  }
-
-  const flash = (text: string) => {
-    setMessage(text)
-    setError(null)
-    window.setTimeout(() => setMessage(null), 2500)
   }
 
   const startEdit = (product: Product) => {
@@ -270,6 +327,7 @@ export function AdminPage() {
                 ['products', t('admin.tabProducts')],
                 ['create', t('admin.tabAddProduct')],
                 ['subcategories', t('admin.tabSubcategories')],
+                ['users', t('admin.tabUsers')],
               ] as const
             ).map(([id, label]) => (
               <button
@@ -503,7 +561,7 @@ export function AdminPage() {
                 )}
               </div>
             </form>
-          ) : (
+          ) : tab === 'subcategories' ? (
             <form className={styles.panel} onSubmit={handleCreateSub}>
               <label className={styles.selectLabel}>
                 {t('admin.category')}
@@ -543,6 +601,78 @@ export function AdminPage() {
                 {t('admin.createSubcategory')}
               </Button>
             </form>
+          ) : (
+            <div className={styles.panel}>
+              <Input
+                label={t('admin.tabUsers')}
+                placeholder={t('admin.usersSearch')}
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+              />
+              {filteredUsers.length === 0 ? (
+                <p className={styles.muted}>{t('admin.usersEmpty')}</p>
+              ) : (
+                <ul className={styles.productList}>
+                  {filteredUsers.map((adminUser) => {
+                    const draft = discountDrafts[adminUser.id] ?? { percent: '', label: '' }
+                    return (
+                      <li key={adminUser.id} className={styles.productCard}>
+                        <div className={styles.productMeta}>
+                          <h3 className={styles.productName}>
+                            {adminUser.firstName} {adminUser.lastName}
+                          </h3>
+                          <p className={styles.productSku}>
+                            {t('admin.usersContact')}:{' '}
+                            {[adminUser.phone, adminUser.email].filter(Boolean).join(' · ') || '—'}
+                          </p>
+                        </div>
+                        <div className={styles.formGrid}>
+                          <Input
+                            label={t('admin.usersDiscount')}
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={draft.percent}
+                            onChange={(e) =>
+                              setDiscountDrafts((d) => ({
+                                ...d,
+                                [adminUser.id]: { ...draft, percent: e.target.value },
+                              }))
+                            }
+                          />
+                          <Input
+                            label={t('admin.usersDiscountLabel')}
+                            value={draft.label}
+                            onChange={(e) =>
+                              setDiscountDrafts((d) => ({
+                                ...d,
+                                [adminUser.id]: { ...draft, label: e.target.value },
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className={styles.formActions}>
+                          <Button
+                            size="sm"
+                            loading={saving}
+                            onClick={() => void saveUserDiscount(adminUser.id)}
+                          >
+                            {t('admin.usersSaveDiscount')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => void saveUserDiscount(adminUser.id, true)}
+                          >
+                            {t('admin.usersClearDiscount')}
+                          </Button>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
           )}
         </motion.div>
       </div>

@@ -1,22 +1,23 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react'
+import { Lock, User, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore, type AuthError } from '@/store'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
-import { Button, Input, Breadcrumbs } from '@/components/ui'
-import { AuthApi } from '@/api'
+import { Button, Input, PhoneInput, Breadcrumbs } from '@/components/ui'
 import styles from './AuthPage.module.scss'
 
 type AuthMode = 'login' | 'register'
 
 const ERROR_KEYS: Record<AuthError, TranslationKey> = {
   email_taken: 'auth.errorEmailTaken',
+  phone_taken: 'auth.errorPhoneTaken',
   invalid_credentials: 'auth.errorInvalidCredentials',
   weak_password: 'auth.errorWeakPassword',
   required: 'auth.errorRequired',
   invalid_email: 'auth.errorInvalidEmail',
+  invalid_phone: 'auth.errorInvalidPhone',
   name_required: 'auth.errorNameRequired',
   oauth_not_configured: 'auth.errorOauthNotConfigured',
   oauth_denied: 'auth.errorOauthDenied',
@@ -46,14 +47,6 @@ function GoogleIcon() {
   )
 }
 
-function AppleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" fill="currentColor">
-      <path d="M14.79 12.35c-.25.58-.37.84-.69 1.35-.45.72-.1.1-.1.1s-.55.37-.95.66c-.35.25-.7.5-1.22.5-.48 0-.95-.28-1.45-.56-.48-.28-.97-.56-1.52-.56-.58 0-1.08.29-1.57.58-.46.27-.89.53-1.32.53-.48 0-.88-.28-1.28-.62-.5-.43-.98-.1.1-.1.1 0-1.55-3.55-.65-5.42.45-.93 1.24-1.47 1.95-1.47.48 0 .98.3 1.45.56.45.26.9.52 1.42.52.5 0 .95-.27 1.42-.54.5-.29 1.03-.59 1.6-.59.66 0 1.38.4 1.86 1.09-1.64.9-1.37 3.24.15 3.97ZM12.1 2.9c.28-.35.5-.84.42-1.34-.42.03-.93.3-1.23.65-.27.31-.5.8-.41 1.27.45.03.93-.23 1.22-.58Z" />
-    </svg>
-  )
-}
-
 async function syncUserData() {
   await Promise.all([
     useCartStore.getState().mergeGuestCartToServer(),
@@ -67,6 +60,7 @@ export function AuthPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const user = useAuthStore((s) => s.user)
   const login = useAuthStore((s) => s.login)
+  const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle)
   const register = useAuthStore((s) => s.register)
 
   const modeParam = searchParams.get('mode')
@@ -75,28 +69,52 @@ export function AuthPage() {
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<AuthError | null>(oauthError)
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   useEffect(() => {
-    if (user) navigate('/profile', { replace: true })
-  }, [user, navigate])
+    if (user) {
+      const returnTo = searchParams.get('returnTo')
+      const safeReturn =
+        returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/profile'
+      navigate(safeReturn, { replace: true })
+    }
+  }, [user, navigate, searchParams])
 
   const setMode = (next: AuthMode) => {
     setError(null)
-    setSearchParams(next === 'register' ? { mode: 'register' } : {}, { replace: true })
+    const returnTo = searchParams.get('returnTo')
+    const nextParams = new URLSearchParams()
+    if (next === 'register') nextParams.set('mode', 'register')
+    if (returnTo) nextParams.set('returnTo', returnTo)
+    setSearchParams(nextParams, { replace: true })
   }
 
-  const handleGoogle = () => {
-    window.location.assign(AuthApi.googleStartUrl())
+  const redirectAfterAuth = async () => {
+    await syncUserData()
+    const returnTo = searchParams.get('returnTo')
+    const safeReturn =
+      returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/profile'
+    navigate(safeReturn, { replace: true })
   }
 
-  const handleApple = () => {
-    window.location.assign(AuthApi.appleStartUrl())
+  const handleGoogle = async () => {
+    setError(null)
+    setGoogleLoading(true)
+    const result = await loginWithGoogle()
+    setGoogleLoading(false)
+    if (result) {
+      setError(result)
+      return
+    }
+    // Live mode redirects away; mock mode stays here and sets user
+    if (useAuthStore.getState().user) {
+      await redirectAfterAuth()
+    }
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -106,8 +124,8 @@ export function AuthPage() {
 
     const result =
       mode === 'login'
-        ? await login(email, password)
-        : await register({ firstName, lastName, email, phone, password })
+        ? await login(phone, password)
+        : await register({ firstName, lastName, phone, password })
 
     setLoading(false)
     if (result) {
@@ -115,8 +133,7 @@ export function AuthPage() {
       return
     }
 
-    await syncUserData()
-    navigate('/profile', { replace: true })
+    await redirectAfterAuth()
   }
 
   return (
@@ -172,22 +189,19 @@ export function AuthPage() {
               </p>
 
               <div className={styles.socialBlock}>
-                <button type="button" className={styles.socialBtn} onClick={handleGoogle}>
-                  <GoogleIcon />
-                  <span>{t('auth.continueGoogle')}</span>
-                </button>
                 <button
                   type="button"
-                  className={`${styles.socialBtn} ${styles.socialBtnApple}`}
-                  onClick={handleApple}
+                  className={styles.socialBtn}
+                  onClick={() => void handleGoogle()}
+                  disabled={googleLoading}
                 >
-                  <AppleIcon />
-                  <span>{t('auth.continueApple')}</span>
+                  <GoogleIcon />
+                  <span>{t('auth.continueGoogle')}</span>
                 </button>
               </div>
 
               <div className={styles.divider} role="separator">
-                <span>{t('auth.orEmail')}</span>
+                <span>{t('auth.orPhone')}</span>
               </div>
 
               <form className={styles.form} onSubmit={handleSubmit} noValidate>
@@ -214,29 +228,13 @@ export function AuthPage() {
                   </div>
                 )}
 
-                <Input
-                  label={t('auth.email')}
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  leftIcon={<Mail />}
+                <PhoneInput
+                  label={t('auth.phone')}
+                  name="phone"
+                  value={phone}
+                  onChange={setPhone}
                   required
                 />
-
-                {mode === 'register' && (
-                  <Input
-                    label={t('auth.phone')}
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    leftIcon={<Phone />}
-                    placeholder={t('auth.phoneOptional')}
-                  />
-                )}
 
                 <Input
                   label={t('auth.password')}

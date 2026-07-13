@@ -1,10 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { applyTheme, getStoredTheme } from '@/config/Themes'
+import { isMockMode } from '@/api/client'
 import '@/styles/global.scss'
 import App from './App'
 
-applyTheme(getStoredTheme())
+if (isMockMode) {
+  console.info('[mock] Running without API/DB — data is stored in localStorage')
+}
 
 const root = document.getElementById('root')
 

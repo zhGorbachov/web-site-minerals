@@ -1,0 +1,60 @@
+@use '@/styles/variables' as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+}
+
+.field {
+  display: flex;
+  align-items: stretch;
+  height: 44px;
+  background: $color-white;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &:focus-within {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
+  }
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  padding-inline: $spacing-4;
+  background: $color-panel;
+  border-right: 1px solid $color-border;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding-inline: $spacing-4;
+  border: none;
+  background: transparent;
+  font-size: $font-size-base;
+  color: $color-text;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}

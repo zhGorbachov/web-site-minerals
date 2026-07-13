@@ -1,4 +1,4 @@
-import { api, setAuthToken, getAuthToken } from './client'
+import { api, setAuthToken, getAuthToken, isMockMode } from './client'
 import type { User } from '@/types'
 
 export type AuthResponse = {
@@ -10,8 +10,7 @@ export const AuthApi = {
   async register(payload: {
     firstName: string
     lastName: string
-    email: string
-    phone?: string
+    phone: string
     password: string
   }) {
     const { data } = await api.post<AuthResponse>('/auth/register', payload)
@@ -19,8 +18,11 @@ export const AuthApi = {
     return data
   },
 
-  async login(payload: { email: string; password: string }) {
-    const { data } = await api.post<AuthResponse>('/auth/login', payload)
+  async login(payload: { phone: string; password: string }) {
+    const { data } = await api.post<AuthResponse>('/auth/login', {
+      phone: payload.phone,
+      password: payload.password,
+    })
     setAuthToken(data.token)
     return data
   },
@@ -36,13 +38,14 @@ export const AuthApi = {
     setAuthToken(null)
   },
 
+  /** Live: redirect URL. Mock: handled by loginWithGoogle(). */
   googleStartUrl() {
+    if (isMockMode) return ''
     const base = api.defaults.baseURL?.replace(/\/api$/, '') || 'http://localhost:3001'
     return `${base}/api/auth/google`
   },
 
-  appleStartUrl() {
-    const base = api.defaults.baseURL?.replace(/\/api$/, '') || 'http://localhost:3001'
-    return `${base}/api/auth/apple`
+  async loginWithGoogle(): Promise<AuthResponse> {
+    throw new Error('Google login is only available via OAuth redirect in live mode')
   },
 }

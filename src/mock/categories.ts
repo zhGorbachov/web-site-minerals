@@ -30,6 +30,15 @@ export const categories: Category[] = [
     updatedAt: '2024-01-01T00:00:00Z',
   },
   {
+    id: 'cat-5',
+    name: 'Пахощі',
+    slug: 'pahoshchi',
+    image: mockImages.amethyst,
+    description: 'Натуральні пахощі для медитації, релаксу та створення затишної атмосфери',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+  {
     id: 'cat-4',
     name: 'Підвіски',
     slug: 'pidvisky',

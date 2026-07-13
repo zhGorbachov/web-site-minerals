@@ -10,20 +10,34 @@
   }
 }
 
-.card {
-  max-width: 520px;
-  margin-inline: auto;
+.layout {
+  display: grid;
+  gap: $spacing-5;
   margin-top: $spacing-4;
+
+  @include tablet-up {
+    margin-top: $spacing-6;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card,
+.cardWide {
   padding: $spacing-6;
   background: $color-white;
   border: 1px solid $color-border;
   border-radius: $radius-lg;
 
   @include tablet-up {
-    margin-top: $spacing-6;
     padding: $spacing-8;
     box-shadow: $shadow-card;
     border: none;
+  }
+}
+
+.cardWide {
+  @include tablet-up {
+    grid-column: 1 / -1;
   }
 }
 
@@ -121,4 +135,88 @@
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-3;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  margin-bottom: $spacing-4;
+  color: $color-primary;
+
+  .sectionTitle {
+    flex: 1;
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+}
+
+.discountBadge {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  padding: $spacing-4;
+  border-radius: $radius-md;
+  background: rgba(var(--color-primary-rgb), 0.12);
+  color: $color-text;
+
+  strong {
+    font-size: $font-size-2xl;
+    color: $color-primary-dark;
+  }
+}
+
+.emptyText {
+  margin: 0;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+}
+
+.orderList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.orderItem {
+  padding: $spacing-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-panel;
+}
+
+.orderTop,
+.orderMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-3;
+  margin-bottom: $spacing-2;
+}
+
+.orderId {
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.orderStatus {
+  color: $color-primary-dark;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.orderMeta {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.orderProducts {
+  margin: 0;
+  padding-left: $spacing-4;
+  color: $color-text;
+  font-size: $font-size-sm;
 }

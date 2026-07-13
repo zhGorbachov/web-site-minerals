@@ -6,18 +6,20 @@ import { prisma } from './prisma.js'
 
 export type AuthUser = {
   id: string
-  email: string
+  email?: string
   firstName: string
   lastName: string
-  phone: string | null
+  phone?: string
   role: UserRole
   provider: AuthProvider
+  discountPercent?: number | null
+  discountLabel?: string | null
   createdAt: string
 }
 
 export type JwtPayload = {
   sub: string
-  email: string
+  email?: string
 }
 
 declare global {
@@ -32,12 +34,14 @@ declare global {
 export function toPublicUser(user: User): AuthUser {
   return {
     id: user.id,
-    email: user.email,
+    email: user.email ?? undefined,
     firstName: user.firstName,
     lastName: user.lastName,
-    phone: user.phone,
+    phone: user.phone ?? undefined,
     role: user.role,
     provider: user.provider,
+    discountPercent: user.discountPercent,
+    discountLabel: user.discountLabel,
     createdAt: user.createdAt.toISOString(),
   }
 }
@@ -46,7 +50,11 @@ export function signToken(user: Pick<User, 'id' | 'email'>) {
   const options: SignOptions = {
     expiresIn: env.jwtExpiresIn as SignOptions['expiresIn'],
   }
-  return jwt.sign({ sub: user.id, email: user.email } satisfies JwtPayload, env.jwtSecret, options)
+  return jwt.sign(
+    { sub: user.id, email: user.email ?? undefined } satisfies JwtPayload,
+    env.jwtSecret,
+    options,
+  )
 }
 
 export function verifyToken(token: string): JwtPayload {
@@ -66,6 +74,22 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     next()
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' })
+  }
+}
+
+export function optionalAuth(req: Request, res: Response, next: NextFunction) {
+  const header = req.headers.authorization
+  if (!header?.startsWith('Bearer ')) {
+    next()
+    return
+  }
+
+  try {
+    const payload = verifyToken(header.slice(7))
+    req.userId = payload.sub
+    next()
+  } catch {
+    next()
   }
 }
 
@@ -89,4 +113,24 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' })
   }
+}
+
+export function normalizePhone(phone: string) {
+  let digits = phone.replace(/\D/g, '')
+
+  if (digits.startsWith('380')) {
+    digits = digits.slice(3)
+  } else if (digits.startsWith('38') && digits.length > 9) {
+    digits = digits.slice(2)
+  }
+
+  if (digits.length === 9 && !digits.startsWith('0')) {
+    digits = `0${digits}`
+  }
+
+  return digits
+}
+
+export function isValidPhone(phone: string) {
+  return /^0\d{9}$/.test(normalizePhone(phone))
 }

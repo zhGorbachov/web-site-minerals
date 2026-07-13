@@ -175,6 +175,27 @@ export const subcategories: SubCategory[] = [
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
+  // Пахощі
+  {
+    id: 'sub-22',
+    categoryId: 'cat-5',
+    categorySlug: 'pahoshchi',
+    name: 'Палички',
+    slug: 'palichky',
+    image: mockImages.jasper,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: 'sub-23',
+    categoryId: 'cat-5',
+    categorySlug: 'pahoshchi',
+    name: 'Конуси',
+    slug: 'konusy',
+    image: mockImages.amethyst,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
   // Підвіски
   {
     id: 'sub-18',

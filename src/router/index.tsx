@@ -13,6 +13,7 @@ const AboutPage      = lazy(() => import('@/pages/AboutPage').then((m) => ({ def
 const ContactsPage   = lazy(() => import('@/pages/ContactsPage').then((m) => ({ default: m.ContactsPage })))
 const AuthPage       = lazy(() => import('@/pages/AuthPage').then((m) => ({ default: m.AuthPage })))
 const ProfilePage    = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const CheckoutPage   = lazy(() => import('@/pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })))
 const AdminPage      = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })))
 const AuthCallbackPage = lazy(() =>
   import('@/pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })),
@@ -124,6 +125,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageFallback />}>
             <ProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'checkout',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <CheckoutPage />
           </Suspense>
         ),
       },

@@ -49,16 +49,12 @@ export type TranslationSchema = UiTranslationSchema & {
     minerals: string
     threads: string
     bracelets: string
+    incense: string
     pendants: string
     city: string
     country: string
     rights: string
     made: string
-    themeTest: string
-    themeSage: string
-    themePurple: string
-    themeAgate: string
-    themeBrown: string
   }
   about: {
     breadcrumbHome: string
@@ -147,16 +143,12 @@ export const translations: Record<Language, TranslationSchema> = {
       minerals: 'Мінерали',
       threads: 'Низки',
       bracelets: 'Браслети',
+      incense: 'Пахощі',
       pendants: 'Підвіски',
       city: 'Кропивницький',
       country: 'Україна',
       rights: 'Всі права захищено.',
       made: 'Натуральні мінерали та ручна робота з любов\'ю 💎',
-      themeTest: 'Тест кольорів',
-      themeSage: 'Варіант 1',
-      themePurple: 'Варіант 2',
-      themeAgate: 'Варіант 3',
-      themeBrown: 'Варіант 4',
     },
     about: {
       breadcrumbHome: 'Головна',
@@ -293,16 +285,12 @@ export const translations: Record<Language, TranslationSchema> = {
       minerals: 'Minerals',
       threads: 'Threads',
       bracelets: 'Bracelets',
+      incense: 'Incense',
       pendants: 'Pendants',
       city: 'Kropyvnytskyi',
       country: 'Ukraine',
       rights: 'All rights reserved.',
       made: 'Natural minerals and handmade with love 💎',
-      themeTest: 'Theme test',
-      themeSage: 'Option 1',
-      themePurple: 'Option 2',
-      themeAgate: 'Option 3',
-      themeBrown: 'Option 4',
     },
     about: {
       breadcrumbHome: 'Home',

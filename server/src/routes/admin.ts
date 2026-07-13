@@ -261,3 +261,75 @@ adminRouter.post('/subcategories', async (req, res) => {
 
   res.status(201).json(serializeSubCategory(sub))
 })
+
+const discountSchema = z.object({
+  discountPercent: z.number().int().min(0).max(100).nullable(),
+  discountLabel: z.string().trim().max(120).nullable().optional(),
+})
+
+adminRouter.get('/users', async (_req, res) => {
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      role: true,
+      discountPercent: true,
+      discountLabel: true,
+      createdAt: true,
+    },
+  })
+
+  res.json(
+    users.map((user) => ({
+      ...user,
+      email: user.email ?? undefined,
+      phone: user.phone ?? undefined,
+      createdAt: user.createdAt.toISOString(),
+    })),
+  )
+})
+
+adminRouter.patch('/users/:id/discount', async (req, res) => {
+  const parsed = discountSchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload' })
+    return
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: {
+        discountPercent: parsed.data.discountPercent,
+        discountLabel:
+          parsed.data.discountPercent && parsed.data.discountPercent > 0
+            ? parsed.data.discountLabel ?? null
+            : null,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        role: true,
+        discountPercent: true,
+        discountLabel: true,
+        createdAt: true,
+      },
+    })
+
+    res.json({
+      ...user,
+      email: user.email ?? undefined,
+      phone: user.phone ?? undefined,
+      createdAt: user.createdAt.toISOString(),
+    })
+  } catch {
+    res.status(404).json({ error: 'Not found' })
+  }
+})

@@ -1,3 +1,5 @@
 export { categories } from './categories'
 export { subcategories } from './subcategories'
 export { products } from './products'
+export { MockDb, resetMockDb } from './MockDb'
+export { MockApiError } from './MockApiError'

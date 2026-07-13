@@ -7,27 +7,41 @@ const prisma = new PrismaClient()
 
 async function seedAdmin() {
   const email = 'admin@luxstones.local'
+  const phone = '0501112233'
   const passwordHash = await bcrypt.hash('admin123', 10)
 
-  await prisma.user.upsert({
-    where: { email },
-    create: {
-      email,
-      firstName: 'Admin',
-      lastName: 'Lux',
-      passwordHash,
-      role: 'admin',
-      provider: 'email',
-    },
-    update: {
-      passwordHash,
-      role: 'admin',
-      firstName: 'Admin',
-      lastName: 'Lux',
-    },
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ email }, { phone }] },
   })
 
-  console.log('Admin user ready: admin@luxstones.local / admin123')
+  if (existing) {
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        email,
+        phone,
+        passwordHash,
+        role: 'admin',
+        firstName: 'Admin',
+        lastName: 'Lux',
+        provider: 'email',
+      },
+    })
+  } else {
+    await prisma.user.create({
+      data: {
+        email,
+        phone,
+        firstName: 'Admin',
+        lastName: 'Lux',
+        passwordHash,
+        role: 'admin',
+        provider: 'email',
+      },
+    })
+  }
+
+  console.log('Admin user ready: +38 0501112233 / admin123 (stored as 0501112233)')
 }
 
 async function main() {

@@ -19,7 +19,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string
-  userId: string
+  userId: string | null
   status: OrderStatus
   totalPrice: number
   paymentMethod: string

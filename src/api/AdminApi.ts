@@ -1,4 +1,4 @@
-import type { Product, SubCategory } from '@/types'
+import type { Product, SubCategory, User } from '@/types'
 import { api, withMediaUrls } from './client'
 
 export type AdminProductPayload = {
@@ -25,6 +25,19 @@ export type UploadedMedia = {
   name: string
   size: number
 }
+
+export type AdminUser = Pick<
+  User,
+  | 'id'
+  | 'firstName'
+  | 'lastName'
+  | 'email'
+  | 'phone'
+  | 'role'
+  | 'discountPercent'
+  | 'discountLabel'
+  | 'createdAt'
+>
 
 export const AdminApi = {
   async getProducts() {
@@ -66,5 +79,18 @@ export const AdminApi = {
     files.forEach((file) => body.append('files', file))
     const { data } = await api.post<{ files: UploadedMedia[] }>('/admin/upload', body)
     return data.files
+  },
+
+  async getUsers() {
+    const { data } = await api.get<AdminUser[]>('/admin/users')
+    return data
+  },
+
+  async setUserDiscount(
+    id: string,
+    payload: { discountPercent: number | null; discountLabel?: string | null },
+  ) {
+    const { data } = await api.patch<AdminUser>(`/admin/users/${id}/discount`, payload)
+    return data
   },
 }

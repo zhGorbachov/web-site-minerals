@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+export const isMockMode = import.meta.env.VITE_MOCK === 'true'
+
 const API_URL = import.meta.env.VITE_API_URL?.trim() || 'http://localhost:3001'
 
 export const api = axios.create({

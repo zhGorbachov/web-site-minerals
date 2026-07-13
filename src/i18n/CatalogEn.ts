@@ -11,6 +11,10 @@ export const categoryEn: Record<string, { name: string; description: string }> =
     name: 'Bracelets',
     description: 'Handmade bracelets from natural minerals for men, women, and children',
   },
+  pahoshchi: {
+    name: 'Incense',
+    description: 'Natural incense for meditation, relaxation, and a cozy atmosphere',
+  },
   pidvisky: {
     name: 'Pendants',
     description: 'Handmade pendants and charms from natural minerals',
@@ -35,6 +39,8 @@ export const subcategoryEn: Record<string, string> = {
   dytyachi: "Children's",
   'ruchna-robota': 'Handmade',
   'limitovana-kolektsiya': 'Limited Collection',
+  palichky: 'Sticks',
+  konusy: 'Cones',
   'kaminni-pidvisky': 'Stone Pendants',
   kulony: 'Charms',
   sertsya: 'Hearts',
@@ -198,6 +204,30 @@ export const productEn: Record<
     shortDescription: 'Pink silk thread, 0.5 mm, 50 m',
     description:
       'Natural silk thread for weaving delicate crafts. Soft, lustrous, and resistant to stretching.',
+  },
+  'pakhoshchi-sandalu-palichky': {
+    name: 'Sandalwood Incense Sticks',
+    shortDescription: 'Natural sandalwood incense sticks, 20 pcs',
+    description:
+      'Aromatic sticks made from natural sandalwood for meditation and a cozy atmosphere. The soft woody scent lasts up to 40 minutes.',
+  },
+  'pakhoshchi-lavandy-palichky': {
+    name: 'Lavender Incense Sticks',
+    shortDescription: 'Lavender-scented incense sticks, 15 pcs',
+    description:
+      'Calming sticks with natural lavender. Perfect for evening relaxation and aromatherapy.',
+  },
+  'konusy-sandalu': {
+    name: 'Sandalwood Cones',
+    shortDescription: 'Sandalwood aromatic cones, 12 pcs',
+    description:
+      'Compact aromatic cones made from natural sandalwood. Convenient for small spaces and quick scenting.',
+  },
+  'konusy-palo-santo': {
+    name: 'Palo Santo Cones',
+    shortDescription: 'Palo santo wood cones, 10 pcs',
+    description:
+      'Aromatic cones made from sacred palo santo wood. Used for space cleansing and meditation.',
   },
 }
 

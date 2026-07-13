@@ -74,6 +74,57 @@ export type UiTranslationSchema = {
     checkoutShort: string
     continueShopping: string
   }
+  checkout: {
+    title: string
+    breadcrumb: string
+    stepContact: string
+    stepLocation: string
+    stepPayment: string
+    required: string
+    edit: string
+    expand: string
+    collapse: string
+    continue: string
+    firstName: string
+    lastName: string
+    phone: string
+    email: string
+    emailOptional: string
+    deliveryMethod: string
+    novaPoshta: string
+    novaPoshtaHint: string
+    courier: string
+    courierHint: string
+    city: string
+    branch: string
+    branchPlaceholder: string
+    address: string
+    addressPlaceholder: string
+    paymentPickup: string
+    paymentPickupHint: string
+    paymentGoogle: string
+    paymentApple: string
+    comment: string
+    commentPlaceholder: string
+    toPay: string
+    placeOrder: string
+    emptyCart: string
+    loginRequired: string
+    successTitle: string
+    successDescription: string
+    successGuestDescription: string
+    goToOrders: string
+    errorRequired: string
+    errorPhone: string
+    errorCity: string
+    errorBranch: string
+    errorAddress: string
+    errorPayment: string
+    errorSubmit: string
+    contactSummary: string
+    locationSummaryBranch: string
+    locationSummaryCourier: string
+  }
   wishlist: {
     emptyTitle: string
     emptyDescription: string
@@ -169,15 +220,13 @@ export type UiTranslationSchema = {
     lastName: string
     email: string
     phone: string
-    phoneOptional: string
     password: string
     showPassword: string
     hidePassword: string
     loginSubmit: string
     registerSubmit: string
     continueGoogle: string
-    continueApple: string
-    orEmail: string
+    orPhone: string
     continue: string
     cancel: string
     noAccount: string
@@ -187,10 +236,12 @@ export type UiTranslationSchema = {
     oauthProcessing: string
     oauthErrorTitle: string
     errorEmailTaken: string
+    errorPhoneTaken: string
     errorInvalidCredentials: string
     errorWeakPassword: string
     errorRequired: string
     errorInvalidEmail: string
+    errorInvalidPhone: string
     errorNameRequired: string
     errorOauthNotConfigured: string
     errorOauthDenied: string
@@ -203,11 +254,26 @@ export type UiTranslationSchema = {
     roleCustomer: string
     roleAdmin: string
     openAdmin: string
-    signedInWith: string
-    providerEmail: string
-    providerGoogle: string
-    providerApple: string
     logout: string
+    discountsTitle: string
+    discountsEmpty: string
+    discountPersonal: string
+    ordersTitle: string
+    ordersEmpty: string
+    orderNumber: string
+    orderStatus: {
+      pending: string
+      confirmed: string
+      processing: string
+      shipped: string
+      delivered: string
+      cancelled: string
+      refunded: string
+    }
+    favouritesTitle: string
+    favouritesEmpty: string
+    openWishlist: string
+    checkoutCta: string
   }
   admin: {
     title: string
@@ -215,8 +281,17 @@ export type UiTranslationSchema = {
     tabProducts: string
     tabAddProduct: string
     tabSubcategories: string
+    tabUsers: string
     forbidden: string
     loading: string
+    usersSearch: string
+    usersDiscount: string
+    usersDiscountLabel: string
+    usersSaveDiscount: string
+    usersClearDiscount: string
+    usersSaved: string
+    usersEmpty: string
+    usersContact: string
     searchPlaceholder: string
     stock: string
     saveStock: string
@@ -343,6 +418,57 @@ export const uiTranslationsUk: UiTranslationSchema = {
     checkoutShort: 'Оформити',
     continueShopping: 'Продовжити покупки',
   },
+  checkout: {
+    title: 'Оформлення замовлення',
+    breadcrumb: 'Оформлення',
+    stepContact: 'Контактні дані',
+    stepLocation: 'Доставка',
+    stepPayment: 'Оплата',
+    required: '*',
+    edit: 'Змінити',
+    expand: 'Розгорнути',
+    collapse: 'Згорнути',
+    continue: 'Далі',
+    firstName: 'Імʼя',
+    lastName: 'Прізвище',
+    phone: 'Телефон',
+    email: 'Email',
+    emailOptional: 'Email (необовʼязково)',
+    deliveryMethod: 'Спосіб доставки',
+    novaPoshta: 'Нова Пошта — відділення',
+    novaPoshtaHint: 'Забрати з відділення / поштомату',
+    courier: 'Курʼєрська доставка',
+    courierHint: 'Доставка за адресою',
+    city: 'Місто',
+    branch: 'Відділення / поштомат',
+    branchPlaceholder: 'Номер або адреса відділення',
+    address: 'Адреса доставки',
+    addressPlaceholder: 'Вулиця, будинок, квартира',
+    paymentPickup: 'Оплата при отриманні',
+    paymentPickupHint: 'Готівкою або карткою у відділенні',
+    paymentGoogle: 'Google Pay',
+    paymentApple: 'Apple Pay',
+    comment: 'Коментар до замовлення',
+    commentPlaceholder: 'Побажання до доставки або замовлення',
+    toPay: 'До оплати',
+    placeOrder: 'Оформити замовлення',
+    emptyCart: 'Кошик порожній — додайте товари, щоб оформити замовлення',
+    loginRequired: 'Увійдіть, щоб оформити замовлення',
+    successTitle: 'Замовлення оформлено!',
+    successDescription: 'Ми зберегли ваше замовлення. Статус можна переглянути в профілі.',
+    successGuestDescription: 'Дякуємо за замовлення! Ми звʼяжемося з вами для підтвердження.',
+    goToOrders: 'До замовлень',
+    errorRequired: 'Заповніть обовʼязкові поля',
+    errorPhone: 'Введіть коректний номер телефону',
+    errorCity: 'Вкажіть місто',
+    errorBranch: 'Вкажіть відділення Нової Пошти',
+    errorAddress: 'Вкажіть адресу доставки',
+    errorPayment: 'Оберіть спосіб оплати',
+    errorSubmit: 'Не вдалося оформити замовлення. Спробуйте ще раз',
+    contactSummary: '{name}, {phone}',
+    locationSummaryBranch: '{city}, відділення: {branch}',
+    locationSummaryCourier: '{city}, {address}',
+  },
   wishlist: {
     emptyTitle: 'Обране порожнє',
     emptyDescription: 'Натисніть на серце біля товару, щоб зберегти його тут',
@@ -432,21 +558,19 @@ export const uiTranslationsUk: UiTranslationSchema = {
     registerTab: 'Реєстрація',
     loginTitle: 'Вхід до кабінету',
     registerTitle: 'Створити акаунт',
-    loginSubtitle: 'Увійдіть, щоб переглядати профіль та зберігати замовлення',
-    registerSubtitle: 'Зареєструйтесь, щоб швидше оформлювати покупки',
+    loginSubtitle: 'Увійдіть за номером телефону або через Google',
+    registerSubtitle: 'Зареєструйтесь за телефоном або увійдіть через Google',
     firstName: "Ім'я",
     lastName: 'Прізвище',
     email: 'Email',
     phone: 'Телефон',
-    phoneOptional: 'Необовʼязково',
     password: 'Пароль',
     showPassword: 'Показати пароль',
     hidePassword: 'Сховати пароль',
     loginSubmit: 'Увійти',
     registerSubmit: 'Зареєструватися',
-    continueGoogle: 'Продовжити з Google',
-    continueApple: 'Продовжити з Apple',
-    orEmail: 'або email',
+    continueGoogle: 'Увійти через Google',
+    orPhone: 'або за телефоном',
     continue: 'Продовжити',
     cancel: 'Скасувати',
     noAccount: 'Ще немає акаунту?',
@@ -456,10 +580,12 @@ export const uiTranslationsUk: UiTranslationSchema = {
     oauthProcessing: 'Завершуємо вхід...',
     oauthErrorTitle: 'Не вдалося увійти',
     errorEmailTaken: 'Користувач з таким email вже існує',
-    errorInvalidCredentials: 'Невірний email або пароль',
+    errorPhoneTaken: 'Користувач з таким телефоном вже існує',
+    errorInvalidCredentials: 'Невірний телефон або пароль',
     errorWeakPassword: 'Пароль має містити щонайменше 6 символів',
     errorRequired: 'Заповніть усі обовʼязкові поля',
     errorInvalidEmail: 'Введіть коректний email',
+    errorInvalidPhone: 'Введіть коректний номер телефону',
     errorNameRequired: "Вкажіть ім'я та прізвище",
     errorOauthNotConfigured:
       'OAuth не налаштовано на сервері. Додайте GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET у server/.env',
@@ -473,20 +599,44 @@ export const uiTranslationsUk: UiTranslationSchema = {
     roleCustomer: 'Клієнт',
     roleAdmin: 'Адміністратор',
     openAdmin: 'Адмін-панель',
-    signedInWith: 'Спосіб входу',
-    providerEmail: 'Email і пароль',
-    providerGoogle: 'Google',
-    providerApple: 'Apple',
     logout: 'Вийти',
+    discountsTitle: 'Ваші знижки',
+    discountsEmpty: 'Персональних знижок поки немає. Власник магазину може призначити їх окремим клієнтам.',
+    discountPersonal: 'Персональна знижка',
+    ordersTitle: 'Історія замовлень',
+    ordersEmpty: 'Замовлень ще немає',
+    orderNumber: 'Замовлення #{id}',
+    orderStatus: {
+      pending: 'Очікує',
+      confirmed: 'Підтверджено',
+      processing: 'В обробці',
+      shipped: 'Відправлено',
+      delivered: 'Доставлено',
+      cancelled: 'Скасовано',
+      refunded: 'Повернено',
+    },
+    favouritesTitle: 'Обрані товари',
+    favouritesEmpty: 'У обраному поки порожньо',
+    openWishlist: 'Відкрити обране',
+    checkoutCta: 'Оформити замовлення',
   },
   admin: {
     title: 'Адмін-панель',
-    subtitle: 'Керування товарами, залишками та підкатегоріями',
+    subtitle: 'Керування товарами, залишками, підкатегоріями та знижками клієнтів',
     tabProducts: 'Товари',
     tabAddProduct: 'Новий товар',
     tabSubcategories: 'Підкатегорії',
+    tabUsers: 'Клієнти',
     forbidden: 'Доступ лише для адміністратора',
     loading: 'Завантаження...',
+    usersSearch: 'Пошук за телефоном, email або імʼям',
+    usersDiscount: 'Знижка %',
+    usersDiscountLabel: 'Назва знижки',
+    usersSaveDiscount: 'Зберегти',
+    usersClearDiscount: 'Зняти',
+    usersSaved: 'Знижку збережено',
+    usersEmpty: 'Клієнтів не знайдено',
+    usersContact: 'Контакти',
     searchPlaceholder: 'Пошук за назвою або SKU...',
     stock: 'Залишок',
     saveStock: 'Зберегти',
@@ -613,6 +763,57 @@ export const uiTranslationsEn: UiTranslationSchema = {
     checkoutShort: 'Checkout',
     continueShopping: 'Continue shopping',
   },
+  checkout: {
+    title: 'Checkout',
+    breadcrumb: 'Checkout',
+    stepContact: 'Contact details',
+    stepLocation: 'Delivery',
+    stepPayment: 'Payment',
+    required: '*',
+    edit: 'Edit',
+    expand: 'Expand',
+    collapse: 'Collapse',
+    continue: 'Continue',
+    firstName: 'First name',
+    lastName: 'Last name',
+    phone: 'Phone',
+    email: 'Email',
+    emailOptional: 'Email (optional)',
+    deliveryMethod: 'Delivery method',
+    novaPoshta: 'Nova Poshta — branch',
+    novaPoshtaHint: 'Pick up from a branch / parcel locker',
+    courier: 'Courier delivery',
+    courierHint: 'Delivery to your address',
+    city: 'City',
+    branch: 'Branch / locker',
+    branchPlaceholder: 'Branch number or address',
+    address: 'Delivery address',
+    addressPlaceholder: 'Street, building, apartment',
+    paymentPickup: 'Pay on pickup',
+    paymentPickupHint: 'Cash or card at the branch',
+    paymentGoogle: 'Google Pay',
+    paymentApple: 'Apple Pay',
+    comment: 'Order comment',
+    commentPlaceholder: 'Delivery or order notes',
+    toPay: 'To pay',
+    placeOrder: 'Place order',
+    emptyCart: 'Your cart is empty — add products to place an order',
+    loginRequired: 'Sign in to place an order',
+    successTitle: 'Order placed!',
+    successDescription: 'Your order has been saved. You can track its status in your profile.',
+    successGuestDescription: 'Thank you for your order! We will contact you to confirm.',
+    goToOrders: 'View orders',
+    errorRequired: 'Please fill in the required fields',
+    errorPhone: 'Enter a valid phone number',
+    errorCity: 'Enter a city',
+    errorBranch: 'Enter a Nova Poshta branch',
+    errorAddress: 'Enter a delivery address',
+    errorPayment: 'Select a payment method',
+    errorSubmit: 'Could not place the order. Please try again',
+    contactSummary: '{name}, {phone}',
+    locationSummaryBranch: '{city}, branch: {branch}',
+    locationSummaryCourier: '{city}, {address}',
+  },
   wishlist: {
     emptyTitle: 'Wishlist is empty',
     emptyDescription: 'Tap the heart on a product to save it here',
@@ -702,21 +903,19 @@ export const uiTranslationsEn: UiTranslationSchema = {
     registerTab: 'Register',
     loginTitle: 'Sign in',
     registerTitle: 'Create account',
-    loginSubtitle: 'Sign in to view your profile and keep your orders',
-    registerSubtitle: 'Register to check out faster next time',
+    loginSubtitle: 'Sign in with your phone number or Google',
+    registerSubtitle: 'Register with your phone or sign in with Google',
     firstName: 'First name',
     lastName: 'Last name',
     email: 'Email',
     phone: 'Phone',
-    phoneOptional: 'Optional',
     password: 'Password',
     showPassword: 'Show password',
     hidePassword: 'Hide password',
     loginSubmit: 'Sign in',
     registerSubmit: 'Create account',
-    continueGoogle: 'Continue with Google',
-    continueApple: 'Continue with Apple',
-    orEmail: 'or email',
+    continueGoogle: 'Sign in with Google',
+    orPhone: 'or with phone',
     continue: 'Continue',
     cancel: 'Cancel',
     noAccount: 'No account yet?',
@@ -726,10 +925,12 @@ export const uiTranslationsEn: UiTranslationSchema = {
     oauthProcessing: 'Finishing sign-in...',
     oauthErrorTitle: 'Sign-in failed',
     errorEmailTaken: 'An account with this email already exists',
-    errorInvalidCredentials: 'Invalid email or password',
+    errorPhoneTaken: 'An account with this phone already exists',
+    errorInvalidCredentials: 'Invalid phone or password',
     errorWeakPassword: 'Password must be at least 6 characters',
     errorRequired: 'Please fill in all required fields',
     errorInvalidEmail: 'Enter a valid email address',
+    errorInvalidPhone: 'Enter a valid phone number',
     errorNameRequired: 'Enter your first and last name',
     errorOauthNotConfigured:
       'OAuth is not configured on the server. Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET to server/.env',
@@ -743,20 +944,44 @@ export const uiTranslationsEn: UiTranslationSchema = {
     roleCustomer: 'Customer',
     roleAdmin: 'Administrator',
     openAdmin: 'Admin panel',
-    signedInWith: 'Signed in with',
-    providerEmail: 'Email & password',
-    providerGoogle: 'Google',
-    providerApple: 'Apple',
     logout: 'Log out',
+    discountsTitle: 'Your discounts',
+    discountsEmpty: 'No personal discounts yet. The store owner can assign them to selected customers.',
+    discountPersonal: 'Personal discount',
+    ordersTitle: 'Order history',
+    ordersEmpty: 'No orders yet',
+    orderNumber: 'Order #{id}',
+    orderStatus: {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      processing: 'Processing',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      refunded: 'Refunded',
+    },
+    favouritesTitle: 'Favourite products',
+    favouritesEmpty: 'Your favourites list is empty',
+    openWishlist: 'Open wishlist',
+    checkoutCta: 'Place an order',
   },
   admin: {
     title: 'Admin panel',
-    subtitle: 'Manage products, stock and subcategories',
+    subtitle: 'Manage products, stock, subcategories and customer discounts',
     tabProducts: 'Products',
     tabAddProduct: 'New product',
     tabSubcategories: 'Subcategories',
+    tabUsers: 'Customers',
     forbidden: 'Admin access only',
     loading: 'Loading...',
+    usersSearch: 'Search by phone, email or name',
+    usersDiscount: 'Discount %',
+    usersDiscountLabel: 'Discount label',
+    usersSaveDiscount: 'Save',
+    usersClearDiscount: 'Clear',
+    usersSaved: 'Discount saved',
+    usersEmpty: 'No customers found',
+    usersContact: 'Contacts',
     searchPlaceholder: 'Search by name or SKU...',
     stock: 'Stock',
     saveStock: 'Save',

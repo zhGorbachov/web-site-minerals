@@ -3,20 +3,27 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { env, isAppleConfigured, isGoogleConfigured } from '../lib/env.js'
-import { requireAuth, signToken, toPublicUser } from '../lib/auth.js'
+import {
+  isValidPhone,
+  normalizePhone,
+  requireAuth,
+  signToken,
+  toPublicUser,
+} from '../lib/auth.js'
 
 export const authRouter = Router()
 
 const registerSchema = z.object({
   firstName: z.string().trim().min(1),
   lastName: z.string().trim().min(1),
-  email: z.string().trim().email(),
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().min(1),
+  email: z.string().trim().email().optional().or(z.literal('')),
   password: z.string().min(6),
 })
 
 const loginSchema = z.object({
-  email: z.string().trim().email(),
+  phone: z.string().trim().min(1).optional(),
+  login: z.string().trim().min(1).optional(),
   password: z.string().min(1),
 })
 
@@ -31,11 +38,26 @@ authRouter.post('/register', async (req, res) => {
     return
   }
 
-  const email = parsed.data.email.toLowerCase()
-  const existing = await prisma.user.findUnique({ where: { email } })
-  if (existing) {
-    res.status(409).json({ error: 'email_taken' })
+  const phone = normalizePhone(parsed.data.phone)
+  if (!isValidPhone(phone)) {
+    res.status(400).json({ error: 'invalid_phone' })
     return
+  }
+
+  const email = parsed.data.email?.trim().toLowerCase() || null
+
+  const existingPhone = await prisma.user.findUnique({ where: { phone } })
+  if (existingPhone) {
+    res.status(409).json({ error: 'phone_taken' })
+    return
+  }
+
+  if (email) {
+    const existingEmail = await prisma.user.findUnique({ where: { email } })
+    if (existingEmail) {
+      res.status(409).json({ error: 'email_taken' })
+      return
+    }
   }
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10)
@@ -43,8 +65,8 @@ authRouter.post('/register', async (req, res) => {
     data: {
       firstName: parsed.data.firstName,
       lastName: parsed.data.lastName,
+      phone,
       email,
-      phone: parsed.data.phone || null,
       passwordHash,
       provider: 'email',
     },
@@ -63,8 +85,20 @@ authRouter.post('/login', async (req, res) => {
     return
   }
 
-  const email = parsed.data.email.toLowerCase()
-  const user = await prisma.user.findUnique({ where: { email } })
+  const rawPhone = (parsed.data.phone || parsed.data.login || '').trim()
+  if (!rawPhone) {
+    res.status(400).json({ error: 'Invalid payload' })
+    return
+  }
+
+  const phone = normalizePhone(rawPhone)
+  if (!isValidPhone(phone)) {
+    res.status(400).json({ error: 'invalid_phone' })
+    return
+  }
+
+  const user = await prisma.user.findUnique({ where: { phone } })
+
   if (!user?.passwordHash) {
     res.status(401).json({ error: 'invalid_credentials' })
     return

@@ -3,11 +3,11 @@ import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, LayoutGrid, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Category, SubCategory } from '@/types'
+import { CATALOG_MENU_ORDER } from '@/config/Catalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CatalogMenu.module.scss'
 
 const MINERAL_SLUG = 'mineraly'
-const PRIMARY_SLUGS = ['nytky', 'pidvisky', 'brаslety', MINERAL_SLUG] as const
 
 const listVariants = {
   hidden: { opacity: 0 },
@@ -47,7 +47,7 @@ export function CatalogMenu({
   const location = useLocation()
   const [openSlugs, setOpenSlugs] = useState<Set<string>>(() => new Set([MINERAL_SLUG]))
 
-  const primaryCategories = PRIMARY_SLUGS.map((slug) =>
+  const primaryCategories = CATALOG_MENU_ORDER.map((slug) =>
     categories.find((c) => c.slug === slug),
   ).filter((c): c is Category => Boolean(c))
 
