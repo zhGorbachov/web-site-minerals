@@ -14,6 +14,11 @@ export type UiTranslationSchema = {
     paginationPage: string
     view: string
     breadcrumbsAria: string
+    selectAll: string
+    deselectAll: string
+    removeSelected: string
+    removeSelectedAria: string
+    selectedCount: string
   }
   home: {
     heroTitle: string
@@ -96,10 +101,17 @@ export type UiTranslationSchema = {
     courier: string
     courierHint: string
     city: string
+    cityPlaceholder: string
+    cityHint: string
     branch: string
     branchPlaceholder: string
+    branchHint: string
+    branchSelectCityFirst: string
+    branchAddressLabel: string
     address: string
     addressPlaceholder: string
+    searchLoading: string
+    searchEmpty: string
     paymentPickup: string
     paymentPickupHint: string
     paymentGoogle: string
@@ -356,6 +368,11 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paginationPage: 'Сторінка {page}',
     view: 'Переглянути',
     breadcrumbsAria: 'Навігаційний ланцюжок',
+    selectAll: 'Обрати всі',
+    deselectAll: 'Зняти вибір',
+    removeSelected: 'Видалити',
+    removeSelectedAria: 'Видалити обрані',
+    selectedCount: 'Обрано {count}',
   },
   home: {
     heroTitle: 'Ласкаво просимо до «{siteName}»',
@@ -439,11 +456,18 @@ export const uiTranslationsUk: UiTranslationSchema = {
     novaPoshtaHint: 'Забрати з відділення / поштомату',
     courier: 'Курʼєрська доставка',
     courierHint: 'Доставка за адресою',
-    city: 'Місто',
+    city: 'Населений пункт',
+    cityPlaceholder: 'Почніть вводити назву міста або села',
+    cityHint: 'Оберіть зі списку підказок',
     branch: 'Відділення / поштомат',
-    branchPlaceholder: 'Номер або адреса відділення',
+    branchPlaceholder: 'Номер відділення, наприклад 137',
+    branchHint: 'Оберіть відділення — адреса підставиться автоматично',
+    branchSelectCityFirst: 'Спочатку оберіть населений пункт',
+    branchAddressLabel: 'Адреса відділення: {address}',
     address: 'Адреса доставки',
     addressPlaceholder: 'Вулиця, будинок, квартира',
+    searchLoading: 'Пошук…',
+    searchEmpty: 'Нічого не знайдено',
     paymentPickup: 'Оплата при отриманні',
     paymentPickupHint: 'Готівкою або карткою у відділенні',
     paymentGoogle: 'Google Pay',
@@ -460,8 +484,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     goToOrders: 'До замовлень',
     errorRequired: 'Заповніть обовʼязкові поля',
     errorPhone: 'Введіть коректний номер телефону',
-    errorCity: 'Вкажіть місто',
-    errorBranch: 'Вкажіть відділення Нової Пошти',
+    errorCity: 'Оберіть населений пункт зі списку',
+    errorBranch: 'Оберіть відділення Нової Пошти зі списку',
     errorAddress: 'Вкажіть адресу доставки',
     errorPayment: 'Оберіть спосіб оплати',
     errorSubmit: 'Не вдалося оформити замовлення. Спробуйте ще раз',
@@ -701,6 +725,11 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paginationPage: 'Page {page}',
     view: 'View',
     breadcrumbsAria: 'Breadcrumb',
+    selectAll: 'Select all',
+    deselectAll: 'Deselect all',
+    removeSelected: 'Delete',
+    removeSelectedAria: 'Remove selected',
+    selectedCount: 'Selected {count}',
   },
   home: {
     heroTitle: 'Welcome to "{siteName}"',
@@ -784,11 +813,18 @@ export const uiTranslationsEn: UiTranslationSchema = {
     novaPoshtaHint: 'Pick up from a branch / parcel locker',
     courier: 'Courier delivery',
     courierHint: 'Delivery to your address',
-    city: 'City',
+    city: 'Settlement',
+    cityPlaceholder: 'Start typing a city or village',
+    cityHint: 'Pick a suggestion from the list',
     branch: 'Branch / locker',
-    branchPlaceholder: 'Branch number or address',
+    branchPlaceholder: 'Branch number, e.g. 137',
+    branchHint: 'Select a branch — the address fills in automatically',
+    branchSelectCityFirst: 'Select a settlement first',
+    branchAddressLabel: 'Branch address: {address}',
     address: 'Delivery address',
     addressPlaceholder: 'Street, building, apartment',
+    searchLoading: 'Searching…',
+    searchEmpty: 'No results',
     paymentPickup: 'Pay on pickup',
     paymentPickupHint: 'Cash or card at the branch',
     paymentGoogle: 'Google Pay',
@@ -805,8 +841,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     goToOrders: 'View orders',
     errorRequired: 'Please fill in the required fields',
     errorPhone: 'Enter a valid phone number',
-    errorCity: 'Enter a city',
-    errorBranch: 'Enter a Nova Poshta branch',
+    errorCity: 'Select a settlement from the list',
+    errorBranch: 'Select a Nova Poshta branch from the list',
     errorAddress: 'Enter a delivery address',
     errorPayment: 'Select a payment method',
     errorSubmit: 'Could not place the order. Please try again',

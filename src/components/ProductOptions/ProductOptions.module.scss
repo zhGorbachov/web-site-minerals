@@ -31,20 +31,22 @@
   border: none;
   background: transparent;
   font-size: $font-size-sm;
-  font-weight: $font-weight-medium;
-  color: $color-primary;
+  font-weight: $font-weight-bold;
+  color: $color-text;
   cursor: pointer;
   user-select: none;
-  transition: color $transition-base;
   text-align: left;
 
-  &:hover {
-    color: $color-primary-dark;
+  &:hover,
+  &:focus,
+  &:focus-visible,
+  &:active {
+    color: $color-text;
   }
 }
 
 .characteristicsTitleOpen {
-  color: $color-primary-dark;
+  color: $color-text;
 }
 
 .chevron {
@@ -168,8 +170,8 @@
 
   &.lengthPillActive {
     border-color: $color-primary;
-    background: rgba(var(--color-primary-rgb), 0.08);
-    color: $color-primary;
+    background: $color-primary;
+    color: $color-on-primary;
     font-weight: $font-weight-semibold;
     box-shadow: none;
   }

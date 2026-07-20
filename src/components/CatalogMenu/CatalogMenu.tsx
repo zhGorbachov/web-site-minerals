@@ -13,16 +13,16 @@ const listVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.07, delayChildren: 0.12 },
+    transition: { staggerChildren: 0.1, delayChildren: 0.22 },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, x: -16 },
+  hidden: { opacity: 0, x: -22 },
   visible: {
     opacity: 1,
     x: 0,
-    transition: { type: 'spring', stiffness: 380, damping: 26 },
+    transition: { type: 'spring', stiffness: 220, damping: 22, mass: 0.9 },
   },
 }
 
@@ -135,7 +135,7 @@ export function CatalogMenu({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                       >
                         <ul className={styles.subList}>
                           {subs.map((sub) => (

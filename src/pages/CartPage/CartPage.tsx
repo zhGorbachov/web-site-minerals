@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react'
@@ -20,12 +21,47 @@ const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
 export function CartPage() {
   const { t, tp, language } = useTranslation()
   const navigate = useNavigate()
-  const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCartStore()
+  const { items, removeItem, removeItems, updateQuantity, totalPrice, totalItems } = useCartStore()
   const openCatalog = useOpenCatalog()
   const total = totalPrice()
   const count = totalItems()
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const validIds = new Set(items.map((item) => item.id))
+    setSelectedIds((prev) => {
+      const next = new Set([...prev].filter((id) => validIds.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [items])
 
   const goToCheckout = () => navigate('/checkout')
+
+  const allSelected = items.length > 0 && selectedIds.size === items.length
+  const someSelected = selectedIds.size > 0
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+      return
+    }
+    setSelectedIds(new Set(items.map((item) => item.id)))
+  }
+
+  const toggleItem = (itemId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(itemId)) next.delete(itemId)
+      else next.add(itemId)
+      return next
+    })
+  }
+
+  const handleRemoveSelected = async () => {
+    if (!someSelected) return
+    await removeItems([...selectedIds])
+    setSelectedIds(new Set())
+  }
 
   if (count === 0) {
     return (
@@ -55,12 +91,46 @@ export function CartPage() {
           <span className={styles.titleCount}>{tp(count)}</span>
         </motion.h1>
 
+        <div className={styles.selectionBar}>
+          <label className={styles.selectAll}>
+            <input
+              type="checkbox"
+              className={styles.checkbox}
+              checked={allSelected}
+              ref={(el) => {
+                if (el) el.indeterminate = someSelected && !allSelected
+              }}
+              onChange={toggleSelectAll}
+            />
+            <span>{allSelected ? t('common.deselectAll') : t('common.selectAll')}</span>
+          </label>
+
+          <button
+            type="button"
+            className={[styles.bulkRemoveBtn, someSelected ? '' : styles.bulkRemoveBtnHidden]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={handleRemoveSelected}
+            disabled={!someSelected}
+            aria-hidden={!someSelected}
+            tabIndex={someSelected ? 0 : -1}
+            aria-label={t('common.removeSelectedAria')}
+          >
+            <Trash2 size={16} />
+            <span>
+              {t('common.removeSelected')}
+              <span className={styles.bulkCount}>{someSelected ? selectedIds.size : 0}</span>
+            </span>
+          </button>
+        </div>
+
         <div className={styles.layout}>
           <div className={styles.itemsList}>
             <AnimatePresence initial={false}>
               {items.map((item) => {
                 const product = localizeProduct(item.product, language)
                 const unitPrice = product.discountPrice ?? product.price
+                const isSelected = selectedIds.has(item.id)
 
                 const formatOptionValue = (key: string, value: string) => {
                   if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
@@ -73,13 +143,24 @@ export function CartPage() {
                 return (
                   <motion.article
                     key={item.id}
-                    layout
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8, height: 0, marginBottom: 0 }}
                     transition={{ duration: 0.25 }}
-                    className={styles.cartItem}
+                    className={[styles.cartItem, isSelected ? styles.cartItemSelected : '']
+                      .filter(Boolean)
+                      .join(' ')}
                   >
+                    <label className={styles.itemCheck}>
+                      <input
+                        type="checkbox"
+                        className={styles.checkbox}
+                        checked={isSelected}
+                        onChange={() => toggleItem(item.id)}
+                        aria-label={product.name}
+                      />
+                    </label>
+
                     <Link to={`/product/${product.slug}`} className={styles.itemImage}>
                       <img src={product.images[0]} alt={product.name} />
                     </Link>

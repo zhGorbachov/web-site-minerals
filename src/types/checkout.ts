@@ -12,7 +12,11 @@ export interface CheckoutContact {
 export interface CheckoutLocation {
   deliveryMethod: DeliveryMethod
   city: string
+  /** Nova Poshta settlement / city Ref (for warehouse lookup). */
+  cityRef?: string
   branch: string
+  /** Nova Poshta warehouse Ref. */
+  warehouseRef?: string
   address: string
 }
 

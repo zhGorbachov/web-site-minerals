@@ -14,10 +14,10 @@
   align-items: center;
   justify-content: space-between;
   gap: $spacing-4;
-  margin-bottom: $spacing-6;
+  margin-bottom: $spacing-4;
 
   @include tablet-up {
-    margin-bottom: $spacing-8;
+    margin-bottom: $spacing-5;
   }
 }
 
@@ -44,15 +44,269 @@
   }
 }
 
-.clearBtn {
+.selectionBar {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+  min-height: 36px;
+  margin-bottom: $spacing-4;
+
+  @include tablet-up {
+    margin-bottom: $spacing-5;
+  }
+}
+
+.selectAll {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-height: 36px;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1.5px solid $color-border;
+  border-radius: 4px;
+  background: $color-white;
+  cursor: pointer;
+  position: relative;
+  transition: border-color $transition-base, background $transition-base;
+
+  &:checked,
+  &:indeterminate {
+    background: $color-primary;
+    border-color: $color-primary;
+  }
+
+  &:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid $color-on-primary;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  &:indeterminate::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    width: 10px;
+    height: 2px;
+    background: $color-on-primary;
+  }
+}
+
+.bulkRemoveBtn {
+  display: inline-flex;
   align-items: center;
   gap: $spacing-2;
   flex-shrink: 0;
+  min-height: 36px;
   padding: $spacing-2 $spacing-3;
   border-radius: $radius-button;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
+  color: $color-error;
+  background: rgba($color-error, 0.08);
+  transition: background $transition-base, opacity $transition-base;
+  cursor: pointer;
+  visibility: visible;
+  opacity: 1;
+
+  &:hover:not(:disabled) {
+    background: rgba($color-error, 0.14);
+  }
+}
+
+.bulkRemoveBtnHidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bulkCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  padding-inline: 4px;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  background: $color-error;
+  color: $color-white;
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+
+  @include tablet-up {
+    gap: $spacing-4;
+  }
+}
+
+.listItem {
+  display: flex;
+  gap: $spacing-3;
+  background: $color-white;
+  border-radius: $radius-md;
+  padding: $spacing-3;
+  border: 1px solid $color-border;
+  align-items: flex-start;
+  transition: border-color $transition-base, background $transition-base;
+
+  @include tablet-up {
+    gap: $spacing-4;
+    padding: $spacing-4;
+    box-shadow: $shadow-card;
+    border: 1px solid transparent;
+  }
+}
+
+.listItemSelected {
+  border-color: $color-primary;
+  background: rgba(var(--color-primary-rgb), 0.04);
+}
+
+.itemCheck {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  cursor: pointer;
+}
+
+.itemImage {
+  position: relative;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  background: $color-surface;
+
+  @include tablet-up {
+    width: 100px;
+    height: 100px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.badgeNew {
+  position: absolute;
+  top: $spacing-1;
+  left: $spacing-1;
+  padding: 2px $spacing-2;
+  border-radius: $radius-full;
+  font-size: 10px;
+  font-weight: $font-weight-semibold;
+  background: $color-primary;
+  color: $color-on-primary;
+}
+
+.itemBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-2;
+}
+
+.itemName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  line-height: $line-height-tight;
+  @include text-clamp(2);
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary;
+  }
+
+  @include tablet-up {
+    font-size: $font-size-base;
+  }
+}
+
+.itemCategory {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.itemFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+  margin-top: auto;
+}
+
+.priceGroup {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-2;
+  flex-wrap: wrap;
+}
+
+.itemPrice {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  white-space: nowrap;
+}
+
+.priceDiscounted {
+  color: $color-success;
+}
+
+.oldPrice {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  text-decoration: line-through;
+}
+
+.removeBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-circle;
   color: $color-text-muted;
   transition: color $transition-base, background $transition-base;
   cursor: pointer;
@@ -61,13 +315,54 @@
     color: $color-error;
     background: rgba($color-error, 0.08);
   }
+}
 
-  span {
-    display: none;
+.cartBtn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-circle;
+  color: $color-primary;
+  background: rgba(var(--color-primary-rgb), 0.08);
+  transition: background $transition-base, color $transition-base;
+  cursor: pointer;
 
-    @include tablet-up {
-      display: inline;
-    }
+  &:hover:not(:disabled) {
+    background: rgba(var(--color-primary-rgb), 0.16);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.skeletonItem {
+  height: 114px;
+  border-radius: $radius-md;
+  background: linear-gradient(
+    90deg,
+    $color-surface 25%,
+    rgba($color-border, 0.35) 50%,
+    $color-surface 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+
+  @include tablet-up {
+    height: 132px;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 

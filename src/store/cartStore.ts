@@ -9,6 +9,7 @@ interface CartState {
   syncing: boolean
   addItem: (product: Product, options?: Record<string, string>, quantity?: number) => Promise<void>
   removeItem: (itemId: string) => Promise<void>
+  removeItems: (itemIds: string[]) => Promise<void>
   updateQuantity: (itemId: string, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
   totalItems: () => number
@@ -88,6 +89,29 @@ export const useCartStore = create<CartState>()(
 
         set((state) => ({
           items: state.items.filter((item) => item.id !== itemId),
+        }))
+      },
+
+      removeItems: async (itemIds) => {
+        const uniqueIds = [...new Set(itemIds)]
+        if (uniqueIds.length === 0) return
+
+        if (isLoggedIn()) {
+          try {
+            let cart = await CartApi.removeItem(uniqueIds[0])
+            for (let i = 1; i < uniqueIds.length; i++) {
+              cart = await CartApi.removeItem(uniqueIds[i])
+            }
+            set({ items: cart.items })
+            return
+          } catch {
+            // fall through
+          }
+        }
+
+        const idSet = new Set(uniqueIds)
+        set((state) => ({
+          items: state.items.filter((item) => !idSet.has(item.id)),
         }))
       },
 

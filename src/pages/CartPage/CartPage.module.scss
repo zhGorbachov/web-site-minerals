@@ -34,6 +34,115 @@
   }
 }
 
+.selectionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+  min-height: 36px;
+  margin-bottom: $spacing-4;
+
+  @include tablet-up {
+    margin-bottom: $spacing-5;
+  }
+}
+
+.selectAll {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-height: 36px;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1.5px solid $color-border;
+  border-radius: 4px;
+  background: $color-white;
+  cursor: pointer;
+  position: relative;
+  transition: border-color $transition-base, background $transition-base;
+
+  &:checked,
+  &:indeterminate {
+    background: $color-primary;
+    border-color: $color-primary;
+  }
+
+  &:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid $color-on-primary;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  &:indeterminate::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    width: 10px;
+    height: 2px;
+    background: $color-on-primary;
+  }
+}
+
+.bulkRemoveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-error;
+  background: rgba($color-error, 0.08);
+  transition: background $transition-base, opacity $transition-base;
+  cursor: pointer;
+  visibility: visible;
+  opacity: 1;
+
+  &:hover:not(:disabled) {
+    background: rgba($color-error, 0.14);
+  }
+}
+
+.bulkRemoveBtnHidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bulkCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  padding-inline: 4px;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  background: $color-error;
+  color: $color-white;
+}
+
 .layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -64,13 +173,27 @@
   padding: $spacing-3;
   border: 1px solid $color-border;
   align-items: flex-start;
+  transition: border-color $transition-base, background $transition-base;
 
   @include tablet-up {
     gap: $spacing-4;
     padding: $spacing-4;
     box-shadow: $shadow-card;
-    border: none;
+    border: 1px solid transparent;
   }
+}
+
+.cartItemSelected {
+  border-color: $color-primary;
+  background: rgba(var(--color-primary-rgb), 0.04);
+}
+
+.itemCheck {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  cursor: pointer;
 }
 
 .itemImage {

@@ -13,3 +13,9 @@ export type {
   CheckoutPayment,
   SavedCheckoutProfile,
 } from './checkout'
+export type {
+  NovaPoshtaCity,
+  NovaPoshtaWarehouse,
+  NovaPoshtaCitySearchResponse,
+  NovaPoshtaWarehouseSearchResponse,
+} from './novaPoshta'

@@ -16,17 +16,28 @@ import type {
   CheckoutContact,
   CheckoutLocation,
   DeliveryMethod,
+  NovaPoshtaCity,
+  NovaPoshtaWarehouse,
   PaymentMethod,
 } from '@/types'
-import { OrdersApi } from '@/api'
+import { NovaPoshtaApi, OrdersApi } from '@/api'
 import { useAuthStore, useCartStore, useCheckoutStore, GUEST_CHECKOUT_PROFILE_KEY } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils'
 import { formatPhoneDisplay, isValidLocalPhone, normalizeLocalPhone } from '@/utils/phone'
-import { Button, Breadcrumbs, Input, PhoneInput, EmptyState } from '@/components/ui'
+import { Button, Breadcrumbs, Input, PhoneInput, EmptyState, Autocomplete } from '@/components/ui'
+import type { AutocompleteOption } from '@/components/ui'
 import styles from './CheckoutPage.module.scss'
 
 type StepId = 1 | 2 | 3
+
+function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
+  const number = warehouse.number || ''
+  if (warehouse.cityName && number) {
+    return `${warehouse.cityName} - ${number}`
+  }
+  return warehouse.name
+}
 
 function GooglePayIcon() {
   return (
@@ -120,9 +131,9 @@ function CheckoutBlock({
         {expanded && (
           <motion.div
             className={styles.blockBody}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+            animate={{ opacity: 1, height: 'auto', overflow: 'visible' }}
+            exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
             transition={{ duration: 0.22 }}
           >
             {children}
@@ -161,7 +172,9 @@ export function CheckoutPage() {
   const [location, setLocation] = useState<CheckoutLocation>({
     deliveryMethod: 'nova_poshta',
     city: '',
+    cityRef: undefined,
     branch: '',
+    warehouseRef: undefined,
     address: '',
   })
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
@@ -174,6 +187,32 @@ export function CheckoutPage() {
 
   const total = totalPrice()
   const count = totalItems()
+
+  const loadCityOptions = async (query: string): Promise<AutocompleteOption[]> => {
+    const { items } = await NovaPoshtaApi.searchCities(query)
+    return items.map((city) => ({
+      id: city.ref,
+      label: city.present,
+      description:
+        city.area && !city.present.toLocaleLowerCase('uk-UA').includes(city.area.toLocaleLowerCase('uk-UA'))
+          ? city.area
+          : undefined,
+      data: city,
+    }))
+  }
+
+  const loadWarehouseOptions = async (query: string): Promise<AutocompleteOption[]> => {
+    if (!location.cityRef) return []
+    const numberMatch = query.match(/(?:^|[\s\-—])(\d+)\s*$/)
+    const searchQuery = numberMatch ? numberMatch[1] : query
+    const { items } = await NovaPoshtaApi.searchWarehouses(location.cityRef, searchQuery)
+    return items.map((warehouse) => ({
+      id: warehouse.ref,
+      label: formatWarehouseLabel(warehouse),
+      description: warehouse.shortAddress || warehouse.name,
+      data: warehouse,
+    }))
+  }
 
   useEffect(() => {
     const saved = getProfile(profileKey)
@@ -196,9 +235,10 @@ export function CheckoutPage() {
 
     const locationValid =
       Boolean(saved?.location?.city.trim()) &&
+      Boolean(saved?.location?.cityRef) &&
       (saved?.location.deliveryMethod === 'courier'
         ? Boolean(saved.location.address.trim())
-        : Boolean(saved?.location.branch.trim()))
+        : Boolean(saved?.location.branch.trim()) && Boolean(saved?.location.warehouseRef))
 
     if (contactValid) {
       setContactDone(true)
@@ -296,15 +336,17 @@ export function CheckoutPage() {
   }
 
   const validateLocation = () => {
-    if (!location.city.trim()) {
+    if (!location.city.trim() || !location.cityRef) {
       setErrorStep(2)
       setError(t('checkout.errorCity'))
       return false
     }
-    if (location.deliveryMethod === 'nova_poshta' && !location.branch.trim()) {
-      setErrorStep(2)
-      setError(t('checkout.errorBranch'))
-      return false
+    if (location.deliveryMethod === 'nova_poshta') {
+      if (!location.branch.trim() || !location.warehouseRef) {
+        setErrorStep(2)
+        setError(t('checkout.errorBranch'))
+        return false
+      }
     }
     if (location.deliveryMethod === 'courier' && !location.address.trim()) {
       setErrorStep(2)
@@ -336,7 +378,9 @@ export function CheckoutPage() {
     const next: CheckoutLocation = {
       deliveryMethod: location.deliveryMethod,
       city: location.city.trim(),
+      cityRef: location.cityRef,
       branch: location.branch.trim(),
+      warehouseRef: location.warehouseRef,
       address: location.address.trim(),
     }
     setLocation(next)
@@ -345,7 +389,55 @@ export function CheckoutPage() {
   }
 
   const setDeliveryMethod = (method: DeliveryMethod) => {
-    setLocation((prev) => ({ ...prev, deliveryMethod: method }))
+    setLocation((prev) => ({
+      ...prev,
+      deliveryMethod: method,
+      branch: method === 'courier' ? '' : prev.branch,
+      warehouseRef: method === 'courier' ? undefined : prev.warehouseRef,
+      address: method === 'nova_poshta' ? (prev.warehouseRef ? prev.address : '') : prev.address,
+    }))
+  }
+
+  const handleCityChange = (value: string) => {
+    setLocation((prev) => ({
+      ...prev,
+      city: value,
+      cityRef: undefined,
+      branch: '',
+      warehouseRef: undefined,
+      address: prev.deliveryMethod === 'nova_poshta' ? '' : prev.address,
+    }))
+  }
+
+  const handleCitySelect = (option: AutocompleteOption) => {
+    const city = option.data as NovaPoshtaCity
+    setLocation((prev) => ({
+      ...prev,
+      city: city.present || city.name,
+      cityRef: city.ref,
+      branch: '',
+      warehouseRef: undefined,
+      address: prev.deliveryMethod === 'nova_poshta' ? '' : prev.address,
+    }))
+  }
+
+  const handleBranchChange = (value: string) => {
+    setLocation((prev) => ({
+      ...prev,
+      branch: value,
+      warehouseRef: undefined,
+      address: '',
+    }))
+  }
+
+  const handleBranchSelect = (option: AutocompleteOption) => {
+    const warehouse = option.data as NovaPoshtaWarehouse
+    setLocation((prev) => ({
+      ...prev,
+      branch: formatWarehouseLabel(warehouse),
+      warehouseRef: warehouse.ref,
+      address: warehouse.shortAddress || warehouse.name,
+    }))
   }
 
   const handlePlaceOrder = async () => {
@@ -372,7 +464,9 @@ export function CheckoutPage() {
     saveLocation(profileKey, {
       deliveryMethod: location.deliveryMethod,
       city: location.city.trim(),
+      cityRef: location.cityRef,
       branch: location.branch.trim(),
+      warehouseRef: location.warehouseRef,
       address: location.address.trim(),
     })
 
@@ -555,21 +649,43 @@ export function CheckoutPage() {
 
                 <div className={styles.formGrid} style={{ marginTop: 16 }}>
                   <div className={styles.fullWidth}>
-                    <Input
+                    <Autocomplete
                       label={t('checkout.city')}
                       value={location.city}
-                      onChange={(e) => setLocation((l) => ({ ...l, city: e.target.value }))}
-                      autoComplete="address-level2"
+                      onChange={handleCityChange}
+                      onSelect={handleCitySelect}
+                      loadOptions={loadCityOptions}
+                      placeholder={t('checkout.cityPlaceholder')}
+                      hint={location.cityRef ? undefined : t('checkout.cityHint')}
+                      emptyMessage={t('checkout.searchEmpty')}
+                      loadingMessage={t('checkout.searchLoading')}
                       required
                     />
                   </div>
                   {location.deliveryMethod === 'nova_poshta' ? (
                     <div className={styles.fullWidth}>
-                      <Input
+                      <Autocomplete
                         label={t('checkout.branch')}
                         value={location.branch}
-                        onChange={(e) => setLocation((l) => ({ ...l, branch: e.target.value }))}
-                        placeholder={t('checkout.branchPlaceholder')}
+                        onChange={handleBranchChange}
+                        onSelect={handleBranchSelect}
+                        loadOptions={loadWarehouseOptions}
+                        placeholder={
+                          location.cityRef
+                            ? t('checkout.branchPlaceholder')
+                            : t('checkout.branchSelectCityFirst')
+                        }
+                        disabled={!location.cityRef}
+                        minChars={0}
+                        hint={
+                          location.warehouseRef && location.address
+                            ? t('checkout.branchAddressLabel', { address: location.address })
+                            : location.cityRef
+                              ? t('checkout.branchHint')
+                              : t('checkout.branchSelectCityFirst')
+                        }
+                        emptyMessage={t('checkout.searchEmpty')}
+                        loadingMessage={t('checkout.searchLoading')}
                         required
                       />
                     </div>

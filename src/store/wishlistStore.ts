@@ -8,6 +8,7 @@ interface WishlistState {
   syncing: boolean
   addToWishlist: (productId: string) => Promise<void>
   removeFromWishlist: (productId: string) => Promise<void>
+  removeManyFromWishlist: (productIds: string[]) => Promise<void>
   toggleWishlist: (productId: string) => Promise<void>
   isInWishlist: (productId: string) => boolean
   clearWishlist: () => Promise<void>
@@ -56,6 +57,29 @@ export const useWishlistStore = create<WishlistState>()(
 
         set((state) => ({
           productIds: state.productIds.filter((id) => id !== productId),
+        }))
+      },
+
+      removeManyFromWishlist: async (ids) => {
+        const uniqueIds = [...new Set(ids)]
+        if (uniqueIds.length === 0) return
+
+        if (isLoggedIn()) {
+          try {
+            let productIds = await WishlistApi.remove(uniqueIds[0])
+            for (let i = 1; i < uniqueIds.length; i++) {
+              productIds = await WishlistApi.remove(uniqueIds[i])
+            }
+            set({ productIds })
+            return
+          } catch {
+            // fall through
+          }
+        }
+
+        const idSet = new Set(uniqueIds)
+        set((state) => ({
+          productIds: state.productIds.filter((id) => !idSet.has(id)),
         }))
       },
 

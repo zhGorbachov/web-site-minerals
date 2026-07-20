@@ -12,6 +12,7 @@ import { wishlistRouter } from './routes/wishlist.js'
 import { ordersRouter } from './routes/orders.js'
 import { adminRouter } from './routes/admin.js'
 import { uploadRouter, uploadsDir } from './routes/upload.js'
+import { novaPoshtaRouter } from './routes/novaPoshta.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const mediaDir = path.resolve(__dirname, '../../src/assets/mock')
@@ -41,6 +42,7 @@ app.use('/api/wishlist', wishlistRouter)
 app.use('/api/orders', ordersRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/admin/upload', uploadRouter)
+app.use('/api/nova-poshta', novaPoshtaRouter)
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err)

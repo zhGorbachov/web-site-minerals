@@ -65,7 +65,6 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   const handleAddToCart = () => {
-    if (addedToCart) return
     if (needsOptions) {
       navigate(productUrl)
       return
@@ -73,10 +72,10 @@ export function ProductCard({ product }: ProductCardProps) {
     if (maxSelectable <= 0) return
     addItem(product, undefined, Math.min(quantity, maxSelectable))
     setAddedToCart(true)
-    setTimeout(() => {
+    window.setTimeout(() => {
       setAddedToCart(false)
       setCartMenuOpen(false)
-    }, 1200)
+    }, 800)
   }
 
   return (
@@ -208,7 +207,6 @@ export function ProductCard({ product }: ProductCardProps) {
                           type="button"
                           className={[styles.cartMenuSubmit, addedToCart ? styles.cartMenuSubmitDone : ''].filter(Boolean).join(' ')}
                           onClick={handleAddToCart}
-                          disabled={addedToCart}
                         >
                           {addedToCart ? (
                             <>

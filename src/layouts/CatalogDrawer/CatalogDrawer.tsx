@@ -25,7 +25,7 @@ export function CatalogDrawer() {
       return
     }
 
-    const timer = window.setTimeout(() => setCanHover(true), 200)
+    const timer = window.setTimeout(() => setCanHover(true), 480)
     return () => window.clearTimeout(timer)
   }, [isCatalogOpen])
 
@@ -65,16 +65,21 @@ export function CatalogDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={styles.backdrop}
             onClick={closeCatalog}
             aria-hidden="true"
           />
           <motion.aside
-            initial={{ x: '-100%', opacity: 0.6 }}
+            initial={{ x: '-100%', opacity: 0.55 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: '-100%', opacity: 0.6 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 260, mass: 0.85 }}
+            exit={{ x: '-104%', opacity: 0.4 }}
+            transition={{
+              type: 'spring',
+              damping: 22,
+              stiffness: 130,
+              mass: 1.05,
+            }}
             className={styles.drawer}
             aria-label={t('catalog.title')}
           >

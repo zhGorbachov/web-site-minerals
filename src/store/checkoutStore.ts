@@ -26,7 +26,9 @@ const emptyContact = (): CheckoutContact => ({
 const emptyLocation = (): CheckoutLocation => ({
   deliveryMethod: 'nova_poshta',
   city: '',
+  cityRef: undefined,
   branch: '',
+  warehouseRef: undefined,
   address: '',
 })
 

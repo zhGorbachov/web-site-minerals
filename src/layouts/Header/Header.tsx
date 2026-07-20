@@ -50,6 +50,25 @@ const DESKTOP_SEARCH_WIDTH = 220
 const SEARCH_TRANSITION = { duration: 0.22, ease: [0.4, 0, 0.2, 1] as const }
 const MOBILE_HEADER_SPRING = { type: 'spring' as const, stiffness: 400, damping: 34, mass: 0.8 }
 const MOBILE_SEARCH_SPRING = { type: 'spring' as const, stiffness: 340, damping: 30, mass: 0.85 }
+const DRAWER_SPRING = { type: 'spring' as const, damping: 22, stiffness: 130, mass: 1.05 }
+const DRAWER_BACKDROP_TRANSITION = { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const }
+
+const mobileMenuListVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.18 },
+  },
+}
+
+const mobileMenuItemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { type: 'spring' as const, stiffness: 220, damping: 22, mass: 0.9 },
+  },
+}
 
 const mobileSearchOverlayVariants = {
   hidden: { opacity: 0 },
@@ -398,16 +417,16 @@ export function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={DRAWER_BACKDROP_TRANSITION}
               className={styles.backdrop}
               onClick={closeBurger}
               aria-hidden="true"
             />
             <motion.nav
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+              initial={{ x: '-100%', opacity: 0.55 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-104%', opacity: 0.4 }}
+              transition={DRAWER_SPRING}
               className={styles.mobileDrawer}
               aria-label={t('header.mobileMenu')}
             >
@@ -422,7 +441,12 @@ export function Header() {
                 <LanguageSwitcher />
               </div>
 
-              <ul className={styles.mobileMenu}>
+              <motion.ul
+                className={styles.mobileMenu}
+                variants={mobileMenuListVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 {MOBILE_NAV_LINK_KEYS.map((link, index) => {
                   const nextEndpoint =
                     index < MOBILE_NAV_LINK_KEYS.length - 1
@@ -431,9 +455,10 @@ export function Header() {
                   const showDivider = getMenuEndpoint(link.to) !== nextEndpoint
 
                   return (
-                    <li
+                    <motion.li
                       key={link.to}
                       className={showDivider ? styles.mobileMenuItemDivided : undefined}
+                      variants={mobileMenuItemVariants}
                     >
                       <Link
                         to={link.to}
@@ -446,10 +471,10 @@ export function Header() {
                       >
                         <MobileMenuLinkLabel icon={link.icon} label={t(link.labelKey)} />
                       </Link>
-                    </li>
+                    </motion.li>
                   )
                 })}
-                <li className={styles.mobileMenuLoginWrap}>
+                <motion.li className={styles.mobileMenuLoginWrap} variants={mobileMenuItemVariants}>
                   <Link
                     to={user ? '/profile' : '/login'}
                     className={styles.mobileMenuLogin}
@@ -464,8 +489,8 @@ export function Header() {
                     )}
                     {user ? t('header.profile') : t('header.clientLogin')}
                   </Link>
-                </li>
-                <li className={styles.mobileMenuContactBlock}>
+                </motion.li>
+                <motion.li className={styles.mobileMenuContactBlock} variants={mobileMenuItemVariants}>
                   <Link
                     to="/contacts"
                     className={
@@ -489,8 +514,8 @@ export function Header() {
                     <MobileMenuLinkLabel icon={Clock} label={t('contacts.scheduleTitle')} />
                   </Link>
                   <ContactDetails variant="menu" onLinkClick={closeBurger} />
-                </li>
-              </ul>
+                </motion.li>
+              </motion.ul>
 
               <div className={styles.mobileDrawerFooter}>
                 <a href="tel:+380668344322" className={styles.mobileCallBtn} onClick={closeBurger}>

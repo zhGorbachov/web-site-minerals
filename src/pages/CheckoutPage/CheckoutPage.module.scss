@@ -46,11 +46,17 @@
   background: $color-white;
   border: 1px solid $color-border;
   border-radius: $radius-lg;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
 
   @include tablet-up {
     box-shadow: $shadow-card;
     border: none;
+  }
+
+  &:focus-within {
+    z-index: 5;
   }
 }
 

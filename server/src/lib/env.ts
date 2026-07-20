@@ -18,6 +18,7 @@ export const env = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET?.trim() ?? '',
   appleClientId: process.env.APPLE_CLIENT_ID?.trim() ?? '',
   apiUrl: process.env.API_URL?.trim() || `http://localhost:${process.env.PORT ?? 3001}`,
+  novaPoshtaApiKey: process.env.NOVA_POSHTA_API_KEY?.trim() ?? '',
 }
 
 export function isGoogleConfigured() {

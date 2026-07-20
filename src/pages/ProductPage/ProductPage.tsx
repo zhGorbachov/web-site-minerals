@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lucide-react'
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
@@ -23,6 +23,8 @@ export function ProductPage() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [addAnimKey, setAddAnimKey] = useState(0)
+  const addedResetRef = useRef<number | null>(null)
 
   const addItem = useCartStore((s) => s.addItem)
   const cartQuantity = useCartStore((s) =>
@@ -58,11 +60,23 @@ export function ProductPage() {
   }, [product?.id, product?.stock, maxSelectable, selectedOptions])
 
   const handleAddToCart = () => {
-    if (!product || addedToCart || maxSelectable <= 0) return
+    if (!product || maxSelectable <= 0) return
     addItem(product, selectedOptions, Math.min(quantity, maxSelectable))
     setAddedToCart(true)
-    setTimeout(() => setAddedToCart(false), 2500)
+    setAddAnimKey((key) => key + 1)
+    if (addedResetRef.current !== null) {
+      window.clearTimeout(addedResetRef.current)
+    }
+    addedResetRef.current = window.setTimeout(() => setAddedToCart(false), 900)
   }
+
+  useEffect(() => {
+    return () => {
+      if (addedResetRef.current !== null) {
+        window.clearTimeout(addedResetRef.current)
+      }
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -194,15 +208,63 @@ export function ProductPage() {
                 </button>
               </div>
 
-              <Button
-                onClick={handleAddToCart}
-                size="md"
-                className={styles.addToCartBtn}
-                disabled={product.stock === 0 || maxSelectable === 0 || addedToCart}
-                leftIcon={addedToCart ? <CheckCircle size={16} /> : <ShoppingCart size={16} />}
+              <span
+                className={[
+                  styles.addToCartBtnWrap,
+                  addAnimKey > 0
+                    ? addAnimKey % 2 === 0
+                      ? styles.addToCartBtnPulseA
+                      : styles.addToCartBtnPulseB
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
               >
-                {addedToCart ? t('cart.added') : maxSelectable === 0 ? t('cart.maxInCart') : t('cart.addToCart')}
-              </Button>
+                <Button
+                  onClick={handleAddToCart}
+                  size="md"
+                  className={[
+                    styles.addToCartBtn,
+                    addedToCart ? styles.addToCartBtnAdded : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  disabled={product.stock === 0 || maxSelectable === 0}
+                  leftIcon={
+                    <span className={styles.addToCartIcon}>
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={addedToCart ? 'check' : 'cart'}
+                          className={styles.addToCartIconInner}
+                          initial={{ scale: 0.6, opacity: 0, y: 4 }}
+                          animate={{ scale: 1, opacity: 1, y: 0 }}
+                          exit={{ scale: 0.6, opacity: 0, y: -4 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          {addedToCart ? <CheckCircle size={16} /> : <ShoppingCart size={16} />}
+                        </motion.span>
+                      </AnimatePresence>
+                    </span>
+                  }
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={addedToCart ? 'added' : maxSelectable === 0 ? 'max' : 'add'}
+                      className={styles.addToCartLabel}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.16 }}
+                    >
+                      {addedToCart
+                        ? t('cart.added')
+                        : maxSelectable === 0
+                          ? t('cart.maxInCart')
+                          : t('cart.addToCart')}
+                    </motion.span>
+                  </AnimatePresence>
+                </Button>
+              </span>
 
               <button
                 type="button"
