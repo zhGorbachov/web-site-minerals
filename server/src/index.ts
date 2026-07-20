@@ -21,7 +21,7 @@ const app = express()
 
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: env.clientOrigins.length === 1 ? env.clientOrigins[0] : env.clientOrigins,
     credentials: true,
   }),
 )

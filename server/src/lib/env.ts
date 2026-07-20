@@ -8,9 +8,17 @@ function required(name: string, fallback?: string) {
   return value
 }
 
+const clientUrlRaw = required('CLIENT_URL', 'http://localhost:5174')
+
 export const env = {
   port: Number(process.env.PORT ?? 3001),
-  clientUrl: required('CLIENT_URL', 'http://localhost:5174'),
+  /** Primary client origin (first entry). */
+  clientUrl: clientUrlRaw.split(',')[0]!.trim(),
+  /** All allowed CORS origins (comma-separated CLIENT_URL). */
+  clientOrigins: clientUrlRaw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   databaseUrl: required('DATABASE_URL'),
   jwtSecret: required('JWT_SECRET', 'dev-change-me-minerals-jwt-secret'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',

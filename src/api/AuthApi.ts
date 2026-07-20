@@ -41,7 +41,7 @@ export const AuthApi = {
   /** Live: redirect URL. Mock: handled by loginWithGoogle(). */
   googleStartUrl() {
     if (isMockMode) return ''
-    const base = api.defaults.baseURL?.replace(/\/api$/, '') || 'http://localhost:3001'
+    const base = api.defaults.baseURL?.replace(/\/api$/, '') ?? ''
     return `${base}/api/auth/google`
   },
 

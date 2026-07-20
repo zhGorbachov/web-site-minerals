@@ -2,10 +2,13 @@ import axios from 'axios'
 
 export const isMockMode = import.meta.env.VITE_MOCK === 'true'
 
-const API_URL = import.meta.env.VITE_API_URL?.trim() || 'http://localhost:3001'
+/** Empty string = same-origin (Caddy proxies /api). Unset defaults to local API. */
+const configuredApiUrl = import.meta.env.VITE_API_URL
+const API_URL =
+  configuredApiUrl === undefined ? 'http://localhost:3001' : String(configuredApiUrl).trim()
 
 export const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: API_URL ? `${API_URL}/api` : '/api',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })

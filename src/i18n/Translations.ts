@@ -112,7 +112,7 @@ export const translations: Record<Language, TranslationSchema> = {
       discounts: 'Знижки',
       reviews: 'Відгуки',
       values: 'Наші цінності',
-      faq: 'Часті запитання',
+      faq: 'Цікаво знати',
       contactInfo: 'Контактна інформація',
     },
     header: {
@@ -254,7 +254,7 @@ export const translations: Record<Language, TranslationSchema> = {
       discounts: 'Discounts',
       reviews: 'Reviews',
       values: 'Our values',
-      faq: 'FAQ',
+      faq: 'Good to know',
       contactInfo: 'Contact information',
     },
     header: {

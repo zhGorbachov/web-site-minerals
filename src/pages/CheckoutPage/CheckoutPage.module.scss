@@ -251,6 +251,110 @@
   line-height: $line-height-normal;
 }
 
+.paymentCard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  overflow: hidden;
+  transition: border-color $transition-base, background $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.45);
+  }
+}
+
+.paymentCardSelected {
+  border-color: #e8b923;
+  background: #fffdf5;
+  box-shadow: 0 0 0 1px rgba(232, 185, 35, 0.35);
+
+  &:hover {
+    border-color: #e8b923;
+  }
+
+  .radio {
+    border-color: $color-primary;
+  }
+}
+
+.paymentCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-3 $spacing-4;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: $color-text;
+  cursor: pointer;
+
+  @include focus-ring;
+}
+
+.paymentIconWrap {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  background: $color-white;
+  border: 1px solid $color-border;
+}
+
+.brandLogos {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.paymentNested {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  padding: 0 $spacing-4 $spacing-4;
+  margin-left: calc(20px + #{$spacing-3});
+}
+
+.paymentNestedOption {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-3 $spacing-3;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
+  background: $color-white;
+  text-align: left;
+  font: inherit;
+  color: $color-text;
+  cursor: pointer;
+  transition: border-color $transition-base, background $transition-base;
+
+  &:hover {
+    background: $color-surface;
+  }
+
+  &.nestedSelected {
+    border-color: rgba(var(--color-primary-rgb), 0.5);
+    background: rgba(var(--color-primary-rgb), 0.06);
+
+    .radio {
+      border-color: $color-primary;
+    }
+  }
+
+  @include focus-ring;
+}
+
 .commentToggle {
   display: flex;
   align-items: center;

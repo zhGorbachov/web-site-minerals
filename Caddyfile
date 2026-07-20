@@ -1,7 +1,23 @@
-:3000
+:3000 {
+	encode gzip
 
-root * ./dist
+	# Proxy API + static media/uploads to the Node backend
+	handle /api/* {
+		reverse_proxy localhost:3001
+	}
 
-file_server
+	handle /media/* {
+		reverse_proxy localhost:3001
+	}
 
-try_files {path} /index.html
+	handle /uploads/* {
+		reverse_proxy localhost:3001
+	}
+
+	# SPA: static files from Vite build, fallback to index.html
+	handle {
+		root * ./dist
+		try_files {path} /index.html
+		file_server
+	}
+}

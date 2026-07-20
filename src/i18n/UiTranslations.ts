@@ -114,6 +114,7 @@ export type UiTranslationSchema = {
     searchEmpty: string
     paymentPickup: string
     paymentPickupHint: string
+    paymentOnline: string
     paymentGoogle: string
     paymentApple: string
     comment: string
@@ -468,8 +469,9 @@ export const uiTranslationsUk: UiTranslationSchema = {
     addressPlaceholder: 'Вулиця, будинок, квартира',
     searchLoading: 'Пошук…',
     searchEmpty: 'Нічого не знайдено',
-    paymentPickup: 'Оплата при отриманні',
-    paymentPickupHint: 'Готівкою або карткою у відділенні',
+    paymentPickup: 'Післяплата',
+    paymentPickupHint: 'Готівкою або карткою при отриманні. Комісія сплачується покупцем',
+    paymentOnline: 'Безпечна оплата онлайн',
     paymentGoogle: 'Google Pay',
     paymentApple: 'Apple Pay',
     comment: 'Коментар до замовлення',
@@ -825,8 +827,9 @@ export const uiTranslationsEn: UiTranslationSchema = {
     addressPlaceholder: 'Street, building, apartment',
     searchLoading: 'Searching…',
     searchEmpty: 'No results',
-    paymentPickup: 'Pay on pickup',
-    paymentPickupHint: 'Cash or card at the branch',
+    paymentPickup: 'Cash on delivery',
+    paymentPickupHint: 'Cash or card on receipt. Commission is paid by the buyer',
+    paymentOnline: 'Secure online payment',
     paymentGoogle: 'Google Pay',
     paymentApple: 'Apple Pay',
     comment: 'Order comment',

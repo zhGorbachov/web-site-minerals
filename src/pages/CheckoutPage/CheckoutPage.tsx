@@ -8,8 +8,8 @@ import {
   ChevronUp,
   MapPin,
   Package,
+  Pencil,
   Truck,
-  Wallet,
   CreditCard,
 } from 'lucide-react'
 import type {
@@ -39,25 +39,94 @@ function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
   return warehouse.name
 }
 
-function GooglePayIcon() {
+function GooglePayIcon({ size = 22 }: { size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path
         fill="#4285F4"
-        d="M12.24 10.285V14.4h6.806c-.275 1.41-1.64 4.13-6.806 4.13-4.1 0-7.44-3.4-7.44-7.53s3.34-7.53 7.44-7.53c2.33 0 3.9.99 4.79 1.85l3.26-3.14C18.86.89 15.89-.2 12.24-.2 5.97-.2.9 4.87.9 11s5.07 11.2 11.34 11.2c6.55 0 10.88-4.6 10.88-11.07 0-.74-.08-1.3-.18-1.86H12.24z"
-        transform="translate(0 1)"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
       />
     </svg>
   )
 }
 
-function ApplePayIcon() {
+function ApplePayIcon({ size = 22 }: { size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path
-        fill="currentColor"
-        d="M16.365 12.84c-.03-3.04 2.48-4.5 2.59-4.57-1.41-2.06-3.61-2.34-4.39-2.37-1.87-.19-3.65 1.1-4.6 1.1-.96 0-2.43-1.08-4-1.05-2.05.03-3.95 1.2-5 3.04-2.14 3.71-.55 9.2 1.53 12.21 1.02 1.48 2.24 3.13 3.84 3.07 1.54-.06 2.12-1 3.98-1 1.85 0 2.38.99 4 0.96 1.66-.03 2.71-1.5 3.72-2.99 1.17-1.71 1.65-3.37 1.68-3.45-.04-.02-3.22-1.24-3.25-4.95zM13.88 4.5c.84-1.02 1.41-2.44 1.25-3.86-1.21.05-2.67.81-3.54 1.82-.78.9-1.46 2.34-1.28 3.72 1.35.1 2.73-.69 3.57-1.68z"
+        fill="#1A1A1A"
+        d="M16.365 12.84c-.03-3.04 2.48-4.5 2.59-4.57-1.41-2.06-3.61-2.34-4.39-2.37-1.87-.19-3.65 1.1-4.6 1.1-.96 0-2.43-1.08-4-1.05-2.05.03-3.95 1.2-5 3.04-2.14 3.71-.55 9.2 1.53 12.21 1.02 1.48 2.24 3.13 3.84 3.07 1.54-.06 2.12-1 3.98-1 1.85 0 2.38.99 4 .96 1.66-.03 2.71-1.5 3.72-2.99 1.17-1.71 1.65-3.37 1.68-3.45-.04-.02-3.22-1.24-3.25-4.95zM13.88 4.5c.84-1.02 1.41-2.44 1.25-3.86-1.21.05-2.67.81-3.54 1.82-.78.9-1.46 2.34-1.28 3.72 1.35.1 2.73-.69 3.57-1.68z"
       />
+    </svg>
+  )
+}
+
+function CardPayIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <rect x="2" y="6" width="24" height="16" rx="3" fill="#5B8DEF" />
+      <rect x="2" y="10" width="24" height="4" fill="#3D6FD8" />
+      <rect x="5" y="17" width="7" height="2.5" rx="1" fill="#FFD166" />
+      <circle cx="20" cy="18.5" r="2.2" fill="#EF476F" opacity="0.9" />
+      <circle cx="22.5" cy="18.5" r="2.2" fill="#FFD166" opacity="0.85" />
+    </svg>
+  )
+}
+
+function WalletPayIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <rect x="3" y="7" width="22" height="15" rx="3" fill="#2EC4B6" />
+      <rect x="3" y="7" width="22" height="5" rx="2" fill="#20A39E" />
+      <rect x="15" y="13.5" width="10" height="8.5" rx="2" fill="#FF9F1C" />
+      <circle cx="20.5" cy="17.75" r="1.6" fill="#FFF6E8" />
+      <rect x="6" y="9" width="6" height="1.5" rx="0.75" fill="#B8F2E6" />
+    </svg>
+  )
+}
+
+function MastercardBadge() {
+  return (
+    <svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true">
+      <rect width="28" height="18" rx="3" fill="#F5F5F5" />
+      <circle cx="11.5" cy="9" r="5" fill="#EB001B" />
+      <circle cx="16.5" cy="9" r="5" fill="#F79E1B" />
+      <path
+        d="M14 5.2a5 5 0 0 1 0 7.6 5 5 0 0 1 0-7.6z"
+        fill="#FF5F00"
+      />
+    </svg>
+  )
+}
+
+function VisaBadge() {
+  return (
+    <svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true">
+      <rect width="28" height="18" rx="3" fill="#1A1F71" />
+      <text
+        x="14"
+        y="12.5"
+        textAnchor="middle"
+        fill="#fff"
+        fontSize="8"
+        fontWeight="700"
+        fontFamily="Arial, sans-serif"
+        letterSpacing="0.5"
+      >
+        VISA
+      </text>
     </svg>
   )
 }
@@ -121,7 +190,7 @@ function CheckoutBlock({
           <span className={styles.required}>{t('checkout.required')}</span>
         </span>
         <span className={styles.collapseIcon} aria-hidden="true">
-          {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          <Pencil size={18} />
         </span>
       </button>
 
@@ -495,29 +564,20 @@ export function CheckoutPage() {
     }
   }
 
-  const paymentOptions: {
-    id: PaymentMethod
-    title: string
-    hint?: string
-    icon: ReactNode
-  }[] = [
-    {
-      id: 'pickup',
-      title: t('checkout.paymentPickup'),
-      hint: t('checkout.paymentPickupHint'),
-      icon: <Wallet size={20} />,
-    },
-    {
-      id: 'google_pay',
-      title: t('checkout.paymentGoogle'),
-      icon: <GooglePayIcon />,
-    },
-    {
-      id: 'apple_pay',
-      title: t('checkout.paymentApple'),
-      icon: <ApplePayIcon />,
-    },
-  ]
+  const onlinePaymentSelected =
+    paymentMethod === 'google_pay' || paymentMethod === 'apple_pay'
+
+  const selectOnlinePayment = (method: 'google_pay' | 'apple_pay' = 'google_pay') => {
+    setPaymentMethod(method)
+    setError(null)
+    setErrorStep(null)
+  }
+
+  const selectPickupPayment = () => {
+    setPaymentMethod('pickup')
+    setError(null)
+    setErrorStep(null)
+  }
 
   return (
     <div className={styles.page}>
@@ -724,32 +784,100 @@ export function CheckoutPage() {
               onToggle={() => toggleStep(3)}
             >
               <div className={styles.optionList}>
-                {paymentOptions.map((option) => (
+                <div
+                  className={[
+                    styles.paymentCard,
+                    onlinePaymentSelected ? styles.paymentCardSelected : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
                   <button
-                    key={option.id}
                     type="button"
-                    className={[
-                      styles.optionCard,
-                      paymentMethod === option.id ? styles.selected : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => {
-                      setPaymentMethod(option.id)
-                      setError(null)
-                      setErrorStep(null)
-                    }}
+                    className={styles.paymentCardHeader}
+                    onClick={() => selectOnlinePayment(paymentMethod === 'apple_pay' ? 'apple_pay' : 'google_pay')}
                   >
                     <span className={styles.radio}>
-                      {paymentMethod === option.id && <span className={styles.dot} />}
+                      {onlinePaymentSelected && <span className={styles.dot} />}
                     </span>
-                    <span className={styles.optionIcon}>{option.icon}</span>
+                    <span className={styles.paymentIconWrap}>
+                      <CardPayIcon />
+                    </span>
                     <span className={styles.optionContent}>
-                      <span className={styles.optionTitle}>{option.title}</span>
-                      {option.hint && <span className={styles.optionHint}>{option.hint}</span>}
+                      <span className={styles.optionTitle}>{t('checkout.paymentOnline')}</span>
+                      <span className={styles.brandLogos} aria-hidden="true">
+                        <GooglePayIcon size={18} />
+                        <ApplePayIcon size={18} />
+                        <MastercardBadge />
+                        <VisaBadge />
+                      </span>
                     </span>
                   </button>
-                ))}
+
+                  {onlinePaymentSelected && (
+                    <div className={styles.paymentNested}>
+                      <button
+                        type="button"
+                        className={[
+                          styles.paymentNestedOption,
+                          paymentMethod === 'google_pay' ? styles.nestedSelected : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        onClick={() => selectOnlinePayment('google_pay')}
+                      >
+                        <span className={styles.radio}>
+                          {paymentMethod === 'google_pay' && <span className={styles.dot} />}
+                        </span>
+                        <GooglePayIcon size={20} />
+                        <span className={styles.optionTitle}>{t('checkout.paymentGoogle')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={[
+                          styles.paymentNestedOption,
+                          paymentMethod === 'apple_pay' ? styles.nestedSelected : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        onClick={() => selectOnlinePayment('apple_pay')}
+                      >
+                        <span className={styles.radio}>
+                          {paymentMethod === 'apple_pay' && <span className={styles.dot} />}
+                        </span>
+                        <ApplePayIcon size={20} />
+                        <span className={styles.optionTitle}>{t('checkout.paymentApple')}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  className={[
+                    styles.paymentCard,
+                    paymentMethod === 'pickup' ? styles.paymentCardSelected : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <button
+                    type="button"
+                    className={styles.paymentCardHeader}
+                    onClick={selectPickupPayment}
+                  >
+                    <span className={styles.radio}>
+                      {paymentMethod === 'pickup' && <span className={styles.dot} />}
+                    </span>
+                    <span className={styles.paymentIconWrap}>
+                      <WalletPayIcon />
+                    </span>
+                    <span className={styles.optionContent}>
+                      <span className={styles.optionTitle}>{t('checkout.paymentPickup')}</span>
+                      <span className={styles.optionHint}>{t('checkout.paymentPickupHint')}</span>
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <button
