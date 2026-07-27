@@ -1,0 +1,31 @@
+# Production reverse proxy.
+# Default: HTTP on :80 (IP whitelist via Lightsail firewall).
+#
+# For LiqPay (and OAuth in production), switch to a domain with HTTPS:
+#   1. Point DNS A record to the Lightsail static IP.
+#   2. Replace `:80` below with your domain, e.g. `shop.example.com {`
+#   3. Publish port 443 in docker-compose.prod.yml (and open 443 in Lightsail).
+#   4. Set CLIENT_URL / API_URL to https://shop.example.com
+# Caddy will obtain Let's Encrypt certificates automatically.
+
+:80 {
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy api:3001
+	}
+
+	handle /media/* {
+		reverse_proxy api:3001
+	}
+
+	handle /uploads/* {
+		reverse_proxy api:3001
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

@@ -136,8 +136,8 @@ export type UiTranslationSchema = {
     paymentBankTaxId: string
     paymentBankPurposeLabel: string
     paymentBankPurpose: string
-    paymentGoogle: string
-    paymentApple: string
+    paymentOnline: string
+    paymentOnlineHint: string
     comment: string
     commentPlaceholder: string
     toPay: string
@@ -148,6 +148,12 @@ export type UiTranslationSchema = {
     successDescription: string
     successGuestDescription: string
     goToOrders: string
+    resultTitle: string
+    resultAwaiting: string
+    resultPaid: string
+    resultFailed: string
+    resultMissing: string
+    resultHome: string
     errorRequired: string
     errorPhone: string
     errorCity: string
@@ -517,8 +523,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Призначення',
     paymentBankPurpose: 'Оплата за товар',
-    paymentGoogle: 'Google Pay',
-    paymentApple: 'Apple Pay',
+    paymentOnline: 'Онлайн оплата',
+    paymentOnlineHint: 'Картка, Google Pay або Apple Pay через LiqPay',
     comment: 'Коментар до замовлення',
     commentPlaceholder: 'Побажання до доставки або замовлення',
     toPay: 'До оплати',
@@ -529,6 +535,12 @@ export const uiTranslationsUk: UiTranslationSchema = {
     successDescription: 'Ми зберегли ваше замовлення. Статус можна переглянути в профілі.',
     successGuestDescription: 'Дякуємо за замовлення! Ми звʼяжемося з вами для підтвердження.',
     goToOrders: 'До замовлень',
+    resultTitle: 'Статус оплати',
+    resultAwaiting: 'Очікуємо підтвердження оплати. Це може зайняти кілька секунд.',
+    resultPaid: 'Оплату підтверджено. Дякуємо за замовлення!',
+    resultFailed: 'Оплату не завершено. Замовлення скасовано — спробуйте ще раз.',
+    resultMissing: 'Не вдалося знайти замовлення.',
+    resultHome: 'На головну',
     errorRequired: 'Заповніть обовʼязкові поля',
     errorPhone: 'Введіть коректний номер телефону',
     errorCity: 'Вкажіть місто',
@@ -899,8 +911,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Payment purpose',
     paymentBankPurpose: 'Payment for goods',
-    paymentGoogle: 'Google Pay',
-    paymentApple: 'Apple Pay',
+    paymentOnline: 'Online payment',
+    paymentOnlineHint: 'Card, Google Pay or Apple Pay via LiqPay',
     comment: 'Order comment',
     commentPlaceholder: 'Delivery or order notes',
     toPay: 'To pay',
@@ -911,6 +923,12 @@ export const uiTranslationsEn: UiTranslationSchema = {
     successDescription: 'Your order has been saved. You can track its status in your profile.',
     successGuestDescription: 'Thank you for your order! We will contact you to confirm.',
     goToOrders: 'View orders',
+    resultTitle: 'Payment status',
+    resultAwaiting: 'Waiting for payment confirmation. This may take a few seconds.',
+    resultPaid: 'Payment confirmed. Thank you for your order!',
+    resultFailed: 'Payment was not completed. The order was cancelled — please try again.',
+    resultMissing: 'Could not find this order.',
+    resultHome: 'Go home',
     errorRequired: 'Please fill in the required fields',
     errorPhone: 'Enter a valid phone number',
     errorCity: 'Enter the city',

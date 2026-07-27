@@ -68,6 +68,7 @@ function createDemoOrders(): Order[] {
       status: 'delivered',
       totalPrice: (product.discountPrice ?? product.price) * 2,
       paymentMethod: 'cod',
+      paymentStatus: 'unpaid',
       deliveryMethod: 'nova_poshta',
       createdAt: '2025-11-12T10:00:00Z',
       items: [
@@ -88,6 +89,7 @@ function createDemoOrders(): Order[] {
       status: 'processing',
       totalPrice: product2.discountPrice ?? product2.price,
       paymentMethod: 'cod',
+      paymentStatus: 'unpaid',
       deliveryMethod: 'nova_poshta',
       createdAt: '2026-03-02T14:30:00Z',
       items: [

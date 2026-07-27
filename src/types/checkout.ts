@@ -4,7 +4,7 @@ export type NovaPoshtaType = 'warehouse' | 'parcel_locker' | 'courier'
 
 export type UkrposhtaType = 'basic' | 'priority'
 
-export type PaymentMethod = 'bank_transfer' | 'pickup' | 'google_pay' | 'apple_pay'
+export type PaymentMethod = 'bank_transfer' | 'pickup' | 'liqpay'
 
 export interface CheckoutContact {
   firstName: string

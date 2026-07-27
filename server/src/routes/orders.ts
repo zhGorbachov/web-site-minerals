@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { optionalAuth, requireAuth } from '../lib/auth.js'
+import { env, isLiqPayConfigured } from '../lib/env.js'
+import { encodeCheckout } from '../lib/liqpay.js'
 
 export const ordersRouter = Router()
 
@@ -14,6 +16,7 @@ const guestOrderItemSchema = z.object({
 const createOrderSchema = z.object({
   paymentMethod: z.string().min(1).default('cod'),
   deliveryMethod: z.string().min(1).default('nova_poshta'),
+  language: z.enum(['uk', 'en']).optional(),
   items: z.array(guestOrderItemSchema).optional(),
 })
 
@@ -21,9 +24,11 @@ function mapOrder(order: {
   id: string
   userId: string | null
   status: string
+  paymentStatus: string
   totalPrice: { toNumber?: () => number } | number
   paymentMethod: string
   deliveryMethod: string
+  liqpayOrderId: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -39,9 +44,11 @@ function mapOrder(order: {
     id: order.id,
     userId: order.userId,
     status: order.status,
+    paymentStatus: order.paymentStatus,
     totalPrice: Number(order.totalPrice),
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
+    liqpayOrderId: order.liqpayOrderId,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,
@@ -55,6 +62,25 @@ function mapOrder(order: {
   }
 }
 
+function buildLiqPayPayment(order: {
+  id: string
+  totalPrice: { toNumber?: () => number } | number
+  liqpayOrderId: string | null
+}, language?: 'uk' | 'en') {
+  const liqpayOrderId = order.liqpayOrderId!
+  const amount = Number(order.totalPrice)
+  return {
+    payment: encodeCheckout({
+      amount,
+      orderId: liqpayOrderId,
+      description: `Order ${order.id}`,
+      language,
+      resultUrl: `${env.clientUrl}/checkout/result?orderId=${encodeURIComponent(order.id)}`,
+      serverUrl: `${env.apiUrl}/api/payments/liqpay/callback`,
+    }),
+  }
+}
+
 ordersRouter.get('/', requireAuth, async (req, res) => {
   const orders = await prisma.order.findMany({
     where: { userId: req.userId },
@@ -65,12 +91,46 @@ ordersRouter.get('/', requireAuth, async (req, res) => {
   res.json(orders.map(mapOrder))
 })
 
+ordersRouter.get('/:id/payment-status', async (req, res) => {
+  const order = await prisma.order.findUnique({
+    where: { id: req.params.id },
+    select: {
+      id: true,
+      status: true,
+      paymentStatus: true,
+      paymentMethod: true,
+      totalPrice: true,
+    },
+  })
+
+  if (!order) {
+    res.status(404).json({ error: 'Order not found' })
+    return
+  }
+
+  res.json({
+    id: order.id,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
+    totalPrice: Number(order.totalPrice),
+  })
+})
+
 ordersRouter.post('/', optionalAuth, async (req, res) => {
   const parsed = createOrderSchema.safeParse(req.body ?? {})
   if (!parsed.success) {
     res.status(400).json({ error: 'Invalid payload' })
     return
   }
+
+  const isLiqPay = parsed.data.paymentMethod === 'liqpay'
+  if (isLiqPay && !isLiqPayConfigured()) {
+    res.status(503).json({ error: 'Online payment is not configured' })
+    return
+  }
+
+  const paymentStatus = isLiqPay ? 'awaiting_payment' : 'unpaid'
 
   if (req.userId) {
     const cart = await prisma.cart.findUnique({
@@ -93,6 +153,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         data: {
           userId: req.userId!,
           status: 'pending',
+          paymentStatus,
           totalPrice,
           paymentMethod: parsed.data.paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
@@ -112,6 +173,14 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         include: { items: true },
       })
 
+      const withLiqPayId = isLiqPay
+        ? await tx.order.update({
+            where: { id: created.id },
+            data: { liqpayOrderId: created.id },
+            include: { items: true },
+          })
+        : created
+
       for (const item of cart.items) {
         await tx.product.update({
           where: { id: item.productId },
@@ -120,10 +189,16 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       }
 
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } })
-      return created
+      return withLiqPayId
     })
 
-    res.status(201).json(mapOrder(order))
+    const mapped = mapOrder(order)
+    if (isLiqPay) {
+      res.status(201).json({ ...mapped, ...buildLiqPayPayment(order, parsed.data.language) })
+      return
+    }
+
+    res.status(201).json(mapped)
     return
   }
 
@@ -138,17 +213,28 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
   })
   const productById = new Map(products.map((product) => [product.id, product]))
 
-  const resolvedItems = guestItems.map((item) => {
-    const product = productById.get(item.productId)
-    if (!product) throw new Error('Product not found')
-    if (product.stock < item.quantity) throw new Error('Insufficient stock')
-    const unit = product.discountPrice ?? product.price
-    return {
-      product,
-      quantity: item.quantity,
-      price: unit,
+  let resolvedItems
+  try {
+    resolvedItems = guestItems.map((item) => {
+      const product = productById.get(item.productId)
+      if (!product) throw new Error('Product not found')
+      if (product.stock < item.quantity) throw new Error('Insufficient stock')
+      const unit = product.discountPrice ?? product.price
+      return {
+        product,
+        quantity: item.quantity,
+        price: unit,
+      }
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not create order'
+    if (message === 'Product not found' || message === 'Insufficient stock') {
+      res.status(400).json({ error: message })
+      return
     }
-  })
+    res.status(500).json({ error: 'Could not create order' })
+    return
+  }
 
   const totalPrice = resolvedItems.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
@@ -161,6 +247,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         data: {
           userId: null,
           status: 'pending',
+          paymentStatus,
           totalPrice,
           paymentMethod: parsed.data.paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
@@ -177,6 +264,14 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         include: { items: true },
       })
 
+      const withLiqPayId = isLiqPay
+        ? await tx.order.update({
+            where: { id: created.id },
+            data: { liqpayOrderId: created.id },
+            include: { items: true },
+          })
+        : created
+
       for (const item of resolvedItems) {
         await tx.product.update({
           where: { id: item.product.id },
@@ -184,10 +279,16 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         })
       }
 
-      return created
+      return withLiqPayId
     })
 
-    res.status(201).json(mapOrder(order))
+    const mapped = mapOrder(order)
+    if (isLiqPay) {
+      res.status(201).json({ ...mapped, ...buildLiqPayPayment(order, parsed.data.language) })
+      return
+    }
+
+    res.status(201).json(mapped)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Could not create order'
     if (message === 'Product not found' || message === 'Insufficient stock') {

@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: minerals-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-minerals}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-minerals}
+      POSTGRES_DB: ${POSTGRES_DB:-minerals}
+    volumes:
+      - minerals_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - minerals
+
+  api:
+    build:
+      context: .
+      target: api
+    container_name: minerals-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-minerals}:${POSTGRES_PASSWORD:-minerals}@postgres:5432/${POSTGRES_DB:-minerals}?schema=public
+    volumes:
+      - minerals_uploads:/app/server/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - minerals
+
+  caddy:
+    build:
+      context: .
+      target: caddy
+    container_name: minerals-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      # Uncomment when using a domain + HTTPS (LiqPay / production TLS):
+      # - '443:443'
+    depends_on:
+      - api
+    networks:
+      - minerals
+
+volumes:
+  minerals_pg_data:
+  minerals_uploads:
+
+networks:
+  minerals:
+    driver: bridge

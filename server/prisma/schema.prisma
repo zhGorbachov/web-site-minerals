@@ -29,6 +29,13 @@ enum OrderStatus {
   refunded
 }
 
+enum PaymentStatus {
+  unpaid
+  awaiting_payment
+  paid
+  failed
+}
+
 model User {
   id               String       @id @default(cuid())
   firstName        String
@@ -154,14 +161,16 @@ model WishlistItem {
 }
 
 model Order {
-  id             String      @id @default(cuid())
+  id             String        @id @default(cuid())
   userId         String?
-  status         OrderStatus @default(pending)
-  totalPrice     Decimal     @db.Decimal(10, 2)
+  status         OrderStatus   @default(pending)
+  paymentStatus  PaymentStatus @default(unpaid)
+  totalPrice     Decimal       @db.Decimal(10, 2)
   paymentMethod  String
   deliveryMethod String
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  liqpayOrderId  String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   items OrderItem[]

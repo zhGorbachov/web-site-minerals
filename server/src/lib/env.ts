@@ -28,6 +28,8 @@ export const env = {
   apiUrl: process.env.API_URL?.trim() || `http://localhost:${process.env.PORT ?? 3001}`,
   novaPoshtaApiKey: process.env.NOVA_POSHTA_API_KEY?.trim() ?? '',
   ukrposhtaBearerToken: process.env.UKRPOSHTA_BEARER_TOKEN?.trim() ?? '',
+  liqpayPublicKey: process.env.LIQPAY_PUBLIC_KEY?.trim() ?? '',
+  liqpayPrivateKey: process.env.LIQPAY_PRIVATE_KEY?.trim() ?? '',
 }
 
 export function isGoogleConfigured() {
@@ -36,4 +38,8 @@ export function isGoogleConfigured() {
 
 export function isAppleConfigured() {
   return Boolean(env.appleClientId)
+}
+
+export function isLiqPayConfigured() {
+  return Boolean(env.liqpayPublicKey && env.liqpayPrivateKey)
 }

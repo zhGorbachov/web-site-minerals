@@ -1,9 +1,10 @@
-import type { Order, CartItem } from '@/types'
+import type { Order, CartItem, CreateOrderResult, OrderPaymentStatus } from '@/types'
 import { api, mediaUrl, getAuthToken } from './client'
 
 export type CreateOrderPayload = {
   paymentMethod?: string
   deliveryMethod?: string
+  language?: 'uk' | 'en'
   items?: CartItem[]
 }
 
@@ -31,17 +32,27 @@ export const OrdersApi = {
     return data.map(mapOrder)
   },
 
-  async create(payload?: CreateOrderPayload) {
+  async create(payload?: CreateOrderPayload): Promise<CreateOrderResult> {
     const body: Record<string, unknown> = {
       paymentMethod: payload?.paymentMethod,
       deliveryMethod: payload?.deliveryMethod,
+      language: payload?.language,
     }
 
     if (!getAuthToken() && payload?.items?.length) {
       body.items = toGuestItems(payload.items)
     }
 
-    const { data } = await api.post<Order>('/orders', body)
-    return mapOrder(data)
+    const { data } = await api.post<CreateOrderResult>('/orders', body)
+    const { payment, ...order } = data
+    return {
+      ...mapOrder(order),
+      ...(payment ? { payment } : {}),
+    }
+  },
+
+  async paymentStatus(orderId: string) {
+    const { data } = await api.get<OrderPaymentStatus>(`/orders/${orderId}/payment-status`)
+    return data
   },
 }

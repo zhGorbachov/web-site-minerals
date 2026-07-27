@@ -1,4 +1,4 @@
-import type { CartItem, Order } from '@/types'
+import type { CartItem, CreateOrderResult, Order, OrderPaymentStatus } from '@/types'
 import type { CreateOrderPayload } from '@/api/OrdersApi'
 import { getAuthToken } from '@/api/client'
 import { MockApiError } from './MockApiError'
@@ -20,6 +20,44 @@ function toCartItems(items: CreateOrderPayload['items']): CartItem[] {
   }))
 }
 
+function buildOrder(
+  orderId: string,
+  userId: string | null,
+  sourceItems: CartItem[],
+  payload?: CreateOrderPayload,
+): Order {
+  const items = sourceItems.map((item, index) => {
+    const product = enrichProduct(item.product)
+    const price = product.discountPrice ?? product.price
+    return {
+      id: `oi-${orderId}-${index}`,
+      orderId,
+      productId: product.id,
+      productName: product.name,
+      productImage: product.images[0] ?? '',
+      quantity: item.quantity,
+      price,
+    }
+  })
+
+  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const paymentMethod = payload?.paymentMethod ?? 'cod'
+  const isLiqPay = paymentMethod === 'liqpay'
+
+  return {
+    id: orderId,
+    userId,
+    status: 'pending',
+    paymentStatus: isLiqPay ? 'awaiting_payment' : 'unpaid',
+    totalPrice,
+    paymentMethod,
+    deliveryMethod: payload?.deliveryMethod ?? 'nova_poshta',
+    liqpayOrderId: isLiqPay ? orderId : null,
+    createdAt: new Date().toISOString(),
+    items,
+  }
+}
+
 export const MockOrdersApi = {
   async list(): Promise<Order[]> {
     const userId = resolveUserId()
@@ -29,7 +67,7 @@ export const MockOrdersApi = {
     )
   },
 
-  async create(payload?: CreateOrderPayload): Promise<Order> {
+  async create(payload?: CreateOrderPayload): Promise<CreateOrderResult> {
     const userId = resolveUserId()
     let sourceItems: CartItem[]
 
@@ -39,32 +77,7 @@ export const MockOrdersApi = {
       sourceItems = cart.items
 
       const orderId = `order-${Date.now()}`
-      const items = sourceItems.map((item, index) => {
-        const product = enrichProduct(item.product)
-        const price = product.discountPrice ?? product.price
-        return {
-          id: `oi-${orderId}-${index}`,
-          orderId,
-          productId: product.id,
-          productName: product.name,
-          productImage: product.images[0] ?? '',
-          quantity: item.quantity,
-          price,
-        }
-      })
-
-      const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      const order: Order = {
-        id: orderId,
-        userId,
-        status: 'pending',
-        totalPrice,
-        paymentMethod: payload?.paymentMethod ?? 'cod',
-        deliveryMethod: payload?.deliveryMethod ?? 'nova_poshta',
-        createdAt: new Date().toISOString(),
-        items,
-      }
-
+      const order = buildOrder(orderId, userId, sourceItems, payload)
       MockDb.setOrders(userId, [order, ...MockDb.getOrders(userId)])
       MockDb.setCart(userId, { ...cart, items: [] })
       return order
@@ -74,33 +87,25 @@ export const MockOrdersApi = {
     if (!sourceItems.length) throw new MockApiError(400, 'Cart is empty')
 
     const orderId = `order-${Date.now()}`
-    const items = sourceItems.map((item, index) => {
-      const product = enrichProduct(item.product)
-      const price = product.discountPrice ?? product.price
-      return {
-        id: `oi-${orderId}-${index}`,
-        orderId,
-        productId: product.id,
-        productName: product.name,
-        productImage: product.images[0] ?? '',
-        quantity: item.quantity,
-        price,
-      }
-    })
-
-    const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const order: Order = {
-      id: orderId,
-      userId: GUEST_USER_ID,
-      status: 'pending',
-      totalPrice,
-      paymentMethod: payload?.paymentMethod ?? 'cod',
-      deliveryMethod: payload?.deliveryMethod ?? 'nova_poshta',
-      createdAt: new Date().toISOString(),
-      items,
-    }
-
+    const order = buildOrder(orderId, GUEST_USER_ID, sourceItems, payload)
     MockDb.setOrders(GUEST_USER_ID, [order, ...MockDb.getOrders(GUEST_USER_ID)])
     return order
+  },
+
+  async paymentStatus(orderId: string): Promise<OrderPaymentStatus> {
+    const userId = resolveUserId()
+    const pools = [
+      ...(userId ? MockDb.getOrders(userId) : []),
+      ...MockDb.getOrders(GUEST_USER_ID),
+    ]
+    const order = pools.find((item) => item.id === orderId)
+    if (!order) throw new MockApiError(404, 'Order not found')
+    return {
+      id: order.id,
+      status: order.status,
+      paymentStatus: order.paymentStatus ?? 'unpaid',
+      paymentMethod: order.paymentMethod,
+      totalPrice: order.totalPrice,
+    }
   },
 }

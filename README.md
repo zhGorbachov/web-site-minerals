@@ -138,8 +138,14 @@ Logged-in customers see on **Profile**: order history, favourite products, and a
 web-site-minerals/
   src/                 # React frontend
   server/              # Express + Prisma API
-  docker-compose.yml   # PostgreSQL 16
+  docker-compose.yml   # PostgreSQL 16 (local dev)
+  docker-compose.prod.yml  # Caddy + API + Postgres (Lightsail)
+  deploy/              # Production Caddyfile, env example, Lightsail guide
 ```
+
+## Deploy (AWS Lightsail)
+
+See [deploy/README.md](deploy/README.md) for IP-whitelisted production deploy with Docker Compose.
 
 ## Google OAuth (optional)
 

@@ -100,46 +100,6 @@ function SelfPickupIcon() {
   )
 }
 
-function GooglePayLogo() {
-  return (
-    <span className={styles.brandLogo} aria-hidden="true">
-      <svg width="22" height="22" viewBox="0 0 24 24">
-        <path
-          fill="#4285F4"
-          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-        />
-        <path
-          fill="#34A853"
-          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-        />
-        <path
-          fill="#FBBC05"
-          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-        />
-        <path
-          fill="#EA4335"
-          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-        />
-      </svg>
-      <span className={styles.brandLogoPayGoogle}>Pay</span>
-    </span>
-  )
-}
-
-function ApplePayLogo() {
-  return (
-    <span className={styles.brandLogo} aria-hidden="true">
-      <svg className={styles.brandLogoAppleIcon} width="20" height="20" viewBox="0 0 24 24">
-        <path
-          fill="#1A1A1A"
-          d="M16.365 12.84c-.03-3.04 2.48-4.5 2.59-4.57-1.41-2.06-3.61-2.34-4.39-2.37-1.87-.19-3.65 1.1-4.6 1.1-.96 0-2.43-1.08-4-1.05-2.05.03-3.95 1.2-5 3.04-2.14 3.71-.55 9.2 1.53 12.21 1.02 1.48 2.24 3.13 3.84 3.07 1.54-.06 2.12-1 3.98-1 1.85 0 2.38.99 4 .96 1.66-.03 2.71-1.5 3.72-2.99 1.17-1.71 1.65-3.37 1.68-3.45-.04-.02-3.22-1.24-3.25-4.95zM13.88 4.5c.84-1.02 1.41-2.44 1.25-3.86-1.21.05-2.67.81-3.54 1.82-.78.9-1.46 2.34-1.28 3.72 1.35.1 2.73-.69 3.57-1.68z"
-        />
-      </svg>
-      <span className={styles.brandLogoPayApple}>Pay</span>
-    </span>
-  )
-}
-
 function BankTransferIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
@@ -163,6 +123,42 @@ function WalletPayIcon() {
       <path fill="#BAE6FD" d="M5.5 11.2h17v2.2h-17z" />
     </svg>
   )
+}
+
+function CardPayIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <rect width="28" height="28" rx="7" fill="#059669" />
+      <path fill="#A7F3D0" d="M5.5 10.2h17v2.4h-17z" />
+      <path
+        fill="#fff"
+        d="M5.5 9a1.5 1.5 0 0 1 1.5-1.5h14A1.5 1.5 0 0 1 22.5 9v10a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V9Zm2.2 7.2h5.2v1.5H7.7v-1.5Zm8.4 0h4.2v1.5h-4.2v-1.5Z"
+      />
+    </svg>
+  )
+}
+
+function redirectToLiqPay(payment: { data: string; signature: string; checkoutUrl: string }) {
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = payment.checkoutUrl
+  form.acceptCharset = 'utf-8'
+  form.style.display = 'none'
+
+  const dataInput = document.createElement('input')
+  dataInput.type = 'hidden'
+  dataInput.name = 'data'
+  dataInput.value = payment.data
+  form.appendChild(dataInput)
+
+  const signatureInput = document.createElement('input')
+  signatureInput.type = 'hidden'
+  signatureInput.name = 'signature'
+  signatureInput.value = payment.signature
+  form.appendChild(signatureInput)
+
+  document.body.appendChild(form)
+  form.submit()
 }
 
 function StepBadge({
@@ -739,12 +735,19 @@ export function CheckoutPage() {
     setError(null)
     setErrorStep(null)
     try {
-      await OrdersApi.create({
+      const result = await OrdersApi.create({
         paymentMethod,
         deliveryMethod: location.deliveryMethod,
+        language: language === 'en' ? 'en' : 'uk',
         ...(!user ? { items } : {}),
       })
       await clearCart()
+
+      if (paymentMethod === 'liqpay' && result.payment) {
+        redirectToLiqPay(result.payment)
+        return
+      }
+
       setSuccess(true)
     } catch {
       setError(t('checkout.errorSubmit'))
@@ -1182,43 +1185,27 @@ export function CheckoutPage() {
                   </span>
                 </button>
 
-                <div className={styles.payRow}>
-                  <button
-                    type="button"
-                    className={[
-                      styles.optionCard,
-                      styles.payCompact,
-                      paymentMethod === 'google_pay' ? styles.selected : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => selectPaymentMethod('google_pay')}
-                    aria-label={t('checkout.paymentGoogle')}
-                  >
-                    <span className={styles.radio}>
-                      {paymentMethod === 'google_pay' && <span className={styles.dot} />}
-                    </span>
-                    <GooglePayLogo />
-                  </button>
-
-                  <button
-                    type="button"
-                    className={[
-                      styles.optionCard,
-                      styles.payCompact,
-                      paymentMethod === 'apple_pay' ? styles.selected : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => selectPaymentMethod('apple_pay')}
-                    aria-label={t('checkout.paymentApple')}
-                  >
-                    <span className={styles.radio}>
-                      {paymentMethod === 'apple_pay' && <span className={styles.dot} />}
-                    </span>
-                    <ApplePayLogo />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className={[
+                    styles.optionCard,
+                    paymentMethod === 'liqpay' ? styles.selected : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => selectPaymentMethod('liqpay')}
+                >
+                  <span className={styles.radio}>
+                    {paymentMethod === 'liqpay' && <span className={styles.dot} />}
+                  </span>
+                  <span className={styles.optionIcon}>
+                    <CardPayIcon />
+                  </span>
+                  <span className={styles.optionContent}>
+                    <span className={styles.optionTitle}>{t('checkout.paymentOnline')}</span>
+                    <span className={styles.optionHint}>{t('checkout.paymentOnlineHint')}</span>
+                  </span>
+                </button>
               </div>
 
               {error && errorStep === 3 && <p className={styles.error}>{error}</p>}
