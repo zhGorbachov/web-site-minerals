@@ -6,7 +6,8 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react'
-import { Loader2 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown, Loader2 } from 'lucide-react'
 import styles from './Autocomplete.module.scss'
 
 export interface AutocompleteOption {
@@ -60,6 +61,7 @@ export function Autocomplete({
   const wrapperRef = useRef<HTMLDivElement>(null)
   const requestIdRef = useRef(0)
   const loadOptionsRef = useRef(loadOptions)
+  const dismissedRef = useRef(false)
   loadOptionsRef.current = loadOptions
 
   const [open, setOpen] = useState(false)
@@ -68,9 +70,12 @@ export function Autocomplete({
   const [highlight, setHighlight] = useState(-1)
   const [touched, setTouched] = useState(false)
 
+  const showList = open && !disabled && touched && value.trim().length >= minChars
+
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
       if (!wrapperRef.current?.contains(event.target as Node)) {
+        dismissedRef.current = true
         setOpen(false)
         setHighlight(-1)
       }
@@ -105,12 +110,12 @@ export function Autocomplete({
           if (requestId !== requestIdRef.current) return
           setOptions(next)
           setHighlight(next.length ? 0 : -1)
-          setOpen(true)
+          if (!dismissedRef.current) setOpen(true)
         })
         .catch(() => {
           if (requestId !== requestIdRef.current) return
           setOptions([])
-          setOpen(true)
+          if (!dismissedRef.current) setOpen(true)
         })
         .finally(() => {
           if (requestId === requestIdRef.current) setLoading(false)
@@ -122,14 +127,33 @@ export function Autocomplete({
 
   const selectOption = (option: AutocompleteOption) => {
     onSelect(option)
+    dismissedRef.current = true
     setOpen(false)
     setHighlight(-1)
     setTouched(false)
   }
 
+  const openList = () => {
+    if (disabled) return
+    dismissedRef.current = false
+    setTouched(true)
+    setOpen(true)
+  }
+
+  const closeList = () => {
+    dismissedRef.current = true
+    setOpen(false)
+    setHighlight(-1)
+  }
+
+  const toggleList = () => {
+    if (showList) closeList()
+    else openList()
+  }
+
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp') && options.length) {
-      setOpen(true)
+      openList()
       setHighlight(0)
       event.preventDefault()
       return
@@ -147,15 +171,15 @@ export function Autocomplete({
       event.preventDefault()
       selectOption(options[highlight])
     } else if (event.key === 'Escape') {
-      setOpen(false)
-      setHighlight(-1)
+      closeList()
     }
   }
 
-  const showList = open && !disabled && touched && value.trim().length >= minChars
-
   return (
-    <div className={styles.wrapper} ref={wrapperRef}>
+      <div
+        className={[styles.wrapper, showList ? styles.listOpen : ''].filter(Boolean).join(' ')}
+        ref={wrapperRef}
+      >
       {label && (
         <label htmlFor={inputId} className={styles.label}>
           {label}
@@ -165,7 +189,6 @@ export function Autocomplete({
         className={[
           styles.inputWrapper,
           error ? styles.hasError : '',
-          showList ? styles.open : '',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -186,10 +209,12 @@ export function Autocomplete({
             highlight >= 0 && options[highlight] ? `${listboxId}-option-${highlight}` : undefined
           }
           onChange={(e) => {
+            dismissedRef.current = false
             setTouched(true)
             onChange(e.target.value)
           }}
           onFocus={() => {
+            dismissedRef.current = false
             setTouched(true)
             setOpen(true)
           }}
@@ -200,40 +225,71 @@ export function Autocomplete({
             <Loader2 size={16} className={styles.spinnerIcon} />
           </span>
         )}
-
-        {showList && (
-          <ul id={listboxId} className={styles.list} role="listbox">
-            {loading && options.length === 0 && (
-              <li className={styles.message} role="presentation">
-                {loadingMessage ?? '…'}
-              </li>
-            )}
-            {!loading && options.length === 0 && (
-              <li className={styles.message} role="presentation">
-                {emptyMessage ?? '—'}
-              </li>
-            )}
-            {options.map((option, index) => (
-              <li
-                key={option.id}
-                id={`${listboxId}-option-${index}`}
-                role="option"
-                aria-selected={index === highlight}
-                className={[styles.option, index === highlight ? styles.highlighted : '']
-                  .filter(Boolean)
-                  .join(' ')}
-                onMouseEnter={() => setHighlight(index)}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => selectOption(option)}
-              >
-                <span className={styles.optionLabel}>{option.label}</span>
-                {option.description && (
-                  <span className={styles.optionDescription}>{option.description}</span>
-                )}
-              </li>
-            ))}
-          </ul>
+        {!disabled && (
+          <button
+            type="button"
+            className={styles.toggle}
+            tabIndex={-1}
+            aria-label={showList ? 'Collapse' : 'Expand'}
+            aria-expanded={showList}
+            aria-controls={listboxId}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={toggleList}
+          >
+            <motion.span
+              className={styles.toggleIcon}
+              animate={{ rotate: showList ? 180 : 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <ChevronDown size={18} />
+            </motion.span>
+          </button>
         )}
+
+        <AnimatePresence>
+          {showList && (
+            <motion.div
+              className={styles.list}
+              initial={{ opacity: 0, y: -8, scaleY: 0.96 }}
+              animate={{ opacity: 1, y: 0, scaleY: 1 }}
+              exit={{ opacity: 0, y: -6, scaleY: 0.98 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformOrigin: 'top center' }}
+            >
+              <ul id={listboxId} className={styles.listScroll} role="listbox">
+                {loading && options.length === 0 && (
+                  <li className={styles.message} role="presentation">
+                    {loadingMessage ?? '…'}
+                  </li>
+                )}
+                {!loading && options.length === 0 && (
+                  <li className={styles.message} role="presentation">
+                    {emptyMessage ?? '—'}
+                  </li>
+                )}
+                {options.map((option, index) => (
+                  <li
+                    key={option.id}
+                    id={`${listboxId}-option-${index}`}
+                    role="option"
+                    aria-selected={index === highlight}
+                    className={[styles.option, index === highlight ? styles.highlighted : '']
+                      .filter(Boolean)
+                      .join(' ')}
+                    onMouseEnter={() => setHighlight(index)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectOption(option)}
+                  >
+                    <span className={styles.optionLabel}>{option.label}</span>
+                    {option.description && (
+                      <span className={styles.optionDescription}>{option.description}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {error && <span className={styles.error}>{error}</span>}

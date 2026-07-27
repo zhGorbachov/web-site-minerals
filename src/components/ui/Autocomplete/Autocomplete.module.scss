@@ -3,9 +3,14 @@
 
 .wrapper {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: $spacing-2;
+
+  &.listOpen {
+    z-index: 400;
+  }
 }
 
 .label {
@@ -18,14 +23,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  z-index: 2;
 
   &.hasError .input {
     border-color: $color-error;
-  }
-
-  &.open {
-    z-index: 30;
   }
 }
 
@@ -33,11 +33,11 @@
   width: 100%;
   height: 44px;
   padding-inline: $spacing-4;
-  padding-right: $spacing-10;
+  padding-right: $spacing-12;
   background: $color-white;
   border: 1.5px solid $color-border;
   border-radius: $radius-md;
-  font-size: $font-size-base;
+  font-size: $font-size-sm;
   color: $color-text;
   transition: border-color $transition-base, box-shadow $transition-base;
 
@@ -60,7 +60,7 @@
 
 .spinner {
   position: absolute;
-  right: $spacing-3;
+  right: calc(#{$spacing-3} + 28px);
   display: flex;
   color: $color-text-muted;
   pointer-events: none;
@@ -76,29 +76,87 @@
   }
 }
 
+.toggle {
+  position: absolute;
+  right: $spacing-2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: color $transition-base, background $transition-base;
+
+  &:hover {
+    color: $color-text;
+    background: rgba(var(--color-primary-rgb), 0.08);
+  }
+
+  @include focus-ring;
+}
+
+.toggleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .list {
   position: absolute;
-  z-index: 50;
+  z-index: 500;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  margin: 0;
-  padding: $spacing-1;
-  list-style: none;
-  max-height: 280px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   background: $color-white;
   border: 1px solid $color-border;
   border-radius: $radius-md;
   box-shadow: $shadow-lg;
 }
 
+.listScroll {
+  margin: 0;
+  padding: $spacing-1;
+  list-style: none;
+  max-height: 240px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-primary-rgb), 0.35) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin-block: 6px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb), 0.35);
+    border-radius: $radius-full;
+
+    &:hover {
+      background: rgba(var(--color-primary-rgb), 0.5);
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
 .option {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: $spacing-2 $spacing-3;
+  gap: 1px;
+  padding: 6px $spacing-2;
   border-radius: $radius-sm;
   cursor: pointer;
   transition: background-color $transition-fast;
@@ -110,21 +168,21 @@
 }
 
 .optionLabel {
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
   font-weight: $font-weight-medium;
   color: $color-text;
   line-height: $line-height-tight;
 }
 
 .optionDescription {
-  font-size: $font-size-xs;
+  font-size: 0.6875rem;
   color: $color-text-muted;
   line-height: $line-height-normal;
 }
 
 .message {
-  padding: $spacing-3;
-  font-size: $font-size-sm;
+  padding: $spacing-2;
+  font-size: $font-size-xs;
   color: $color-text-muted;
   text-align: center;
 }

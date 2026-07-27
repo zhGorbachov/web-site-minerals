@@ -30,28 +30,40 @@
   padding: $spacing-2 0;
   border: none;
   background: transparent;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-bold;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
   color: $color-text;
   cursor: pointer;
   user-select: none;
   text-align: left;
+
+  > span {
+    color: $color-text;
+  }
 
   &:hover,
   &:focus,
   &:focus-visible,
   &:active {
     color: $color-text;
+
+    > span {
+      color: $color-text;
+    }
   }
 }
 
 .characteristicsTitleOpen {
   color: $color-text;
+
+  > span {
+    color: $color-text;
+  }
 }
 
 .chevron {
   flex-shrink: 0;
-  color: $color-text-muted;
+  color: $color-text;
   transition: transform 0.25s ease, color $transition-base;
 }
 

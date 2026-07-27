@@ -43,8 +43,8 @@
 }
 
 .block {
-  background: $color-white;
-  border: 1px solid $color-border;
+  background: color-mix(in srgb, var(--color-primary) 9%, #f4f7fa);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, #e4eaf0);
   border-radius: $radius-lg;
   overflow: visible;
   position: relative;
@@ -52,11 +52,10 @@
 
   @include tablet-up {
     box-shadow: $shadow-card;
-    border: none;
   }
 
   &:focus-within {
-    z-index: 5;
+    z-index: 30;
   }
 }
 
@@ -99,7 +98,7 @@
   align-items: center;
   justify-content: center;
   border-radius: $radius-circle;
-  background: $color-surface;
+  background: color-mix(in srgb, var(--color-primary) 14%, #fff);
   color: $color-text-muted;
   font-size: $font-size-sm;
   font-weight: $font-weight-bold;
@@ -111,8 +110,8 @@
   }
 
   &.done {
-    background: $color-primary;
-    color: $color-on-primary;
+    background: $color-success;
+    color: $color-white;
   }
 }
 
@@ -164,35 +163,129 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-2;
+  position: relative;
 }
 
 .optionCard {
   display: flex;
-  align-items: flex-start;
-  gap: $spacing-3;
+  flex-direction: column;
+  gap: 0;
   width: 100%;
-  padding: $spacing-3 $spacing-4;
+  padding: 0;
   border: 1.5px solid $color-border;
   border-radius: $radius-md;
   background: $color-white;
   text-align: left;
   font: inherit;
   color: $color-text;
-  cursor: pointer;
-  transition: border-color $transition-base, background $transition-base, box-shadow $transition-base;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     border-color: rgba(var(--color-primary-rgb), 0.45);
-    background: $color-surface;
   }
 
   &.selected {
     border-color: $color-primary;
-    background: rgba(var(--color-primary-rgb), 0.08);
-    box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.25);
+    box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.2);
+    z-index: 2;
+  }
+
+  &:focus-within {
+    z-index: 50;
+  }
+
+  &:is(button) {
+    flex-direction: row;
+    align-items: center;
+    gap: $spacing-3;
+    padding: $spacing-3 $spacing-4;
+    cursor: pointer;
+    overflow: visible;
+
+    @include focus-ring;
+  }
+}
+
+.subOption {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  width: 100%;
+  padding: $spacing-2 $spacing-3;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-sm;
+  color: $color-text;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.45);
+    background: $color-white;
+  }
+
+  &.subOptionSelected {
+    border-color: $color-primary;
+    background: $color-white;
+    box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.2);
+
+    .radio {
+      border-color: $color-primary;
+    }
+  }
+
+  .radio {
+    margin-top: 0;
   }
 
   @include focus-ring;
+}
+
+.optionCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-3 $spacing-4;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  @include focus-ring;
+}
+
+.optionCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  padding: 0 $spacing-4 $spacing-4;
+  margin-top: -$spacing-1;
+  position: relative;
+  overflow: visible;
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  > *:focus-within {
+    z-index: 100;
+  }
+}
+
+.subOptions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
 }
 
 .radio {
@@ -221,14 +314,14 @@
 
 .optionIcon {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: $radius-sm;
-  background: $color-surface;
-  color: $color-primary-dark;
+  background: transparent;
+  overflow: hidden;
 }
 
 .optionContent {
@@ -249,6 +342,25 @@
   font-size: $font-size-xs;
   color: $color-text-muted;
   line-height: $line-height-normal;
+}
+
+.pickupAddress {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  font-size: $font-size-sm;
+  color: $color-text;
+  line-height: $line-height-normal;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: $color-primary-dark;
+  }
 }
 
 .paymentCard {
@@ -355,31 +467,162 @@
   @include focus-ring;
 }
 
+.bankDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: $spacing-3;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--color-primary) 4%, #fff);
+}
+
+.bankDetailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bankDetailLabel {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  line-height: $line-height-tight;
+}
+
+.bankDetailValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  line-height: $line-height-normal;
+}
+
+.bankDetailValueMono {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: $color-text;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  line-height: $line-height-normal;
+}
+
+.payRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-2;
+}
+
+.payCompact {
+  align-items: center;
+  justify-content: flex-start;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  min-height: 52px;
+
+  .radio {
+    margin-top: 0;
+  }
+}
+
+.brandLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.brandLogoPayGoogle,
+.brandLogoPayApple {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #000000;
+  letter-spacing: -0.01em;
+}
+
+.brandLogoAppleIcon {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.commentBlock {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-4 $spacing-5;
+  overflow: hidden;
+
+  @include tablet-up {
+    box-shadow: $shadow-card;
+    border: none;
+    padding: $spacing-5;
+  }
+}
+
 .commentToggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: $spacing-3;
   width: 100%;
-  padding: $spacing-3 $spacing-4;
-  border: 1px solid $color-border;
+  padding: $spacing-2 0;
+  border: none;
   border-radius: $radius-md;
-  background: $color-white;
+  background: transparent;
   font: inherit;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   color: $color-text;
   cursor: pointer;
-  transition: border-color $transition-base, background $transition-base;
 
-  &:hover {
-    background: $color-surface;
+  &:hover,
+  &:focus,
+  &:focus-visible,
+  &:active {
+    color: $color-text;
   }
 
   @include focus-ring;
 }
 
+.commentToggleLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+
+  svg {
+    color: $color-text;
+    flex-shrink: 0;
+  }
+}
+
 .commentField {
-  margin-top: $spacing-2;
+  padding-top: $spacing-3;
+}
+
+.commentTextarea {
+  width: 100%;
+  min-height: calc(2 * 1.5em + #{$spacing-4} * 2);
+  padding: $spacing-3 $spacing-4;
+  resize: vertical;
+  background: $color-white;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  font: inherit;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $color-text;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
+  }
 }
 
 .error {
@@ -445,13 +688,21 @@
   margin: $spacing-8 auto 0;
   padding: $spacing-8 $spacing-6;
   text-align: center;
-  background: $color-white;
-  border: 1px solid $color-border;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, $color-success 6%, $color-white) 0%,
+    $color-white 55%
+  );
+  border: 1px solid color-mix(in srgb, $color-success 22%, $color-border);
   border-radius: $radius-lg;
+  box-shadow:
+    0 4px 20px rgba(34, 197, 94, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.04);
 
   @include tablet-up {
-    box-shadow: $shadow-card;
-    border: none;
+    box-shadow:
+      0 8px 28px rgba(34, 197, 94, 0.14),
+      0 2px 8px rgba(0, 0, 0, 0.04);
   }
 }
 
@@ -463,8 +714,9 @@
   align-items: center;
   justify-content: center;
   border-radius: $radius-circle;
-  background: rgba(var(--color-primary-rgb), 0.15);
-  color: $color-primary-dark;
+  background: rgba(34, 197, 94, 0.18);
+  color: $color-success;
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.45));
 }
 
 .successTitle {

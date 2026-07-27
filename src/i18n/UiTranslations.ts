@@ -98,11 +98,20 @@ export type UiTranslationSchema = {
     deliveryMethod: string
     novaPoshta: string
     novaPoshtaHint: string
-    courier: string
-    courierHint: string
+    novaPoshtaWarehouse: string
+    novaPoshtaParcelLocker: string
+    novaPoshtaCourier: string
+    ukrposhta: string
+    ukrposhtaHint: string
+    ukrposhtaBasic: string
+    ukrposhtaPriority: string
+    selfPickup: string
+    selfPickupHint: string
+    selfPickupAddress: string
     city: string
     cityPlaceholder: string
     cityHint: string
+    citySimplePlaceholder: string
     branch: string
     branchPlaceholder: string
     branchHint: string
@@ -110,11 +119,23 @@ export type UiTranslationSchema = {
     branchAddressLabel: string
     address: string
     addressPlaceholder: string
+    ukrposhtaBranchHint: string
+    postalIndex: string
+    postalIndexPlaceholder: string
     searchLoading: string
     searchEmpty: string
     paymentPickup: string
     paymentPickupHint: string
-    paymentOnline: string
+    paymentBank: string
+    paymentBankHint: string
+    paymentBankRecipientLabel: string
+    paymentBankRecipient: string
+    paymentBankIbanLabel: string
+    paymentBankIban: string
+    paymentBankTaxIdLabel: string
+    paymentBankTaxId: string
+    paymentBankPurposeLabel: string
+    paymentBankPurpose: string
     paymentGoogle: string
     paymentApple: string
     comment: string
@@ -132,11 +153,14 @@ export type UiTranslationSchema = {
     errorCity: string
     errorBranch: string
     errorAddress: string
+    errorPostalIndex: string
     errorPayment: string
     errorSubmit: string
     contactSummary: string
     locationSummaryBranch: string
     locationSummaryCourier: string
+    locationSummaryUkrposhta: string
+    locationSummarySelfPickup: string
   }
   wishlist: {
     emptyTitle: string
@@ -453,25 +477,46 @@ export const uiTranslationsUk: UiTranslationSchema = {
     email: 'Email',
     emailOptional: 'Email (необовʼязково)',
     deliveryMethod: 'Спосіб доставки',
-    novaPoshta: 'Нова Пошта — відділення',
-    novaPoshtaHint: 'Забрати з відділення / поштомату',
-    courier: 'Курʼєрська доставка',
-    courierHint: 'Доставка за адресою',
-    city: 'Населений пункт',
+    novaPoshta: 'Нова Пошта',
+    novaPoshtaHint: 'Відділення, поштомат або курʼєр',
+    novaPoshtaWarehouse: 'У відділення',
+    novaPoshtaParcelLocker: 'У поштомат',
+    novaPoshtaCourier: 'Курʼєром',
+    ukrposhta: 'Укрпошта',
+    ukrposhtaHint: 'Доставка у відділення Укрпошти',
+    ukrposhtaBasic: 'Базовий',
+    ukrposhtaPriority: 'Пріоритетний',
+    selfPickup: 'Самовивіз',
+    selfPickupHint: 'Забрати самостійно з магазину',
+    selfPickupAddress: 'вул. Короленка, 32А, Кропивницький',
+    city: 'Місто',
     cityPlaceholder: 'Почніть вводити назву міста або села',
     cityHint: 'Оберіть зі списку підказок',
-    branch: 'Відділення / поштомат',
+    citySimplePlaceholder: 'Введіть назву міста',
+    branch: 'Відділення',
     branchPlaceholder: 'Номер відділення, наприклад 137',
     branchHint: 'Оберіть відділення — адреса підставиться автоматично',
-    branchSelectCityFirst: 'Спочатку оберіть населений пункт',
+    branchSelectCityFirst: 'Спочатку оберіть місто',
     branchAddressLabel: 'Адреса відділення: {address}',
     address: 'Адреса доставки',
     addressPlaceholder: 'Вулиця, будинок, квартира',
+    ukrposhtaBranchHint: 'Адреса: {address}. Індекс: {index}',
+    postalIndex: 'Індекс',
+    postalIndexPlaceholder: 'Наприклад, 25000',
     searchLoading: 'Пошук…',
     searchEmpty: 'Нічого не знайдено',
     paymentPickup: 'Післяплата',
-    paymentPickupHint: 'Готівкою або карткою при отриманні. Комісія сплачується покупцем',
-    paymentOnline: 'Безпечна оплата онлайн',
+    paymentPickupHint: 'Готівкою або карткою при отриманні',
+    paymentBank: 'Повна оплата на рахунок',
+    paymentBankHint: 'Переказ на банківський рахунок',
+    paymentBankRecipientLabel: 'Одержувач',
+    paymentBankRecipient: 'ФОП Глущенко Ілля Володимирович',
+    paymentBankIbanLabel: 'IBAN',
+    paymentBankIban: 'UA743052990000026000005107086',
+    paymentBankTaxIdLabel: 'ЄДРПОУ/ІПН',
+    paymentBankTaxId: '3817313230',
+    paymentBankPurposeLabel: 'Призначення',
+    paymentBankPurpose: 'Оплата за товар',
     paymentGoogle: 'Google Pay',
     paymentApple: 'Apple Pay',
     comment: 'Коментар до замовлення',
@@ -486,14 +531,17 @@ export const uiTranslationsUk: UiTranslationSchema = {
     goToOrders: 'До замовлень',
     errorRequired: 'Заповніть обовʼязкові поля',
     errorPhone: 'Введіть коректний номер телефону',
-    errorCity: 'Оберіть населений пункт зі списку',
+    errorCity: 'Вкажіть місто',
     errorBranch: 'Оберіть відділення Нової Пошти зі списку',
     errorAddress: 'Вкажіть адресу доставки',
+    errorPostalIndex: 'Вкажіть поштовий індекс',
     errorPayment: 'Оберіть спосіб оплати',
     errorSubmit: 'Не вдалося оформити замовлення. Спробуйте ще раз',
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, відділення: {branch}',
     locationSummaryCourier: '{city}, {address}',
+    locationSummaryUkrposhta: 'Укрпошта ({type}), {city}, {branch}, індекс {index}',
+    locationSummarySelfPickup: 'Самовивіз: {address}',
   },
   wishlist: {
     emptyTitle: 'Обране порожнє',
@@ -811,25 +859,46 @@ export const uiTranslationsEn: UiTranslationSchema = {
     email: 'Email',
     emailOptional: 'Email (optional)',
     deliveryMethod: 'Delivery method',
-    novaPoshta: 'Nova Poshta — branch',
-    novaPoshtaHint: 'Pick up from a branch / parcel locker',
-    courier: 'Courier delivery',
-    courierHint: 'Delivery to your address',
-    city: 'Settlement',
+    novaPoshta: 'Nova Poshta',
+    novaPoshtaHint: 'Branch, parcel locker or courier',
+    novaPoshtaWarehouse: 'To branch',
+    novaPoshtaParcelLocker: 'To parcel locker',
+    novaPoshtaCourier: 'By courier',
+    ukrposhta: 'Ukrposhta',
+    ukrposhtaHint: 'Delivery to a Ukrposhta branch',
+    ukrposhtaBasic: 'Basic',
+    ukrposhtaPriority: 'Priority',
+    selfPickup: 'Self-pickup',
+    selfPickupHint: 'Pick up from the store',
+    selfPickupAddress: 'Korolenka St., 32A, Kropyvnytskyi',
+    city: 'City',
     cityPlaceholder: 'Start typing a city or village',
     cityHint: 'Pick a suggestion from the list',
-    branch: 'Branch / locker',
+    citySimplePlaceholder: 'Enter the city name',
+    branch: 'Branch',
     branchPlaceholder: 'Branch number, e.g. 137',
     branchHint: 'Select a branch — the address fills in automatically',
-    branchSelectCityFirst: 'Select a settlement first',
+    branchSelectCityFirst: 'Select a city first',
     branchAddressLabel: 'Branch address: {address}',
     address: 'Delivery address',
     addressPlaceholder: 'Street, building, apartment',
+    ukrposhtaBranchHint: 'Address: {address}. Index: {index}',
+    postalIndex: 'Postal index',
+    postalIndexPlaceholder: 'e.g. 25000',
     searchLoading: 'Searching…',
     searchEmpty: 'No results',
     paymentPickup: 'Cash on delivery',
-    paymentPickupHint: 'Cash or card on receipt. Commission is paid by the buyer',
-    paymentOnline: 'Secure online payment',
+    paymentPickupHint: 'Cash or card on receipt',
+    paymentBank: 'Full payment to account',
+    paymentBankHint: 'Bank transfer to our account',
+    paymentBankRecipientLabel: 'Recipient',
+    paymentBankRecipient: 'FOP Hlushchenko Illia Volodymyrovych',
+    paymentBankIbanLabel: 'IBAN',
+    paymentBankIban: 'UA743052990000026000005107086',
+    paymentBankTaxIdLabel: 'EDRPOU / Tax ID',
+    paymentBankTaxId: '3817313230',
+    paymentBankPurposeLabel: 'Payment purpose',
+    paymentBankPurpose: 'Payment for goods',
     paymentGoogle: 'Google Pay',
     paymentApple: 'Apple Pay',
     comment: 'Order comment',
@@ -844,14 +913,17 @@ export const uiTranslationsEn: UiTranslationSchema = {
     goToOrders: 'View orders',
     errorRequired: 'Please fill in the required fields',
     errorPhone: 'Enter a valid phone number',
-    errorCity: 'Select a settlement from the list',
+    errorCity: 'Enter the city',
     errorBranch: 'Select a Nova Poshta branch from the list',
     errorAddress: 'Enter a delivery address',
+    errorPostalIndex: 'Enter the postal index',
     errorPayment: 'Select a payment method',
     errorSubmit: 'Could not place the order. Please try again',
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, branch: {branch}',
     locationSummaryCourier: '{city}, {address}',
+    locationSummaryUkrposhta: 'Ukrposhta ({type}), {city}, {branch}, index {index}',
+    locationSummarySelfPickup: 'Self-pickup: {address}',
   },
   wishlist: {
     emptyTitle: 'Wishlist is empty',

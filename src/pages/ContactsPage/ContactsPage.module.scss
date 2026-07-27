@@ -55,8 +55,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $color-primary;
+  color: $color-primary-dark;
   flex-shrink: 0;
+}
+
+.iconPhone {
+  background: rgba(37, 99, 235, 0.14);
+  color: #2563EB;
+}
+
+.iconMail {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0284C7;
+}
+
+.iconLocation {
+  background: rgba(239, 68, 68, 0.14);
+  color: #DC2626;
 }
 
 .contactBody {
@@ -229,13 +244,22 @@
   border-top: 1px solid $color-border;
 }
 
+.scheduleSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.scheduleSectionIcon {
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
 .scheduleSectionLabel {
   margin: 0;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-semibold;
-  color: $color-primary;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
 }
 
 .scheduleCard {
@@ -247,18 +271,6 @@
   background: rgba(var(--color-primary-rgb), 0.08);
   border: 1px solid rgba(var(--color-primary-rgb), 0.16);
   box-shadow: none;
-}
-
-.scheduleIcon {
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: $radius-md;
-  background: rgba(var(--color-primary-rgb), 0.16);
-  color: $color-primary;
 }
 
 .scheduleTitle {

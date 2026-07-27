@@ -1,6 +1,10 @@
-export type DeliveryMethod = 'nova_poshta' | 'courier'
+export type DeliveryMethod = 'nova_poshta' | 'ukrposhta' | 'self_pickup'
 
-export type PaymentMethod = 'pickup' | 'google_pay' | 'apple_pay'
+export type NovaPoshtaType = 'warehouse' | 'parcel_locker' | 'courier'
+
+export type UkrposhtaType = 'basic' | 'priority'
+
+export type PaymentMethod = 'bank_transfer' | 'pickup' | 'google_pay' | 'apple_pay'
 
 export interface CheckoutContact {
   firstName: string
@@ -11,13 +15,19 @@ export interface CheckoutContact {
 
 export interface CheckoutLocation {
   deliveryMethod: DeliveryMethod
+  /** Nova Poshta subtype: branch / locker / courier. */
+  novaPoshtaType: NovaPoshtaType
+  /** Ukrposhta tariff: basic or priority. */
+  ukrposhtaType: UkrposhtaType
   city: string
-  /** Nova Poshta settlement / city Ref (for warehouse lookup). */
+  /** Settlement / city Ref for Nova Poshta or Ukrposhta branch lookup. */
   cityRef?: string
   branch: string
-  /** Nova Poshta warehouse Ref. */
+  /** Branch / warehouse Ref (Nova Poshta warehouse or Ukrposhta post office). */
   warehouseRef?: string
   address: string
+  /** Ukrposhta postal index (auto-filled from selected branch). */
+  postalIndex: string
 }
 
 export interface CheckoutPayment {

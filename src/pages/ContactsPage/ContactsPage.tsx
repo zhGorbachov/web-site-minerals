@@ -58,7 +58,7 @@ export function ContactsPage() {
                     transition={{ duration: 0.3, delay }}
                   >
                     <div className={styles.phoneGroupHeader}>
-                      <div className={styles.contactIcon}>
+                      <div className={[styles.contactIcon, styles.iconPhone].join(' ')}>
                         <Phone size={24} />
                       </div>
                       <div className={styles.contactBody}>
@@ -98,7 +98,7 @@ export function ContactsPage() {
                   {...fadeUp}
                   transition={{ duration: 0.3, delay }}
                 >
-                  <div className={styles.contactIcon}>
+                  <div className={[styles.contactIcon, styles.iconPhone].join(' ')}>
                     <Phone size={24} />
                   </div>
                   <div className={styles.contactBody}>
@@ -146,7 +146,7 @@ export function ContactsPage() {
               {...fadeUp}
               transition={{ duration: 0.3, delay: cardIndex++ * 0.08 }}
             >
-              <div className={styles.contactIcon}>
+              <div className={[styles.contactIcon, styles.iconMail].join(' ')}>
                 <Mail size={24} />
               </div>
               <div className={styles.contactBody}>
@@ -167,7 +167,7 @@ export function ContactsPage() {
               {...fadeUp}
               transition={{ duration: 0.3, delay: cardIndex++ * 0.08 }}
             >
-              <div className={styles.contactIcon}>
+              <div className={[styles.contactIcon, styles.iconLocation].join(' ')}>
                 <MapPin size={24} />
               </div>
               <div className={styles.contactBody}>
@@ -190,11 +190,11 @@ export function ContactsPage() {
               {...fadeUp}
               transition={{ duration: 0.3, delay: cardIndex * 0.08 }}
             >
-              <p className={styles.scheduleSectionLabel}>{t('contacts.scheduleSectionLabel')}</p>
+              <div className={styles.scheduleSectionHeader}>
+                <Clock className={styles.scheduleSectionIcon} size={28} />
+                <h2 className={styles.scheduleSectionLabel}>{t('contacts.scheduleSectionLabel')}</h2>
+              </div>
               <div className={styles.scheduleCard}>
-                <div className={styles.scheduleIcon}>
-                  <Clock size={24} />
-                </div>
                 <div className={styles.contactBody}>
                   <h4 className={styles.scheduleTitle}>{t('contacts.scheduleTitle')}</h4>
                   <p className={styles.scheduleValue}>{t('contacts.scheduleValue')}</p>

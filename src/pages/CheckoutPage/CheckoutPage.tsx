@@ -1,26 +1,29 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
-  ArrowRight,
   Check,
   ChevronDown,
   ChevronUp,
-  MapPin,
   Package,
   Pencil,
   Truck,
   CreditCard,
+  MessageSquare,
 } from 'lucide-react'
 import type {
   CheckoutContact,
   CheckoutLocation,
   DeliveryMethod,
   NovaPoshtaCity,
+  NovaPoshtaType,
   NovaPoshtaWarehouse,
   PaymentMethod,
+  UkrposhtaBranch,
+  UkrposhtaCity,
+  UkrposhtaType,
 } from '@/types'
-import { NovaPoshtaApi, OrdersApi } from '@/api'
+import { NovaPoshtaApi, OrdersApi, UkrposhtaApi } from '@/api'
 import { useAuthStore, useCartStore, useCheckoutStore, GUEST_CHECKOUT_PROFILE_KEY } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils'
@@ -31,6 +34,18 @@ import styles from './CheckoutPage.module.scss'
 
 type StepId = 1 | 2 | 3
 
+const emptyLocation = (): CheckoutLocation => ({
+  deliveryMethod: 'nova_poshta',
+  novaPoshtaType: 'warehouse',
+  ukrposhtaType: 'basic',
+  city: '',
+  cityRef: undefined,
+  branch: '',
+  warehouseRef: undefined,
+  address: '',
+  postalIndex: '',
+})
+
 function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
   const number = warehouse.number || ''
   if (warehouse.cityName && number) {
@@ -39,48 +54,100 @@ function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
   return warehouse.name
 }
 
-function GooglePayIcon({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-      />
-    </svg>
-  )
+function formatUkrposhtaBranchLabel(branch: UkrposhtaBranch) {
+  const number = branch.number || ''
+  if (branch.cityName && number) {
+    return `${branch.cityName} - ${number}`
+  }
+  return branch.name
 }
 
-function ApplePayIcon({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#1A1A1A"
-        d="M16.365 12.84c-.03-3.04 2.48-4.5 2.59-4.57-1.41-2.06-3.61-2.34-4.39-2.37-1.87-.19-3.65 1.1-4.6 1.1-.96 0-2.43-1.08-4-1.05-2.05.03-3.95 1.2-5 3.04-2.14 3.71-.55 9.2 1.53 12.21 1.02 1.48 2.24 3.13 3.84 3.07 1.54-.06 2.12-1 3.98-1 1.85 0 2.38.99 4 .96 1.66-.03 2.71-1.5 3.72-2.99 1.17-1.71 1.65-3.37 1.68-3.45-.04-.02-3.22-1.24-3.25-4.95zM13.88 4.5c.84-1.02 1.41-2.44 1.25-3.86-1.21.05-2.67.81-3.54 1.82-.78.9-1.46 2.34-1.28 3.72 1.35.1 2.73-.69 3.57-1.68z"
-      />
-    </svg>
-  )
-}
-
-function CardPayIcon() {
+function NovaPoshtaIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect x="2" y="6" width="24" height="16" rx="3" fill="#5B8DEF" />
-      <rect x="2" y="10" width="24" height="4" fill="#3D6FD8" />
-      <rect x="5" y="17" width="7" height="2.5" rx="1" fill="#FFD166" />
-      <circle cx="20" cy="18.5" r="2.2" fill="#EF476F" opacity="0.9" />
-      <circle cx="22.5" cy="18.5" r="2.2" fill="#FFD166" opacity="0.85" />
+      <rect width="28" height="28" rx="7" fill="#E30613" />
+      <path
+        fill="#fff"
+        d="M14 5.2 8.2 11h3.1v5.2h5.4V11h3.1L14 5.2Zm-5.8 12.2v5.4h11.6v-5.4h-2.7v2.7H11v-2.7H8.2Z"
+      />
+    </svg>
+  )
+}
+
+function UkrposhtaIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <rect width="28" height="28" rx="7" fill="#FFCC00" />
+      <path
+        fill="#0057B8"
+        d="M6.5 9.2h15v1.7H6.5V9.2Zm0 4h15v1.7H6.5v-1.7Zm0 4h15v1.7H6.5v-1.7Z"
+      />
+      <circle cx="14" cy="14" r="3.2" fill="#0057B8" />
+      <circle cx="14" cy="14" r="1.5" fill="#FFCC00" />
+    </svg>
+  )
+}
+
+function SelfPickupIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <rect width="28" height="28" rx="7" fill="#12B76A" />
+      <path
+        fill="#fff"
+        d="M7 12.2 14 6.8l7 5.4v9.5a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 21.7v-9.5Zm3.2 2.3v6.2h2.6v-4h2.4v4h2.6v-6.2H10.2Z"
+      />
+    </svg>
+  )
+}
+
+function GooglePayLogo() {
+  return (
+    <span className={styles.brandLogo} aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24">
+        <path
+          fill="#4285F4"
+          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        />
+        <path
+          fill="#34A853"
+          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        />
+        <path
+          fill="#FBBC05"
+          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        />
+        <path
+          fill="#EA4335"
+          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        />
+      </svg>
+      <span className={styles.brandLogoPayGoogle}>Pay</span>
+    </span>
+  )
+}
+
+function ApplePayLogo() {
+  return (
+    <span className={styles.brandLogo} aria-hidden="true">
+      <svg className={styles.brandLogoAppleIcon} width="20" height="20" viewBox="0 0 24 24">
+        <path
+          fill="#1A1A1A"
+          d="M16.365 12.84c-.03-3.04 2.48-4.5 2.59-4.57-1.41-2.06-3.61-2.34-4.39-2.37-1.87-.19-3.65 1.1-4.6 1.1-.96 0-2.43-1.08-4-1.05-2.05.03-3.95 1.2-5 3.04-2.14 3.71-.55 9.2 1.53 12.21 1.02 1.48 2.24 3.13 3.84 3.07 1.54-.06 2.12-1 3.98-1 1.85 0 2.38.99 4 .96 1.66-.03 2.71-1.5 3.72-2.99 1.17-1.71 1.65-3.37 1.68-3.45-.04-.02-3.22-1.24-3.25-4.95zM13.88 4.5c.84-1.02 1.41-2.44 1.25-3.86-1.21.05-2.67.81-3.54 1.82-.78.9-1.46 2.34-1.28 3.72 1.35.1 2.73-.69 3.57-1.68z"
+        />
+      </svg>
+      <span className={styles.brandLogoPayApple}>Pay</span>
+    </span>
+  )
+}
+
+function BankTransferIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <rect width="28" height="28" rx="7" fill="#4F46E5" />
+      <path
+        fill="#fff"
+        d="M7.5 9.2h13v1.6H7.5V9.2Zm1.2 3.2h10.6v9.2H8.7v-9.2Zm2 2.2v1.4h6.6v-1.4H10.7Zm0 2.8v1.4h6.6v-1.4H10.7Zm0 2.8v1.4h4.2v-1.4h-4.2Z"
+      />
     </svg>
   )
 }
@@ -88,45 +155,12 @@ function CardPayIcon() {
 function WalletPayIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect x="3" y="7" width="22" height="15" rx="3" fill="#2EC4B6" />
-      <rect x="3" y="7" width="22" height="5" rx="2" fill="#20A39E" />
-      <rect x="15" y="13.5" width="10" height="8.5" rx="2" fill="#FF9F1C" />
-      <circle cx="20.5" cy="17.75" r="1.6" fill="#FFF6E8" />
-      <rect x="6" y="9" width="6" height="1.5" rx="0.75" fill="#B8F2E6" />
-    </svg>
-  )
-}
-
-function MastercardBadge() {
-  return (
-    <svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true">
-      <rect width="28" height="18" rx="3" fill="#F5F5F5" />
-      <circle cx="11.5" cy="9" r="5" fill="#EB001B" />
-      <circle cx="16.5" cy="9" r="5" fill="#F79E1B" />
+      <rect width="28" height="28" rx="7" fill="#0EA5E9" />
       <path
-        d="M14 5.2a5 5 0 0 1 0 7.6 5 5 0 0 1 0-7.6z"
-        fill="#FF5F00"
-      />
-    </svg>
-  )
-}
-
-function VisaBadge() {
-  return (
-    <svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true">
-      <rect width="28" height="18" rx="3" fill="#1A1F71" />
-      <text
-        x="14"
-        y="12.5"
-        textAnchor="middle"
         fill="#fff"
-        fontSize="8"
-        fontWeight="700"
-        fontFamily="Arial, sans-serif"
-        letterSpacing="0.5"
-      >
-        VISA
-      </text>
+        d="M7 9.5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 21 21.5H7A1.5 1.5 0 0 1 5.5 20v-9A1.5 1.5 0 0 1 7 9.5Zm12.2 5.2a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8Z"
+      />
+      <path fill="#BAE6FD" d="M5.5 11.2h17v2.2h-17z" />
     </svg>
   )
 }
@@ -196,19 +230,7 @@ function CheckoutBlock({
 
       {!expanded && done && summary && <p className={styles.summaryText}>{summary}</p>}
 
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            className={styles.blockBody}
-            initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
-            animate={{ opacity: 1, height: 'auto', overflow: 'visible' }}
-            exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
-            transition={{ duration: 0.22 }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {expanded && <div className={styles.blockBody}>{children}</div>}
     </section>
   )
 }
@@ -238,14 +260,7 @@ export function CheckoutPage() {
     phone: '',
     email: '',
   })
-  const [location, setLocation] = useState<CheckoutLocation>({
-    deliveryMethod: 'nova_poshta',
-    city: '',
-    cityRef: undefined,
-    branch: '',
-    warehouseRef: undefined,
-    address: '',
-  })
+  const [location, setLocation] = useState<CheckoutLocation>(emptyLocation)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
   const [comment, setComment] = useState('')
   const [commentOpen, setCommentOpen] = useState(false)
@@ -283,6 +298,32 @@ export function CheckoutPage() {
     }))
   }
 
+  const loadUkrposhtaCityOptions = async (query: string): Promise<AutocompleteOption[]> => {
+    const { items } = await UkrposhtaApi.searchCities(query)
+    return items.map((city) => ({
+      id: city.ref,
+      label: city.present,
+      description:
+        city.area && !city.present.toLocaleLowerCase('uk-UA').includes(city.area.toLocaleLowerCase('uk-UA'))
+          ? city.area
+          : undefined,
+      data: city,
+    }))
+  }
+
+  const loadUkrposhtaBranchOptions = async (query: string): Promise<AutocompleteOption[]> => {
+    if (!location.cityRef) return []
+    const numberMatch = query.match(/(?:^|[\s\-—])(\d+)\s*$/)
+    const searchQuery = numberMatch ? numberMatch[1] : query
+    const { items } = await UkrposhtaApi.searchBranches(location.cityRef, searchQuery)
+    return items.map((branch) => ({
+      id: branch.ref,
+      label: formatUkrposhtaBranchLabel(branch),
+      description: `${branch.shortAddress || branch.name} · ${branch.postalIndex}`,
+      data: branch,
+    }))
+  }
+
   useEffect(() => {
     const saved = getProfile(profileKey)
     const nextContact: CheckoutContact = {
@@ -302,12 +343,29 @@ export function CheckoutPage() {
       setLocation(saved.location)
     }
 
-    const locationValid =
-      Boolean(saved?.location?.city.trim()) &&
-      Boolean(saved?.location?.cityRef) &&
-      (saved?.location.deliveryMethod === 'courier'
-        ? Boolean(saved.location.address.trim())
-        : Boolean(saved?.location.branch.trim()) && Boolean(saved?.location.warehouseRef))
+    const savedLocation = saved?.location
+    const locationValid = (() => {
+      if (!savedLocation) return false
+      if (savedLocation.deliveryMethod === 'self_pickup') return true
+      if (savedLocation.deliveryMethod === 'ukrposhta') {
+        return (
+          Boolean(savedLocation.city.trim()) &&
+          Boolean(savedLocation.cityRef) &&
+          Boolean(savedLocation.branch.trim()) &&
+          Boolean(savedLocation.warehouseRef) &&
+          Boolean(savedLocation.postalIndex.trim())
+        )
+      }
+      if (savedLocation.novaPoshtaType === 'courier') {
+        return Boolean(savedLocation.city.trim()) && Boolean(savedLocation.cityRef) && Boolean(savedLocation.address.trim())
+      }
+      return (
+        Boolean(savedLocation.city.trim()) &&
+        Boolean(savedLocation.cityRef) &&
+        Boolean(savedLocation.branch.trim()) &&
+        Boolean(savedLocation.warehouseRef)
+      )
+    })()
 
     if (contactValid) {
       setContactDone(true)
@@ -377,26 +435,64 @@ export function CheckoutPage() {
     phone: formatPhoneDisplay(contact.phone),
   })
 
-  const locationSummary =
-    location.deliveryMethod === 'nova_poshta'
-      ? t('checkout.locationSummaryBranch', {
-          city: location.city,
-          branch: location.branch,
-        })
-      : t('checkout.locationSummaryCourier', {
-          city: location.city,
-          address: location.address,
-        })
+  const locationSummary = (() => {
+    if (location.deliveryMethod === 'self_pickup') {
+      return t('checkout.locationSummarySelfPickup', {
+        address: t('checkout.selfPickupAddress'),
+      })
+    }
+    if (location.deliveryMethod === 'ukrposhta') {
+      return t('checkout.locationSummaryUkrposhta', {
+        type:
+          location.ukrposhtaType === 'priority'
+            ? t('checkout.ukrposhtaPriority')
+            : t('checkout.ukrposhtaBasic'),
+        city: location.city,
+        branch: location.branch,
+        index: location.postalIndex,
+      })
+    }
+    if (location.novaPoshtaType === 'courier') {
+      return t('checkout.locationSummaryCourier', {
+        city: location.city,
+        address: location.address,
+      })
+    }
+    return t('checkout.locationSummaryBranch', {
+      city: location.city,
+      branch: location.branch,
+    })
+  })()
+
+  const isContactComplete = (value: CheckoutContact = contact) =>
+    Boolean(value.firstName.trim()) &&
+    Boolean(value.lastName.trim()) &&
+    isValidLocalPhone(value.phone)
+
+  const isLocationComplete = (value: CheckoutLocation = location) => {
+    if (value.deliveryMethod === 'self_pickup') return true
+    if (value.deliveryMethod === 'ukrposhta') {
+      return (
+        Boolean(value.city.trim()) &&
+        Boolean(value.cityRef) &&
+        Boolean(value.branch.trim()) &&
+        Boolean(value.warehouseRef) &&
+        Boolean(value.postalIndex.trim())
+      )
+    }
+    if (!value.city.trim() || !value.cityRef) return false
+    if (value.novaPoshtaType === 'courier') return Boolean(value.address.trim())
+    return Boolean(value.branch.trim()) && Boolean(value.warehouseRef)
+  }
 
   const validateContact = () => {
-    if (!contact.firstName.trim() || !contact.lastName.trim()) {
+    if (!isContactComplete()) {
       setErrorStep(1)
-      setError(t('checkout.errorRequired'))
-      return false
-    }
-    if (!isValidLocalPhone(contact.phone)) {
-      setErrorStep(1)
-      setError(t('checkout.errorPhone'))
+      setError(
+        !isValidLocalPhone(contact.phone) && contact.phone.trim()
+          ? t('checkout.errorPhone')
+          : t('checkout.errorRequired'),
+      )
       return false
     }
     setErrorStep(null)
@@ -405,21 +501,48 @@ export function CheckoutPage() {
   }
 
   const validateLocation = () => {
-    if (!location.city.trim() || !location.cityRef) {
-      setErrorStep(2)
-      setError(t('checkout.errorCity'))
-      return false
+    if (location.deliveryMethod === 'self_pickup') {
+      setErrorStep(null)
+      setError(null)
+      return true
     }
-    if (location.deliveryMethod === 'nova_poshta') {
+
+    if (location.deliveryMethod === 'ukrposhta') {
+      if (!location.city.trim() || !location.cityRef) {
+        setErrorStep(2)
+        setError(t('checkout.errorCity'))
+        return false
+      }
       if (!location.branch.trim() || !location.warehouseRef) {
         setErrorStep(2)
         setError(t('checkout.errorBranch'))
         return false
       }
+      if (!location.postalIndex.trim()) {
+        setErrorStep(2)
+        setError(t('checkout.errorPostalIndex'))
+        return false
+      }
+      setErrorStep(null)
+      setError(null)
+      return true
     }
-    if (location.deliveryMethod === 'courier' && !location.address.trim()) {
+
+    // Nova Poshta
+    if (!location.city.trim() || !location.cityRef) {
       setErrorStep(2)
-      setError(t('checkout.errorAddress'))
+      setError(t('checkout.errorCity'))
+      return false
+    }
+    if (location.novaPoshtaType === 'courier') {
+      if (!location.address.trim()) {
+        setErrorStep(2)
+        setError(t('checkout.errorAddress'))
+        return false
+      }
+    } else if (!location.branch.trim() || !location.warehouseRef) {
+      setErrorStep(2)
+      setError(t('checkout.errorBranch'))
       return false
     }
     setErrorStep(null)
@@ -427,44 +550,90 @@ export function CheckoutPage() {
     return true
   }
 
-  const handleContactContinue = (e: FormEvent) => {
-    e.preventDefault()
-    if (!validateContact()) return
-    const next: CheckoutContact = {
+  const buildLocationPayload = (): CheckoutLocation => ({
+    deliveryMethod: location.deliveryMethod,
+    novaPoshtaType: location.novaPoshtaType,
+    ukrposhtaType: location.ukrposhtaType,
+    city: location.city.trim(),
+    cityRef: location.cityRef,
+    branch: location.branch.trim(),
+    warehouseRef: location.warehouseRef,
+    address:
+      location.deliveryMethod === 'self_pickup'
+        ? t('checkout.selfPickupAddress')
+        : location.address.trim(),
+    postalIndex: location.postalIndex.trim(),
+  })
+
+  useEffect(() => {
+    if (!isContactComplete(contact)) {
+      setContactDone(false)
+      return
+    }
+    saveContact(profileKey, {
       firstName: contact.firstName.trim(),
       lastName: contact.lastName.trim(),
       phone: normalizeLocalPhone(contact.phone),
       email: contact.email.trim(),
-    }
-    setContact(next)
-    saveContact(profileKey, next)
+    })
     setContactDone(true)
-  }
+  }, [contact, profileKey, saveContact])
 
-  const handleLocationContinue = (e: FormEvent) => {
-    e.preventDefault()
-    if (!validateLocation()) return
-    const next: CheckoutLocation = {
+  useEffect(() => {
+    if (!isLocationComplete(location)) {
+      setLocationDone(false)
+      return
+    }
+    saveLocation(profileKey, {
       deliveryMethod: location.deliveryMethod,
+      novaPoshtaType: location.novaPoshtaType,
+      ukrposhtaType: location.ukrposhtaType,
       city: location.city.trim(),
       cityRef: location.cityRef,
       branch: location.branch.trim(),
       warehouseRef: location.warehouseRef,
-      address: location.address.trim(),
-    }
-    setLocation(next)
-    saveLocation(profileKey, next)
+      address:
+        location.deliveryMethod === 'self_pickup'
+          ? t('checkout.selfPickupAddress')
+          : location.address.trim(),
+      postalIndex: location.postalIndex.trim(),
+    })
     setLocationDone(true)
-  }
+  }, [location, profileKey, saveLocation, language])
 
   const setDeliveryMethod = (method: DeliveryMethod) => {
+    setLocation((prev) => {
+      const same = prev.deliveryMethod === method
+      return {
+        ...prev,
+        deliveryMethod: method,
+        city: same ? prev.city : '',
+        cityRef: same ? prev.cityRef : undefined,
+        branch: same ? prev.branch : '',
+        warehouseRef: same ? prev.warehouseRef : undefined,
+        address: method === 'self_pickup' ? t('checkout.selfPickupAddress') : same ? prev.address : '',
+        postalIndex: same ? prev.postalIndex : '',
+      }
+    })
+  }
+
+  const setNovaPoshtaType = (novaPoshtaType: NovaPoshtaType) => {
     setLocation((prev) => ({
       ...prev,
-      deliveryMethod: method,
-      branch: method === 'courier' ? '' : prev.branch,
-      warehouseRef: method === 'courier' ? undefined : prev.warehouseRef,
-      address: method === 'nova_poshta' ? (prev.warehouseRef ? prev.address : '') : prev.address,
+      novaPoshtaType,
+      branch: novaPoshtaType === 'courier' ? '' : prev.branch,
+      warehouseRef: novaPoshtaType === 'courier' ? undefined : prev.warehouseRef,
+      address:
+        novaPoshtaType === 'courier'
+          ? ''
+          : prev.warehouseRef
+            ? prev.address
+            : '',
     }))
+  }
+
+  const setUkrposhtaType = (ukrposhtaType: UkrposhtaType) => {
+    setLocation((prev) => ({ ...prev, ukrposhtaType }))
   }
 
   const handleCityChange = (value: string) => {
@@ -474,7 +643,8 @@ export function CheckoutPage() {
       cityRef: undefined,
       branch: '',
       warehouseRef: undefined,
-      address: prev.deliveryMethod === 'nova_poshta' ? '' : prev.address,
+      address: prev.deliveryMethod === 'nova_poshta' && prev.novaPoshtaType === 'courier' ? prev.address : '',
+      postalIndex: '',
     }))
   }
 
@@ -486,7 +656,21 @@ export function CheckoutPage() {
       cityRef: city.ref,
       branch: '',
       warehouseRef: undefined,
-      address: prev.deliveryMethod === 'nova_poshta' ? '' : prev.address,
+      address: prev.novaPoshtaType === 'courier' ? prev.address : '',
+      postalIndex: '',
+    }))
+  }
+
+  const handleUkrposhtaCitySelect = (option: AutocompleteOption) => {
+    const city = option.data as UkrposhtaCity
+    setLocation((prev) => ({
+      ...prev,
+      city: city.present || city.name,
+      cityRef: city.ref,
+      branch: '',
+      warehouseRef: undefined,
+      address: '',
+      postalIndex: '',
     }))
   }
 
@@ -496,6 +680,7 @@ export function CheckoutPage() {
       branch: value,
       warehouseRef: undefined,
       address: '',
+      postalIndex: prev.deliveryMethod === 'ukrposhta' ? '' : prev.postalIndex,
     }))
   }
 
@@ -506,6 +691,17 @@ export function CheckoutPage() {
       branch: formatWarehouseLabel(warehouse),
       warehouseRef: warehouse.ref,
       address: warehouse.shortAddress || warehouse.name,
+    }))
+  }
+
+  const handleUkrposhtaBranchSelect = (option: AutocompleteOption) => {
+    const branch = option.data as UkrposhtaBranch
+    setLocation((prev) => ({
+      ...prev,
+      branch: formatUkrposhtaBranchLabel(branch),
+      warehouseRef: branch.ref,
+      address: branch.shortAddress || branch.name,
+      postalIndex: branch.postalIndex,
     }))
   }
 
@@ -530,14 +726,7 @@ export function CheckoutPage() {
       phone: normalizeLocalPhone(contact.phone),
       email: contact.email.trim(),
     })
-    saveLocation(profileKey, {
-      deliveryMethod: location.deliveryMethod,
-      city: location.city.trim(),
-      cityRef: location.cityRef,
-      branch: location.branch.trim(),
-      warehouseRef: location.warehouseRef,
-      address: location.address.trim(),
-    })
+    saveLocation(profileKey, buildLocationPayload())
 
     if (!paymentMethod) {
       setErrorStep(3)
@@ -564,17 +753,8 @@ export function CheckoutPage() {
     }
   }
 
-  const onlinePaymentSelected =
-    paymentMethod === 'google_pay' || paymentMethod === 'apple_pay'
-
-  const selectOnlinePayment = (method: 'google_pay' | 'apple_pay' = 'google_pay') => {
+  const selectPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethod(method)
-    setError(null)
-    setErrorStep(null)
-  }
-
-  const selectPickupPayment = () => {
-    setPaymentMethod('pickup')
     setError(null)
     setErrorStep(null)
   }
@@ -608,7 +788,7 @@ export function CheckoutPage() {
               summary={contactSummary}
               onToggle={() => toggleStep(1)}
             >
-              <form className={styles.formGrid} onSubmit={handleContactContinue}>
+              <div className={styles.formGrid}>
                 <Input
                   label={t('checkout.firstName')}
                   value={contact.firstName}
@@ -641,12 +821,7 @@ export function CheckoutPage() {
                   />
                 </div>
                 {error && errorStep === 1 && <p className={`${styles.error} ${styles.fullWidth}`}>{error}</p>}
-                <div className={styles.fullWidth}>
-                  <Button type="submit" size="lg" fullWidth rightIcon={<ArrowRight size={18} />}>
-                    {t('checkout.continue')}
-                  </Button>
-                </div>
-              </form>
+              </div>
             </CheckoutBlock>
 
             <CheckoutBlock
@@ -657,123 +832,266 @@ export function CheckoutPage() {
               summary={locationSummary}
               onToggle={() => toggleStep(2)}
             >
-              <form onSubmit={handleLocationContinue}>
+              <div>
                 <p className={styles.optionTitle} style={{ marginBottom: 8 }}>
                   {t('checkout.deliveryMethod')}
                 </p>
                 <div className={styles.optionList}>
-                  <button
-                    type="button"
+                  <div
                     className={[
                       styles.optionCard,
                       location.deliveryMethod === 'nova_poshta' ? styles.selected : '',
                     ]
                       .filter(Boolean)
                       .join(' ')}
-                    onClick={() => setDeliveryMethod('nova_poshta')}
                   >
-                    <span className={styles.radio}>
-                      {location.deliveryMethod === 'nova_poshta' && <span className={styles.dot} />}
-                    </span>
-                    <span className={styles.optionIcon}>
-                      <MapPin size={20} />
-                    </span>
-                    <span className={styles.optionContent}>
-                      <span className={styles.optionTitle}>{t('checkout.novaPoshta')}</span>
-                      <span className={styles.optionHint}>{t('checkout.novaPoshtaHint')}</span>
-                    </span>
-                  </button>
+                    <button
+                      type="button"
+                      className={styles.optionCardHeader}
+                      onClick={() => setDeliveryMethod('nova_poshta')}
+                    >
+                      <span className={styles.radio}>
+                        {location.deliveryMethod === 'nova_poshta' && <span className={styles.dot} />}
+                      </span>
+                      <span className={styles.optionIcon}>
+                        <NovaPoshtaIcon />
+                      </span>
+                      <span className={styles.optionContent}>
+                        <span className={styles.optionTitle}>{t('checkout.novaPoshta')}</span>
+                        <span className={styles.optionHint}>{t('checkout.novaPoshtaHint')}</span>
+                      </span>
+                    </button>
 
-                  <button
-                    type="button"
+                    {location.deliveryMethod === 'nova_poshta' && (
+                      <div className={styles.optionCardBody}>
+                        <div className={styles.subOptions}>
+                          {(
+                            [
+                              ['warehouse', 'checkout.novaPoshtaWarehouse'],
+                              ['parcel_locker', 'checkout.novaPoshtaParcelLocker'],
+                              ['courier', 'checkout.novaPoshtaCourier'],
+                            ] as const
+                          ).map(([type, labelKey]) => (
+                            <button
+                              key={type}
+                              type="button"
+                              className={[
+                                styles.subOption,
+                                location.novaPoshtaType === type ? styles.subOptionSelected : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                              onClick={() => setNovaPoshtaType(type)}
+                            >
+                              <span className={styles.radio}>
+                                {location.novaPoshtaType === type && <span className={styles.dot} />}
+                              </span>
+                              <span>{t(labelKey)}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className={styles.formGrid}>
+                          <div className={styles.fullWidth}>
+                            <Autocomplete
+                              label={t('checkout.city')}
+                              value={location.city}
+                              onChange={handleCityChange}
+                              onSelect={handleCitySelect}
+                              loadOptions={loadCityOptions}
+                              placeholder={t('checkout.cityPlaceholder')}
+                              hint={location.cityRef ? undefined : t('checkout.cityHint')}
+                              emptyMessage={t('checkout.searchEmpty')}
+                              loadingMessage={t('checkout.searchLoading')}
+                              required
+                            />
+                          </div>
+
+                          {location.novaPoshtaType === 'courier' ? (
+                            <div className={styles.fullWidth}>
+                              <Input
+                                label={t('checkout.address')}
+                                value={location.address}
+                                onChange={(e) => setLocation((l) => ({ ...l, address: e.target.value }))}
+                                placeholder={t('checkout.addressPlaceholder')}
+                                autoComplete="street-address"
+                                required
+                              />
+                            </div>
+                          ) : (
+                            <div className={styles.fullWidth}>
+                              <Autocomplete
+                                label={t('checkout.branch')}
+                                value={location.branch}
+                                onChange={handleBranchChange}
+                                onSelect={handleBranchSelect}
+                                loadOptions={loadWarehouseOptions}
+                                placeholder={
+                                  location.cityRef
+                                    ? t('checkout.branchPlaceholder')
+                                    : t('checkout.branchSelectCityFirst')
+                                }
+                                disabled={!location.cityRef}
+                                minChars={0}
+                                hint={
+                                  location.warehouseRef && location.address
+                                    ? t('checkout.branchAddressLabel', { address: location.address })
+                                    : location.cityRef
+                                      ? t('checkout.branchHint')
+                                      : t('checkout.branchSelectCityFirst')
+                                }
+                                emptyMessage={t('checkout.searchEmpty')}
+                                loadingMessage={t('checkout.searchLoading')}
+                                required
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div
                     className={[
                       styles.optionCard,
-                      location.deliveryMethod === 'courier' ? styles.selected : '',
+                      location.deliveryMethod === 'ukrposhta' ? styles.selected : '',
                     ]
                       .filter(Boolean)
                       .join(' ')}
-                    onClick={() => setDeliveryMethod('courier')}
                   >
-                    <span className={styles.radio}>
-                      {location.deliveryMethod === 'courier' && <span className={styles.dot} />}
-                    </span>
-                    <span className={styles.optionIcon}>
-                      <Truck size={20} />
-                    </span>
-                    <span className={styles.optionContent}>
-                      <span className={styles.optionTitle}>{t('checkout.courier')}</span>
-                      <span className={styles.optionHint}>{t('checkout.courierHint')}</span>
-                    </span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      className={styles.optionCardHeader}
+                      onClick={() => setDeliveryMethod('ukrposhta')}
+                    >
+                      <span className={styles.radio}>
+                        {location.deliveryMethod === 'ukrposhta' && <span className={styles.dot} />}
+                      </span>
+                      <span className={styles.optionIcon}>
+                        <UkrposhtaIcon />
+                      </span>
+                      <span className={styles.optionContent}>
+                        <span className={styles.optionTitle}>{t('checkout.ukrposhta')}</span>
+                        <span className={styles.optionHint}>{t('checkout.ukrposhtaHint')}</span>
+                      </span>
+                    </button>
 
-                <div className={styles.formGrid} style={{ marginTop: 16 }}>
-                  <div className={styles.fullWidth}>
-                    <Autocomplete
-                      label={t('checkout.city')}
-                      value={location.city}
-                      onChange={handleCityChange}
-                      onSelect={handleCitySelect}
-                      loadOptions={loadCityOptions}
-                      placeholder={t('checkout.cityPlaceholder')}
-                      hint={location.cityRef ? undefined : t('checkout.cityHint')}
-                      emptyMessage={t('checkout.searchEmpty')}
-                      loadingMessage={t('checkout.searchLoading')}
-                      required
-                    />
+                    {location.deliveryMethod === 'ukrposhta' && (
+                      <div className={styles.optionCardBody}>
+                        <div className={styles.subOptions}>
+                          {(
+                            [
+                              ['basic', 'checkout.ukrposhtaBasic'],
+                              ['priority', 'checkout.ukrposhtaPriority'],
+                            ] as const
+                          ).map(([type, labelKey]) => (
+                            <button
+                              key={type}
+                              type="button"
+                              className={[
+                                styles.subOption,
+                                location.ukrposhtaType === type ? styles.subOptionSelected : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                              onClick={() => setUkrposhtaType(type)}
+                            >
+                              <span className={styles.radio}>
+                                {location.ukrposhtaType === type && <span className={styles.dot} />}
+                              </span>
+                              <span>{t(labelKey)}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className={styles.formGrid}>
+                          <div className={styles.fullWidth}>
+                            <Autocomplete
+                              label={t('checkout.city')}
+                              value={location.city}
+                              onChange={handleCityChange}
+                              onSelect={handleUkrposhtaCitySelect}
+                              loadOptions={loadUkrposhtaCityOptions}
+                              placeholder={t('checkout.cityPlaceholder')}
+                              hint={location.cityRef ? undefined : t('checkout.cityHint')}
+                              emptyMessage={t('checkout.searchEmpty')}
+                              loadingMessage={t('checkout.searchLoading')}
+                              required
+                            />
+                          </div>
+
+                          <div className={styles.fullWidth}>
+                            <Autocomplete
+                              label={t('checkout.branch')}
+                              value={location.branch}
+                              onChange={handleBranchChange}
+                              onSelect={handleUkrposhtaBranchSelect}
+                              loadOptions={loadUkrposhtaBranchOptions}
+                              placeholder={
+                                location.cityRef
+                                  ? t('checkout.branchPlaceholder')
+                                  : t('checkout.branchSelectCityFirst')
+                              }
+                              disabled={!location.cityRef}
+                              minChars={0}
+                              hint={
+                                location.warehouseRef && location.postalIndex
+                                  ? t('checkout.ukrposhtaBranchHint', {
+                                      address: location.address,
+                                      index: location.postalIndex,
+                                    })
+                                  : location.cityRef
+                                    ? t('checkout.branchHint')
+                                    : t('checkout.branchSelectCityFirst')
+                              }
+                              emptyMessage={t('checkout.searchEmpty')}
+                              loadingMessage={t('checkout.searchLoading')}
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {location.deliveryMethod === 'nova_poshta' ? (
-                    <div className={styles.fullWidth}>
-                      <Autocomplete
-                        label={t('checkout.branch')}
-                        value={location.branch}
-                        onChange={handleBranchChange}
-                        onSelect={handleBranchSelect}
-                        loadOptions={loadWarehouseOptions}
-                        placeholder={
-                          location.cityRef
-                            ? t('checkout.branchPlaceholder')
-                            : t('checkout.branchSelectCityFirst')
-                        }
-                        disabled={!location.cityRef}
-                        minChars={0}
-                        hint={
-                          location.warehouseRef && location.address
-                            ? t('checkout.branchAddressLabel', { address: location.address })
-                            : location.cityRef
-                              ? t('checkout.branchHint')
-                              : t('checkout.branchSelectCityFirst')
-                        }
-                        emptyMessage={t('checkout.searchEmpty')}
-                        loadingMessage={t('checkout.searchLoading')}
-                        required
-                      />
-                    </div>
-                  ) : (
-                    <div className={styles.fullWidth}>
-                      <Input
-                        label={t('checkout.address')}
-                        value={location.address}
-                        onChange={(e) => setLocation((l) => ({ ...l, address: e.target.value }))}
-                        placeholder={t('checkout.addressPlaceholder')}
-                        autoComplete="street-address"
-                        required
-                      />
-                    </div>
-                  )}
+
+                  <div
+                    className={[
+                      styles.optionCard,
+                      location.deliveryMethod === 'self_pickup' ? styles.selected : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <button
+                      type="button"
+                      className={styles.optionCardHeader}
+                      onClick={() => setDeliveryMethod('self_pickup')}
+                    >
+                      <span className={styles.radio}>
+                        {location.deliveryMethod === 'self_pickup' && <span className={styles.dot} />}
+                      </span>
+                      <span className={styles.optionIcon}>
+                        <SelfPickupIcon />
+                      </span>
+                      <span className={styles.optionContent}>
+                        <span className={styles.optionTitle}>{t('checkout.selfPickup')}</span>
+                        <span className={styles.optionHint}>{t('checkout.selfPickupHint')}</span>
+                      </span>
+                    </button>
+
+                    {location.deliveryMethod === 'self_pickup' && (
+                      <div className={styles.optionCardBody}>
+                        <div className={styles.pickupAddress}>
+                          <Truck size={18} />
+                          <span>{t('checkout.selfPickupAddress')}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {error && errorStep === 2 && <p className={styles.error}>{error}</p>}
-                <Button
-                  type="submit"
-                  size="lg"
-                  fullWidth
-                  rightIcon={<ArrowRight size={18} />}
-                  style={{ marginTop: 16 }}
-                >
-                  {t('checkout.continue')}
-                </Button>
-              </form>
+              </div>
             </CheckoutBlock>
 
             <CheckoutBlock
@@ -784,123 +1102,153 @@ export function CheckoutPage() {
               onToggle={() => toggleStep(3)}
             >
               <div className={styles.optionList}>
-                <div
+                <button
+                  type="button"
                   className={[
-                    styles.paymentCard,
-                    onlinePaymentSelected ? styles.paymentCardSelected : '',
+                    styles.optionCard,
+                    paymentMethod === 'bank_transfer' ? styles.selected : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
+                  onClick={() => selectPaymentMethod('bank_transfer')}
                 >
+                  <span className={styles.radio}>
+                    {paymentMethod === 'bank_transfer' && <span className={styles.dot} />}
+                  </span>
+                  <span className={styles.optionIcon}>
+                    <BankTransferIcon />
+                  </span>
+                  <span className={styles.optionContent}>
+                    <span className={styles.optionTitle}>{t('checkout.paymentBank')}</span>
+                    <span className={styles.optionHint}>{t('checkout.paymentBankHint')}</span>
+                    {paymentMethod === 'bank_transfer' && (
+                      <div className={styles.bankDetails}>
+                        <div className={styles.bankDetailRow}>
+                          <span className={styles.bankDetailLabel}>
+                            {t('checkout.paymentBankRecipientLabel')}
+                          </span>
+                          <span className={styles.bankDetailValue}>
+                            {t('checkout.paymentBankRecipient')}
+                          </span>
+                        </div>
+                        <div className={styles.bankDetailRow}>
+                          <span className={styles.bankDetailLabel}>
+                            {t('checkout.paymentBankIbanLabel')}
+                          </span>
+                          <span className={styles.bankDetailValueMono}>
+                            {t('checkout.paymentBankIban')}
+                          </span>
+                        </div>
+                        <div className={styles.bankDetailRow}>
+                          <span className={styles.bankDetailLabel}>
+                            {t('checkout.paymentBankTaxIdLabel')}
+                          </span>
+                          <span className={styles.bankDetailValueMono}>
+                            {t('checkout.paymentBankTaxId')}
+                          </span>
+                        </div>
+                        <div className={styles.bankDetailRow}>
+                          <span className={styles.bankDetailLabel}>
+                            {t('checkout.paymentBankPurposeLabel')}
+                          </span>
+                          <span className={styles.bankDetailValue}>
+                            {t('checkout.paymentBankPurpose')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className={[
+                    styles.optionCard,
+                    paymentMethod === 'pickup' ? styles.selected : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => selectPaymentMethod('pickup')}
+                >
+                  <span className={styles.radio}>
+                    {paymentMethod === 'pickup' && <span className={styles.dot} />}
+                  </span>
+                  <span className={styles.optionIcon}>
+                    <WalletPayIcon />
+                  </span>
+                  <span className={styles.optionContent}>
+                    <span className={styles.optionTitle}>{t('checkout.paymentPickup')}</span>
+                    <span className={styles.optionHint}>{t('checkout.paymentPickupHint')}</span>
+                  </span>
+                </button>
+
+                <div className={styles.payRow}>
                   <button
                     type="button"
-                    className={styles.paymentCardHeader}
-                    onClick={() => selectOnlinePayment(paymentMethod === 'apple_pay' ? 'apple_pay' : 'google_pay')}
+                    className={[
+                      styles.optionCard,
+                      styles.payCompact,
+                      paymentMethod === 'google_pay' ? styles.selected : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => selectPaymentMethod('google_pay')}
+                    aria-label={t('checkout.paymentGoogle')}
                   >
                     <span className={styles.radio}>
-                      {onlinePaymentSelected && <span className={styles.dot} />}
+                      {paymentMethod === 'google_pay' && <span className={styles.dot} />}
                     </span>
-                    <span className={styles.paymentIconWrap}>
-                      <CardPayIcon />
-                    </span>
-                    <span className={styles.optionContent}>
-                      <span className={styles.optionTitle}>{t('checkout.paymentOnline')}</span>
-                      <span className={styles.brandLogos} aria-hidden="true">
-                        <GooglePayIcon size={18} />
-                        <ApplePayIcon size={18} />
-                        <MastercardBadge />
-                        <VisaBadge />
-                      </span>
-                    </span>
+                    <GooglePayLogo />
                   </button>
 
-                  {onlinePaymentSelected && (
-                    <div className={styles.paymentNested}>
-                      <button
-                        type="button"
-                        className={[
-                          styles.paymentNestedOption,
-                          paymentMethod === 'google_pay' ? styles.nestedSelected : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                        onClick={() => selectOnlinePayment('google_pay')}
-                      >
-                        <span className={styles.radio}>
-                          {paymentMethod === 'google_pay' && <span className={styles.dot} />}
-                        </span>
-                        <GooglePayIcon size={20} />
-                        <span className={styles.optionTitle}>{t('checkout.paymentGoogle')}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className={[
-                          styles.paymentNestedOption,
-                          paymentMethod === 'apple_pay' ? styles.nestedSelected : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                        onClick={() => selectOnlinePayment('apple_pay')}
-                      >
-                        <span className={styles.radio}>
-                          {paymentMethod === 'apple_pay' && <span className={styles.dot} />}
-                        </span>
-                        <ApplePayIcon size={20} />
-                        <span className={styles.optionTitle}>{t('checkout.paymentApple')}</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  className={[
-                    styles.paymentCard,
-                    paymentMethod === 'pickup' ? styles.paymentCardSelected : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
                   <button
                     type="button"
-                    className={styles.paymentCardHeader}
-                    onClick={selectPickupPayment}
+                    className={[
+                      styles.optionCard,
+                      styles.payCompact,
+                      paymentMethod === 'apple_pay' ? styles.selected : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => selectPaymentMethod('apple_pay')}
+                    aria-label={t('checkout.paymentApple')}
                   >
                     <span className={styles.radio}>
-                      {paymentMethod === 'pickup' && <span className={styles.dot} />}
+                      {paymentMethod === 'apple_pay' && <span className={styles.dot} />}
                     </span>
-                    <span className={styles.paymentIconWrap}>
-                      <WalletPayIcon />
-                    </span>
-                    <span className={styles.optionContent}>
-                      <span className={styles.optionTitle}>{t('checkout.paymentPickup')}</span>
-                      <span className={styles.optionHint}>{t('checkout.paymentPickupHint')}</span>
-                    </span>
+                    <ApplePayLogo />
                   </button>
                 </div>
               </div>
 
+              {error && errorStep === 3 && <p className={styles.error}>{error}</p>}
+            </CheckoutBlock>
+
+            <section className={styles.commentBlock}>
               <button
                 type="button"
                 className={styles.commentToggle}
                 onClick={() => setCommentOpen((v) => !v)}
                 aria-expanded={commentOpen}
               >
-                {t('checkout.comment')}
+                <span className={styles.commentToggleLabel}>
+                  <MessageSquare size={18} aria-hidden="true" />
+                  {t('checkout.comment')}
+                </span>
                 {commentOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </button>
               {commentOpen && (
                 <div className={styles.commentField}>
-                  <Input
+                  <textarea
+                    className={styles.commentTextarea}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder={t('checkout.commentPlaceholder')}
+                    rows={2}
                   />
                 </div>
               )}
-
-              {error && errorStep === 3 && <p className={styles.error}>{error}</p>}
-            </CheckoutBlock>
+            </section>
           </div>
 
           <aside className={styles.summary}>
