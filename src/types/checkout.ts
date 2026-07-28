@@ -20,13 +20,14 @@ export interface CheckoutLocation {
   /** Ukrposhta tariff: basic or priority. */
   ukrposhtaType: UkrposhtaType
   city: string
-  /** Settlement / city Ref for Nova Poshta or Ukrposhta branch lookup. */
+  /** Settlement Ref for Nova Poshta warehouse lookup. Optional for Ukrposhta free-text city. */
   cityRef?: string
+  /** Nova Poshta warehouse label, or optional Ukrposhta branch description. */
   branch: string
-  /** Branch / warehouse Ref (Nova Poshta warehouse or Ukrposhta post office). */
+  /** Nova Poshta warehouse Ref. Unused for Ukrposhta (manual / by index). */
   warehouseRef?: string
   address: string
-  /** Ukrposhta postal index (auto-filled from selected branch). */
+  /** Ukrposhta postal index (required for Ukrposhta delivery). */
   postalIndex: string
 }
 

@@ -257,23 +257,32 @@
   }
 }
 
-.heroLogo {
-  align-items: center;
-  margin-bottom: $spacing-1;
-}
-
-.heroContent .heroLogo {
-  color: $color-text;
-}
-
 .heroTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-2;
   font-size: clamp($font-size-sm, 3.8vw, $font-size-xl);
   font-weight: $font-weight-bold;
   color: $color-text;
   line-height: $line-height-tight;
 
   @include tablet-up {
+    gap: $spacing-3;
     font-size: clamp($font-size-lg, 2.4vw, $font-size-2xl);
+  }
+}
+
+.heroWelcome {
+  display: block;
+}
+
+.heroLogo {
+  color: $color-text;
+  font-size: clamp(0.75rem, 3.5vw, 1rem);
+
+  @include tablet-up {
+    font-size: clamp(0.875rem, 1.8vw, 1.25rem);
   }
 }
 

@@ -137,9 +137,9 @@ export function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
-            <SiteLogo className={styles.heroLogo} compact />
             <h1 className={styles.heroTitle}>
-              {t('home.heroTitle', { siteName: SITE_NAME })}
+              <span className={styles.heroWelcome}>{t('home.heroTitle')}</span>
+              <SiteLogo className={styles.heroLogo} compact />
             </h1>
             <p className={styles.heroDescription}>
               {t('home.heroDescription')}

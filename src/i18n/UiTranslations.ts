@@ -71,8 +71,14 @@ export type UiTranslationSchema = {
     summary: string
     itemsLabel: string
     itemsCount: string
+    subtotal: string
+    discount: string
+    discountVolume: string
+    discountPersonal: string
+    discountMixed: string
     delivery: string
     deliveryNote: string
+    deliveryFree: string
     total: string
     checkout: string
     checkoutSoon: string
@@ -105,6 +111,11 @@ export type UiTranslationSchema = {
     ukrposhtaHint: string
     ukrposhtaBasic: string
     ukrposhtaPriority: string
+    ukrposhtaCityHint: string
+    ukrposhtaIndexHint: string
+    ukrposhtaBranchManual: string
+    ukrposhtaBranchManualPlaceholder: string
+    ukrposhtaBranchManualHint: string
     selfPickup: string
     selfPickupHint: string
     selfPickupAddress: string
@@ -119,7 +130,6 @@ export type UiTranslationSchema = {
     branchAddressLabel: string
     address: string
     addressPlaceholder: string
-    ukrposhtaBranchHint: string
     postalIndex: string
     postalIndexPlaceholder: string
     searchLoading: string
@@ -166,6 +176,7 @@ export type UiTranslationSchema = {
     locationSummaryBranch: string
     locationSummaryCourier: string
     locationSummaryUkrposhta: string
+    locationSummaryUkrposhtaIndex: string
     locationSummarySelfPickup: string
   }
   wishlist: {
@@ -406,7 +417,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     selectedCount: 'Обрано {count}',
   },
   home: {
-    heroTitle: 'Ласкаво просимо до «{siteName}»',
+    heroTitle: 'Ласкаво просимо до',
     heroDescription: 'Справжній простір для поціновувачів природної краси та унікальних мінералів',
     catalogTitle: 'Каталог товарів',
     catalogSubtitle: 'Категорії для вашого натхнення',
@@ -458,8 +469,14 @@ export const uiTranslationsUk: UiTranslationSchema = {
     summary: 'Підсумок',
     itemsLabel: 'Товарів',
     itemsCount: '{count} шт.',
+    subtotal: 'Сума',
+    discount: 'Знижка',
+    discountVolume: 'знижка за суму {percent}%',
+    discountPersonal: 'постійна знижка {percent}%',
+    discountMixed: 'постійна {personal}% + низки {strands}%',
     delivery: 'Доставка',
     deliveryNote: 'за тарифами перевізника',
+    deliveryFree: 'Безкоштовно',
     total: 'Разом',
     checkout: 'Оформити замовлення',
     checkoutSoon: 'Оформлення замовлення — незабаром',
@@ -489,9 +506,14 @@ export const uiTranslationsUk: UiTranslationSchema = {
     novaPoshtaParcelLocker: 'У поштомат',
     novaPoshtaCourier: 'Курʼєром',
     ukrposhta: 'Укрпошта',
-    ukrposhtaHint: 'Доставка у відділення Укрпошти',
+    ukrposhtaHint: 'Доставка за поштовим індексом',
     ukrposhtaBasic: 'Базовий',
     ukrposhtaPriority: 'Пріоритетний',
+    ukrposhtaCityHint: 'Оберіть зі списку або введіть назву вручну',
+    ukrposhtaIndexHint: '5-значний індекс відділення Укрпошти',
+    ukrposhtaBranchManual: 'Відділення (необовʼязково)',
+    ukrposhtaBranchManualPlaceholder: 'Номер або адреса відділення',
+    ukrposhtaBranchManualHint: 'Якщо знаєте — вкажіть номер чи адресу. Для доставки достатньо індексу',
     selfPickup: 'Самовивіз',
     selfPickupHint: 'Забрати самостійно з магазину',
     selfPickupAddress: 'вул. Короленка, 32А, Кропивницький',
@@ -506,8 +528,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     branchAddressLabel: 'Адреса відділення: {address}',
     address: 'Адреса доставки',
     addressPlaceholder: 'Вулиця, будинок, квартира',
-    ukrposhtaBranchHint: 'Адреса: {address}. Індекс: {index}',
-    postalIndex: 'Індекс',
+    postalIndex: 'Поштовий індекс',
     postalIndexPlaceholder: 'Наприклад, 25000',
     searchLoading: 'Пошук…',
     searchEmpty: 'Нічого не знайдено',
@@ -546,13 +567,14 @@ export const uiTranslationsUk: UiTranslationSchema = {
     errorCity: 'Вкажіть місто',
     errorBranch: 'Оберіть відділення Нової Пошти зі списку',
     errorAddress: 'Вкажіть адресу доставки',
-    errorPostalIndex: 'Вкажіть поштовий індекс',
+    errorPostalIndex: 'Вкажіть коректний 5-значний поштовий індекс',
     errorPayment: 'Оберіть спосіб оплати',
     errorSubmit: 'Не вдалося оформити замовлення. Спробуйте ще раз',
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, відділення: {branch}',
     locationSummaryCourier: '{city}, {address}',
     locationSummaryUkrposhta: 'Укрпошта ({type}), {city}, {branch}, індекс {index}',
+    locationSummaryUkrposhtaIndex: 'Укрпошта ({type}), {city}, індекс {index}',
     locationSummarySelfPickup: 'Самовивіз: {address}',
   },
   wishlist: {
@@ -688,7 +710,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     logout: 'Вийти',
     discountsTitle: 'Ваші знижки',
     discountsEmpty: 'Персональних знижок поки немає. Власник магазину може призначити їх окремим клієнтам.',
-    discountPersonal: 'Персональна знижка',
+    discountPersonal: 'Персональна знижка (на все, крім низок)',
     ordersTitle: 'Історія замовлень',
     ordersEmpty: 'Замовлень ще немає',
     orderNumber: 'Замовлення #{id}',
@@ -794,7 +816,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     selectedCount: 'Selected {count}',
   },
   home: {
-    heroTitle: 'Welcome to "{siteName}"',
+    heroTitle: 'Welcome to',
     heroDescription: 'A genuine space for lovers of natural beauty and unique minerals',
     catalogTitle: 'Product catalog',
     catalogSubtitle: 'Categories for your inspiration',
@@ -846,8 +868,14 @@ export const uiTranslationsEn: UiTranslationSchema = {
     summary: 'Summary',
     itemsLabel: 'Items',
     itemsCount: '{count} pcs.',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
+    discountVolume: 'volume discount {percent}%',
+    discountPersonal: 'loyalty discount {percent}%',
+    discountMixed: 'loyalty {personal}% + strands {strands}%',
     delivery: 'Delivery',
     deliveryNote: 'carrier rates apply',
+    deliveryFree: 'Free',
     total: 'Total',
     checkout: 'Checkout',
     checkoutSoon: 'Checkout — coming soon',
@@ -877,9 +905,14 @@ export const uiTranslationsEn: UiTranslationSchema = {
     novaPoshtaParcelLocker: 'To parcel locker',
     novaPoshtaCourier: 'By courier',
     ukrposhta: 'Ukrposhta',
-    ukrposhtaHint: 'Delivery to a Ukrposhta branch',
+    ukrposhtaHint: 'Delivery by postal index',
     ukrposhtaBasic: 'Basic',
     ukrposhtaPriority: 'Priority',
+    ukrposhtaCityHint: 'Pick a suggestion or type the city name yourself',
+    ukrposhtaIndexHint: '5-digit Ukrposhta branch index',
+    ukrposhtaBranchManual: 'Branch (optional)',
+    ukrposhtaBranchManualPlaceholder: 'Branch number or address',
+    ukrposhtaBranchManualHint: 'Optional — number or address. Postal index alone is enough',
     selfPickup: 'Self-pickup',
     selfPickupHint: 'Pick up from the store',
     selfPickupAddress: 'Korolenka St., 32A, Kropyvnytskyi',
@@ -894,7 +927,6 @@ export const uiTranslationsEn: UiTranslationSchema = {
     branchAddressLabel: 'Branch address: {address}',
     address: 'Delivery address',
     addressPlaceholder: 'Street, building, apartment',
-    ukrposhtaBranchHint: 'Address: {address}. Index: {index}',
     postalIndex: 'Postal index',
     postalIndexPlaceholder: 'e.g. 25000',
     searchLoading: 'Searching…',
@@ -934,13 +966,14 @@ export const uiTranslationsEn: UiTranslationSchema = {
     errorCity: 'Enter the city',
     errorBranch: 'Select a Nova Poshta branch from the list',
     errorAddress: 'Enter a delivery address',
-    errorPostalIndex: 'Enter the postal index',
+    errorPostalIndex: 'Enter a valid 5-digit postal index',
     errorPayment: 'Select a payment method',
     errorSubmit: 'Could not place the order. Please try again',
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, branch: {branch}',
     locationSummaryCourier: '{city}, {address}',
     locationSummaryUkrposhta: 'Ukrposhta ({type}), {city}, {branch}, index {index}',
+    locationSummaryUkrposhtaIndex: 'Ukrposhta ({type}), {city}, index {index}',
     locationSummarySelfPickup: 'Self-pickup: {address}',
   },
   wishlist: {
@@ -1076,7 +1109,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     logout: 'Log out',
     discountsTitle: 'Your discounts',
     discountsEmpty: 'No personal discounts yet. The store owner can assign them to selected customers.',
-    discountPersonal: 'Personal discount',
+    discountPersonal: 'Personal discount (everything except strands)',
     ordersTitle: 'Order history',
     ordersEmpty: 'No orders yet',
     orderNumber: 'Order #{id}',

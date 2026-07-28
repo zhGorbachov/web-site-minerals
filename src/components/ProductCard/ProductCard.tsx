@@ -75,7 +75,7 @@ export function ProductCard({ product }: ProductCardProps) {
     window.setTimeout(() => {
       setAddedToCart(false)
       setCartMenuOpen(false)
-    }, 800)
+    }, 450)
   }
 
   return (

@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react'
-import { useCartStore } from '@/store'
+import { useAuthStore, useCartStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { attributeValueEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice } from '@/utils'
+import { formatPrice, getUnitPrice, getDiscountLabel } from '@/utils'
 import { Button, EmptyState } from '@/components/ui'
 import styles from './CartPage.module.scss'
 
@@ -21,11 +21,16 @@ const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
 export function CartPage() {
   const { t, tp, language } = useTranslation()
   const navigate = useNavigate()
-  const { items, removeItem, removeItems, updateQuantity, totalPrice, totalItems } = useCartStore()
+  const { items, removeItem, removeItems, updateQuantity, getPricing, totalItems } = useCartStore()
+  const user = useAuthStore((s) => s.user)
   const openCatalog = useOpenCatalog()
-  const total = totalPrice()
+  const pricing = useMemo(
+    () => getPricing(user?.discountPercent),
+    [getPricing, items, user?.discountPercent],
+  )
   const count = totalItems()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const discountLabel = getDiscountLabel(pricing, t)
 
   useEffect(() => {
     const validIds = new Set(items.map((item) => item.id))
@@ -129,7 +134,7 @@ export function CartPage() {
             <AnimatePresence initial={false}>
               {items.map((item) => {
                 const product = localizeProduct(item.product, language)
-                const unitPrice = product.discountPrice ?? product.price
+                const unitPrice = getUnitPrice(product)
                 const isSelected = selectedIds.has(item.id)
 
                 const formatOptionValue = (key: string, value: string) => {
@@ -247,15 +252,36 @@ export function CartPage() {
                 <span>{t('cart.itemsLabel')}</span>
                 <span>{t('cart.itemsCount', { count })}</span>
               </div>
+              {pricing.discountAmount > 0 && (
+                <div className={styles.summaryRow}>
+                  <span>{t('cart.subtotal')}</span>
+                  <span>{formatPrice(pricing.subtotal, language)}</span>
+                </div>
+              )}
+              {pricing.discountAmount > 0 && (
+                <div className={styles.summaryRow}>
+                  <span>
+                    {t('cart.discount')}
+                    {discountLabel ? (
+                      <span className={styles.discountNote}> ({discountLabel})</span>
+                    ) : null}
+                  </span>
+                  <span className={styles.discountAmount}>
+                    −{formatPrice(pricing.discountAmount, language)}
+                  </span>
+                </div>
+              )}
               <div className={styles.summaryRow}>
                 <span>{t('cart.delivery')}</span>
-                <span className={styles.deliveryNote}>{t('cart.deliveryNote')}</span>
+                <span className={pricing.freeDelivery ? styles.deliveryFree : styles.deliveryNote}>
+                  {pricing.freeDelivery ? t('cart.deliveryFree') : t('cart.deliveryNote')}
+                </span>
               </div>
             </div>
 
             <div className={styles.totalRow}>
               <span>{t('cart.total')}</span>
-              <span className={styles.totalAmount}>{formatPrice(total, language)}</span>
+              <span className={styles.totalAmount}>{formatPrice(pricing.total, language)}</span>
             </div>
 
             <Button size="lg" fullWidth rightIcon={<ArrowRight size={18} />} onClick={goToCheckout}>
@@ -272,7 +298,7 @@ export function CartPage() {
       <div className={styles.mobileBar}>
         <div className={styles.mobileBarTotal}>
           <span className={styles.mobileBarLabel}>{t('cart.total')}</span>
-          <span className={styles.mobileBarAmount}>{formatPrice(total, language)}</span>
+          <span className={styles.mobileBarAmount}>{formatPrice(pricing.total, language)}</span>
         </div>
         <Button
           size="lg"

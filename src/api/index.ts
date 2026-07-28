@@ -16,7 +16,6 @@ import { MockWishlistApi } from '@/mock/MockWishlistApi'
 import { MockAdminApi } from '@/mock/MockAdminApi'
 import { MockOrdersApi } from '@/mock/MockOrdersApi'
 import { NovaPoshtaApi } from './novaPoshtaClient'
-import { UkrposhtaApi } from './ukrposhtaClient'
 
 export const AuthApi = isMockMode ? MockAuthApi : LiveAuthApi
 export const CatalogApi = isMockMode ? MockCatalogApi : LiveCatalogApi
@@ -24,4 +23,4 @@ export const CartApi = isMockMode ? MockCartApi : LiveCartApi
 export const WishlistApi = isMockMode ? MockWishlistApi : LiveWishlistApi
 export const AdminApi = isMockMode ? MockAdminApi : LiveAdminApi
 export const OrdersApi = isMockMode ? MockOrdersApi : LiveOrdersApi
-export { NovaPoshtaApi, UkrposhtaApi }
+export { NovaPoshtaApi }

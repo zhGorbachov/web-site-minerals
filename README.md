@@ -6,7 +6,7 @@ React storefront + Express/Prisma API + PostgreSQL.
 
 - Node.js 20+
 - npm
-- Docker Desktop (only for full stack with real API + PostgreSQL)
+- Docker Desktop **or Podman** (only for full stack with real API + PostgreSQL)
 
 ## Demo on a PC without Docker / DB
 
@@ -29,26 +29,74 @@ You can browse the catalog, register/login (**phone** or **Google**), use cart &
 
 ## Full stack quick start
 
+### Option A — Docker
+
 ```bash
 # 1. Start PostgreSQL (port 55432)
 docker compose up -d
+```
 
-# 2. Install API deps, push schema, seed catalog + admin user
+Then continue from **Install & run** below.
+
+### Option B — Podman (no Docker)
+
+`podman compose` may be missing on Windows. Start Postgres with a plain `podman run` (same ports/creds as `docker-compose.yml`):
+
+```powershell
+# 0. Ensure Podman machine is running (Windows)
+podman machine start
+
+# 1. Start PostgreSQL (port 55432) — first time only; later use `podman start minerals-postgres`
+podman run -d `
+  --name minerals-postgres `
+  --restart unless-stopped `
+  -p 55432:5432 `
+  -e POSTGRES_USER=minerals `
+  -e POSTGRES_PASSWORD=minerals `
+  -e POSTGRES_DB=minerals `
+  -v minerals_pg_data:/var/lib/postgresql/data `
+  docker.io/library/postgres:16-alpine
+
+# Wait until ready
+podman exec minerals-postgres pg_isready -U minerals -d minerals
+```
+
+Useful Podman commands:
+
+| Command | Description |
+|---------|-------------|
+| `podman start minerals-postgres` | Start existing container |
+| `podman stop minerals-postgres` | Stop Postgres |
+| `podman rm -f minerals-postgres` | Remove container (volume keeps data) |
+| `podman volume rm minerals_pg_data` | Delete DB data volume |
+
+Then continue from **Install & run** below.
+
+### Install & run (Docker or Podman)
+
+```bash
+# 2. Env files (once)
+copy .env.example .env
+copy server\.env.example server\.env
+
+# 3. Install API deps, push schema, seed catalog + admin user
 cd server
 npm install
 npx prisma db push
 npx prisma db seed
 cd ..
 
-# 3. Install frontend deps
+# 4. Install frontend deps
 npm install
 
-# 4. Run API (terminal 1)
+# 5. Run API (terminal 1)
 npm run dev:server
 
-# 5. Run frontend (terminal 2)
+# 6. Run frontend (terminal 2)
 npm run dev
 ```
+
+> **PowerShell tip:** if `npm` fails with *running scripts is disabled*, use `npm.cmd` instead (e.g. `npm.cmd run dev`).
 
 - Frontend: http://localhost:5174  
 - API: http://localhost:3001  
@@ -111,8 +159,9 @@ Copy from `server/.env.example`.
 | Command | Description |
 |---------|-------------|
 | `npm run dev:mock` | Frontend only with in-browser mock API (no Docker/DB) |
-| `npm run db:up` | Start Docker Postgres |
+| `npm run db:up` | Start Docker Postgres (`docker compose up -d`) |
 | `npm run db:down` | Stop Docker Postgres |
+| *(Podman)* `podman start/stop minerals-postgres` | Start/stop Postgres without Docker |
 | `npm run db:migrate` | `prisma db push` |
 | `npm run db:seed` | Reseed catalog + admin user |
 | `npm run dev:server` | Start Express API |
@@ -126,7 +175,8 @@ Signed-in admins can:
 - Change product stock (quantity)
 - Create new subcategories under existing categories
 - Upload / paste multiple product images and import a product video
-- Assign personal discounts (%) to selected customers (Profile → Admin → Customers)
+- Assign personal discounts (%) to selected customers (Profile → Admin → Customers). Personal % applies to everything except «Низки»; strands use the volume discount system separately.
+- Cart/checkout automatically apply volume discounts (1000→2% … up to 10%) and free delivery from 3000 UAH
 
 On the product form: click the media area and press **Ctrl+V** (or **⌘V**) to paste images, or use **Add photos** / **Add video**.
 

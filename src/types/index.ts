@@ -21,9 +21,3 @@ export type {
   NovaPoshtaCitySearchResponse,
   NovaPoshtaWarehouseSearchResponse,
 } from './novaPoshta'
-export type {
-  UkrposhtaCity,
-  UkrposhtaBranch,
-  UkrposhtaCitySearchResponse,
-  UkrposhtaBranchSearchResponse,
-} from './ukrposhta'

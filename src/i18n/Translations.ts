@@ -164,9 +164,10 @@ export const translations: Record<Language, TranslationSchema> = {
       returnsP2:
         'Товар повинен бути у незміненому стані, у оригінальній упаковці. Для повернення зв\'яжіться з нами за телефоном або у Telegram.',
       discountsTitle: 'Знижки та програма лояльності',
-      discountsP1: 'Ми цінуємо наших постійних клієнтів і пропонуємо програму лояльності.',
+      discountsP1:
+        'Знижка залежить від суми замовлення: від 1000 грн — 2%, від 2000 грн — 3%, від 3000 грн — 4% і так далі до 10%. Доставка безкоштовна від 3000 грн.',
       discountsP2:
-        'Після 3 замовлень ви отримуєте знижку 10% на всі наступні покупки. Також регулярно проводимо акції на окремі категорії товарів — слідкуйте за оновленнями в каталозі.',
+        'Постійним клієнтам можемо призначити персональну знижку 5% або 10% на всі товари, крім низок. Низки завжди рахуються окремо за системою знижок від суми.',
       reviewsTitle: 'Відгуки',
       reviewRating: 'Оцінка {rating} з 5',
       valuesTitle: 'Наші цінності',
@@ -211,11 +212,11 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           q: 'Скільки коштує доставка?',
-          a: 'Доставка Новою Поштою — за тарифами перевізника (зазвичай 60–80 грн). При замовленні від 500 грн — безкоштовна доставка.',
+          a: 'Доставка Новою Поштою — за тарифами перевізника (зазвичай 60–80 грн). При замовленні від 3000 грн — безкоштовна доставка.',
         },
         {
           q: 'Чи є знижки для постійних клієнтів?',
-          a: 'Так, ми маємо програму лояльності. Після 3 замовлень ви отримуєте знижку 10% на всі наступні покупки.',
+          a: 'Так. Від суми замовлення діє автоматична знижка (від 1000 грн — 2% і далі до 10%). Постійним клієнтам можемо призначити 5% або 10% на все, крім низок — низки рахуються окремо за сумою.',
         },
         {
           q: 'Як правильно доглядати за браслетом?',
@@ -306,9 +307,10 @@ export const translations: Record<Language, TranslationSchema> = {
       returnsP2:
         'Items must be unused and in original packaging. To return an item, contact us by phone or Telegram.',
       discountsTitle: 'Discounts & loyalty program',
-      discountsP1: 'We value our regular customers and offer a loyalty program.',
+      discountsP1:
+        'The discount depends on the order total: from 1000 UAH — 2%, from 2000 UAH — 3%, from 3000 UAH — 4%, and so on up to 10%. Free delivery from 3000 UAH.',
       discountsP2:
-        'After 3 orders you get 10% off all future purchases. We also run promotions on selected product categories — check the catalog for updates.',
+        'Regular customers may receive a personal 5% or 10% discount on everything except strands. Strands are always priced separately using the volume discount system.',
       reviewsTitle: 'Reviews',
       reviewRating: 'Rating {rating} out of 5',
       valuesTitle: 'Our values',
@@ -353,11 +355,11 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           q: 'How much does delivery cost?',
-          a: 'Nova Poshta delivery follows carrier rates (usually 60–80 UAH). Free delivery on orders over 500 UAH.',
+          a: 'Nova Poshta delivery follows carrier rates (usually 60–80 UAH). Free delivery on orders from 3000 UAH.',
         },
         {
           q: 'Are there discounts for regular customers?',
-          a: 'Yes, we have a loyalty program. After 3 orders you get 10% off all future purchases.',
+          a: 'Yes. Orders get an automatic volume discount (from 1000 UAH — 2%, up to 10%). Regular customers may get a personal 5% or 10% on everything except strands — strands use the volume system separately.',
         },
         {
           q: 'How should I care for my bracelet?',

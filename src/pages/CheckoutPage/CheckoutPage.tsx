@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -19,14 +19,12 @@ import type {
   NovaPoshtaType,
   NovaPoshtaWarehouse,
   PaymentMethod,
-  UkrposhtaBranch,
-  UkrposhtaCity,
   UkrposhtaType,
 } from '@/types'
-import { NovaPoshtaApi, OrdersApi, UkrposhtaApi } from '@/api'
+import { NovaPoshtaApi, OrdersApi } from '@/api'
 import { useAuthStore, useCartStore, useCheckoutStore, GUEST_CHECKOUT_PROFILE_KEY } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
-import { formatPrice } from '@/utils'
+import { formatPrice, getDiscountLabel } from '@/utils'
 import { formatPhoneDisplay, isValidLocalPhone, normalizeLocalPhone } from '@/utils/phone'
 import { Button, Breadcrumbs, Input, PhoneInput, EmptyState, Autocomplete } from '@/components/ui'
 import type { AutocompleteOption } from '@/components/ui'
@@ -54,12 +52,8 @@ function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
   return warehouse.name
 }
 
-function formatUkrposhtaBranchLabel(branch: UkrposhtaBranch) {
-  const number = branch.number || ''
-  if (branch.cityName && number) {
-    return `${branch.cityName} - ${number}`
-  }
-  return branch.name
+function isValidUkrposhtaIndex(value: string) {
+  return /^\d{5}$/.test(value.trim())
 }
 
 function NovaPoshtaIcon() {
@@ -236,7 +230,7 @@ export function CheckoutPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const hydrated = useAuthStore((s) => s.hydrated)
-  const { items, totalPrice, totalItems, clearCart } = useCartStore()
+  const { items, getPricing, totalItems, clearCart } = useCartStore()
   const getProfile = useCheckoutStore((s) => s.getProfile)
   const saveContact = useCheckoutStore((s) => s.saveContact)
   const saveLocation = useCheckoutStore((s) => s.saveLocation)
@@ -265,8 +259,13 @@ export function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const total = totalPrice()
+  const pricing = useMemo(
+    () => getPricing(user?.discountPercent),
+    [getPricing, items, user?.discountPercent],
+  )
+  const total = pricing.total
   const count = totalItems()
+  const discountLabel = getDiscountLabel(pricing, t)
 
   const loadCityOptions = async (query: string): Promise<AutocompleteOption[]> => {
     const { items } = await NovaPoshtaApi.searchCities(query)
@@ -291,32 +290,6 @@ export function CheckoutPage() {
       label: formatWarehouseLabel(warehouse),
       description: warehouse.shortAddress || warehouse.name,
       data: warehouse,
-    }))
-  }
-
-  const loadUkrposhtaCityOptions = async (query: string): Promise<AutocompleteOption[]> => {
-    const { items } = await UkrposhtaApi.searchCities(query)
-    return items.map((city) => ({
-      id: city.ref,
-      label: city.present,
-      description:
-        city.area && !city.present.toLocaleLowerCase('uk-UA').includes(city.area.toLocaleLowerCase('uk-UA'))
-          ? city.area
-          : undefined,
-      data: city,
-    }))
-  }
-
-  const loadUkrposhtaBranchOptions = async (query: string): Promise<AutocompleteOption[]> => {
-    if (!location.cityRef) return []
-    const numberMatch = query.match(/(?:^|[\s\-—])(\d+)\s*$/)
-    const searchQuery = numberMatch ? numberMatch[1] : query
-    const { items } = await UkrposhtaApi.searchBranches(location.cityRef, searchQuery)
-    return items.map((branch) => ({
-      id: branch.ref,
-      label: formatUkrposhtaBranchLabel(branch),
-      description: `${branch.shortAddress || branch.name} · ${branch.postalIndex}`,
-      data: branch,
     }))
   }
 
@@ -346,10 +319,7 @@ export function CheckoutPage() {
       if (savedLocation.deliveryMethod === 'ukrposhta') {
         return (
           Boolean(savedLocation.city.trim()) &&
-          Boolean(savedLocation.cityRef) &&
-          Boolean(savedLocation.branch.trim()) &&
-          Boolean(savedLocation.warehouseRef) &&
-          Boolean(savedLocation.postalIndex.trim())
+          isValidUkrposhtaIndex(savedLocation.postalIndex)
         )
       }
       if (savedLocation.novaPoshtaType === 'courier') {
@@ -438,13 +408,21 @@ export function CheckoutPage() {
       })
     }
     if (location.deliveryMethod === 'ukrposhta') {
-      return t('checkout.locationSummaryUkrposhta', {
-        type:
-          location.ukrposhtaType === 'priority'
-            ? t('checkout.ukrposhtaPriority')
-            : t('checkout.ukrposhtaBasic'),
+      const type =
+        location.ukrposhtaType === 'priority'
+          ? t('checkout.ukrposhtaPriority')
+          : t('checkout.ukrposhtaBasic')
+      if (location.branch.trim()) {
+        return t('checkout.locationSummaryUkrposhta', {
+          type,
+          city: location.city,
+          branch: location.branch,
+          index: location.postalIndex,
+        })
+      }
+      return t('checkout.locationSummaryUkrposhtaIndex', {
+        type,
         city: location.city,
-        branch: location.branch,
         index: location.postalIndex,
       })
     }
@@ -468,13 +446,7 @@ export function CheckoutPage() {
   const isLocationComplete = (value: CheckoutLocation = location) => {
     if (value.deliveryMethod === 'self_pickup') return true
     if (value.deliveryMethod === 'ukrposhta') {
-      return (
-        Boolean(value.city.trim()) &&
-        Boolean(value.cityRef) &&
-        Boolean(value.branch.trim()) &&
-        Boolean(value.warehouseRef) &&
-        Boolean(value.postalIndex.trim())
-      )
+      return Boolean(value.city.trim()) && isValidUkrposhtaIndex(value.postalIndex)
     }
     if (!value.city.trim() || !value.cityRef) return false
     if (value.novaPoshtaType === 'courier') return Boolean(value.address.trim())
@@ -504,17 +476,12 @@ export function CheckoutPage() {
     }
 
     if (location.deliveryMethod === 'ukrposhta') {
-      if (!location.city.trim() || !location.cityRef) {
+      if (!location.city.trim()) {
         setErrorStep(2)
         setError(t('checkout.errorCity'))
         return false
       }
-      if (!location.branch.trim() || !location.warehouseRef) {
-        setErrorStep(2)
-        setError(t('checkout.errorBranch'))
-        return false
-      }
-      if (!location.postalIndex.trim()) {
+      if (!isValidUkrposhtaIndex(location.postalIndex)) {
         setErrorStep(2)
         setError(t('checkout.errorPostalIndex'))
         return false
@@ -637,10 +604,11 @@ export function CheckoutPage() {
       ...prev,
       city: value,
       cityRef: undefined,
-      branch: '',
+      branch: prev.deliveryMethod === 'ukrposhta' ? prev.branch : '',
       warehouseRef: undefined,
-      address: prev.deliveryMethod === 'nova_poshta' && prev.novaPoshtaType === 'courier' ? prev.address : '',
-      postalIndex: '',
+      address:
+        prev.deliveryMethod === 'nova_poshta' && prev.novaPoshtaType === 'courier' ? prev.address : '',
+      postalIndex: prev.deliveryMethod === 'ukrposhta' ? prev.postalIndex : '',
     }))
   }
 
@@ -650,23 +618,10 @@ export function CheckoutPage() {
       ...prev,
       city: city.present || city.name,
       cityRef: city.ref,
-      branch: '',
+      branch: prev.deliveryMethod === 'ukrposhta' ? prev.branch : '',
       warehouseRef: undefined,
       address: prev.novaPoshtaType === 'courier' ? prev.address : '',
-      postalIndex: '',
-    }))
-  }
-
-  const handleUkrposhtaCitySelect = (option: AutocompleteOption) => {
-    const city = option.data as UkrposhtaCity
-    setLocation((prev) => ({
-      ...prev,
-      city: city.present || city.name,
-      cityRef: city.ref,
-      branch: '',
-      warehouseRef: undefined,
-      address: '',
-      postalIndex: '',
+      postalIndex: prev.deliveryMethod === 'ukrposhta' ? prev.postalIndex : '',
     }))
   }
 
@@ -676,7 +631,6 @@ export function CheckoutPage() {
       branch: value,
       warehouseRef: undefined,
       address: '',
-      postalIndex: prev.deliveryMethod === 'ukrposhta' ? '' : prev.postalIndex,
     }))
   }
 
@@ -687,17 +641,6 @@ export function CheckoutPage() {
       branch: formatWarehouseLabel(warehouse),
       warehouseRef: warehouse.ref,
       address: warehouse.shortAddress || warehouse.name,
-    }))
-  }
-
-  const handleUkrposhtaBranchSelect = (option: AutocompleteOption) => {
-    const branch = option.data as UkrposhtaBranch
-    setLocation((prev) => ({
-      ...prev,
-      branch: formatUkrposhtaBranchLabel(branch),
-      warehouseRef: branch.ref,
-      address: branch.shortAddress || branch.name,
-      postalIndex: branch.postalIndex,
     }))
   }
 
@@ -1013,10 +956,10 @@ export function CheckoutPage() {
                               label={t('checkout.city')}
                               value={location.city}
                               onChange={handleCityChange}
-                              onSelect={handleUkrposhtaCitySelect}
-                              loadOptions={loadUkrposhtaCityOptions}
+                              onSelect={handleCitySelect}
+                              loadOptions={loadCityOptions}
                               placeholder={t('checkout.cityPlaceholder')}
-                              hint={location.cityRef ? undefined : t('checkout.cityHint')}
+                              hint={t('checkout.ukrposhtaCityHint')}
                               emptyMessage={t('checkout.searchEmpty')}
                               loadingMessage={t('checkout.searchLoading')}
                               required
@@ -1024,32 +967,36 @@ export function CheckoutPage() {
                           </div>
 
                           <div className={styles.fullWidth}>
-                            <Autocomplete
-                              label={t('checkout.branch')}
-                              value={location.branch}
-                              onChange={handleBranchChange}
-                              onSelect={handleUkrposhtaBranchSelect}
-                              loadOptions={loadUkrposhtaBranchOptions}
-                              placeholder={
-                                location.cityRef
-                                  ? t('checkout.branchPlaceholder')
-                                  : t('checkout.branchSelectCityFirst')
+                            <Input
+                              label={t('checkout.postalIndex')}
+                              value={location.postalIndex}
+                              onChange={(e) =>
+                                setLocation((l) => ({
+                                  ...l,
+                                  postalIndex: e.target.value.replace(/\D/g, '').slice(0, 5),
+                                }))
                               }
-                              disabled={!location.cityRef}
-                              minChars={0}
-                              hint={
-                                location.warehouseRef && location.postalIndex
-                                  ? t('checkout.ukrposhtaBranchHint', {
-                                      address: location.address,
-                                      index: location.postalIndex,
-                                    })
-                                  : location.cityRef
-                                    ? t('checkout.branchHint')
-                                    : t('checkout.branchSelectCityFirst')
-                              }
-                              emptyMessage={t('checkout.searchEmpty')}
-                              loadingMessage={t('checkout.searchLoading')}
+                              placeholder={t('checkout.postalIndexPlaceholder')}
+                              inputMode="numeric"
+                              autoComplete="postal-code"
+                              hint={t('checkout.ukrposhtaIndexHint')}
                               required
+                            />
+                          </div>
+
+                          <div className={styles.fullWidth}>
+                            <Input
+                              label={t('checkout.ukrposhtaBranchManual')}
+                              value={location.branch}
+                              onChange={(e) =>
+                                setLocation((l) => ({
+                                  ...l,
+                                  branch: e.target.value,
+                                  warehouseRef: undefined,
+                                }))
+                              }
+                              placeholder={t('checkout.ukrposhtaBranchManualPlaceholder')}
+                              hint={t('checkout.ukrposhtaBranchManualHint')}
                             />
                           </div>
                         </div>
@@ -1244,9 +1191,28 @@ export function CheckoutPage() {
               <span>{t('cart.itemsLabel')}</span>
               <span>{t('cart.itemsCount', { count })}</span>
             </div>
+            {pricing.discountAmount > 0 && (
+              <div className={styles.summaryRow}>
+                <span>{t('cart.subtotal')}</span>
+                <span>{formatPrice(pricing.subtotal, language)}</span>
+              </div>
+            )}
+            {pricing.discountAmount > 0 && (
+              <div className={styles.summaryRow}>
+                <span>
+                  {t('cart.discount')}
+                  {discountLabel ? ` (${discountLabel})` : ''}
+                </span>
+                <span className={styles.discountAmount}>
+                  −{formatPrice(pricing.discountAmount, language)}
+                </span>
+              </div>
+            )}
             <div className={styles.summaryRow}>
               <span>{t('cart.delivery')}</span>
-              <span>{t('cart.deliveryNote')}</span>
+              <span className={pricing.freeDelivery ? styles.deliveryFree : undefined}>
+                {pricing.freeDelivery ? t('cart.deliveryFree') : t('cart.deliveryNote')}
+              </span>
             </div>
             <div className={styles.totalRow}>
               <span>{t('checkout.toPay')}</span>

@@ -1,6 +1,12 @@
 import type { CartItem, CreateOrderResult, Order, OrderPaymentStatus } from '@/types'
 import type { CreateOrderPayload } from '@/api/OrdersApi'
 import { getAuthToken } from '@/api/client'
+import {
+  calculateCartPricing,
+  getDiscountedUnitPrice,
+  getUnitPrice,
+  toPricingItems,
+} from '@/utils/pricing'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb } from './MockDb'
 
@@ -25,10 +31,13 @@ function buildOrder(
   userId: string | null,
   sourceItems: CartItem[],
   payload?: CreateOrderPayload,
+  personalDiscountPercent?: number | null,
 ): Order {
+  const pricing = calculateCartPricing(toPricingItems(sourceItems), personalDiscountPercent)
+
   const items = sourceItems.map((item, index) => {
     const product = enrichProduct(item.product)
-    const price = product.discountPrice ?? product.price
+    const unit = getUnitPrice(product)
     return {
       id: `oi-${orderId}-${index}`,
       orderId,
@@ -36,7 +45,7 @@ function buildOrder(
       productName: product.name,
       productImage: product.images[0] ?? '',
       quantity: item.quantity,
-      price,
+      price: getDiscountedUnitPrice(product.categorySlug, unit, pricing),
     }
   })
 
@@ -75,9 +84,16 @@ export const MockOrdersApi = {
       const cart = MockDb.getCart(userId)
       if (!cart.items.length) throw new MockApiError(400, 'Cart is empty')
       sourceItems = cart.items
+      const user = MockDb.findUserById(userId)?.user
 
       const orderId = `order-${Date.now()}`
-      const order = buildOrder(orderId, userId, sourceItems, payload)
+      const order = buildOrder(
+        orderId,
+        userId,
+        sourceItems,
+        payload,
+        user?.discountPercent,
+      )
       MockDb.setOrders(userId, [order, ...MockDb.getOrders(userId)])
       MockDb.setCart(userId, { ...cart, items: [] })
       return order

@@ -14,7 +14,6 @@ import { paymentsRouter } from './routes/payments.js'
 import { adminRouter } from './routes/admin.js'
 import { uploadRouter, uploadsDir } from './routes/upload.js'
 import { novaPoshtaRouter } from './routes/novaPoshta.js'
-import { ukrposhtaRouter } from './routes/ukrposhta.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const mediaDir = path.resolve(__dirname, '../../src/assets/mock')
@@ -46,7 +45,6 @@ app.use('/api/payments', paymentsRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/admin/upload', uploadRouter)
 app.use('/api/nova-poshta', novaPoshtaRouter)
-app.use('/api/ukrposhta', ukrposhtaRouter)
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err)

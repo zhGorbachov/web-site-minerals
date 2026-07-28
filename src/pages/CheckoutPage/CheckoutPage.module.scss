@@ -665,6 +665,15 @@
   margin-bottom: $spacing-2;
 }
 
+.discountAmount {
+  color: $color-primary;
+}
+
+.deliveryFree {
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
 .totalRow {
   display: flex;
   justify-content: space-between;

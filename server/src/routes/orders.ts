@@ -4,6 +4,11 @@ import { prisma } from '../lib/prisma.js'
 import { optionalAuth, requireAuth } from '../lib/auth.js'
 import { env, isLiqPayConfigured } from '../lib/env.js'
 import { encodeCheckout } from '../lib/liqpay.js'
+import {
+  calculateCartPricing,
+  getDiscountedUnitPrice,
+  getUnitPrice,
+} from '../lib/pricing.js'
 
 export const ordersRouter = Router()
 
@@ -133,20 +138,42 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
   const paymentStatus = isLiqPay ? 'awaiting_payment' : 'unpaid'
 
   if (req.userId) {
-    const cart = await prisma.cart.findUnique({
-      where: { userId: req.userId },
-      include: { items: { include: { product: true } } },
-    })
+    const [cart, user] = await Promise.all([
+      prisma.cart.findUnique({
+        where: { userId: req.userId },
+        include: { items: { include: { product: true } } },
+      }),
+      prisma.user.findUnique({
+        where: { id: req.userId },
+        select: { discountPercent: true },
+      }),
+    ])
 
     if (!cart?.items.length) {
       res.status(400).json({ error: 'Cart is empty' })
       return
     }
 
-    const totalPrice = cart.items.reduce((sum, item) => {
-      const unit = item.product.discountPrice ?? item.product.price
-      return sum + Number(unit) * item.quantity
-    }, 0)
+    const pricingItems = cart.items.map((item) => ({
+      categorySlug: item.product.categorySlug,
+      unitPrice: getUnitPrice(item.product),
+      quantity: item.quantity,
+    }))
+    const pricing = calculateCartPricing(pricingItems, user?.discountPercent)
+    const pricedLines = cart.items.map((item) => {
+      const unit = getUnitPrice(item.product)
+      return {
+        productId: item.productId,
+        productName: item.product.name,
+        productImage: item.product.images[0] ?? '',
+        quantity: item.quantity,
+        price: getDiscountedUnitPrice(item.product.categorySlug, unit, pricing),
+      }
+    })
+    const totalPrice = pricedLines.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    )
 
     const order = await prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
@@ -158,16 +185,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           paymentMethod: parsed.data.paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
           items: {
-            create: cart.items.map((item) => {
-              const unit = item.product.discountPrice ?? item.product.price
-              return {
-                productId: item.productId,
-                productName: item.product.name,
-                productImage: item.product.images[0] ?? '',
-                quantity: item.quantity,
-                price: unit,
-              }
-            }),
+            create: pricedLines,
           },
         },
         include: { items: true },
@@ -219,11 +237,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       const product = productById.get(item.productId)
       if (!product) throw new Error('Product not found')
       if (product.stock < item.quantity) throw new Error('Insufficient stock')
-      const unit = product.discountPrice ?? product.price
       return {
         product,
         quantity: item.quantity,
-        price: unit,
+        unitPrice: getUnitPrice(product),
       }
     })
   } catch (error) {
@@ -236,8 +253,20 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
     return
   }
 
-  const totalPrice = resolvedItems.reduce(
-    (sum, item) => sum + Number(item.price) * item.quantity,
+  const pricing = calculateCartPricing(
+    resolvedItems.map((item) => ({
+      categorySlug: item.product.categorySlug,
+      unitPrice: item.unitPrice,
+      quantity: item.quantity,
+    })),
+  )
+  const pricedLines = resolvedItems.map((item) => ({
+    product: item.product,
+    quantity: item.quantity,
+    price: getDiscountedUnitPrice(item.product.categorySlug, item.unitPrice, pricing),
+  }))
+  const totalPrice = pricedLines.reduce(
+    (sum, item) => sum + item.price * item.quantity,
     0,
   )
 
@@ -252,7 +281,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           paymentMethod: parsed.data.paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
           items: {
-            create: resolvedItems.map((item) => ({
+            create: pricedLines.map((item) => ({
               productId: item.product.id,
               productName: item.product.name,
               productImage: item.product.images[0] ?? '',

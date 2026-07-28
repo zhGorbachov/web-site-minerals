@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { CartItem, Product } from '@/types'
 import { CartApi } from '@/api'
 import { getAuthToken } from '@/api/client'
+import { calculateCartPricing, toPricingItems, type CartPricing } from '@/utils/pricing'
 
 interface CartState {
   items: CartItem[]
@@ -13,7 +14,9 @@ interface CartState {
   updateQuantity: (itemId: string, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
   totalItems: () => number
-  totalPrice: () => number
+  /** Final payable total after volume / personal discounts. */
+  totalPrice: (personalDiscountPercent?: number | null) => number
+  getPricing: (personalDiscountPercent?: number | null) => CartPricing
   isInCart: (productId: string) => boolean
   getCartQuantity: (productId: string, options?: Record<string, string>) => number
   pullFromServer: () => Promise<void>
@@ -157,11 +160,11 @@ export const useCartStore = create<CartState>()(
 
       totalItems: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
 
-      totalPrice: () =>
-        get().items.reduce((sum, item) => {
-          const price = item.product.discountPrice ?? item.product.price
-          return sum + price * item.quantity
-        }, 0),
+      getPricing: (personalDiscountPercent) =>
+        calculateCartPricing(toPricingItems(get().items), personalDiscountPercent),
+
+      totalPrice: (personalDiscountPercent) =>
+        get().getPricing(personalDiscountPercent).total,
 
       isInCart: (productId) => get().items.some((item) => item.product.id === productId),
 

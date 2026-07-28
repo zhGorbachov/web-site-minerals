@@ -67,7 +67,7 @@ export function ProductPage() {
     if (addedResetRef.current !== null) {
       window.clearTimeout(addedResetRef.current)
     }
-    addedResetRef.current = window.setTimeout(() => setAddedToCart(false), 900)
+    addedResetRef.current = window.setTimeout(() => setAddedToCart(false), 450)
   }
 
   useEffect(() => {

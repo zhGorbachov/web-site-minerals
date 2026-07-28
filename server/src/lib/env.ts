@@ -27,7 +27,6 @@ export const env = {
   appleClientId: process.env.APPLE_CLIENT_ID?.trim() ?? '',
   apiUrl: process.env.API_URL?.trim() || `http://localhost:${process.env.PORT ?? 3001}`,
   novaPoshtaApiKey: process.env.NOVA_POSHTA_API_KEY?.trim() ?? '',
-  ukrposhtaBearerToken: process.env.UKRPOSHTA_BEARER_TOKEN?.trim() ?? '',
   liqpayPublicKey: process.env.LIQPAY_PUBLIC_KEY?.trim() ?? '',
   liqpayPrivateKey: process.env.LIQPAY_PRIVATE_KEY?.trim() ?? '',
 }

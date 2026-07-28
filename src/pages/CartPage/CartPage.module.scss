@@ -134,7 +134,7 @@
   justify-content: center;
   min-width: 18px;
   height: 18px;
-  margin-left: 2px;
+  margin-left: 4px;
   padding-inline: 4px;
   border-radius: $radius-full;
   font-size: $font-size-xs;
@@ -395,6 +395,22 @@
   font-size: $font-size-xs;
   color: $color-text-muted;
   text-align: right;
+}
+
+.deliveryFree {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  text-align: right;
+}
+
+.discountNote {
+  font-weight: $font-weight-regular;
+  color: $color-text-muted;
+}
+
+.discountAmount {
+  color: $color-primary;
 }
 
 .totalRow {

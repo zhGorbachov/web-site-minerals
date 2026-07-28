@@ -70,7 +70,7 @@ Set at least:
 - `JWT_SECRET` — long random string
 - `POSTGRES_PASSWORD` — strong password
 
-OAuth and Nova Poshta / Ukrposhta keys are optional.
+OAuth and Nova Poshta keys are optional.
 
 ## 5. Build and start
 
