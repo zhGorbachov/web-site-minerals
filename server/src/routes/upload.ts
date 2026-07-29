@@ -27,7 +27,8 @@ const upload = multer({
     const ok =
       file.mimetype.startsWith('image/') ||
       file.mimetype.startsWith('video/')
-    cb(ok ? null : new Error('Only image and video files are allowed'), ok)
+    if (ok) cb(null, true)
+    else cb(new Error('Only image and video files are allowed'))
   },
 })
 

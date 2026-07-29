@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { requireAdmin } from '../lib/auth.js'
@@ -99,7 +100,7 @@ adminRouter.post('/products', async (req, res) => {
       stock: parsed.data.stock,
       images: parsed.data.images,
       video: parsed.data.video ?? null,
-      attributes: parsed.data.attributes ?? {},
+      attributes: (parsed.data.attributes ?? {}) as Prisma.InputJsonValue,
       featured: parsed.data.featured ?? false,
       popular: parsed.data.popular ?? false,
       isNew: parsed.data.isNew ?? true,
@@ -171,7 +172,7 @@ adminRouter.patch('/products/:id', async (req, res) => {
       stock: parsed.data.stock,
       images: parsed.data.images,
       video: parsed.data.video === undefined ? undefined : parsed.data.video,
-      attributes: parsed.data.attributes,
+      attributes: parsed.data.attributes as Prisma.InputJsonValue | undefined,
       featured: parsed.data.featured,
       popular: parsed.data.popular,
       isNew: parsed.data.isNew,
