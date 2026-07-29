@@ -129,7 +129,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
     return
   }
 
-  const isLiqPay = parsed.data.paymentMethod === 'liqpay'
+  const isLiqPay =
+    parsed.data.paymentMethod === 'liqpay' ||
+    parsed.data.paymentMethod === 'google_pay' ||
+    parsed.data.paymentMethod === 'apple_pay'
   if (isLiqPay && !isLiqPayConfigured()) {
     res.status(503).json({ error: 'Online payment is not configured' })
     return

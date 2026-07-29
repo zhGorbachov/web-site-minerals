@@ -3,7 +3,6 @@ import { uiTranslationsEn, uiTranslationsUk, type UiTranslationSchema } from './
 export type Language = 'uk' | 'en'
 
 export type DeliveryItem = { title: string; text: string }
-export type ReviewItem = { author: string; rating: number; text: string }
 export type ValueItem = { title: string; text: string }
 export type FaqItem = { q: string; a: string }
 
@@ -75,7 +74,6 @@ export type TranslationSchema = UiTranslationSchema & {
     valuesTitle: string
     faqTitle: string
     deliveryItems: DeliveryItem[]
-    reviews: ReviewItem[]
     values: ValueItem[]
     faq: FaqItem[]
   }
@@ -177,23 +175,6 @@ export const translations: Record<Language, TranslationSchema> = {
         { title: 'Укрпошта', text: 'Доставка 2–5 днів. Підходить для великих замовлень.' },
         { title: 'Кур\'єр', text: 'Доступно в Києві та найближчих містах.' },
         { title: 'Оплата', text: 'Оплата на картку ПриватБанк/Монобанк або накладеним платежем.' },
-      ],
-      reviews: [
-        {
-          author: 'Олена К.',
-          rating: 5,
-          text: 'Чудові браслети ручної роботи! Камінці справжні, упаковка акуратна. Замовляла вже двічі.',
-        },
-        {
-          author: 'Марія С.',
-          rating: 5,
-          text: 'Дуже швидка доставка і приємне спілкування. Аметист виглядає ще краще, ніж на фото.',
-        },
-        {
-          author: 'Ірина В.',
-          rating: 4,
-          text: 'Гарний вибір ниток для плетіння. Якість на висоті, обов\'язково замовлю ще.',
-        },
       ],
       values: [
         { title: 'Натуральність', text: 'Тільки справжні природні матеріали без підробок' },
@@ -320,23 +301,6 @@ export const translations: Record<Language, TranslationSchema> = {
         { title: 'Ukrposhta', text: 'Delivery in 2–5 days. Suitable for large orders.' },
         { title: 'Courier', text: 'Available in Kyiv and nearby cities.' },
         { title: 'Payment', text: 'Payment by PrivatBank/Monobank card or cash on delivery.' },
-      ],
-      reviews: [
-        {
-          author: 'Olena K.',
-          rating: 5,
-          text: 'Wonderful handmade bracelets! Genuine stones, neat packaging. I have ordered twice already.',
-        },
-        {
-          author: 'Maria S.',
-          rating: 5,
-          text: 'Very fast delivery and pleasant communication. The amethyst looks even better than in the photo.',
-        },
-        {
-          author: 'Iryna V.',
-          rating: 4,
-          text: 'Great selection of threads for weaving. Top quality — I will definitely order again.',
-        },
       ],
       values: [
         { title: 'Natural', text: 'Only genuine natural materials, no fakes' },

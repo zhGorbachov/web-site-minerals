@@ -422,7 +422,7 @@
 
 .totalAmount {
   font-size: $font-size-xl;
-  color: $color-primary;
+  color: $color-text;
 }
 
 .checkoutNote {
@@ -433,7 +433,7 @@
 
 .continueShopping {
   font-size: $font-size-sm;
-  color: $color-primary;
+  color: $color-text;
   text-align: center;
   font-weight: $font-weight-medium;
   transition: opacity $transition-base;

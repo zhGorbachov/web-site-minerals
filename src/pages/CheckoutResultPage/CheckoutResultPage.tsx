@@ -95,13 +95,31 @@ export function CheckoutResultPage() {
 
         <div className={styles.actions}>
           {user ? (
-            <Button as={Link} to="/profile">
-              {t('checkout.goToOrders')}
-            </Button>
+            <>
+              <Button as={Link} to="/profile">
+                {t('checkout.goToOrders')}
+              </Button>
+              {view === 'paid' && (
+                <Button as={Link} to="/profile#review" variant="secondary">
+                  {t('storeReviews.leaveReview')}
+                </Button>
+              )}
+            </>
           ) : (
-            <Button as={Link} to="/catalog">
-              {t('cart.continueShopping')}
-            </Button>
+            <>
+              <Button as={Link} to="/catalog">
+                {t('cart.continueShopping')}
+              </Button>
+              {view === 'paid' && (
+                <Button
+                  as={Link}
+                  to={`/login?returnTo=${encodeURIComponent('/profile#review')}`}
+                  variant="secondary"
+                >
+                  {t('storeReviews.leaveReview')}
+                </Button>
+              )}
+            </>
           )}
           <Button as={Link} to="/" variant="secondary">
             {t('checkout.resultHome')}

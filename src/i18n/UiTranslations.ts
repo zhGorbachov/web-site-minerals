@@ -112,10 +112,8 @@ export type UiTranslationSchema = {
     ukrposhtaBasic: string
     ukrposhtaPriority: string
     ukrposhtaCityHint: string
+    ukrposhtaCityOptional: string
     ukrposhtaIndexHint: string
-    ukrposhtaBranchManual: string
-    ukrposhtaBranchManualPlaceholder: string
-    ukrposhtaBranchManualHint: string
     selfPickup: string
     selfPickupHint: string
     selfPickupAddress: string
@@ -146,8 +144,10 @@ export type UiTranslationSchema = {
     paymentBankTaxId: string
     paymentBankPurposeLabel: string
     paymentBankPurpose: string
-    paymentOnline: string
-    paymentOnlineHint: string
+    paymentGooglePay: string
+    paymentGooglePayHint: string
+    paymentApplePay: string
+    paymentApplePayHint: string
     comment: string
     commentPlaceholder: string
     toPay: string
@@ -315,6 +315,10 @@ export type UiTranslationSchema = {
     ordersTitle: string
     ordersEmpty: string
     orderNumber: string
+    orderItemsCount: string
+    showOrderItems: string
+    hideOrderItems: string
+    orderItemQty: string
     orderStatus: {
       pending: string
       confirmed: string
@@ -328,6 +332,22 @@ export type UiTranslationSchema = {
     favouritesEmpty: string
     openWishlist: string
     checkoutCta: string
+    reviewTitle: string
+    reviewHint: string
+    reviewPlaceholder: string
+    reviewSubmit: string
+    reviewSuccess: string
+    reviewAlready: string
+    reviewNeedPurchase: string
+    reviewRatingLabel: string
+    reviewError: string
+  }
+  storeReviews: {
+    sortByDate: string
+    sortByRating: string
+    sortAria: string
+    empty: string
+    leaveReview: string
   }
   admin: {
     title: string
@@ -509,11 +529,9 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ukrposhtaHint: 'Доставка за поштовим індексом',
     ukrposhtaBasic: 'Базовий',
     ukrposhtaPriority: 'Пріоритетний',
-    ukrposhtaCityHint: 'Оберіть зі списку або введіть назву вручну',
+    ukrposhtaCityHint: 'Необовʼязково — оберіть зі списку або введіть назву вручну',
+    ukrposhtaCityOptional: 'Місто (необовʼязково)',
     ukrposhtaIndexHint: '5-значний індекс відділення Укрпошти',
-    ukrposhtaBranchManual: 'Відділення (необовʼязково)',
-    ukrposhtaBranchManualPlaceholder: 'Номер або адреса відділення',
-    ukrposhtaBranchManualHint: 'Якщо знаєте — вкажіть номер чи адресу. Для доставки достатньо індексу',
     selfPickup: 'Самовивіз',
     selfPickupHint: 'Забрати самостійно з магазину',
     selfPickupAddress: 'вул. Короленка, 32А, Кропивницький',
@@ -544,8 +562,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Призначення',
     paymentBankPurpose: 'Оплата за товар',
-    paymentOnline: 'Онлайн оплата',
-    paymentOnlineHint: 'Картка, Google Pay або Apple Pay через LiqPay',
+    paymentGooglePay: 'Google Pay',
+    paymentGooglePayHint: 'Оплата через LiqPay',
+    paymentApplePay: 'Apple Pay',
+    paymentApplePayHint: 'Оплата через LiqPay',
     comment: 'Коментар до замовлення',
     commentPlaceholder: 'Побажання до доставки або замовлення',
     toPay: 'До оплати',
@@ -573,7 +593,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, відділення: {branch}',
     locationSummaryCourier: '{city}, {address}',
-    locationSummaryUkrposhta: 'Укрпошта ({type}), {city}, {branch}, індекс {index}',
+    locationSummaryUkrposhta: 'Укрпошта ({type}), індекс {index}',
     locationSummaryUkrposhtaIndex: 'Укрпошта ({type}), {city}, індекс {index}',
     locationSummarySelfPickup: 'Самовивіз: {address}',
   },
@@ -714,6 +734,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ordersTitle: 'Історія замовлень',
     ordersEmpty: 'Замовлень ще немає',
     orderNumber: 'Замовлення #{id}',
+    orderItemsCount: '{count} поз.',
+    showOrderItems: 'Показати товари',
+    hideOrderItems: 'Сховати товари',
+    orderItemQty: '{count} шт.',
     orderStatus: {
       pending: 'Очікує',
       confirmed: 'Підтверджено',
@@ -727,6 +751,22 @@ export const uiTranslationsUk: UiTranslationSchema = {
     favouritesEmpty: 'У обраному поки порожньо',
     openWishlist: 'Відкрити обране',
     checkoutCta: 'Оформити замовлення',
+    reviewTitle: 'Відгук про магазин',
+    reviewHint: 'Поділіться враженням про сервіс, доставку та якість обслуговування.',
+    reviewPlaceholder: 'Напишіть ваш відгук (мінімум 10 символів)',
+    reviewSubmit: 'Надіслати відгук',
+    reviewSuccess: 'Дякуємо! Ваш відгук опубліковано.',
+    reviewAlready: 'Ви вже залишили відгук про магазин.',
+    reviewNeedPurchase: 'Відгук можна залишити після першого замовлення.',
+    reviewRatingLabel: 'Ваша оцінка',
+    reviewError: 'Не вдалося надіслати відгук. Спробуйте ще раз.',
+  },
+  storeReviews: {
+    sortByDate: 'За датою',
+    sortByRating: 'За оцінкою',
+    sortAria: 'Сортування відгуків',
+    empty: 'Відгуків поки немає',
+    leaveReview: 'Залишити відгук',
   },
   admin: {
     title: 'Адмін-панель',
@@ -908,11 +948,9 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ukrposhtaHint: 'Delivery by postal index',
     ukrposhtaBasic: 'Basic',
     ukrposhtaPriority: 'Priority',
-    ukrposhtaCityHint: 'Pick a suggestion or type the city name yourself',
+    ukrposhtaCityHint: 'Optional — pick a suggestion or type the city name yourself',
+    ukrposhtaCityOptional: 'City (optional)',
     ukrposhtaIndexHint: '5-digit Ukrposhta branch index',
-    ukrposhtaBranchManual: 'Branch (optional)',
-    ukrposhtaBranchManualPlaceholder: 'Branch number or address',
-    ukrposhtaBranchManualHint: 'Optional — number or address. Postal index alone is enough',
     selfPickup: 'Self-pickup',
     selfPickupHint: 'Pick up from the store',
     selfPickupAddress: 'Korolenka St., 32A, Kropyvnytskyi',
@@ -943,8 +981,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Payment purpose',
     paymentBankPurpose: 'Payment for goods',
-    paymentOnline: 'Online payment',
-    paymentOnlineHint: 'Card, Google Pay or Apple Pay via LiqPay',
+    paymentGooglePay: 'Google Pay',
+    paymentGooglePayHint: 'Pay via LiqPay',
+    paymentApplePay: 'Apple Pay',
+    paymentApplePayHint: 'Pay via LiqPay',
     comment: 'Order comment',
     commentPlaceholder: 'Delivery or order notes',
     toPay: 'To pay',
@@ -972,7 +1012,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, branch: {branch}',
     locationSummaryCourier: '{city}, {address}',
-    locationSummaryUkrposhta: 'Ukrposhta ({type}), {city}, {branch}, index {index}',
+    locationSummaryUkrposhta: 'Ukrposhta ({type}), index {index}',
     locationSummaryUkrposhtaIndex: 'Ukrposhta ({type}), {city}, index {index}',
     locationSummarySelfPickup: 'Self-pickup: {address}',
   },
@@ -1113,6 +1153,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ordersTitle: 'Order history',
     ordersEmpty: 'No orders yet',
     orderNumber: 'Order #{id}',
+    orderItemsCount: '{count} items',
+    showOrderItems: 'Show products',
+    hideOrderItems: 'Hide products',
+    orderItemQty: '× {count}',
     orderStatus: {
       pending: 'Pending',
       confirmed: 'Confirmed',
@@ -1126,6 +1170,22 @@ export const uiTranslationsEn: UiTranslationSchema = {
     favouritesEmpty: 'Your favourites list is empty',
     openWishlist: 'Open wishlist',
     checkoutCta: 'Place an order',
+    reviewTitle: 'Store review',
+    reviewHint: 'Share your experience with our service, delivery and support.',
+    reviewPlaceholder: 'Write your review (at least 10 characters)',
+    reviewSubmit: 'Submit review',
+    reviewSuccess: 'Thank you! Your review has been published.',
+    reviewAlready: 'You have already left a store review.',
+    reviewNeedPurchase: 'You can leave a review after your first order.',
+    reviewRatingLabel: 'Your rating',
+    reviewError: 'Could not submit the review. Please try again.',
+  },
+  storeReviews: {
+    sortByDate: 'By date',
+    sortByRating: 'By rating',
+    sortAria: 'Sort reviews',
+    empty: 'No reviews yet',
+    leaveReview: 'Leave a review',
   },
   admin: {
     title: 'Admin panel',

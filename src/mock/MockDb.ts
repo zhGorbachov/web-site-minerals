@@ -1,11 +1,11 @@
-import type { CartItem, Category, Order, Product, SubCategory, User } from '@/types'
+import type { CartItem, Category, Order, Product, StoreReview, SubCategory, User } from '@/types'
 import { isValidLocalPhone, normalizeLocalPhone } from '@/utils/phone'
 import { categories as seedCategories } from './categories'
 import { subcategories as seedSubcategories } from './subcategories'
 import { products as seedProducts } from './products'
 
 const STORAGE_KEY = 'crystal-mock-db'
-const STORAGE_VERSION = 4
+const STORAGE_VERSION = 5
 
 export type MockUserRecord = {
   password: string
@@ -27,6 +27,7 @@ type MockDbState = {
   carts: Record<string, MockCart>
   wishlists: Record<string, string[]>
   orders: Record<string, Order[]>
+  reviews: StoreReview[]
   sessions: Record<string, string>
 }
 
@@ -107,6 +108,51 @@ function createDemoOrders(): Order[] {
   ]
 }
 
+function createDemoReviews(): StoreReview[] {
+  return [
+    {
+      id: 'review-seed-1',
+      userId: null,
+      author: 'Олена К.',
+      rating: 5,
+      text: 'Чудові браслети ручної роботи! Камінці справжні, упаковка акуратна. Замовляла вже двічі.',
+      createdAt: '2026-06-18T12:00:00Z',
+    },
+    {
+      id: 'review-seed-2',
+      userId: null,
+      author: 'Марія С.',
+      rating: 5,
+      text: 'Дуже швидка доставка і приємне спілкування. Аметист виглядає ще краще, ніж на фото.',
+      createdAt: '2026-05-22T09:30:00Z',
+    },
+    {
+      id: 'review-seed-3',
+      userId: null,
+      author: 'Ірина В.',
+      rating: 4,
+      text: "Гарний вибір ниток для плетіння. Якість на висоті, обов'язково замовлю ще.",
+      createdAt: '2026-04-10T16:45:00Z',
+    },
+    {
+      id: 'review-seed-4',
+      userId: null,
+      author: 'Андрій П.',
+      rating: 5,
+      text: 'Магазин відповідає швидко, товар якісний. Дякую за допомогу з вибором каменів.',
+      createdAt: '2026-03-28T11:15:00Z',
+    },
+    {
+      id: 'review-seed-5',
+      userId: null,
+      author: 'Наталія М.',
+      rating: 4,
+      text: 'Все сподобалось: і упаковка, і сервіс. Трохи довше чекала на відповідь у месенджері, але результатом задоволена.',
+      createdAt: '2026-02-14T18:20:00Z',
+    },
+  ]
+}
+
 function createSeedState(): MockDbState {
   return {
     version: STORAGE_VERSION,
@@ -124,6 +170,7 @@ function createSeedState(): MockDbState {
     orders: {
       [DEMO_CUSTOMER.id]: createDemoOrders(),
     },
+    reviews: createDemoReviews(),
     sessions: {},
   }
 }
@@ -261,6 +308,15 @@ export const MockDb = {
 
   setOrders(userId: string, orders: Order[]) {
     state.orders[userId] = orders
+    persist()
+  },
+
+  getReviews() {
+    return state.reviews
+  },
+
+  addReview(review: StoreReview) {
+    state.reviews = [review, ...state.reviews]
     persist()
   },
 }

@@ -51,7 +51,7 @@ function buildOrder(
 
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const paymentMethod = payload?.paymentMethod ?? 'cod'
-  const isLiqPay = paymentMethod === 'liqpay'
+  const isLiqPay = paymentMethod === 'liqpay' || paymentMethod === 'google_pay' || paymentMethod === 'apple_pay'
 
   return {
     id: orderId,

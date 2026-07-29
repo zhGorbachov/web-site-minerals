@@ -21,7 +21,17 @@ import type {
   PaymentMethod,
   UkrposhtaType,
 } from '@/types'
+import { isLiqPayPaymentMethod } from '@/types'
 import { NovaPoshtaApi, OrdersApi } from '@/api'
+import {
+  NovaPoshtaIcon,
+  UkrposhtaIcon,
+  BankTransferIcon,
+  CashOnDeliveryIcon,
+  SelfPickupIcon,
+  GooglePayIcon,
+  ApplePayIcon,
+} from '@/components/BrandIcons'
 import { useAuthStore, useCartStore, useCheckoutStore, GUEST_CHECKOUT_PROFILE_KEY } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice, getDiscountLabel } from '@/utils'
@@ -54,82 +64,6 @@ function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
 
 function isValidUkrposhtaIndex(value: string) {
   return /^\d{5}$/.test(value.trim())
-}
-
-function NovaPoshtaIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="7" fill="#E30613" />
-      <path
-        fill="#fff"
-        d="M14 5.2 8.2 11h3.1v5.2h5.4V11h3.1L14 5.2Zm-5.8 12.2v5.4h11.6v-5.4h-2.7v2.7H11v-2.7H8.2Z"
-      />
-    </svg>
-  )
-}
-
-function UkrposhtaIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="7" fill="#FFCC00" />
-      <path
-        fill="#0057B8"
-        d="M6.5 9.2h15v1.7H6.5V9.2Zm0 4h15v1.7H6.5v-1.7Zm0 4h15v1.7H6.5v-1.7Z"
-      />
-      <circle cx="14" cy="14" r="3.2" fill="#0057B8" />
-      <circle cx="14" cy="14" r="1.5" fill="#FFCC00" />
-    </svg>
-  )
-}
-
-function SelfPickupIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="7" fill="#12B76A" />
-      <path
-        fill="#fff"
-        d="M7 12.2 14 6.8l7 5.4v9.5a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 21.7v-9.5Zm3.2 2.3v6.2h2.6v-4h2.4v4h2.6v-6.2H10.2Z"
-      />
-    </svg>
-  )
-}
-
-function BankTransferIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="7" fill="#4F46E5" />
-      <path
-        fill="#fff"
-        d="M7.5 9.2h13v1.6H7.5V9.2Zm1.2 3.2h10.6v9.2H8.7v-9.2Zm2 2.2v1.4h6.6v-1.4H10.7Zm0 2.8v1.4h6.6v-1.4H10.7Zm0 2.8v1.4h4.2v-1.4h-4.2Z"
-      />
-    </svg>
-  )
-}
-
-function WalletPayIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="7" fill="#0EA5E9" />
-      <path
-        fill="#fff"
-        d="M7 9.5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 21 21.5H7A1.5 1.5 0 0 1 5.5 20v-9A1.5 1.5 0 0 1 7 9.5Zm12.2 5.2a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8Z"
-      />
-      <path fill="#BAE6FD" d="M5.5 11.2h17v2.2h-17z" />
-    </svg>
-  )
-}
-
-function CardPayIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" rx="7" fill="#059669" />
-      <path fill="#A7F3D0" d="M5.5 10.2h17v2.4h-17z" />
-      <path
-        fill="#fff"
-        d="M5.5 9a1.5 1.5 0 0 1 1.5-1.5h14A1.5 1.5 0 0 1 22.5 9v10a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V9Zm2.2 7.2h5.2v1.5H7.7v-1.5Zm8.4 0h4.2v1.5h-4.2v-1.5Z"
-      />
-    </svg>
-  )
 }
 
 function redirectToLiqPay(payment: { data: string; signature: string; checkoutUrl: string }) {
@@ -317,10 +251,7 @@ export function CheckoutPage() {
       if (!savedLocation) return false
       if (savedLocation.deliveryMethod === 'self_pickup') return true
       if (savedLocation.deliveryMethod === 'ukrposhta') {
-        return (
-          Boolean(savedLocation.city.trim()) &&
-          isValidUkrposhtaIndex(savedLocation.postalIndex)
-        )
+        return isValidUkrposhtaIndex(savedLocation.postalIndex)
       }
       if (savedLocation.novaPoshtaType === 'courier') {
         return Boolean(savedLocation.city.trim()) && Boolean(savedLocation.cityRef) && Boolean(savedLocation.address.trim())
@@ -364,13 +295,28 @@ export function CheckoutPage() {
               {user ? t('checkout.successDescription') : t('checkout.successGuestDescription')}
             </p>
             {user ? (
-              <Button as={Link} to="/profile" size="lg">
-                {t('checkout.goToOrders')}
-              </Button>
+              <div className={styles.successActions}>
+                <Button as={Link} to="/profile" size="lg">
+                  {t('checkout.goToOrders')}
+                </Button>
+                <Button as={Link} to="/profile#review" variant="secondary" size="lg">
+                  {t('storeReviews.leaveReview')}
+                </Button>
+              </div>
             ) : (
-              <Button as={Link} to="/catalog" size="lg">
-                {t('cart.continueShopping')}
-              </Button>
+              <div className={styles.successActions}>
+                <Button as={Link} to="/catalog" size="lg">
+                  {t('cart.continueShopping')}
+                </Button>
+                <Button
+                  as={Link}
+                  to={`/login?returnTo=${encodeURIComponent('/profile#review')}`}
+                  variant="secondary"
+                  size="lg"
+                >
+                  {t('storeReviews.leaveReview')}
+                </Button>
+              </div>
             )}
           </motion.div>
         </div>
@@ -412,17 +358,15 @@ export function CheckoutPage() {
         location.ukrposhtaType === 'priority'
           ? t('checkout.ukrposhtaPriority')
           : t('checkout.ukrposhtaBasic')
-      if (location.branch.trim()) {
-        return t('checkout.locationSummaryUkrposhta', {
+      if (location.city.trim()) {
+        return t('checkout.locationSummaryUkrposhtaIndex', {
           type,
           city: location.city,
-          branch: location.branch,
           index: location.postalIndex,
         })
       }
-      return t('checkout.locationSummaryUkrposhtaIndex', {
+      return t('checkout.locationSummaryUkrposhta', {
         type,
-        city: location.city,
         index: location.postalIndex,
       })
     }
@@ -446,7 +390,7 @@ export function CheckoutPage() {
   const isLocationComplete = (value: CheckoutLocation = location) => {
     if (value.deliveryMethod === 'self_pickup') return true
     if (value.deliveryMethod === 'ukrposhta') {
-      return Boolean(value.city.trim()) && isValidUkrposhtaIndex(value.postalIndex)
+      return isValidUkrposhtaIndex(value.postalIndex)
     }
     if (!value.city.trim() || !value.cityRef) return false
     if (value.novaPoshtaType === 'courier') return Boolean(value.address.trim())
@@ -476,11 +420,6 @@ export function CheckoutPage() {
     }
 
     if (location.deliveryMethod === 'ukrposhta') {
-      if (!location.city.trim()) {
-        setErrorStep(2)
-        setError(t('checkout.errorCity'))
-        return false
-      }
       if (!isValidUkrposhtaIndex(location.postalIndex)) {
         setErrorStep(2)
         setError(t('checkout.errorPostalIndex'))
@@ -572,8 +511,8 @@ export function CheckoutPage() {
         deliveryMethod: method,
         city: same ? prev.city : '',
         cityRef: same ? prev.cityRef : undefined,
-        branch: same ? prev.branch : '',
-        warehouseRef: same ? prev.warehouseRef : undefined,
+        branch: method === 'ukrposhta' ? '' : same ? prev.branch : '',
+        warehouseRef: method === 'ukrposhta' ? undefined : same ? prev.warehouseRef : undefined,
         address: method === 'self_pickup' ? t('checkout.selfPickupAddress') : same ? prev.address : '',
         postalIndex: same ? prev.postalIndex : '',
       }
@@ -604,7 +543,7 @@ export function CheckoutPage() {
       ...prev,
       city: value,
       cityRef: undefined,
-      branch: prev.deliveryMethod === 'ukrposhta' ? prev.branch : '',
+      branch: '',
       warehouseRef: undefined,
       address:
         prev.deliveryMethod === 'nova_poshta' && prev.novaPoshtaType === 'courier' ? prev.address : '',
@@ -618,7 +557,7 @@ export function CheckoutPage() {
       ...prev,
       city: city.present || city.name,
       cityRef: city.ref,
-      branch: prev.deliveryMethod === 'ukrposhta' ? prev.branch : '',
+      branch: '',
       warehouseRef: undefined,
       address: prev.novaPoshtaType === 'courier' ? prev.address : '',
       postalIndex: prev.deliveryMethod === 'ukrposhta' ? prev.postalIndex : '',
@@ -686,7 +625,7 @@ export function CheckoutPage() {
       })
       await clearCart()
 
-      if (paymentMethod === 'liqpay' && result.payment) {
+      if (isLiqPayPaymentMethod(paymentMethod) && result.payment) {
         redirectToLiqPay(result.payment)
         return
       }
@@ -952,21 +891,6 @@ export function CheckoutPage() {
 
                         <div className={styles.formGrid}>
                           <div className={styles.fullWidth}>
-                            <Autocomplete
-                              label={t('checkout.city')}
-                              value={location.city}
-                              onChange={handleCityChange}
-                              onSelect={handleCitySelect}
-                              loadOptions={loadCityOptions}
-                              placeholder={t('checkout.cityPlaceholder')}
-                              hint={t('checkout.ukrposhtaCityHint')}
-                              emptyMessage={t('checkout.searchEmpty')}
-                              loadingMessage={t('checkout.searchLoading')}
-                              required
-                            />
-                          </div>
-
-                          <div className={styles.fullWidth}>
                             <Input
                               label={t('checkout.postalIndex')}
                               value={location.postalIndex}
@@ -985,18 +909,16 @@ export function CheckoutPage() {
                           </div>
 
                           <div className={styles.fullWidth}>
-                            <Input
-                              label={t('checkout.ukrposhtaBranchManual')}
-                              value={location.branch}
-                              onChange={(e) =>
-                                setLocation((l) => ({
-                                  ...l,
-                                  branch: e.target.value,
-                                  warehouseRef: undefined,
-                                }))
-                              }
-                              placeholder={t('checkout.ukrposhtaBranchManualPlaceholder')}
-                              hint={t('checkout.ukrposhtaBranchManualHint')}
+                            <Autocomplete
+                              label={t('checkout.ukrposhtaCityOptional')}
+                              value={location.city}
+                              onChange={handleCityChange}
+                              onSelect={handleCitySelect}
+                              loadOptions={loadCityOptions}
+                              placeholder={t('checkout.cityPlaceholder')}
+                              hint={t('checkout.ukrposhtaCityHint')}
+                              emptyMessage={t('checkout.searchEmpty')}
+                              loadingMessage={t('checkout.searchLoading')}
                             />
                           </div>
                         </div>
@@ -1124,7 +1046,7 @@ export function CheckoutPage() {
                     {paymentMethod === 'pickup' && <span className={styles.dot} />}
                   </span>
                   <span className={styles.optionIcon}>
-                    <WalletPayIcon />
+                    <CashOnDeliveryIcon />
                   </span>
                   <span className={styles.optionContent}>
                     <span className={styles.optionTitle}>{t('checkout.paymentPickup')}</span>
@@ -1136,21 +1058,41 @@ export function CheckoutPage() {
                   type="button"
                   className={[
                     styles.optionCard,
-                    paymentMethod === 'liqpay' ? styles.selected : '',
+                    paymentMethod === 'google_pay' ? styles.selected : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  onClick={() => selectPaymentMethod('liqpay')}
+                  onClick={() => selectPaymentMethod('google_pay')}
                 >
                   <span className={styles.radio}>
-                    {paymentMethod === 'liqpay' && <span className={styles.dot} />}
+                    {paymentMethod === 'google_pay' && <span className={styles.dot} />}
                   </span>
-                  <span className={styles.optionIcon}>
-                    <CardPayIcon />
+                  <span className={styles.optionIconWide}>
+                    <GooglePayIcon />
                   </span>
                   <span className={styles.optionContent}>
-                    <span className={styles.optionTitle}>{t('checkout.paymentOnline')}</span>
-                    <span className={styles.optionHint}>{t('checkout.paymentOnlineHint')}</span>
+                    <span className={styles.optionTitle}>{t('checkout.paymentGooglePay')}</span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className={[
+                    styles.optionCard,
+                    paymentMethod === 'apple_pay' ? styles.selected : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => selectPaymentMethod('apple_pay')}
+                >
+                  <span className={styles.radio}>
+                    {paymentMethod === 'apple_pay' && <span className={styles.dot} />}
+                  </span>
+                  <span className={styles.optionIconWide}>
+                    <ApplePayIcon />
+                  </span>
+                  <span className={styles.optionContent}>
+                    <span className={styles.optionTitle}>{t('checkout.paymentApplePay')}</span>
                   </span>
                 </button>
               </div>
