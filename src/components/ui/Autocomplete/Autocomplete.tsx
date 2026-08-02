@@ -28,6 +28,8 @@ interface AutocompleteProps {
   disabled?: boolean
   required?: boolean
   error?: string
+  /** Soft red highlight without an error message. */
+  invalid?: boolean
   hint?: ReactNode
   debounceMs?: number
   minChars?: number
@@ -47,6 +49,7 @@ export function Autocomplete({
   disabled,
   required,
   error,
+  invalid,
   hint,
   debounceMs = 280,
   minChars = 2,
@@ -188,7 +191,7 @@ export function Autocomplete({
       <div
         className={[
           styles.inputWrapper,
-          error ? styles.hasError : '',
+          error || invalid ? styles.hasError : '',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -208,6 +211,7 @@ export function Autocomplete({
           aria-activedescendant={
             highlight >= 0 && options[highlight] ? `${listboxId}-option-${highlight}` : undefined
           }
+          aria-invalid={Boolean(error || invalid) || undefined}
           onChange={(e) => {
             dismissedRef.current = false
             setTouched(true)

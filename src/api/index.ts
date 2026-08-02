@@ -1,6 +1,13 @@
 export { api, getAuthToken, setAuthToken, mediaUrl, API_URL, isMockMode } from './client'
 export type { AuthResponse } from './AuthApi'
-export type { AdminProductPayload, UploadedMedia, AdminUser } from './AdminApi'
+export type {
+  AdminProductPayload,
+  UploadedMedia,
+  AdminUser,
+  AdminOrder,
+  AdminOrderCustomer,
+  AdminOrderUpdatePayload,
+} from './AdminApi'
 
 import { isMockMode } from './client'
 import { AuthApi as LiveAuthApi } from './AuthApi'

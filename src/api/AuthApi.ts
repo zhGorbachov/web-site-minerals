@@ -13,9 +13,21 @@ export const AuthApi = {
     phone: string
     password: string
   }) {
-    const { data } = await api.post<AuthResponse>('/auth/register', payload)
+    await api.post('/auth/register', payload)
+  },
+
+  async verifyRegistration(payload: { phone: string; code: string }) {
+    const { data } = await api.post<AuthResponse>('/auth/register/verify', payload)
     setAuthToken(data.token)
     return data
+  },
+
+  async forgotPassword(payload: { phone: string }) {
+    await api.post('/auth/password/forgot', payload)
+  },
+
+  async resetPassword(payload: { phone: string; code: string; password: string }) {
+    await api.post('/auth/password/reset', payload)
   },
 
   async login(payload: { phone: string; password: string }) {

@@ -2,23 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Trash2, ShoppingCart } from 'lucide-react'
-import type { MineralAttributes, Product } from '@/types'
+import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice } from '@/utils'
+import { formatPrice, productRequiresOptions } from '@/utils'
 import { EmptyState } from '@/components/ui'
 import styles from './WishlistPage.module.scss'
-
-function productRequiresOptions(product: Product): boolean {
-  if (product.categorySlug === 'mineraly') {
-    const attrs = product.attributes as MineralAttributes
-    return Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
-  }
-  return product.categorySlug === 'nytky' || product.categorySlug === 'brаslety'
-}
 
 export function WishlistPage() {
   const { t, tp, language } = useTranslation()

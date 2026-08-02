@@ -22,6 +22,10 @@ const ERROR_KEYS: Record<AuthError, TranslationKey> = {
   oauth_not_configured: 'auth.errorOauthNotConfigured',
   oauth_denied: 'auth.errorOauthDenied',
   oauth_failed: 'auth.errorOauthFailed',
+  invalid_code: 'auth.errorOauthFailed',
+  code_expired: 'auth.errorOauthFailed',
+  too_many_attempts: 'auth.errorOauthFailed',
+  code_send_too_soon: 'auth.errorOauthFailed',
 }
 
 function GoogleIcon() {
@@ -62,6 +66,7 @@ export function AuthPage() {
   const login = useAuthStore((s) => s.login)
   const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle)
   const register = useAuthStore((s) => s.register)
+  const verifyRegistration = useAuthStore((s) => s.verifyRegistration)
 
   const modeParam = searchParams.get('mode')
   const mode: AuthMode = modeParam === 'register' ? 'register' : 'login'
@@ -75,6 +80,8 @@ export function AuthPage() {
   const [error, setError] = useState<AuthError | null>(oauthError)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [registrationVerification, setRegistrationVerification] = useState(false)
+  const [code, setCode] = useState('')
 
   useEffect(() => {
     if (user) {
@@ -87,6 +94,8 @@ export function AuthPage() {
 
   const setMode = (next: AuthMode) => {
     setError(null)
+    setRegistrationVerification(false)
+    setCode('')
     const returnTo = searchParams.get('returnTo')
     const nextParams = new URLSearchParams()
     if (next === 'register') nextParams.set('mode', 'register')
@@ -123,9 +132,7 @@ export function AuthPage() {
     setError(null)
 
     const result =
-      mode === 'login'
-        ? await login(phone, password)
-        : await register({ firstName, lastName, phone, password })
+      mode === 'login' ? await login(phone, password) : await register({ firstName, lastName, phone, password })
 
     setLoading(false)
     if (result) {
@@ -133,6 +140,23 @@ export function AuthPage() {
       return
     }
 
+    if (mode === 'register') {
+      setRegistrationVerification(true)
+      return
+    }
+    await redirectAfterAuth()
+  }
+
+  const handleVerifyRegistration = async (e: FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    const result = await verifyRegistration(phone, code)
+    setLoading(false)
+    if (result) {
+      setError(result)
+      return
+    }
     await redirectAfterAuth()
   }
 
@@ -182,12 +206,48 @@ export function AuthPage() {
               transition={{ duration: 0.2 }}
             >
               <h1 className={styles.title}>
-                {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
+                {registrationVerification ? 'Підтвердіть номер телефону' : mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
               </h1>
               <p className={styles.subtitle}>
-                {mode === 'login' ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
+                {registrationVerification
+                  ? `Ми надіслали 4-значний код на номер ${phone}.`
+                  : mode === 'login'
+                    ? t('auth.loginSubtitle')
+                    : t('auth.registerSubtitle')}
               </p>
 
+              {registrationVerification ? (
+                <form className={styles.form} onSubmit={handleVerifyRegistration} noValidate>
+                  <Input
+                    label="Код із SMS"
+                    name="code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={4}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    required
+                  />
+                  {error && (
+                    <p className={styles.error} role="alert">
+                      {error === 'invalid_code'
+                        ? 'Невірний код. Спробуйте ще раз.'
+                        : error === 'code_expired'
+                          ? 'Термін дії коду завершився. Зареєструйтесь ще раз.'
+                          : error === 'too_many_attempts'
+                            ? 'Забагато спроб. Зареєструйтесь ще раз.'
+                            : t(ERROR_KEYS[error] ?? 'auth.errorOauthFailed')}
+                    </p>
+                  )}
+                  <Button type="submit" fullWidth size="lg" loading={loading} disabled={code.length !== 4}>
+                    Підтвердити номер
+                  </Button>
+                  <button type="button" className={styles.switchLink} onClick={() => setRegistrationVerification(false)}>
+                    Змінити дані
+                  </button>
+                </form>
+              ) : (
+                <>
               <div className={styles.socialBlock}>
                 <button
                   type="button"
@@ -276,6 +336,10 @@ export function AuthPage() {
                     <button type="button" className={styles.switchLink} onClick={() => setMode('register')}>
                       {t('auth.registerTab')}
                     </button>
+                    <br />
+                    <Link className={styles.switchLink} to="/forgot-password">
+                      Забули пароль?
+                    </Link>
                   </>
                 ) : (
                   <>
@@ -286,6 +350,8 @@ export function AuthPage() {
                   </>
                 )}
               </p>
+                </>
+              )}
 
               <p className={styles.backHome}>
                 <Link to="/">{t('auth.backHome')}</Link>

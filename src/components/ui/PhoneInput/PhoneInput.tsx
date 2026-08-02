@@ -9,6 +9,9 @@ type PhoneInputProps = {
   onChange: (value: string) => void
   required?: boolean
   autoComplete?: string
+  /** Soft red highlight without an error message. */
+  invalid?: boolean
+  error?: string
 }
 
 export function PhoneInput({
@@ -18,11 +21,15 @@ export function PhoneInput({
   onChange,
   required,
   autoComplete = 'tel',
+  invalid,
+  error,
 }: PhoneInputProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, '').slice(0, 10)
     onChange(digits)
   }
+
+  const hasError = Boolean(invalid) || Boolean(error)
 
   return (
     <div className={styles.wrapper}>
@@ -31,7 +38,7 @@ export function PhoneInput({
           {label}
         </label>
       )}
-      <div className={styles.field}>
+      <div className={[styles.field, hasError ? styles.hasError : ''].filter(Boolean).join(' ')}>
         <span className={styles.prefix} aria-hidden="true">
           {UA_COUNTRY_PREFIX}
         </span>
@@ -45,9 +52,11 @@ export function PhoneInput({
           value={value}
           onChange={handleChange}
           required={required}
+          aria-invalid={hasError || undefined}
           aria-label={label ? `${label}, ${UA_COUNTRY_PREFIX}` : UA_COUNTRY_PREFIX}
         />
       </div>
+      {error && <span className={styles.error}>{error}</span>}
     </div>
   )
 }

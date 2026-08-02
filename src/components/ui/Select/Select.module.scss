@@ -1,0 +1,180 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+
+  &.listOpen {
+    z-index: 400;
+  }
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-2;
+  width: 100%;
+  min-height: 44px;
+  padding: $spacing-2 $spacing-3;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  color: $color-text;
+  font: inherit;
+  font-size: $font-size-sm;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $transition-base, box-shadow $transition-base, background $transition-base;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(var(--color-primary-rgb), 0.45);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: $color-surface;
+  }
+}
+
+.triggerOpen {
+  border-color: $color-primary;
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
+}
+
+.triggerValue {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-width: 0;
+}
+
+.triggerLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: $color-text-muted;
+  transition: transform $transition-base, color $transition-base;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: $color-primary;
+}
+
+.list {
+  position: absolute;
+  z-index: 500;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: $spacing-1;
+  list-style: none;
+  max-height: 260px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  transform-origin: top center;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-primary-rgb), 0.35) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb), 0.35);
+    border-radius: $radius-full;
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-2;
+  padding: 10px $spacing-3;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background-color $transition-fast;
+}
+
+.optionHighlighted {
+  background: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.optionSelected {
+  background: rgba(var(--color-primary-rgb), 0.12);
+}
+
+.optionMain {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-width: 0;
+}
+
+.optionLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  line-height: $line-height-tight;
+}
+
+.check {
+  flex-shrink: 0;
+  color: $color-primary;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-circle;
+  flex-shrink: 0;
+  background: $color-text-muted;
+}
+
+.tone_neutral {
+  background: $color-text-muted;
+}
+
+.tone_success {
+  background: $color-success;
+}
+
+.tone_warning {
+  background: $color-warning;
+}
+
+.tone_danger {
+  background: $color-error;
+}
+
+.tone_info {
+  background: $color-primary;
+}

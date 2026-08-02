@@ -54,6 +54,7 @@ const baseProducts: Product[] = [
       hardness: '6.5–7',
       shape: 'Куля',
       beadSizes: ['6', '8', '10'],
+      beadCounts: ['36', '40', '44'],
       strandLengths: [
         { label: 'Низка 39 см', value: '39 см' },
         { label: 'Пів низки 19.5 см', value: '19.5 см' },
@@ -252,6 +253,7 @@ const baseProducts: Product[] = [
       hardness: '6.5–7',
       shape: 'Низка',
       beadSizes: ['6', '8', '10'],
+      beadCounts: ['36', '40', '44'],
       strandLengths: [
         { label: 'Низка 39 см', value: '39 см' },
         { label: 'Пів низки 19.5 см', value: '19.5 см' },
@@ -346,7 +348,7 @@ const baseProducts: Product[] = [
     images: [
       mockImages.elasticThread,
     ],
-    attributes: { color: 'Чорний', length: '50 м', diameter: '1 мм', material: 'Кристальний еластик' },
+    attributes: { color: 'Чорний', length: '50 м', lengths: ['10 м', '25 м', '50 м'], diameter: '1 мм', material: 'Кристальний еластик' },
     featured: false,
     popular: false,
     isNew: true,
@@ -395,7 +397,7 @@ const baseProducts: Product[] = [
       mockImages.womenBracelet,
       mockImages.bracelets,
     ],
-    attributes: { wristSize: '14–21 см', threadColor: 'Прозорий', stones: ['Рожевий кварц', 'Перламутр'], material: 'Еластична нитка' },
+    attributes: { wristSize: '14–21 см', wristSizes: ['14 см', '15 см', '16 см', '17 см', '18 см', '19 см', '20 см', '21 см'], threadColor: 'Прозорий', stones: ['Рожевий кварц', 'Перламутр'], material: 'Еластична нитка' },
     featured: true,
     popular: true,
     isNew: false,

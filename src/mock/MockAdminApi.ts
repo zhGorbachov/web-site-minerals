@@ -1,5 +1,11 @@
 import type { Product, ProductAttributes, SubCategory } from '@/types'
-import type { AdminProductPayload, AdminUser, UploadedMedia } from '@/api/AdminApi'
+import type {
+  AdminOrder,
+  AdminOrderUpdatePayload,
+  AdminProductPayload,
+  AdminUser,
+  UploadedMedia,
+} from '@/api/AdminApi'
 import { getAuthToken } from '@/api/client'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, slugify } from './MockDb'
@@ -221,6 +227,64 @@ export const MockAdminApi = {
       discountPercent: updated.discountPercent,
       discountLabel: updated.discountLabel,
       createdAt: updated.createdAt,
+    }
+  },
+
+  async getOrders(params?: { id?: string }): Promise<AdminOrder[]> {
+    requireAdmin()
+    const q = params?.id?.trim().toLowerCase()
+    const orders = MockDb.getAllOrders()
+      .filter((order) => {
+        if (!q) return true
+        return (
+          order.id.toLowerCase().includes(q) ||
+          (order.liqpayOrderId?.toLowerCase().includes(q) ?? false)
+        )
+      })
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    return orders.map((order) => {
+      const user =
+        order.userId && order.userId !== 'guest'
+          ? MockDb.findUserById(order.userId)?.user
+          : undefined
+      return {
+        ...order,
+        customer: user
+          ? {
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              phone: user.phone,
+            }
+          : null,
+      }
+    })
+  },
+
+  async updateOrder(id: string, payload: AdminOrderUpdatePayload): Promise<AdminOrder> {
+    requireAdmin()
+    if (payload.status === undefined && payload.paymentStatus === undefined) {
+      throw new MockApiError(400, 'Invalid payload')
+    }
+    const updated = MockDb.updateOrder(id, payload)
+    if (!updated) throw new MockApiError(404, 'Not found')
+
+    const user =
+      updated.userId && updated.userId !== 'guest'
+        ? MockDb.findUserById(updated.userId)?.user
+        : undefined
+
+    return {
+      ...updated,
+      customer: user
+        ? {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            phone: user.phone,
+          }
+        : null,
     }
   },
 }

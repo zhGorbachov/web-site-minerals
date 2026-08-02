@@ -19,10 +19,17 @@ enum AuthProvider {
   apple
 }
 
+enum PhoneVerificationPurpose {
+  register
+  password_reset
+}
+
 enum OrderStatus {
   pending
   confirmed
   processing
+  assembling
+  ready
   shipped
   delivered
   cancelled
@@ -57,6 +64,22 @@ model User {
   storeReview   StoreReview?
 
   @@unique([provider, providerUserId])
+}
+
+model PhoneVerification {
+  id        String                   @id @default(cuid())
+  phone     String
+  purpose   PhoneVerificationPurpose
+  codeHash  String
+  payload   Json?
+  attempts  Int                      @default(0)
+  sentAt    DateTime                 @default(now())
+  expiresAt DateTime
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+
+  @@unique([phone, purpose])
+  @@index([expiresAt])
 }
 
 model Category {

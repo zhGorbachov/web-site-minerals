@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Header } from '../Header'
 import { CatalogDrawer } from '../CatalogDrawer'
 import { Footer } from '../Footer'
+import { ToastStack } from '@/components/ui'
 import { useLanguageStore } from '@/store/languageStore'
 import styles from './MainLayout.module.scss'
 
@@ -21,6 +22,7 @@ export function MainLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ToastStack />
     </div>
   )
 }

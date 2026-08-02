@@ -10,12 +10,14 @@ type CartResponse = {
     selectedOptions?: Record<string, string>
   }>
   createdAt: string
+  halfStrandsMerged?: number
 }
 
 function mapCart(cart: CartResponse): Cart {
   return {
     id: cart.id,
     createdAt: cart.createdAt,
+    halfStrandsMerged: cart.halfStrandsMerged,
     items: cart.items.map((item) => ({
       ...item,
       product: withMediaUrls(item.product),

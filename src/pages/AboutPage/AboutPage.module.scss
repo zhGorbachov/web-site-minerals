@@ -36,9 +36,16 @@
 }
 
 .heroDesc {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
   font-size: $font-size-md;
   color: $color-text-muted;
   line-height: $line-height-relaxed;
+
+  p {
+    margin: 0;
+  }
 }
 
 .heroImage {
@@ -128,6 +135,20 @@
   }
 }
 
+.contentList {
+  margin: 0;
+  padding-left: $spacing-5;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+
+  li {
+    font-size: $font-size-base;
+    color: $color-text-muted;
+    line-height: $line-height-relaxed;
+  }
+}
+
 // Info grid
 .infoGrid {
   display: grid;
@@ -140,7 +161,7 @@
   }
 
   @include desktop-up {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

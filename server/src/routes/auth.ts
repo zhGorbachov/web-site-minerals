@@ -10,6 +10,7 @@ import {
   signToken,
   toPublicUser,
 } from '../lib/auth.js'
+import { sendVerificationSms } from '../lib/sms.js'
 
 export const authRouter = Router()
 
@@ -27,8 +28,100 @@ const loginSchema = z.object({
   password: z.string().min(1),
 })
 
+const codeSchema = z.object({
+  phone: z.string().trim().min(1),
+  code: z.string().regex(/^\d{4}$/),
+})
+
+const resetPasswordSchema = codeSchema.extend({
+  password: z.string().min(6),
+})
+
+const verificationSelect = {
+  id: true,
+  phone: true,
+  purpose: true,
+  codeHash: true,
+  payload: true,
+  attempts: true,
+  sentAt: true,
+  expiresAt: true,
+} as const
+
 function randomState() {
   return Buffer.from(crypto.getRandomValues(new Uint8Array(24))).toString('hex')
+}
+
+function parsePhone(value: string) {
+  const phone = normalizePhone(value)
+  return isValidPhone(phone) ? phone : null
+}
+
+async function issueCode(
+  phone: string,
+  purpose: 'register' | 'password_reset',
+  payload?: Record<string, string | null>,
+) {
+  const existing = await prisma.phoneVerification.findUnique({
+    where: { phone_purpose: { phone, purpose } },
+    select: verificationSelect,
+  })
+  const now = new Date()
+  if (
+    existing &&
+    now.getTime() - existing.sentAt.getTime() < env.otpResendCooldownSeconds * 1000
+  ) {
+    return 'too_soon' as const
+  }
+
+  const code = String(Math.floor(Math.random() * 10_000)).padStart(4, '0')
+  const codeHash = await bcrypt.hash(code, 10)
+  await prisma.phoneVerification.upsert({
+    where: { phone_purpose: { phone, purpose } },
+    create: {
+      phone,
+      purpose,
+      codeHash,
+      payload,
+      expiresAt: new Date(now.getTime() + env.otpTtlMinutes * 60_000),
+    },
+    update: {
+      codeHash,
+      payload,
+      attempts: 0,
+      sentAt: now,
+      expiresAt: new Date(now.getTime() + env.otpTtlMinutes * 60_000),
+    },
+  })
+
+  try {
+    await sendVerificationSms(phone, code)
+  } catch (error) {
+    await prisma.phoneVerification.delete({
+      where: { phone_purpose: { phone, purpose } },
+    })
+    throw error
+  }
+  return 'sent' as const
+}
+
+async function verifyCode(phone: string, purpose: 'register' | 'password_reset', code: string) {
+  const verification = await prisma.phoneVerification.findUnique({
+    where: { phone_purpose: { phone, purpose } },
+    select: verificationSelect,
+  })
+  if (!verification || verification.expiresAt < new Date()) return { error: 'code_expired' as const }
+  if (verification.attempts >= env.otpMaxAttempts) return { error: 'too_many_attempts' as const }
+
+  const valid = await bcrypt.compare(code, verification.codeHash)
+  if (!valid) {
+    await prisma.phoneVerification.update({
+      where: { phone_purpose: { phone, purpose } },
+      data: { attempts: { increment: 1 } },
+    })
+    return { error: 'invalid_code' as const }
+  }
+  return { verification }
 }
 
 authRouter.post('/register', async (req, res) => {
@@ -38,8 +131,8 @@ authRouter.post('/register', async (req, res) => {
     return
   }
 
-  const phone = normalizePhone(parsed.data.phone)
-  if (!isValidPhone(phone)) {
+  const phone = parsePhone(parsed.data.phone)
+  if (!phone) {
     res.status(400).json({ error: 'invalid_phone' })
     return
   }
@@ -60,22 +153,119 @@ authRouter.post('/register', async (req, res) => {
     }
   }
 
-  const passwordHash = await bcrypt.hash(parsed.data.password, 10)
-  const user = await prisma.user.create({
-    data: {
-      firstName: parsed.data.firstName,
-      lastName: parsed.data.lastName,
-      phone,
-      email,
-      passwordHash,
-      provider: 'email',
-    },
+  const result = await issueCode(phone, 'register', {
+    firstName: parsed.data.firstName,
+    lastName: parsed.data.lastName,
+    email,
+    passwordHash: await bcrypt.hash(parsed.data.password, 10),
   })
+  if (result === 'too_soon') {
+    res.status(429).json({ error: 'code_send_too_soon' })
+    return
+  }
+  res.status(202).json({ ok: true })
+})
 
-  await prisma.cart.create({ data: { userId: user.id } })
+authRouter.post('/register/verify', async (req, res) => {
+  const parsed = codeSchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid_code' })
+    return
+  }
+  const phone = parsePhone(parsed.data.phone)
+  if (!phone) {
+    res.status(400).json({ error: 'invalid_phone' })
+    return
+  }
+  const result = await verifyCode(phone, 'register', parsed.data.code)
+  if ('error' in result) {
+    res.status(result.error === 'too_many_attempts' ? 429 : 400).json(result)
+    return
+  }
+  const payload = result.verification.payload as {
+    firstName?: string
+    lastName?: string
+    email?: string | null
+    passwordHash?: string
+  } | null
+  if (!payload?.firstName || !payload.lastName || !payload.passwordHash) {
+    res.status(400).json({ error: 'code_expired' })
+    return
+  }
+  const { firstName, lastName, passwordHash, email: registrationEmail } = payload
 
-  const token = signToken(user)
-  res.status(201).json({ token, user: toPublicUser(user) })
+  try {
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          firstName,
+          lastName,
+          phone,
+          email: registrationEmail ?? null,
+          passwordHash,
+          provider: 'email',
+        },
+      })
+      await tx.cart.create({ data: { userId: created.id } })
+      await tx.phoneVerification.delete({ where: { phone_purpose: { phone, purpose: 'register' } } })
+      return created
+    })
+    res.status(201).json({ token: signToken(user), user: toPublicUser(user) })
+  } catch {
+    res.status(409).json({ error: 'phone_taken' })
+  }
+})
+
+authRouter.post('/password/forgot', async (req, res) => {
+  const parsed = z.object({ phone: z.string().trim().min(1) }).safeParse(req.body)
+  const phone = parsed.success ? parsePhone(parsed.data.phone) : null
+  if (!phone) {
+    res.status(400).json({ error: 'invalid_phone' })
+    return
+  }
+  const user = await prisma.user.findUnique({ where: { phone } })
+  // Do not disclose whether a phone has an account or supports passwords.
+  if (!user?.passwordHash) {
+    res.status(202).json({ ok: true })
+    return
+  }
+  const result = await issueCode(phone, 'password_reset')
+  if (result === 'too_soon') {
+    res.status(429).json({ error: 'code_send_too_soon' })
+    return
+  }
+  res.status(202).json({ ok: true })
+})
+
+authRouter.post('/password/reset', async (req, res) => {
+  const parsed = resetPasswordSchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload' })
+    return
+  }
+  const phone = parsePhone(parsed.data.phone)
+  if (!phone) {
+    res.status(400).json({ error: 'invalid_phone' })
+    return
+  }
+  const result = await verifyCode(phone, 'password_reset', parsed.data.code)
+  if ('error' in result) {
+    res.status(result.error === 'too_many_attempts' ? 429 : 400).json(result)
+    return
+  }
+  const user = await prisma.user.findUnique({ where: { phone } })
+  if (!user?.passwordHash) {
+    res.status(400).json({ error: 'invalid_credentials' })
+    return
+  }
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await bcrypt.hash(parsed.data.password, 10) },
+    }),
+    prisma.phoneVerification.delete({ where: { phone_purpose: { phone, purpose: 'password_reset' } } }),
+  ])
+  res.json({ ok: true })
 })
 
 authRouter.post('/login', async (req, res) => {

@@ -29,8 +29,20 @@
 }
 
 .mobileCategoryRow {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.mobileCategoryTop {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-2;
+}
+
+.mobileCategoryBottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: $spacing-2;
 }
 
@@ -38,9 +50,7 @@
   position: relative;
   display: block;
   aspect-ratio: 1 / 1;
-  min-height: 148px;
   text-decoration: none;
-  border-radius: 44px;
   overflow: hidden;
   background: $color-surface;
 
@@ -51,6 +61,16 @@
     background: rgba($color-black, 0.4);
     pointer-events: none;
   }
+}
+
+.mobileCategoryTileLarge {
+  min-height: 148px;
+  border-radius: 44px;
+}
+
+.mobileCategoryTileSmall {
+  min-height: 104px;
+  border-radius: 28px;
 }
 
 .mobileCategoryImage {
@@ -74,11 +94,10 @@
   text-shadow: 0 1px 4px rgba($color-black, 0.6);
 }
 
-.mobileCategorySkeleton {
-  aspect-ratio: 1 / 1;
-  min-height: 148px;
-  border-radius: 44px;
-  background: $color-header;
+.mobileCategoryTileSmall .mobileCategoryLabel {
+  top: $spacing-3;
+  left: $spacing-3;
+  font-size: $font-size-sm;
 }
 
 .mobilePagination {
@@ -383,6 +402,16 @@
 
 // ── Category Grid ─────────────────────────────────────────────
 .categoryGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+
+  @include desktop-up {
+    gap: $spacing-8;
+  }
+}
+
+.categoryGridTop {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: $spacing-6;
@@ -392,18 +421,14 @@
   }
 }
 
-.categorySkeleton {
-  aspect-ratio: 1 / 1;
-  min-height: 220px;
-  border-radius: $radius-lg;
-  background: linear-gradient(90deg, $color-surface 25%, #EBEBEB 50%, $color-surface 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-}
+.categoryGridBottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-6;
 
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  @include desktop-up {
+    gap: $spacing-8;
+  }
 }
 
 // ── Product Grid ──────────────────────────────────────────────

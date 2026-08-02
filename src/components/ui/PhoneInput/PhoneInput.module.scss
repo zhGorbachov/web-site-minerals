@@ -20,12 +20,28 @@
   border: 1.5px solid $color-border;
   border-radius: $radius-md;
   overflow: hidden;
-  transition: border-color $transition-base, box-shadow $transition-base;
+  transition: border-color $transition-base, box-shadow $transition-base, background $transition-base;
 
   &:focus-within {
     border-color: $color-primary;
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
   }
+
+  &.hasError {
+    border-color: rgba($color-error, 0.55);
+    background: rgba($color-error, 0.04);
+    box-shadow: 0 0 0 3px rgba($color-error, 0.1);
+
+    &:focus-within {
+      border-color: rgba($color-error, 0.7);
+      box-shadow: 0 0 0 3px rgba($color-error, 0.14);
+    }
+  }
+}
+
+.error {
+  font-size: $font-size-xs;
+  color: $color-error;
 }
 
 .prefix {

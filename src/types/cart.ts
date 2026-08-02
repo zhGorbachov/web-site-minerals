@@ -11,4 +11,6 @@ export interface Cart {
   id: string
   items: CartItem[]
   createdAt: string
+  /** How many half-strand pairs were converted into whole strands in this response. */
+  halfStrandsMerged?: number
 }

@@ -12,6 +12,7 @@ import type { Language } from '@/i18n/Translations'
 import { attributeValueEn, colorKeyByUk } from '@/i18n/CatalogEn'
 import { getColorOptions } from '@/i18n/localizeCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
+import { getBraceletWristSizes, getMineralStrandLengths } from '@/utils/productOptions'
 import styles from './ProductOptions.module.scss'
 
 interface ProductOptionsProps {
@@ -23,8 +24,6 @@ type CharacteristicItem = {
   label: string
   value: string
 }
-
-const WRIST_SIZES = ['14 см', '15 см', '16 см', '17 см', '18 см', '19 см', '20 см', '21 см']
 
 const GENERIC_ATTR_KEYS: Record<string, TranslationKey> = {
   size: 'productOptions.attrSize',
@@ -73,8 +72,11 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
 
   if (categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
-    const hasStrandOptions = Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
-    if (!hasStrandOptions) return null
+    const strandLengths = getMineralStrandLengths(attrs)
+    const hasOptions = Boolean(
+      attrs.beadSizes?.length || attrs.beadCounts?.length || strandLengths.length,
+    )
+    if (!hasOptions) return null
 
     return (
       <div className={styles.options}>
@@ -96,12 +98,33 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
           </div>
         )}
 
-        {attrs.strandLengths && attrs.strandLengths.length > 0 && (
+        {attrs.beadCounts && attrs.beadCounts.length > 0 && (
           <div className={styles.optionGroup}>
             {attrs.beadSizes?.length ? <span className={styles.sectionDivider} /> : null}
+            <span className={styles.optionLabel}>{t('productOptions.beadCount')}</span>
+            <div className={styles.lengthPills}>
+              {attrs.beadCounts.map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  className={[styles.lengthPill, selected.beadCount === count ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => handleSelect('beadCount', count)}
+                >
+                  {t('productOptions.beadCountValue', { value: count })}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {strandLengths.length > 0 && (
+          <div className={styles.optionGroup}>
+            {attrs.beadSizes?.length || attrs.beadCounts?.length ? (
+              <span className={styles.sectionDivider} />
+            ) : null}
             <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>
             <div className={styles.lengthPills}>
-              {attrs.strandLengths.map((length) => (
+              {strandLengths.map((length) => (
                 <button
                   key={length.value}
                   type="button"
@@ -119,10 +142,29 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
   }
 
   if (categorySlug === 'nytky') {
+    const attrs = product.attributes as ThreadAttributes
     const colors = getColorOptions(language)
     return (
       <div className={styles.options}>
+        {attrs.lengths && attrs.lengths.length > 0 && (
+          <div className={styles.optionGroup}>
+            <span className={styles.optionLabel}>{t('productOptions.threadLength')}</span>
+            <div className={styles.lengthPills}>
+              {attrs.lengths.map((length) => (
+                <button
+                  key={length}
+                  type="button"
+                  className={[styles.lengthPill, selected.length === length ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => handleSelect('length', length)}
+                >
+                  {translateAttrValue(length, language)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className={styles.optionGroup}>
+          {attrs.lengths?.length ? <span className={styles.sectionDivider} /> : null}
           <span className={styles.optionLabel}>{t('productOptions.color')}</span>
           <div className={styles.lengthPills}>
             {colors.map((color) => {
@@ -146,12 +188,13 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
 
   if (categorySlug === 'brаslety') {
     const attrs = product.attributes as BraceletAttributes
+    const wristSizes = getBraceletWristSizes(attrs)
     return (
       <div className={styles.options}>
         <div className={styles.optionGroup}>
           <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
           <div className={styles.lengthPills}>
-            {WRIST_SIZES.map((size) => (
+            {wristSizes.map((size) => (
               <button
                 key={size}
                 type="button"
@@ -183,7 +226,10 @@ export function ProductCharacteristics({ product }: Pick<ProductOptionsProps, 'p
 
   if (categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
-    const hasStrandOptions = Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
+    const strandLengths = getMineralStrandLengths(attrs)
+    const hasStrandOptions = Boolean(
+      attrs.beadSizes?.length || attrs.beadCounts?.length || strandLengths.length,
+    )
     return (
       <CharacteristicsPanel
         items={buildMineralCharacteristics(attrs, t, language, { strand: hasStrandOptions })}
@@ -290,7 +336,7 @@ function buildThreadCharacteristics(
   language: Language,
 ): CharacteristicItem[] {
   const items: CharacteristicItem[] = []
-  if (attrs.length) {
+  if (attrs.length && !attrs.lengths?.length) {
     items.push({
       label: t('productOptions.attrLength'),
       value: translateAttrValue(attrs.length, language),

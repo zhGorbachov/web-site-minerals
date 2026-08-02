@@ -17,6 +17,10 @@ export type AuthError =
   | 'oauth_not_configured'
   | 'oauth_denied'
   | 'oauth_failed'
+  | 'invalid_code'
+  | 'code_expired'
+  | 'too_many_attempts'
+  | 'code_send_too_soon'
 
 interface RegisterPayload {
   firstName: string
@@ -32,6 +36,9 @@ interface AuthState {
   login: (phone: string, password: string) => Promise<AuthError | null>
   loginWithGoogle: () => Promise<AuthError | null>
   register: (payload: RegisterPayload) => Promise<AuthError | null>
+  verifyRegistration: (phone: string, code: string) => Promise<AuthError | null>
+  forgotPassword: (phone: string) => Promise<AuthError | null>
+  resetPassword: (phone: string, code: string, password: string) => Promise<AuthError | null>
   setSession: (token: string, user: User) => void
   logout: () => void
   bootstrap: () => Promise<void>
@@ -46,6 +53,10 @@ function mapApiError(error: unknown): AuthError {
     if (code === 'invalid_phone') return 'invalid_phone'
     if (code === 'invalid_credentials') return 'invalid_credentials'
     if (code === 'oauth_not_configured') return 'oauth_not_configured'
+    if (code === 'invalid_code') return 'invalid_code'
+    if (code === 'code_expired') return 'code_expired'
+    if (code === 'too_many_attempts') return 'too_many_attempts'
+    if (code === 'code_send_too_soon') return 'code_send_too_soon'
   }
   return 'oauth_failed'
 }
@@ -97,13 +108,43 @@ export const useAuthStore = create<AuthState>()(
         if (password.length < 6) return 'weak_password'
 
         try {
-          const data = await AuthApi.register({
+          await AuthApi.register({
             firstName: trimmedFirst,
             lastName: trimmedLast,
             phone: normalizedPhone,
             password,
           })
+          return null
+        } catch (error) {
+          return mapApiError(error)
+        }
+      },
+
+      verifyRegistration: async (phone, code) => {
+        try {
+          const data = await AuthApi.verifyRegistration({ phone: normalizeLocalPhone(phone), code })
           set({ user: data.user, token: data.token })
+          return null
+        } catch (error) {
+          return mapApiError(error)
+        }
+      },
+
+      forgotPassword: async (phone) => {
+        const normalized = normalizeLocalPhone(phone)
+        if (!isValidLocalPhone(normalized)) return 'invalid_phone'
+        try {
+          await AuthApi.forgotPassword({ phone: normalized })
+          return null
+        } catch (error) {
+          return mapApiError(error)
+        }
+      },
+
+      resetPassword: async (phone, code, password) => {
+        if (password.length < 6) return 'weak_password'
+        try {
+          await AuthApi.resetPassword({ phone: normalizeLocalPhone(phone), code, password })
           return null
         } catch (error) {
           return mapApiError(error)

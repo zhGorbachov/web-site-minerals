@@ -334,3 +334,144 @@ adminRouter.patch('/users/:id/discount', async (req, res) => {
     res.status(404).json({ error: 'Not found' })
   }
 })
+
+const orderStatusSchema = z.enum([
+  'pending',
+  'confirmed',
+  'processing',
+  'assembling',
+  'ready',
+  'shipped',
+  'delivered',
+  'cancelled',
+  'refunded',
+])
+
+const paymentStatusSchema = z.enum(['unpaid', 'awaiting_payment', 'paid', 'failed'])
+
+const updateOrderSchema = z
+  .object({
+    status: orderStatusSchema.optional(),
+    paymentStatus: paymentStatusSchema.optional(),
+  })
+  .refine((data) => data.status !== undefined || data.paymentStatus !== undefined, {
+    message: 'At least one field is required',
+  })
+
+function mapAdminOrder(order: {
+  id: string
+  userId: string | null
+  status: string
+  paymentStatus: string
+  totalPrice: { toNumber?: () => number } | number
+  paymentMethod: string
+  deliveryMethod: string
+  liqpayOrderId: string | null
+  createdAt: Date
+  items: Array<{
+    id: string
+    orderId: string
+    productId: string
+    productName: string
+    productImage: string
+    quantity: number
+    price: { toNumber?: () => number } | number
+  }>
+  user: {
+    firstName: string
+    lastName: string
+    email: string | null
+    phone: string | null
+  } | null
+}) {
+  return {
+    id: order.id,
+    userId: order.userId,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    totalPrice: Number(order.totalPrice),
+    paymentMethod: order.paymentMethod,
+    deliveryMethod: order.deliveryMethod,
+    liqpayOrderId: order.liqpayOrderId,
+    createdAt: order.createdAt.toISOString(),
+    items: order.items.map((item) => ({
+      id: item.id,
+      orderId: item.orderId,
+      productId: item.productId,
+      productName: item.productName,
+      productImage: item.productImage,
+      quantity: item.quantity,
+      price: Number(item.price),
+    })),
+    customer: order.user
+      ? {
+          firstName: order.user.firstName,
+          lastName: order.user.lastName,
+          email: order.user.email ?? undefined,
+          phone: order.user.phone ?? undefined,
+        }
+      : null,
+  }
+}
+
+adminRouter.get('/orders', async (req, res) => {
+  const id = typeof req.query.id === 'string' ? req.query.id.trim() : ''
+
+  const orders = await prisma.order.findMany({
+    where: id
+      ? {
+          OR: [
+            { id },
+            { id: { contains: id, mode: 'insensitive' } },
+            { liqpayOrderId: id },
+          ],
+        }
+      : undefined,
+    include: {
+      items: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  res.json(orders.map(mapAdminOrder))
+})
+
+adminRouter.patch('/orders/:id', async (req, res) => {
+  const parsed = updateOrderSchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() })
+    return
+  }
+
+  try {
+    const order = await prisma.order.update({
+      where: { id: req.params.id },
+      data: {
+        status: parsed.data.status,
+        paymentStatus: parsed.data.paymentStatus,
+      },
+      include: {
+        items: true,
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    })
+    res.json(mapAdminOrder(order))
+  } catch {
+    res.status(404).json({ error: 'Not found' })
+  }
+})

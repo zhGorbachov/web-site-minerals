@@ -295,6 +295,7 @@ export const attributeValueEn: Record<string, string> = {
 export const strandLengthEn: Record<string, string> = {
   'Низка 39 см': 'Strand 39 cm',
   'Пів низки 19.5 см': 'Half strand 19.5 cm',
+  'Низка 40 см': 'Strand 40 cm',
 }
 
 export const colorKeyByUk: Record<string, string> = {

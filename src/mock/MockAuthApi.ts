@@ -6,6 +6,12 @@ import { isValidLocalPhone, normalizeLocalPhone } from '@/utils/phone'
 import { MockDb } from './MockDb'
 
 const GOOGLE_DEMO_EMAIL = 'google.demo@luxstones.local'
+const MOCK_OTP_CODE = '1234'
+const pendingRegistrations = new Map<
+  string,
+  { firstName: string; lastName: string; phone: string; password: string }
+>()
+const passwordResetCodes = new Set<string>()
 
 export const MockAuthApi = {
   async register(payload: {
@@ -13,15 +19,22 @@ export const MockAuthApi = {
     lastName: string
     phone: string
     password: string
-  }): Promise<AuthResponse> {
+  }): Promise<void> {
     const phone = normalizeLocalPhone(payload.phone)
     if (!isValidLocalPhone(phone)) throw new MockApiError(400, 'invalid_phone')
     if (MockDb.findUserByPhone(phone)) throw new MockApiError(409, 'phone_taken')
+    pendingRegistrations.set(phone, { ...payload, phone })
+    console.info(`[Mock SMS] Код для ${phone}: ${MOCK_OTP_CODE}`)
+  },
 
+  async verifyRegistration(payload: { phone: string; code: string }): Promise<AuthResponse> {
+    const phone = normalizeLocalPhone(payload.phone)
+    const pending = pendingRegistrations.get(phone)
+    if (!pending || payload.code !== MOCK_OTP_CODE) throw new MockApiError(400, 'invalid_code')
     const user: User = {
       id: `user-${Date.now()}`,
-      firstName: payload.firstName.trim(),
-      lastName: payload.lastName.trim(),
+      firstName: pending.firstName.trim(),
+      lastName: pending.lastName.trim(),
       phone,
       role: 'customer',
       provider: 'email',
@@ -30,10 +43,29 @@ export const MockAuthApi = {
       createdAt: new Date().toISOString(),
     }
 
-    MockDb.addUser({ password: payload.password, user })
+    MockDb.addUser({ password: pending.password, user })
+    pendingRegistrations.delete(phone)
     const token = MockDb.createSession(user.id)
     setAuthToken(token)
     return { token, user }
+  },
+
+  async forgotPassword(payload: { phone: string }): Promise<void> {
+    const phone = normalizeLocalPhone(payload.phone)
+    if (MockDb.findUserByPhone(phone)) {
+      passwordResetCodes.add(phone)
+      console.info(`[Mock SMS] Код для ${phone}: ${MOCK_OTP_CODE}`)
+    }
+  },
+
+  async resetPassword(payload: { phone: string; code: string; password: string }): Promise<void> {
+    const phone = normalizeLocalPhone(payload.phone)
+    const record = MockDb.findUserByPhone(phone)
+    if (!record || !passwordResetCodes.has(phone) || payload.code !== MOCK_OTP_CODE) {
+      throw new MockApiError(400, 'invalid_code')
+    }
+    MockDb.updateUserPassword(record.user.id, payload.password)
+    passwordResetCodes.delete(phone)
   },
 
   async login(payload: { phone: string; password: string }): Promise<AuthResponse> {

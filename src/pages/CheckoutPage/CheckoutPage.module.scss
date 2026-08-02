@@ -49,6 +49,7 @@
   overflow: visible;
   position: relative;
   z-index: 1;
+  transition: border-color $transition-base, box-shadow $transition-base, background $transition-base;
 
   @include tablet-up {
     box-shadow: $shadow-card;
@@ -56,6 +57,12 @@
 
   &:focus-within {
     z-index: 30;
+  }
+
+  &.blockInvalid {
+    border-color: rgba($color-error, 0.45);
+    background: color-mix(in srgb, $color-error 5%, #f4f7fa);
+    box-shadow: 0 0 0 3px rgba($color-error, 0.1);
   }
 }
 

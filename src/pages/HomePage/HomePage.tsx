@@ -14,6 +14,7 @@ import type { Category, Product } from '@/types'
 import { CategoryService } from '@/services/CategoryService'
 import { ProductService } from '@/services/ProductService'
 import { mockImages } from '@/assets/mock/Images'
+import { categories as seedCategories } from '@/mock/categories'
 import { CategoryCard } from '@/components/CategoryCard'
 import { CatalogButton } from '@/components/CatalogButton'
 import { ProductCard } from '@/components/ProductCard'
@@ -22,10 +23,27 @@ import { Button } from '@/components/ui'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { SITE_NAME } from '@/config/Site'
-import { HOME_PAGE_CATEGORY_SLUGS } from '@/config/Catalog'
+import { HOME_PAGE_CATEGORIES, type HomeCategorySize } from '@/config/Catalog'
 import { SiteLogo } from '@/components/SiteLogo'
+import { localizeCategories } from '@/i18n/localizeCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
+import type { Language } from '@/i18n/Translations'
 import styles from './HomePage.module.scss'
+
+type HomeCategory = Category & { size: HomeCategorySize }
+
+function buildHomeCategories(apiCats: Category[], language: Language): HomeCategory[] {
+  const localizedSeed = localizeCategories(seedCategories, language)
+  return HOME_PAGE_CATEGORIES.map((def) => {
+    const fromApi = apiCats.find((cat) => cat.slug === def.slug)
+    const fromSeed = localizedSeed.find((cat) => cat.slug === def.slug)
+    const base = fromApi ?? fromSeed
+    if (!base) {
+      throw new Error(`Missing home category fallback for slug: ${def.slug}`)
+    }
+    return { ...base, size: def.size }
+  })
+}
 
 const MOBILE_NEW_ROWS = 5
 const MOBILE_NEW_COLS = 2
@@ -51,12 +69,17 @@ export function HomePage() {
   const { t, language } = useTranslation()
   const openCatalog = useOpenCatalog()
   const isMobile = useIsMobile()
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<HomeCategory[]>(() =>
+    buildHomeCategories([], language),
+  )
   const [newProducts, setNewProducts] = useState<Product[]>([])
   const [newProductsPage, setNewProductsPage] = useState(0)
   const [pageDirection, setPageDirection] = useState(0)
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+
+  const largeCategories = categories.filter((cat) => cat.size === 'large')
+  const smallCategories = categories.filter((cat) => cat.size === 'small')
 
   const advantages = [
     {
@@ -86,15 +109,14 @@ export function HomePage() {
   ]
 
   useEffect(() => {
+    setCategories(buildHomeCategories([], language))
+    setLoading(true)
     void Promise.all([
       CategoryService.getAll(),
       ProductService.getNew(),
       ProductService.getPopular(),
     ]).then(([cats, newP, popP]) => {
-      const homeCategories = cats.filter((cat) =>
-        (HOME_PAGE_CATEGORY_SLUGS as readonly string[]).includes(cat.slug),
-      )
-      setCategories(homeCategories)
+      setCategories(buildHomeCategories(cats, language))
       setNewProducts(newP)
       setPopularProducts(popP.slice(0, DESKTOP_NEW_LIMIT))
       setLoading(false)
@@ -153,20 +175,30 @@ export function HomePage() {
         <CatalogButton className={styles.mobileCatalogBar} onClick={openCatalog} />
 
         <div className={styles.mobileCategoryRow}>
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className={styles.mobileCategorySkeleton} />
-              ))
-            : categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  to={`/catalog/${cat.slug}`}
-                  className={styles.mobileCategoryTile}
-                >
-                  <img src={cat.image} alt="" className={styles.mobileCategoryImage} />
-                  <span className={styles.mobileCategoryLabel}>{cat.name}</span>
-                </Link>
-              ))}
+          <div className={styles.mobileCategoryTop}>
+            {largeCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/catalog/${cat.slug}`}
+                className={[styles.mobileCategoryTile, styles.mobileCategoryTileLarge].join(' ')}
+              >
+                <img src={cat.image} alt="" className={styles.mobileCategoryImage} />
+                <span className={styles.mobileCategoryLabel}>{cat.name}</span>
+              </Link>
+            ))}
+          </div>
+          <div className={styles.mobileCategoryBottom}>
+            {smallCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/catalog/${cat.slug}`}
+                className={[styles.mobileCategoryTile, styles.mobileCategoryTileSmall].join(' ')}
+              >
+                <img src={cat.image} alt="" className={styles.mobileCategoryImage} />
+                <span className={styles.mobileCategoryLabel}>{cat.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -178,13 +210,16 @@ export function HomePage() {
             <p className={styles.sectionSubtitle}>{t('home.catalogSubtitle')}</p>
           </div>
           <div className={styles.categoryGrid}>
-            {loading
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className={styles.categorySkeleton} />
-                ))
-              : categories.map((cat) => (
-                  <CategoryCard key={cat.id} category={cat} />
-                ))}
+            <div className={styles.categoryGridTop}>
+              {largeCategories.map((cat) => (
+                <CategoryCard key={cat.id} category={cat} />
+              ))}
+            </div>
+            <div className={styles.categoryGridBottom}>
+              {smallCategories.map((cat) => (
+                <CategoryCard key={cat.id} category={cat} />
+              ))}
+            </div>
           </div>
         </div>
       </section>

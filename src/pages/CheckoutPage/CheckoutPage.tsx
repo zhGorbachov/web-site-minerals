@@ -42,6 +42,29 @@ import styles from './CheckoutPage.module.scss'
 
 type StepId = 1 | 2 | 3
 
+type FieldKey =
+  | 'firstName'
+  | 'lastName'
+  | 'phone'
+  | 'city'
+  | 'address'
+  | 'branch'
+  | 'postalIndex'
+  | 'payment'
+
+type FieldErrors = Partial<Record<FieldKey, boolean>>
+
+const FIELD_STEP: Record<FieldKey, StepId> = {
+  firstName: 1,
+  lastName: 1,
+  phone: 1,
+  city: 2,
+  address: 2,
+  branch: 2,
+  postalIndex: 2,
+  payment: 3,
+}
+
 const emptyLocation = (): CheckoutLocation => ({
   deliveryMethod: 'nova_poshta',
   novaPoshtaType: 'warehouse',
@@ -121,6 +144,7 @@ function CheckoutBlock({
   done,
   summary,
   onToggle,
+  invalid,
   children,
 }: {
   step: number
@@ -129,12 +153,15 @@ function CheckoutBlock({
   done: boolean
   summary?: string
   onToggle: () => void
+  invalid?: boolean
   children?: ReactNode
 }) {
   const { t } = useTranslation()
 
   return (
-    <section className={styles.block}>
+    <section
+      className={[styles.block, invalid ? styles.blockInvalid : ''].filter(Boolean).join(' ')}
+    >
       <button
         type="button"
         className={[styles.blockHeader, styles.toggleable].join(' ')}
@@ -190,8 +217,27 @@ export function CheckoutPage() {
   const [commentOpen, setCommentOpen] = useState(false)
   const [errorStep, setErrorStep] = useState<StepId | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  const clearFieldError = (field: FieldKey) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
+  const scrollToField = (field: FieldKey) => {
+    window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(`[data-checkout-field="${field}"]`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      const focusable = el?.querySelector<HTMLElement>('input, button, textarea, [tabindex]')
+      focusable?.focus({ preventScroll: true })
+    }, 60)
+  }
 
   const pricing = useMemo(
     () => getPricing(user?.discountPercent),
@@ -397,59 +443,48 @@ export function CheckoutPage() {
     return Boolean(value.branch.trim()) && Boolean(value.warehouseRef)
   }
 
-  const validateContact = () => {
-    if (!isContactComplete()) {
-      setErrorStep(1)
-      setError(
-        !isValidLocalPhone(contact.phone) && contact.phone.trim()
-          ? t('checkout.errorPhone')
-          : t('checkout.errorRequired'),
-      )
-      return false
-    }
-    setErrorStep(null)
-    setError(null)
-    return true
-  }
+  const collectFieldErrors = (): { errors: FieldErrors; first: FieldKey | null; message: string | null } => {
+    const errors: FieldErrors = {}
 
-  const validateLocation = () => {
-    if (location.deliveryMethod === 'self_pickup') {
-      setErrorStep(null)
-      setError(null)
-      return true
-    }
+    if (!contact.firstName.trim()) errors.firstName = true
+    if (!contact.lastName.trim()) errors.lastName = true
+    if (!isValidLocalPhone(contact.phone)) errors.phone = true
 
     if (location.deliveryMethod === 'ukrposhta') {
-      if (!isValidUkrposhtaIndex(location.postalIndex)) {
-        setErrorStep(2)
-        setError(t('checkout.errorPostalIndex'))
-        return false
+      if (!isValidUkrposhtaIndex(location.postalIndex)) errors.postalIndex = true
+    } else if (location.deliveryMethod === 'nova_poshta') {
+      if (!location.city.trim() || !location.cityRef) errors.city = true
+      if (location.novaPoshtaType === 'courier') {
+        if (!location.address.trim()) errors.address = true
+      } else if (!location.branch.trim() || !location.warehouseRef) {
+        errors.branch = true
       }
-      setErrorStep(null)
-      setError(null)
-      return true
     }
 
-    // Nova Poshta
-    if (!location.city.trim() || !location.cityRef) {
-      setErrorStep(2)
-      setError(t('checkout.errorCity'))
-      return false
-    }
-    if (location.novaPoshtaType === 'courier') {
-      if (!location.address.trim()) {
-        setErrorStep(2)
-        setError(t('checkout.errorAddress'))
-        return false
-      }
-    } else if (!location.branch.trim() || !location.warehouseRef) {
-      setErrorStep(2)
-      setError(t('checkout.errorBranch'))
-      return false
-    }
-    setErrorStep(null)
-    setError(null)
-    return true
+    if (!paymentMethod) errors.payment = true
+
+    const order: FieldKey[] = [
+      'firstName',
+      'lastName',
+      'phone',
+      'city',
+      'address',
+      'branch',
+      'postalIndex',
+      'payment',
+    ]
+    const first = order.find((key) => errors[key]) ?? null
+
+    let message: string | null = null
+    if (first === 'phone' && contact.phone.trim()) message = t('checkout.errorPhone')
+    else if (first === 'postalIndex') message = t('checkout.errorPostalIndex')
+    else if (first === 'city') message = t('checkout.errorCity')
+    else if (first === 'address') message = t('checkout.errorAddress')
+    else if (first === 'branch') message = t('checkout.errorBranch')
+    else if (first === 'payment') message = t('checkout.errorPayment')
+    else if (first) message = t('checkout.errorRequired')
+
+    return { errors, first, message }
   }
 
   const buildLocationPayload = (): CheckoutLocation => ({
@@ -504,6 +539,14 @@ export function CheckoutPage() {
   }, [location, profileKey, saveLocation, language])
 
   const setDeliveryMethod = (method: DeliveryMethod) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next.city
+      delete next.address
+      delete next.branch
+      delete next.postalIndex
+      return next
+    })
     setLocation((prev) => {
       const same = prev.deliveryMethod === method
       return {
@@ -584,18 +627,19 @@ export function CheckoutPage() {
   }
 
   const handlePlaceOrder = async () => {
-    const contactValid = validateContact()
-    const locationValid = validateLocation()
+    const { errors, first, message } = collectFieldErrors()
 
-    if (!contactValid) {
-      setExpandedSteps((prev) => ({ ...prev, 1: true }))
+    if (first) {
+      const step = FIELD_STEP[first]
+      setFieldErrors(errors)
+      setErrorStep(step)
+      setError(message)
+      setExpandedSteps((prev) => ({ ...prev, [step]: true }))
+      scrollToField(first)
       return
     }
-    if (!locationValid) {
-      setExpandedSteps((prev) => ({ ...prev, 2: true }))
-      return
-    }
 
+    setFieldErrors({})
     setContactDone(true)
     setLocationDone(true)
     saveContact(profileKey, {
@@ -606,12 +650,7 @@ export function CheckoutPage() {
     })
     saveLocation(profileKey, buildLocationPayload())
 
-    if (!paymentMethod) {
-      setErrorStep(3)
-      setError(t('checkout.errorPayment'))
-      setExpandedSteps((prev) => ({ ...prev, 3: true }))
-      return
-    }
+    if (!paymentMethod) return
 
     setSubmitting(true)
     setError(null)
@@ -640,6 +679,7 @@ export function CheckoutPage() {
 
   const selectPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethod(method)
+    clearFieldError('payment')
     setError(null)
     setErrorStep(null)
   }
@@ -674,26 +714,42 @@ export function CheckoutPage() {
               onToggle={() => toggleStep(1)}
             >
               <div className={styles.formGrid}>
-                <Input
-                  label={t('checkout.firstName')}
-                  value={contact.firstName}
-                  onChange={(e) => setContact((c) => ({ ...c, firstName: e.target.value }))}
-                  autoComplete="given-name"
-                  required
-                />
-                <Input
-                  label={t('checkout.lastName')}
-                  value={contact.lastName}
-                  onChange={(e) => setContact((c) => ({ ...c, lastName: e.target.value }))}
-                  autoComplete="family-name"
-                  required
-                />
-                <div className={styles.fullWidth}>
+                <div data-checkout-field="firstName">
+                  <Input
+                    label={t('checkout.firstName')}
+                    value={contact.firstName}
+                    onChange={(e) => {
+                      clearFieldError('firstName')
+                      setContact((c) => ({ ...c, firstName: e.target.value }))
+                    }}
+                    autoComplete="given-name"
+                    required
+                    invalid={Boolean(fieldErrors.firstName)}
+                  />
+                </div>
+                <div data-checkout-field="lastName">
+                  <Input
+                    label={t('checkout.lastName')}
+                    value={contact.lastName}
+                    onChange={(e) => {
+                      clearFieldError('lastName')
+                      setContact((c) => ({ ...c, lastName: e.target.value }))
+                    }}
+                    autoComplete="family-name"
+                    required
+                    invalid={Boolean(fieldErrors.lastName)}
+                  />
+                </div>
+                <div className={styles.fullWidth} data-checkout-field="phone">
                   <PhoneInput
                     label={t('checkout.phone')}
                     value={contact.phone}
-                    onChange={(phone) => setContact((c) => ({ ...c, phone }))}
+                    onChange={(phone) => {
+                      clearFieldError('phone')
+                      setContact((c) => ({ ...c, phone }))
+                    }}
                     required
+                    invalid={Boolean(fieldErrors.phone)}
                   />
                 </div>
                 <div className={styles.fullWidth}>
@@ -777,39 +833,56 @@ export function CheckoutPage() {
                         </div>
 
                         <div className={styles.formGrid}>
-                          <div className={styles.fullWidth}>
+                          <div className={styles.fullWidth} data-checkout-field="city">
                             <Autocomplete
                               label={t('checkout.city')}
                               value={location.city}
-                              onChange={handleCityChange}
-                              onSelect={handleCitySelect}
+                              onChange={(value) => {
+                                clearFieldError('city')
+                                handleCityChange(value)
+                              }}
+                              onSelect={(option) => {
+                                clearFieldError('city')
+                                handleCitySelect(option)
+                              }}
                               loadOptions={loadCityOptions}
                               placeholder={t('checkout.cityPlaceholder')}
                               hint={location.cityRef ? undefined : t('checkout.cityHint')}
                               emptyMessage={t('checkout.searchEmpty')}
                               loadingMessage={t('checkout.searchLoading')}
                               required
+                              invalid={Boolean(fieldErrors.city)}
                             />
                           </div>
 
                           {location.novaPoshtaType === 'courier' ? (
-                            <div className={styles.fullWidth}>
+                            <div className={styles.fullWidth} data-checkout-field="address">
                               <Input
                                 label={t('checkout.address')}
                                 value={location.address}
-                                onChange={(e) => setLocation((l) => ({ ...l, address: e.target.value }))}
+                                onChange={(e) => {
+                                  clearFieldError('address')
+                                  setLocation((l) => ({ ...l, address: e.target.value }))
+                                }}
                                 placeholder={t('checkout.addressPlaceholder')}
                                 autoComplete="street-address"
                                 required
+                                invalid={Boolean(fieldErrors.address)}
                               />
                             </div>
                           ) : (
-                            <div className={styles.fullWidth}>
+                            <div className={styles.fullWidth} data-checkout-field="branch">
                               <Autocomplete
                                 label={t('checkout.branch')}
                                 value={location.branch}
-                                onChange={handleBranchChange}
-                                onSelect={handleBranchSelect}
+                                onChange={(value) => {
+                                  clearFieldError('branch')
+                                  handleBranchChange(value)
+                                }}
+                                onSelect={(option) => {
+                                  clearFieldError('branch')
+                                  handleBranchSelect(option)
+                                }}
                                 loadOptions={loadWarehouseOptions}
                                 placeholder={
                                   location.cityRef
@@ -828,6 +901,7 @@ export function CheckoutPage() {
                                 emptyMessage={t('checkout.searchEmpty')}
                                 loadingMessage={t('checkout.searchLoading')}
                                 required
+                                invalid={Boolean(fieldErrors.branch)}
                               />
                             </div>
                           )}
@@ -890,21 +964,23 @@ export function CheckoutPage() {
                         </div>
 
                         <div className={styles.formGrid}>
-                          <div className={styles.fullWidth}>
+                          <div className={styles.fullWidth} data-checkout-field="postalIndex">
                             <Input
                               label={t('checkout.postalIndex')}
                               value={location.postalIndex}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                clearFieldError('postalIndex')
                                 setLocation((l) => ({
                                   ...l,
                                   postalIndex: e.target.value.replace(/\D/g, '').slice(0, 5),
                                 }))
-                              }
+                              }}
                               placeholder={t('checkout.postalIndexPlaceholder')}
                               inputMode="numeric"
                               autoComplete="postal-code"
                               hint={t('checkout.ukrposhtaIndexHint')}
                               required
+                              invalid={Boolean(fieldErrors.postalIndex)}
                             />
                           </div>
 
@@ -971,9 +1047,10 @@ export function CheckoutPage() {
               title={t('checkout.stepPayment')}
               expanded={expandedSteps[3]}
               done={Boolean(paymentMethod)}
+              invalid={Boolean(fieldErrors.payment)}
               onToggle={() => toggleStep(3)}
             >
-              <div className={styles.optionList}>
+              <div className={styles.optionList} data-checkout-field="payment">
                 <button
                   type="button"
                   className={[
@@ -1165,7 +1242,6 @@ export function CheckoutPage() {
                 size="lg"
                 fullWidth
                 loading={submitting}
-                disabled={!paymentMethod}
                 rightIcon={<CreditCard size={18} />}
                 onClick={() => void handlePlaceOrder()}
               >
@@ -1184,7 +1260,6 @@ export function CheckoutPage() {
         <Button
           size="lg"
           loading={submitting}
-          disabled={!paymentMethod}
           className={styles.mobileBarBtn}
           onClick={() => void handlePlaceOrder()}
         >

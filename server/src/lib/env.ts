@@ -12,6 +12,7 @@ const clientUrlRaw = required('CLIENT_URL', 'http://localhost:5174')
 
 export const env = {
   port: Number(process.env.PORT ?? 3001),
+  nodeEnv: process.env.NODE_ENV ?? 'development',
   /** Primary client origin (first entry). */
   clientUrl: clientUrlRaw.split(',')[0]!.trim(),
   /** All allowed CORS origins (comma-separated CLIENT_URL). */
@@ -29,6 +30,11 @@ export const env = {
   novaPoshtaApiKey: process.env.NOVA_POSHTA_API_KEY?.trim() ?? '',
   liqpayPublicKey: process.env.LIQPAY_PUBLIC_KEY?.trim() ?? '',
   liqpayPrivateKey: process.env.LIQPAY_PRIVATE_KEY?.trim() ?? '',
+  turboSmsToken: process.env.TURBOSMS_TOKEN?.trim() ?? '',
+  turboSmsSender: process.env.TURBOSMS_SENDER?.trim() || 'LuxStones',
+  otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES ?? 10),
+  otpMaxAttempts: Number(process.env.OTP_MAX_ATTEMPTS ?? 5),
+  otpResendCooldownSeconds: Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60),
 }
 
 export function isGoogleConfigured() {

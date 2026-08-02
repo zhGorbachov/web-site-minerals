@@ -5,14 +5,17 @@ import styles from './Input.module.scss'
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
+  /** Soft red highlight without an error message. */
+  invalid?: boolean
   hint?: ReactNode
   leftIcon?: ReactNode
   rightIcon?: ReactNode
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, leftIcon, rightIcon, className, id, ...props }, ref) => {
+  ({ label, error, invalid, hint, leftIcon, rightIcon, className, id, ...props }, ref) => {
     const inputId = id ?? `input-${Math.random().toString(36).slice(2)}`
+    const hasError = Boolean(error) || Boolean(invalid)
 
     return (
       <div className={styles.wrapper}>
@@ -21,12 +24,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <div className={[styles.inputWrapper, error ? styles.hasError : ''].filter(Boolean).join(' ')}>
+        <div className={[styles.inputWrapper, hasError ? styles.hasError : ''].filter(Boolean).join(' ')}>
           {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
           <input
             ref={ref}
             id={inputId}
             className={[styles.input, leftIcon ? styles.withLeft : '', rightIcon ? styles.withRight : '', className ?? ''].filter(Boolean).join(' ')}
+            aria-invalid={hasError || undefined}
             {...props}
           />
           {rightIcon && <span className={styles.rightIcon}>{rightIcon}</span>}

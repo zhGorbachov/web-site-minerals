@@ -1,5 +1,6 @@
 import type { Cart, Product } from '@/types'
 import { getAuthToken } from '@/api/client'
+import { mergeHalfStrands } from '@/utils/strandMerge'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, type MockCart } from './MockDb'
 
@@ -16,10 +17,11 @@ function optionsMatch(
   return JSON.stringify(a ?? {}) === JSON.stringify(b ?? {})
 }
 
-function toCart(cart: MockCart): Cart {
+function toCart(cart: MockCart, halfStrandsMerged?: number): Cart {
   return {
     id: cart.id,
     createdAt: cart.createdAt,
+    halfStrandsMerged,
     items: cart.items.map((item) => ({
       ...item,
       product: enrichProduct(item.product),
@@ -31,6 +33,14 @@ function findProduct(productId: string): Product {
   const product = MockDb.getProducts().find((p) => p.id === productId)
   if (!product) throw new MockApiError(404, 'product_not_found')
   return enrichProduct(product)
+}
+
+function applyStrandMerge(cart: MockCart): { cart: MockCart; mergedPairs: number } {
+  const { items, mergedPairs } = mergeHalfStrands(cart.items)
+  return {
+    cart: { ...cart, items },
+    mergedPairs,
+  }
 }
 
 export const MockCartApi = {
@@ -68,8 +78,9 @@ export const MockCartApi = {
       }
     }
 
-    MockDb.setCart(userId, cart)
-    return toCart(cart)
+    const { cart: mergedCart, mergedPairs } = applyStrandMerge(cart)
+    MockDb.setCart(userId, mergedCart)
+    return toCart(mergedCart, mergedPairs || undefined)
   },
 
   async updateItem(itemId: string, quantity: number): Promise<Cart> {
@@ -80,12 +91,14 @@ export const MockCartApi = {
 
     if (quantity <= 0) {
       cart.items = cart.items.filter((i) => i.id !== itemId)
-    } else {
-      item.quantity = Math.min(quantity, item.product.stock)
+      MockDb.setCart(userId, cart)
+      return toCart(cart)
     }
 
-    MockDb.setCart(userId, cart)
-    return toCart(cart)
+    item.quantity = Math.min(quantity, item.product.stock)
+    const { cart: mergedCart, mergedPairs } = applyStrandMerge(cart)
+    MockDb.setCart(userId, mergedCart)
+    return toCart(mergedCart, mergedPairs || undefined)
   },
 
   async removeItem(itemId: string): Promise<Cart> {
@@ -137,7 +150,8 @@ export const MockCartApi = {
       }
     }
 
-    MockDb.setCart(userId, cart)
-    return toCart(cart)
+    const { cart: mergedCart, mergedPairs } = applyStrandMerge(cart)
+    MockDb.setCart(userId, mergedCart)
+    return toCart(mergedCart, mergedPairs || undefined)
   },
 }

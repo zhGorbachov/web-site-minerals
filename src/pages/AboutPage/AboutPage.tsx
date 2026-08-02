@@ -8,9 +8,8 @@ import {
   Percent,
   HelpCircle,
   Star,
-  Bike,
   Leaf,
-  HandHeart,
+  Sparkles,
   BadgeCheck,
   ArrowUpDown,
   Check,
@@ -25,7 +24,6 @@ import { scrollToHashTarget } from '@/utils/hashNav'
 import { useTranslation } from '@/i18n/useTranslation'
 import { translations } from '@/i18n/Translations'
 import { useLanguageStore } from '@/store/languageStore'
-import { SITE_NAME } from '@/config/Site'
 import styles from './AboutPage.module.scss'
 
 const fadeIn = {
@@ -42,15 +40,14 @@ type DeliveryIcon =
 const DELIVERY_ICONS: DeliveryIcon[] = [
   { type: 'brand', node: <NovaPoshtaIcon className={styles.brandIcon} /> },
   { type: 'brand', node: <UkrposhtaIcon className={styles.brandIcon} /> },
-  { type: 'lucide', icon: Bike, tone: styles.toneTeal },
   { type: 'brand', node: <CashOnDeliveryIcon className={styles.brandIcon} /> },
 ]
 
-/** Icons matched to value titles: natural / handmade / quality / delivery. */
+/** Icons matched to value titles: natural / quality / uniqueness / reliability. */
 const VALUE_ICONS: { icon: LucideIcon; tone: string }[] = [
   { icon: Leaf, tone: styles.toneGreen },
-  { icon: HandHeart, tone: styles.toneRose },
   { icon: BadgeCheck, tone: styles.toneBlue },
+  { icon: Sparkles, tone: styles.toneRose },
   { icon: Truck, tone: styles.toneTeal },
 ]
 
@@ -127,7 +124,11 @@ export function AboutPage() {
           <div className={styles.heroText}>
             <span className={styles.eyebrow}>{t('about.eyebrow')}</span>
             <h1 className={styles.heroTitle}>{t('about.heroTitle')}</h1>
-            <p className={styles.heroDesc}>{t('about.heroDesc', { siteName: SITE_NAME })}</p>
+            <div className={styles.heroDesc}>
+              {about.heroParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
           </div>
           <div className={styles.heroImage}>
             <img src={mockImages.aboutStore} alt={t('about.storeAlt')} />
@@ -171,8 +172,14 @@ export function AboutPage() {
             <h2 className={styles.sectionTitle}>{t('about.returnsTitle')}</h2>
           </div>
           <div className={styles.textContent}>
-            <p>{t('about.returnsP1')}</p>
-            <p>{t('about.returnsP2')}</p>
+            <p>{t('about.returnsIntro')}</p>
+            <p>{t('about.returnsConditionsTitle')}</p>
+            <ul className={styles.contentList}>
+              {about.returnsConditions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <p>{t('about.returnsContact')}</p>
           </div>
         </motion.section>
 
@@ -184,8 +191,15 @@ export function AboutPage() {
             <h2 className={styles.sectionTitle}>{t('about.discountsTitle')}</h2>
           </div>
           <div className={styles.textContent}>
-            <p>{t('about.discountsP1')}</p>
-            <p>{t('about.discountsP2')}</p>
+            <p>{t('about.discountsIntro')}</p>
+            <ul className={styles.contentList}>
+              {about.discountsTiers.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <p>{t('about.discountsFreeDelivery')}</p>
+            <p>{t('about.discountsPersonal')}</p>
+            <p>{t('about.discountsStrands')}</p>
           </div>
         </motion.section>
 

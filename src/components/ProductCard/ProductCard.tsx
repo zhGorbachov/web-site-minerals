@@ -2,22 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, ShoppingCart, Minus, Plus, CheckCircle } from 'lucide-react'
-import type { MineralAttributes, Product } from '@/types'
+import type { Product } from '@/types'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
-import { formatPrice } from '@/utils'
+import { formatPrice, productRequiresOptions } from '@/utils'
 import styles from './ProductCard.module.scss'
 
 interface ProductCardProps {
   product: Product
-}
-
-function productRequiresOptions(product: Product): boolean {
-  if (product.categorySlug === 'mineraly') {
-    const attrs = product.attributes as MineralAttributes
-    return Boolean(attrs.beadSizes?.length || attrs.strandLengths?.length)
-  }
-  return product.categorySlug === 'nytky' || product.categorySlug === 'brаslety'
 }
 
 export function ProductCard({ product }: ProductCardProps) {

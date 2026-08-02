@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { requireAuth } from '../lib/auth.js'
 import { serializeProduct } from '../lib/serialize.js'
+import { mergeHalfStrands, type StrandMergeCartItem } from '../lib/strandMerge.js'
 
 export const cartRouter = Router()
 
@@ -42,6 +43,7 @@ async function getOrCreateCart(userId: string) {
 
 function serializeCart(
   cart: Awaited<ReturnType<typeof getOrCreateCart>>,
+  halfStrandsMerged?: number,
 ) {
   return {
     id: cart.id,
@@ -52,7 +54,77 @@ function serializeCart(
       selectedOptions: (item.selectedOptions as Record<string, string> | null) ?? undefined,
     })),
     createdAt: cart.createdAt.toISOString(),
+    ...(halfStrandsMerged ? { halfStrandsMerged } : {}),
   }
+}
+
+function toMergeItems(
+  cart: Awaited<ReturnType<typeof getOrCreateCart>>,
+): StrandMergeCartItem[] {
+  return cart.items.map((item) => ({
+    id: item.id,
+    productId: item.productId,
+    product: {
+      id: item.product.id,
+      stock: item.product.stock,
+      categorySlug: item.product.categorySlug,
+      attributes: item.product.attributes,
+    },
+    quantity: item.quantity,
+    selectedOptions: (item.selectedOptions as Record<string, string> | null) ?? undefined,
+  }))
+}
+
+async function persistStrandMerge(
+  userId: string,
+): Promise<{ cart: Awaited<ReturnType<typeof getOrCreateCart>>; mergedPairs: number }> {
+  const cart = await getOrCreateCart(userId)
+  const { items: merged, mergedPairs } = mergeHalfStrands(toMergeItems(cart))
+
+  if (mergedPairs <= 0) {
+    return { cart, mergedPairs: 0 }
+  }
+
+  const originalById = new Map(cart.items.map((item) => [item.id, item]))
+  const mergedIds = new Set(merged.map((item) => item.id))
+
+  for (const item of cart.items) {
+    if (!mergedIds.has(item.id)) {
+      await prisma.cartItem.delete({ where: { id: item.id } })
+    }
+  }
+
+  for (const item of merged) {
+    const original = originalById.get(item.id)
+    if (original) {
+      const sameQty = original.quantity === item.quantity
+      const sameOptions =
+        JSON.stringify(original.selectedOptions ?? {}) ===
+        JSON.stringify(item.selectedOptions ?? {})
+      if (!sameQty || !sameOptions) {
+        await prisma.cartItem.update({
+          where: { id: item.id },
+          data: {
+            quantity: item.quantity,
+            selectedOptions: item.selectedOptions ?? undefined,
+          },
+        })
+      }
+      continue
+    }
+
+    await prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        selectedOptions: item.selectedOptions ?? undefined,
+      },
+    })
+  }
+
+  const updated = await getOrCreateCart(userId)
+  return { cart: updated, mergedPairs }
 }
 
 cartRouter.get('/', async (req, res) => {
@@ -109,8 +181,8 @@ cartRouter.post('/items', async (req, res) => {
     })
   }
 
-  const updated = await getOrCreateCart(req.userId!)
-  res.status(201).json(serializeCart(updated))
+  const { cart: updated, mergedPairs } = await persistStrandMerge(req.userId!)
+  res.status(201).json(serializeCart(updated, mergedPairs || undefined))
 })
 
 const updateItemSchema = z.object({
@@ -137,8 +209,8 @@ cartRouter.patch('/items/:itemId', async (req, res) => {
     data: { quantity },
   })
 
-  const updated = await getOrCreateCart(req.userId!)
-  res.json(serializeCart(updated))
+  const { cart: updated, mergedPairs } = await persistStrandMerge(req.userId!)
+  res.json(serializeCart(updated, mergedPairs || undefined))
 })
 
 cartRouter.delete('/items/:itemId', async (req, res) => {
@@ -210,6 +282,6 @@ cartRouter.post('/merge', async (req, res) => {
     }
   }
 
-  const updated = await getOrCreateCart(req.userId!)
-  res.json(serializeCart(updated))
+  const { cart: updated, mergedPairs } = await persistStrandMerge(req.userId!)
+  res.json(serializeCart(updated, mergedPairs || undefined))
 })

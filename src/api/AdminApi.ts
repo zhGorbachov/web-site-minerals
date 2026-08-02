@@ -1,5 +1,31 @@
-import type { Product, SubCategory, User } from '@/types'
-import { api, withMediaUrls } from './client'
+import type { Order, OrderStatus, PaymentStatus, Product, SubCategory, User } from '@/types'
+import { api, mediaUrl, withMediaUrls } from './client'
+
+export type AdminOrderCustomer = {
+  firstName: string
+  lastName: string
+  email?: string
+  phone?: string
+}
+
+export type AdminOrder = Order & {
+  customer?: AdminOrderCustomer | null
+}
+
+export type AdminOrderUpdatePayload = {
+  status?: OrderStatus
+  paymentStatus?: PaymentStatus
+}
+
+function withOrderMedia(order: AdminOrder): AdminOrder {
+  return {
+    ...order,
+    items: order.items.map((item) => ({
+      ...item,
+      productImage: item.productImage ? mediaUrl(item.productImage) : item.productImage,
+    })),
+  }
+}
 
 export type AdminProductPayload = {
   name: string
@@ -92,5 +118,17 @@ export const AdminApi = {
   ) {
     const { data } = await api.patch<AdminUser>(`/admin/users/${id}/discount`, payload)
     return data
+  },
+
+  async getOrders(params?: { id?: string }) {
+    const { data } = await api.get<AdminOrder[]>('/admin/orders', {
+      params: params?.id ? { id: params.id } : undefined,
+    })
+    return data.map(withOrderMedia)
+  },
+
+  async updateOrder(id: string, payload: AdminOrderUpdatePayload) {
+    const { data } = await api.patch<AdminOrder>(`/admin/orders/${id}`, payload)
+    return withOrderMedia(data)
   },
 }

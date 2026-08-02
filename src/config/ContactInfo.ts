@@ -16,7 +16,7 @@ export type PhoneContact = {
 }
 
 const MESSENGER_066: MessengerContact[] = [
-  { id: 'telegram', label: 'Telegram', href: 'https://t.me/crystal_store' },
+  { id: 'telegram', label: 'Telegram', href: 'https://t.me/+380668344322' },
   { id: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/380668344322' },
   { id: 'viber', label: 'Viber', href: 'viber://chat?number=380668344322' },
 ]

@@ -5,7 +5,7 @@ import { Trash2, Plus, Minus, ShoppingCart, ArrowRight } from 'lucide-react'
 import { useAuthStore, useCartStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
-import { attributeValueEn } from '@/i18n/CatalogEn'
+import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
 import { formatPrice, getUnitPrice, getDiscountLabel } from '@/utils'
 import { Button, EmptyState } from '@/components/ui'
@@ -13,7 +13,9 @@ import styles from './CartPage.module.scss'
 
 const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
   beadSize: 'productOptions.beadSize',
+  beadCount: 'productOptions.beadCount',
   strandLength: 'productOptions.strandLength',
+  length: 'productOptions.threadLength',
   color: 'productOptions.color',
   wristSize: 'productOptions.wristSize',
 }
@@ -139,7 +141,11 @@ export function CartPage() {
 
                 const formatOptionValue = (key: string, value: string) => {
                   if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
+                  if (key === 'beadCount') return t('productOptions.beadCountValue', { value })
                   if (language === 'en') {
+                    if (key === 'strandLength') {
+                      return strandLengthEn[value] ?? value.replace(/\s*см/gi, ' cm')
+                    }
                     return attributeValueEn[value] ?? value.replace(/\s*см/gi, ' cm')
                   }
                   return value

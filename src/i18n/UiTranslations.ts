@@ -84,6 +84,9 @@ export type UiTranslationSchema = {
     checkoutSoon: string
     checkoutShort: string
     continueShopping: string
+    halfStrandsMergedOne: string
+    halfStrandsMergedMany: string
+    toastDismiss: string
   }
   checkout: {
     title: string
@@ -216,7 +219,10 @@ export type UiTranslationSchema = {
   }
   productOptions: {
     beadSize: string
+    beadCount: string
+    beadCountValue: string
     strandLength: string
+    threadLength: string
     color: string
     wristSize: string
     availableWristSize: string
@@ -323,6 +329,8 @@ export type UiTranslationSchema = {
       pending: string
       confirmed: string
       processing: string
+      assembling: string
+      ready: string
       shipped: string
       delivered: string
       cancelled: string
@@ -356,6 +364,7 @@ export type UiTranslationSchema = {
     tabAddProduct: string
     tabSubcategories: string
     tabUsers: string
+    tabOrders: string
     forbidden: string
     loading: string
     usersSearch: string
@@ -367,6 +376,27 @@ export type UiTranslationSchema = {
     usersEmpty: string
     usersContact: string
     searchPlaceholder: string
+    ordersSearch: string
+    ordersEmpty: string
+    ordersCustomer: string
+    ordersGuest: string
+    ordersTotal: string
+    ordersPayment: string
+    ordersFulfillment: string
+    ordersSaved: string
+    ordersShowItems: string
+    ordersHideItems: string
+    ordersItemQty: string
+    ordersItemPrice: string
+    ordersDelivery: string
+    ordersPaymentMethod: string
+    ordersPaginationAria: string
+    paymentStatus: {
+      unpaid: string
+      awaiting_payment: string
+      paid: string
+      failed: string
+    }
     stock: string
     saveStock: string
     edit: string
@@ -408,6 +438,42 @@ export type UiTranslationSchema = {
     successDeleted: string
     successSubCreated: string
     errorGeneric: string
+    attributesTitle: string
+    attributesMineralTitle: string
+    attributesThreadTitle: string
+    attributesBraceletTitle: string
+    attributesGenericTitle: string
+    attributesMineralHint: string
+    attributesThreadHint: string
+    attributesBraceletHint: string
+    attributesGenericHint: string
+    attributesBuyerOptionsTitle: string
+    attributesBuyerOptionsMineralHint: string
+    attrBeadSizes: string
+    attrBeadSizesHint: string
+    attrBeadCounts: string
+    attrBeadCountsHint: string
+    attrStrandLengths: string
+    attrStrandLengthsHint: string
+    attrStrandLabel: string
+    attrStrandValue: string
+    attrThreadLengths: string
+    attrThreadLengthsHint: string
+    attrWristSizes: string
+    attrWristSizesHint: string
+    attrWristRange: string
+    attrDefaultLength: string
+    attrAddCustom: string
+    attrColor: string
+    attrOrigin: string
+    attrHardness: string
+    attrShape: string
+    attrDiameter: string
+    attrMaterial: string
+    attrThreadColor: string
+    attrStones: string
+    attrSize: string
+    attrWeight: string
     errorSlugTaken: string
     errorSkuTaken: string
     errorInOrders: string
@@ -446,18 +512,18 @@ export const uiTranslationsUk: UiTranslationSchema = {
     popularTitle: 'Популярні товари',
     advantagesTitle: 'Наші переваги',
     advantageNaturalTitle: 'Натуральні матеріали',
-    advantageNaturalText: 'Тільки справжні мінерали та натуральні низки без синтетики',
-    advantageHandmadeTitle: 'Ручна робота',
-    advantageHandmadeText: 'Кожен браслет виготовляється вручну з увагою до деталей',
+    advantageNaturalText: 'Лише натуральні мінерали та вироби з природного каменю',
+    advantageHandmadeTitle: 'Унікальність',
+    advantageHandmadeText: 'Кожен камінь має неповторний природний малюнок, форму та відтінок',
     advantageDeliveryTitle: 'Швидка доставка',
-    advantageDeliveryText: 'Відправляємо Новою Поштою та Укрпоштою по всій Україні',
+    advantageDeliveryText: 'Відправляємо з понеділка по пʼятницю Новою Поштою та Укрпоштою',
     advantageQualityTitle: 'Гарантія якості',
-    advantageQualityText: 'Обмін або повернення протягом 14 днів без зайвих питань',
-    aboutEyebrow: 'Про магазин',
+    advantageQualityText: 'Ретельний відбір, обмін або повернення без зайвих питань',
+    aboutEyebrow: 'Про компанію',
     aboutDescription1:
-      '{siteName} — це невеликий сімейний магазин натуральних мінералів, ниток та браслетів ручної роботи. Ми ретельно відбираємо кожен камінь та матеріал, щоб ви отримали тільки справжнє та якісне.',
+      'Ми — команда, яка щиро захоплюється красою мінералів і вже багато років допомагає людям знаходити саме ті камені, які надихають, прикрашають та дарують естетичне задоволення.',
     aboutDescription2:
-      'Кожен браслет — унікальний. Кожен мінерал — справжній. Кожна нитка — перевірена.',
+      'У нашому асортименті — натуральні мінерали, колекційні зразки, галтовка, намистини, браслети, підвіски, кулони та інші вироби з природного каменю.',
     aboutCta: 'Дізнатись більше',
   },
   category: {
@@ -502,6 +568,11 @@ export const uiTranslationsUk: UiTranslationSchema = {
     checkoutSoon: 'Оформлення замовлення — незабаром',
     checkoutShort: 'Оформити',
     continueShopping: 'Продовжити покупки',
+    halfStrandsMergedOne:
+      'Дві однакові пів низки обʼєднано в одну цілу низку в кошику.',
+    halfStrandsMergedMany:
+      '{count} пари однакових пів низок обʼєднано в цілі низки в кошику.',
+    toastDismiss: 'Закрити повідомлення',
   },
   checkout: {
     title: 'Оформлення замовлення',
@@ -634,7 +705,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
   },
   productOptions: {
     beadSize: 'Розмір намистини',
+    beadCount: 'Кількість бусин',
+    beadCountValue: '{value} шт.',
     strandLength: 'Довжина низки',
+    threadLength: 'Довжина низки',
     color: 'Колір',
     wristSize: "Розмір зап'ястка",
     availableWristSize: 'Доступний розмір: {size}',
@@ -742,6 +816,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
       pending: 'Очікує',
       confirmed: 'Підтверджено',
       processing: 'В обробці',
+      assembling: 'Збирається',
+      ready: 'Готово',
       shipped: 'Відправлено',
       delivered: 'Доставлено',
       cancelled: 'Скасовано',
@@ -770,11 +846,12 @@ export const uiTranslationsUk: UiTranslationSchema = {
   },
   admin: {
     title: 'Адмін-панель',
-    subtitle: 'Керування товарами, залишками, підкатегоріями та знижками клієнтів',
+    subtitle: 'Керування товарами, замовленнями, залишками та знижками клієнтів',
     tabProducts: 'Товари',
     tabAddProduct: 'Новий товар',
     tabSubcategories: 'Підкатегорії',
     tabUsers: 'Клієнти',
+    tabOrders: 'Замовлення',
     forbidden: 'Доступ лише для адміністратора',
     loading: 'Завантаження...',
     usersSearch: 'Пошук за телефоном, email або імʼям',
@@ -786,6 +863,27 @@ export const uiTranslationsUk: UiTranslationSchema = {
     usersEmpty: 'Клієнтів не знайдено',
     usersContact: 'Контакти',
     searchPlaceholder: 'Пошук за назвою або SKU...',
+    ordersSearch: 'Пошук за ID замовлення (порожньо — всі)',
+    ordersEmpty: 'Замовлень не знайдено',
+    ordersCustomer: 'Клієнт',
+    ordersGuest: 'Гість',
+    ordersTotal: 'Сума',
+    ordersPayment: 'Оплата',
+    ordersFulfillment: 'Статус',
+    ordersSaved: 'Статус замовлення оновлено',
+    ordersShowItems: 'Показати товари',
+    ordersHideItems: 'Сховати товари',
+    ordersItemQty: '{count} шт.',
+    ordersItemPrice: 'ціна',
+    ordersDelivery: 'Доставка',
+    ordersPaymentMethod: 'Спосіб оплати',
+    ordersPaginationAria: 'Сторінки замовлень',
+    paymentStatus: {
+      unpaid: 'Не оплачено',
+      awaiting_payment: 'Очікує оплату',
+      paid: 'Оплачено',
+      failed: 'Помилка оплати',
+    },
     stock: 'Залишок',
     saveStock: 'Зберегти',
     edit: 'Редагувати',
@@ -827,6 +925,47 @@ export const uiTranslationsUk: UiTranslationSchema = {
     successDeleted: 'Товар видалено',
     successSubCreated: 'Підкатегорію створено',
     errorGeneric: 'Щось пішло не так',
+    attributesTitle: 'Параметри товару',
+    attributesMineralTitle: 'Параметри мінералу',
+    attributesThreadTitle: 'Параметри низки',
+    attributesBraceletTitle: 'Параметри браслета',
+    attributesGenericTitle: 'Характеристики',
+    attributesMineralHint:
+      'Для звичайного мінералу достатньо характеристик нижче. Вибірка на сайті з’явиться лише якщо заповнити блок варіантів.',
+    attributesThreadHint:
+      'У низок свої параметри: оберіть доступні довжини. Колір покупець обере на сторінці товару.',
+    attributesBraceletHint:
+      "У браслетів свої параметри: оберіть доступні розміри зап'ястка для цього товару.",
+    attributesGenericHint: 'Лише характеристики — без вибірки на сторінці товару.',
+    attributesBuyerOptionsTitle: 'Варіанти для вибору покупця (необовʼязково)',
+    attributesBuyerOptionsMineralHint:
+      'Залиште порожнім, якщо вибору немає. Для низок намистин завжди є ціла та пів низки (стандарт: 39 см / 19.5 см).',
+    attrBeadSizes: 'Розмір намистини (мм)',
+    attrBeadSizesHint: 'Покупець зможе обрати один із позначених розмірів.',
+    attrBeadCounts: 'Кількість бусин',
+    attrBeadCountsHint: 'Покупець зможе обрати кількість бусин.',
+    attrStrandLengths: 'Довжина низки каміння',
+    attrStrandLengthsHint:
+      'Ціла та пів низки. Якщо порожньо — для низок підставляються 39 см і 19.5 см.',
+    attrStrandLabel: 'Підпис (напр. Низка 39 см)',
+    attrStrandValue: 'Значення (напр. 39 см)',
+    attrThreadLengths: 'Довжина низки',
+    attrThreadLengthsHint: 'Покупець зможе обрати одну з довжин. Можна залишити порожнім.',
+    attrWristSizes: "Розмір зап'ястка",
+    attrWristSizesHint: "Якщо нічого не обрати — на сайті будуть стандартні розміри 14–21 см.",
+    attrWristRange: "Діапазон розміру (підказка)",
+    attrDefaultLength: 'Довжина за замовчуванням',
+    attrAddCustom: 'Додати свій варіант',
+    attrColor: 'Колір',
+    attrOrigin: 'Походження',
+    attrHardness: 'Твердість',
+    attrShape: 'Форма',
+    attrDiameter: 'Товщина / діаметр',
+    attrMaterial: 'Матеріал',
+    attrThreadColor: 'Колір нитки',
+    attrStones: 'Каміння (через кому)',
+    attrSize: 'Розмір',
+    attrWeight: 'Вага',
     errorSlugTaken: 'Такий slug уже зайнятий',
     errorSkuTaken: 'Такий SKU уже зайнятий',
     errorInOrders: 'Неможливо видалити: товар є в замовленнях',
@@ -865,18 +1004,18 @@ export const uiTranslationsEn: UiTranslationSchema = {
     popularTitle: 'Popular products',
     advantagesTitle: 'Our advantages',
     advantageNaturalTitle: 'Natural materials',
-    advantageNaturalText: 'Only genuine minerals and natural threads — no synthetics',
-    advantageHandmadeTitle: 'Handmade',
-    advantageHandmadeText: 'Every bracelet is crafted by hand with attention to detail',
+    advantageNaturalText: 'Only natural minerals and pieces made from natural stone',
+    advantageHandmadeTitle: 'Uniqueness',
+    advantageHandmadeText: 'Every stone has a one-of-a-kind natural pattern, shape, and shade',
     advantageDeliveryTitle: 'Fast delivery',
-    advantageDeliveryText: 'We ship via Nova Poshta and Ukrposhta across Ukraine',
+    advantageDeliveryText: 'We ship Monday to Friday via Nova Poshta and Ukrposhta',
     advantageQualityTitle: 'Quality guarantee',
-    advantageQualityText: 'Exchange or return within 14 days, no hassle',
-    aboutEyebrow: 'About the store',
+    advantageQualityText: 'Careful selection, plus exchange or return without hassle',
+    aboutEyebrow: 'About the company',
     aboutDescription1:
-      '{siteName} is a small family store of natural minerals, threads and handmade bracelets. We carefully select every stone and material so you receive only genuine, quality goods.',
+      'We are a team that truly loves the beauty of minerals and has helped people for many years find the stones that inspire, decorate, and bring aesthetic pleasure.',
     aboutDescription2:
-      'Every bracelet is unique. Every mineral is genuine. Every thread is verified.',
+      'Our assortment includes natural minerals, collector specimens, tumbled stones, beads, bracelets, pendants, charms, and other pieces made from natural stone.',
     aboutCta: 'Learn more',
   },
   category: {
@@ -921,6 +1060,11 @@ export const uiTranslationsEn: UiTranslationSchema = {
     checkoutSoon: 'Checkout — coming soon',
     checkoutShort: 'Checkout',
     continueShopping: 'Continue shopping',
+    halfStrandsMergedOne:
+      'Two matching half strands were combined into one full strand in your cart.',
+    halfStrandsMergedMany:
+      '{count} pairs of matching half strands were combined into full strands in your cart.',
+    toastDismiss: 'Dismiss notification',
   },
   checkout: {
     title: 'Checkout',
@@ -1053,7 +1197,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
   },
   productOptions: {
     beadSize: 'Bead size',
+    beadCount: 'Bead count',
+    beadCountValue: '{value} pcs',
     strandLength: 'Strand length',
+    threadLength: 'Cord length',
     color: 'Color',
     wristSize: 'Wrist size',
     availableWristSize: 'Available size: {size}',
@@ -1161,6 +1308,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
       pending: 'Pending',
       confirmed: 'Confirmed',
       processing: 'Processing',
+      assembling: 'Assembling',
+      ready: 'Ready',
       shipped: 'Shipped',
       delivered: 'Delivered',
       cancelled: 'Cancelled',
@@ -1189,11 +1338,12 @@ export const uiTranslationsEn: UiTranslationSchema = {
   },
   admin: {
     title: 'Admin panel',
-    subtitle: 'Manage products, stock, subcategories and customer discounts',
+    subtitle: 'Manage products, orders, stock and customer discounts',
     tabProducts: 'Products',
     tabAddProduct: 'New product',
     tabSubcategories: 'Subcategories',
     tabUsers: 'Customers',
+    tabOrders: 'Orders',
     forbidden: 'Admin access only',
     loading: 'Loading...',
     usersSearch: 'Search by phone, email or name',
@@ -1205,6 +1355,27 @@ export const uiTranslationsEn: UiTranslationSchema = {
     usersEmpty: 'No customers found',
     usersContact: 'Contacts',
     searchPlaceholder: 'Search by name or SKU...',
+    ordersSearch: 'Search by order ID (empty — all)',
+    ordersEmpty: 'No orders found',
+    ordersCustomer: 'Customer',
+    ordersGuest: 'Guest',
+    ordersTotal: 'Total',
+    ordersPayment: 'Payment',
+    ordersFulfillment: 'Status',
+    ordersSaved: 'Order status updated',
+    ordersShowItems: 'Show products',
+    ordersHideItems: 'Hide products',
+    ordersItemQty: '{count} pcs',
+    ordersItemPrice: 'price',
+    ordersDelivery: 'Delivery',
+    ordersPaymentMethod: 'Payment method',
+    ordersPaginationAria: 'Order pages',
+    paymentStatus: {
+      unpaid: 'Unpaid',
+      awaiting_payment: 'Awaiting payment',
+      paid: 'Paid',
+      failed: 'Payment failed',
+    },
     stock: 'Stock',
     saveStock: 'Save',
     edit: 'Edit',
@@ -1246,6 +1417,47 @@ export const uiTranslationsEn: UiTranslationSchema = {
     successDeleted: 'Product deleted',
     successSubCreated: 'Subcategory created',
     errorGeneric: 'Something went wrong',
+    attributesTitle: 'Product options',
+    attributesMineralTitle: 'Mineral details',
+    attributesThreadTitle: 'Cord / strand options',
+    attributesBraceletTitle: 'Bracelet options',
+    attributesGenericTitle: 'Specifications',
+    attributesMineralHint:
+      'Most minerals only need the specs below. Buyer selection appears only if you fill the optional variants block.',
+    attributesThreadHint:
+      'Cords have their own options: choose available lengths. Color is selected on the product page.',
+    attributesBraceletHint:
+      'Bracelets have their own options: choose available wrist sizes for this product.',
+    attributesGenericHint: 'Specs only — no buyer selection on the product page.',
+    attributesBuyerOptionsTitle: 'Buyer selection options (optional)',
+    attributesBuyerOptionsMineralHint:
+      'Leave empty if there is no choice. Strand products always offer whole or half (defaults: 39 cm / 19.5 cm).',
+    attrBeadSizes: 'Bead size (mm)',
+    attrBeadSizesHint: 'The buyer can pick one of the selected sizes.',
+    attrBeadCounts: 'Bead count',
+    attrBeadCountsHint: 'The buyer can pick a bead count.',
+    attrStrandLengths: 'Stone strand length',
+    attrStrandLengthsHint:
+      'Whole and half strand. If empty, strand products get 39 cm and 19.5 cm by default.',
+    attrStrandLabel: 'Label (e.g. Strand 39 cm)',
+    attrStrandValue: 'Value (e.g. 39 cm)',
+    attrThreadLengths: 'Cord length',
+    attrThreadLengthsHint: 'The buyer can pick one of these lengths. Can be left empty.',
+    attrWristSizes: 'Wrist size',
+    attrWristSizesHint: 'If none selected, the storefront shows default sizes 14–21 cm.',
+    attrWristRange: 'Size range hint',
+    attrDefaultLength: 'Default length',
+    attrAddCustom: 'Add custom option',
+    attrColor: 'Color',
+    attrOrigin: 'Origin',
+    attrHardness: 'Hardness',
+    attrShape: 'Shape',
+    attrDiameter: 'Diameter / thickness',
+    attrMaterial: 'Material',
+    attrThreadColor: 'Thread color',
+    attrStones: 'Stones (comma-separated)',
+    attrSize: 'Size',
+    attrWeight: 'Weight',
     errorSlugTaken: 'This slug is already taken',
     errorSkuTaken: 'This SKU is already taken',
     errorInOrders: 'Cannot delete: product is used in orders',

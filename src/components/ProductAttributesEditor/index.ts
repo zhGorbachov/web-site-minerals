@@ -1,0 +1,1 @@
+export { ProductAttributesEditor } from './ProductAttributesEditor'

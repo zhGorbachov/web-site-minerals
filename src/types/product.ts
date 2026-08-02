@@ -10,19 +10,28 @@ export interface MineralAttributes {
   origin?: string
   hardness?: string
   shape?: string
+  /** Bead diameter options in mm, e.g. ['6','8','10'] */
   beadSizes?: string[]
+  /** Bead count options, e.g. ['36','40','44'] */
+  beadCounts?: string[]
   strandLengths?: StrandLengthOption[]
 }
 
 export interface ThreadAttributes {
   color?: string
+  /** Display-only default length */
   length?: string
+  /** Selectable thread length options, e.g. ['1 м','5 м','10 м'] */
+  lengths?: string[]
   diameter?: string
   material?: string
 }
 
 export interface BraceletAttributes {
+  /** Display-only size range hint, e.g. '14–21 см' */
   wristSize?: string
+  /** Selectable wrist sizes, e.g. ['16 см','17 см','18 см'] */
+  wristSizes?: string[]
   threadColor?: string
   stones?: string[]
   material?: string

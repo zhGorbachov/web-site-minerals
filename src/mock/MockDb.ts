@@ -5,7 +5,7 @@ import { subcategories as seedSubcategories } from './subcategories'
 import { products as seedProducts } from './products'
 
 const STORAGE_KEY = 'crystal-mock-db'
-const STORAGE_VERSION = 5
+const STORAGE_VERSION = 7
 
 export type MockUserRecord = {
   password: string
@@ -62,50 +62,66 @@ const DEMO_CUSTOMER: User = {
 function createDemoOrders(): Order[] {
   const product = seedProducts[0]
   const product2 = seedProducts[1] ?? seedProducts[0]
-  return [
-    {
-      id: 'order-demo-1',
-      userId: DEMO_CUSTOMER.id,
-      status: 'delivered',
-      totalPrice: (product.discountPrice ?? product.price) * 2,
-      paymentMethod: 'cod',
-      paymentStatus: 'unpaid',
-      deliveryMethod: 'nova_poshta',
-      createdAt: '2025-11-12T10:00:00Z',
-      items: [
-        {
-          id: 'oi-1',
-          orderId: 'order-demo-1',
-          productId: product.id,
-          productName: product.name,
-          productImage: product.images[0] ?? '',
-          quantity: 2,
-          price: product.discountPrice ?? product.price,
-        },
-      ],
-    },
-    {
-      id: 'order-demo-2',
-      userId: DEMO_CUSTOMER.id,
-      status: 'processing',
-      totalPrice: product2.discountPrice ?? product2.price,
-      paymentMethod: 'cod',
-      paymentStatus: 'unpaid',
-      deliveryMethod: 'nova_poshta',
-      createdAt: '2026-03-02T14:30:00Z',
-      items: [
-        {
-          id: 'oi-2',
-          orderId: 'order-demo-2',
-          productId: product2.id,
-          productName: product2.name,
-          productImage: product2.images[0] ?? '',
-          quantity: 1,
-          price: product2.discountPrice ?? product2.price,
-        },
-      ],
-    },
+  const product3 = seedProducts[2] ?? product
+  const statuses: Order['status'][] = [
+    'pending',
+    'assembling',
+    'ready',
+    'shipped',
+    'delivered',
+    'confirmed',
+    'processing',
+    'assembling',
+    'ready',
+    'shipped',
+    'delivered',
+    'cancelled',
   ]
+  const payments: NonNullable<Order['paymentStatus']>[] = [
+    'unpaid',
+    'paid',
+    'paid',
+    'paid',
+    'paid',
+    'awaiting_payment',
+    'unpaid',
+    'paid',
+    'paid',
+    'paid',
+    'paid',
+    'failed',
+  ]
+
+  return statuses.map((status, index) => {
+    const itemProduct = index % 3 === 0 ? product : index % 3 === 1 ? product2 : product3
+    const quantity = (index % 3) + 1
+    const unitPrice = itemProduct.discountPrice ?? itemProduct.price
+    const id = `order-demo-${index + 1}`
+    const day = String((index % 27) + 1).padStart(2, '0')
+    const month = String((index % 11) + 1).padStart(2, '0')
+
+    return {
+      id,
+      userId: DEMO_CUSTOMER.id,
+      status,
+      totalPrice: unitPrice * quantity,
+      paymentMethod: index % 2 === 0 ? 'cod' : 'liqpay',
+      paymentStatus: payments[index],
+      deliveryMethod: index % 2 === 0 ? 'nova_poshta' : 'pickup',
+      createdAt: `2026-${month}-${day}T${String(10 + (index % 8)).padStart(2, '0')}:30:00Z`,
+      items: [
+        {
+          id: `oi-${index + 1}`,
+          orderId: id,
+          productId: itemProduct.id,
+          productName: itemProduct.name,
+          productImage: itemProduct.images[0] ?? '',
+          quantity,
+          price: unitPrice,
+        },
+      ],
+    }
+  })
 }
 
 function createDemoReviews(): StoreReview[] {
@@ -244,6 +260,14 @@ export const MockDb = {
     persist()
   },
 
+  updateUserPassword(userId: string, password: string) {
+    const record = this.findUserById(userId)
+    if (!record) return false
+    record.password = password
+    persist()
+    return true
+  },
+
   updateUser(userId: string, patch: Partial<User>) {
     const record = this.findUserById(userId)
     if (!record) return null
@@ -306,9 +330,33 @@ export const MockDb = {
     return state.orders[userId] ?? []
   },
 
+  getAllOrders() {
+    return Object.values(state.orders).flat()
+  },
+
   setOrders(userId: string, orders: Order[]) {
     state.orders[userId] = orders
     persist()
+  },
+
+  updateOrder(
+    orderId: string,
+    patch: Partial<Pick<Order, 'status' | 'paymentStatus'>>,
+  ): Order | null {
+    for (const [userId, orders] of Object.entries(state.orders)) {
+      const index = orders.findIndex((order) => order.id === orderId)
+      if (index < 0) continue
+      const updated: Order = {
+        ...orders[index],
+        ...patch,
+      }
+      const next = [...orders]
+      next[index] = updated
+      state.orders[userId] = next
+      persist()
+      return updated
+    }
+    return null
   },
 
   getReviews() {

@@ -60,15 +60,20 @@ export type TranslationSchema = UiTranslationSchema & {
     breadcrumbAbout: string
     eyebrow: string
     heroTitle: string
-    heroDesc: string
+    heroParagraphs: string[]
     storeAlt: string
     deliveryTitle: string
     returnsTitle: string
-    returnsP1: string
-    returnsP2: string
+    returnsIntro: string
+    returnsConditionsTitle: string
+    returnsConditions: string[]
+    returnsContact: string
     discountsTitle: string
-    discountsP1: string
-    discountsP2: string
+    discountsIntro: string
+    discountsTiers: string[]
+    discountsFreeDelivery: string
+    discountsPersonal: string
+    discountsStrands: string
     reviewsTitle: string
     reviewRating: string
     valuesTitle: string
@@ -103,7 +108,7 @@ export const translations: Record<Language, TranslationSchema> = {
     nav: {
       home: 'Головна',
       catalog: 'Каталог',
-      about: 'Про Компанію',
+      about: 'Про компанію',
       contacts: 'Контакти',
       delivery: 'Доставка і оплата',
       returns: 'Обмін та повернення',
@@ -134,7 +139,7 @@ export const translations: Record<Language, TranslationSchema> = {
       switchToEn: 'English',
     },
     footer: {
-      tagline: 'Натуральні мінерали, низки та браслети ручної роботи',
+      tagline: 'Натуральні мінерали, прикраси та намистини з природного каменю',
       navigation: 'Навігація',
       info: 'Інформація',
       contacts: 'Контакти',
@@ -146,41 +151,81 @@ export const translations: Record<Language, TranslationSchema> = {
       city: 'Кропивницький',
       country: 'Україна',
       rights: 'Всі права захищено.',
-      made: 'Натуральні мінерали та ручна робота з любов\'ю 💎',
+      made: 'Відкрийте для себе красу, створену природою 💎',
     },
     about: {
       breadcrumbHome: 'Головна',
-      breadcrumbAbout: 'Про Компанію',
-      eyebrow: 'Наша історія',
-      heroTitle: 'Ми любимо мінерали так само, як і ви',
-      heroDesc:
-        '{siteName} — невеликий сімейний магазин натуральних мінералів, ниток та браслетів ручної роботи. Ми починали як хобі і перетворилися на справжній магазин з великою кількістю задоволених клієнтів.',
+      breadcrumbAbout: 'Про компанію',
+      eyebrow: 'Про компанію',
+      heroTitle: 'Ласкаво просимо до нашого світу натурального каміння!',
+      heroParagraphs: [
+        'Ми — команда, яка щиро захоплюється красою мінералів і вже багато років допомагає людям знаходити саме ті камені, які надихають, прикрашають та дарують естетичне задоволення.',
+        'У нашому асортименті ви знайдете натуральні мінерали, колекційні зразки, галтовку, намистини, браслети, підвіски, кулони та багато інших виробів із природного каменю. Ми ретельно відбираємо кожен екземпляр, адже цінуємо його природну красу, унікальний малюнок і якість.',
+        'Для нас важливо, щоб кожен покупець залишився задоволений. Саме тому ми завжди готові допомогти з вибором, відповісти на запитання та зробити процес покупки максимально простим і комфортним.',
+        'Щиро дякуємо кожному, хто обирає наш магазин. Ваша довіра надихає нас постійно розширювати асортимент, вдосконалювати сервіс і відкривати для вас нові дивовижні мінерали.',
+        'Запрошуємо відкрити для себе красу, створену самою природою!',
+      ],
       storeAlt: 'Наш магазин',
       deliveryTitle: 'Доставка і оплата',
-      returnsTitle: 'Обмін і повернення',
-      returnsP1: 'Ми приймаємо повернення та обміни протягом 14 днів з моменту отримання замовлення.',
-      returnsP2:
-        'Товар повинен бути у незміненому стані, у оригінальній упаковці. Для повернення зв\'яжіться з нами за телефоном або у Telegram.',
+      returnsTitle: 'Обмін та повернення',
+      returnsIntro:
+        'Ми прагнемо, щоб кожна покупка приносила вам лише позитивні емоції. Якщо з будь-якої причини товар вам не підійшов, ви можете оформити обмін або повернення.',
+      returnsConditionsTitle: 'Повернення та обмін можливі за таких умов:',
+      returnsConditions: [
+        'Просимо повідомте нас про це якомога раніше після отримання замовлення.',
+        'Товар не був у використанні та зберіг свій первісний вигляд.',
+        'Повернення коштів здійснюється одразу після отримання та перевірки товару.',
+      ],
+      returnsContact:
+        'Звʼязатися з нами ви можете через будь-який месенджер (Telegram, WhatsApp, Viber, Instagram) або за номером телефону.',
       discountsTitle: 'Знижки та програма лояльності',
-      discountsP1:
-        'Знижка залежить від суми замовлення: від 1000 грн — 2%, від 2000 грн — 3%, від 3000 грн — 4% і так далі до 10%. Доставка безкоштовна від 3000 грн.',
-      discountsP2:
-        'Постійним клієнтам можемо призначити персональну знижку 5% або 10% на всі товари, крім низок. Низки завжди рахуються окремо за системою знижок від суми.',
+      discountsIntro: 'Розмір знижки залежить від суми замовлення:',
+      discountsTiers: [
+        'від 1000 грн — 2%',
+        'від 2000 грн — 3%',
+        'від 3000 грн — 4%',
+        '…і далі до 10%.',
+      ],
+      discountsFreeDelivery: 'Безкоштовна доставка діє на замовлення від 3000 грн.',
+      discountsPersonal:
+        'Для постійних клієнтів у нас працюють персональні знижки 5% або 10% на весь асортимент, окрім низок.',
+      discountsStrands:
+        'Низки завжди розраховуються окремо відповідно до системи знижок за сумою замовлення.',
       reviewsTitle: 'Відгуки',
       reviewRating: 'Оцінка {rating} з 5',
       valuesTitle: 'Наші цінності',
       faqTitle: 'Часті запитання',
       deliveryItems: [
-        { title: 'Нова Пошта', text: 'Відправляємо щодня (крім неділі). Доставка 1–2 дні.' },
-        { title: 'Укрпошта', text: 'Доставка 2–5 днів. Підходить для великих замовлень.' },
-        { title: 'Кур\'єр', text: 'Доступно в Києві та найближчих містах.' },
-        { title: 'Оплата', text: 'Оплата на картку ПриватБанк/Монобанк або накладеним платежем.' },
+        {
+          title: 'Нова Пошта',
+          text: 'Відправляємо з понеділка по пʼятницю. Доступна доставка у відділення, поштомат або курʼєром Нової пошти.',
+        },
+        {
+          title: 'Укрпошта',
+          text: 'Відправляємо з понеділка по пʼятницю по всій Україні.',
+        },
+        {
+          title: 'Оплата',
+          text: 'Оплата на рахунок, післяплатою, а також Apple Pay і Google Pay.',
+        },
       ],
       values: [
-        { title: 'Натуральність', text: 'Тільки справжні природні матеріали без підробок' },
-        { title: 'Ручна робота', text: 'Кожен виріб унікальний і зроблений вручну' },
-        { title: 'Якість', text: 'Гарантуємо якість кожного товару' },
-        { title: 'Надійність', text: 'Швидка та безпечна доставка по всій Україні' },
+        {
+          title: 'Натуральність',
+          text: 'У нашому асортименті — лише натуральні мінерали та вироби з природного каменю, створені самою природою.',
+        },
+        {
+          title: 'Якість',
+          text: 'Кожен товар проходить ретельний відбір перед тим, як потрапити до нашого асортименту.',
+        },
+        {
+          title: 'Унікальність',
+          text: 'Кожен камінь має неповторний природний малюнок, форму, відтінок та розмір.',
+        },
+        {
+          title: 'Надійність',
+          text: 'Дбайливе пакування та швидка доставка по всій Україні.',
+        },
       ],
       faq: [
         {
@@ -193,7 +238,11 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           q: 'Скільки коштує доставка?',
-          a: 'Доставка Новою Поштою — за тарифами перевізника (зазвичай 60–80 грн). При замовленні від 3000 грн — безкоштовна доставка.',
+          a: 'Доставка — за тарифами перевізника. При замовленні від 3000 грн діє безкоштовна доставка.',
+        },
+        {
+          q: 'Коли ви відправляєте замовлення?',
+          a: 'Відправляємо з понеділка по пʼятницю Новою Поштою та Укрпоштою.',
         },
         {
           q: 'Чи є знижки для постійних клієнтів?',
@@ -216,8 +265,8 @@ export const translations: Record<Language, TranslationSchema> = {
       mapTitle: 'Карта магазину',
       scheduleTitle: 'Графік роботи',
       scheduleSectionLabel: 'Коли ми працюємо',
-      scheduleValue: 'Пн–Пт: 9:00 – 19:00',
-      scheduleNote: 'Сб: 10:00 – 16:00 | Нд: вихідний',
+      scheduleValue: 'Пн–Пт: 9:30 – 17:00',
+      scheduleNote: 'Сб–Нд: вихідний',
       mapOpen: 'Відкрити в Google Maps',
       mapSubtext: 'Україна, доставляємо по всій країні',
       instagramTitle: 'Instagram',
@@ -229,7 +278,7 @@ export const translations: Record<Language, TranslationSchema> = {
     nav: {
       home: 'Home',
       catalog: 'Catalog',
-      about: 'About Company',
+      about: 'About the company',
       contacts: 'Contacts',
       delivery: 'Delivery & payment',
       returns: 'Returns & exchanges',
@@ -260,7 +309,7 @@ export const translations: Record<Language, TranslationSchema> = {
       switchToEn: 'English',
     },
     footer: {
-      tagline: 'Natural minerals, threads and handmade bracelets',
+      tagline: 'Natural minerals, jewelry and beads from natural stone',
       navigation: 'Navigation',
       info: 'Information',
       contacts: 'Contacts',
@@ -272,41 +321,81 @@ export const translations: Record<Language, TranslationSchema> = {
       city: 'Kropyvnytskyi',
       country: 'Ukraine',
       rights: 'All rights reserved.',
-      made: 'Natural minerals and handmade with love 💎',
+      made: 'Discover beauty created by nature 💎',
     },
     about: {
       breadcrumbHome: 'Home',
-      breadcrumbAbout: 'About Company',
-      eyebrow: 'Our story',
-      heroTitle: 'We love minerals just as much as you do',
-      heroDesc:
-        '{siteName} is a small family store of natural minerals, threads and handmade bracelets. We started as a hobby and grew into a real shop with many happy customers.',
+      breadcrumbAbout: 'About the company',
+      eyebrow: 'About the company',
+      heroTitle: 'Welcome to our world of natural stones!',
+      heroParagraphs: [
+        'We are a team that truly loves the beauty of minerals and has helped people for many years find the stones that inspire, decorate, and bring aesthetic pleasure.',
+        'In our assortment you will find natural minerals, collector specimens, tumbled stones, beads, bracelets, pendants, charms, and many other pieces made from natural stone. We carefully select every item because we value its natural beauty, unique pattern, and quality.',
+        'It matters to us that every customer is satisfied. That is why we are always ready to help with the choice, answer questions, and make the shopping process as simple and comfortable as possible.',
+        'Thank you to everyone who chooses our store. Your trust inspires us to keep expanding the assortment, improving our service, and discovering new wonderful minerals for you.',
+        'We invite you to discover beauty created by nature itself!',
+      ],
       storeAlt: 'Our store',
       deliveryTitle: 'Delivery & payment',
       returnsTitle: 'Returns & exchanges',
-      returnsP1: 'We accept returns and exchanges within 14 days of receiving your order.',
-      returnsP2:
-        'Items must be unused and in original packaging. To return an item, contact us by phone or Telegram.',
+      returnsIntro:
+        'We want every purchase to bring you only positive emotions. If for any reason an item does not suit you, you can arrange an exchange or return.',
+      returnsConditionsTitle: 'Returns and exchanges are possible under these conditions:',
+      returnsConditions: [
+        'Please let us know as soon as possible after receiving your order.',
+        'The item has not been used and has kept its original appearance.',
+        'Refunds are processed right after we receive and inspect the item.',
+      ],
+      returnsContact:
+        'You can contact us via any messenger (Telegram, WhatsApp, Viber, Instagram) or by phone.',
       discountsTitle: 'Discounts & loyalty program',
-      discountsP1:
-        'The discount depends on the order total: from 1000 UAH — 2%, from 2000 UAH — 3%, from 3000 UAH — 4%, and so on up to 10%. Free delivery from 3000 UAH.',
-      discountsP2:
-        'Regular customers may receive a personal 5% or 10% discount on everything except strands. Strands are always priced separately using the volume discount system.',
+      discountsIntro: 'The discount depends on the order total:',
+      discountsTiers: [
+        'from 1000 UAH — 2%',
+        'from 2000 UAH — 3%',
+        'from 3000 UAH — 4%',
+        '…and so on up to 10%.',
+      ],
+      discountsFreeDelivery: 'Free delivery applies to orders from 3000 UAH.',
+      discountsPersonal:
+        'Regular customers can get personal discounts of 5% or 10% on the entire assortment, except strands.',
+      discountsStrands:
+        'Strands are always calculated separately according to the volume discount system.',
       reviewsTitle: 'Reviews',
       reviewRating: 'Rating {rating} out of 5',
       valuesTitle: 'Our values',
       faqTitle: 'Frequently asked questions',
       deliveryItems: [
-        { title: 'Nova Poshta', text: 'We ship daily (except Sunday). Delivery in 1–2 days.' },
-        { title: 'Ukrposhta', text: 'Delivery in 2–5 days. Suitable for large orders.' },
-        { title: 'Courier', text: 'Available in Kyiv and nearby cities.' },
-        { title: 'Payment', text: 'Payment by PrivatBank/Monobank card or cash on delivery.' },
+        {
+          title: 'Nova Poshta',
+          text: 'We ship Monday to Friday. Delivery to a branch, parcel locker, or by Nova Poshta courier is available.',
+        },
+        {
+          title: 'Ukrposhta',
+          text: 'We ship Monday to Friday across Ukraine.',
+        },
+        {
+          title: 'Payment',
+          text: 'Bank transfer, cash on delivery, as well as Apple Pay and Google Pay.',
+        },
       ],
       values: [
-        { title: 'Natural', text: 'Only genuine natural materials, no fakes' },
-        { title: 'Handmade', text: 'Every piece is unique and made by hand' },
-        { title: 'Quality', text: 'We guarantee the quality of every product' },
-        { title: 'Reliability', text: 'Fast and secure delivery across Ukraine' },
+        {
+          title: 'Natural',
+          text: 'Our assortment includes only natural minerals and pieces made from natural stone, created by nature itself.',
+        },
+        {
+          title: 'Quality',
+          text: 'Every item is carefully selected before it enters our assortment.',
+        },
+        {
+          title: 'Uniqueness',
+          text: 'Every stone has a one-of-a-kind natural pattern, shape, shade, and size.',
+        },
+        {
+          title: 'Reliability',
+          text: 'Careful packaging and fast delivery across Ukraine.',
+        },
       ],
       faq: [
         {
@@ -319,7 +408,11 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           q: 'How much does delivery cost?',
-          a: 'Nova Poshta delivery follows carrier rates (usually 60–80 UAH). Free delivery on orders from 3000 UAH.',
+          a: 'Delivery follows carrier rates. Free delivery applies to orders from 3000 UAH.',
+        },
+        {
+          q: 'When do you ship orders?',
+          a: 'We ship Monday to Friday via Nova Poshta and Ukrposhta.',
         },
         {
           q: 'Are there discounts for regular customers?',
@@ -342,8 +435,8 @@ export const translations: Record<Language, TranslationSchema> = {
       mapTitle: 'Store map',
       scheduleTitle: 'Working hours',
       scheduleSectionLabel: 'When we\'re open',
-      scheduleValue: 'Mon–Fri: 9:00 AM – 7:00 PM',
-      scheduleNote: 'Sat: 10:00 AM – 4:00 PM | Sun: closed',
+      scheduleValue: 'Mon–Fri: 9:30 AM – 5:00 PM',
+      scheduleNote: 'Sat–Sun: closed',
       mapOpen: 'Open in Google Maps',
       mapSubtext: 'Ukraine, we deliver nationwide',
       instagramTitle: 'Instagram',

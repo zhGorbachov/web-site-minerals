@@ -4,6 +4,8 @@ import type { CartItem, Product } from '@/types'
 import { CartApi } from '@/api'
 import { getAuthToken } from '@/api/client'
 import { calculateCartPricing, toPricingItems, type CartPricing } from '@/utils/pricing'
+import { mergeHalfStrands } from '@/utils/strandMerge'
+import { useUIStore } from './uiStore'
 
 interface CartState {
   items: CartItem[]
@@ -34,6 +36,17 @@ function isLoggedIn() {
   return Boolean(getAuthToken())
 }
 
+function notifyHalfStrandMerge(mergedPairs: number | undefined) {
+  if (!mergedPairs || mergedPairs <= 0) return
+  useUIStore.getState().pushToast({ kind: 'halfStrandsMerged', count: mergedPairs })
+}
+
+function applyLocalStrandMerge(items: CartItem[]): CartItem[] {
+  const { items: merged, mergedPairs } = mergeHalfStrands(items)
+  notifyHalfStrandMerge(mergedPairs)
+  return merged
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
@@ -45,6 +58,7 @@ export const useCartStore = create<CartState>()(
           try {
             const cart = await CartApi.addItem(product.id, quantity, options)
             set({ items: cart.items })
+            notifyHalfStrandMerge(cart.halfStrandsMerged)
             return
           } catch {
             // fall through to local
@@ -56,15 +70,15 @@ export const useCartStore = create<CartState>()(
             item.product.id === product.id && optionsMatch(item.selectedOptions, options),
         )
 
+        let nextItems: CartItem[]
+
         if (existing) {
           const nextQuantity = Math.min(existing.quantity + quantity, product.stock)
           if (nextQuantity === existing.quantity) return
 
-          set((state) => ({
-            items: state.items.map((item) =>
-              item.id === existing.id ? { ...item, quantity: nextQuantity } : item,
-            ),
-          }))
+          nextItems = get().items.map((item) =>
+            item.id === existing.id ? { ...item, quantity: nextQuantity } : item,
+          )
         } else {
           const cappedQuantity = Math.min(quantity, product.stock)
           if (cappedQuantity <= 0) return
@@ -75,8 +89,10 @@ export const useCartStore = create<CartState>()(
             quantity: cappedQuantity,
             selectedOptions: options,
           }
-          set((state) => ({ items: [...state.items, newItem] }))
+          nextItems = [...get().items, newItem]
         }
+
+        set({ items: applyLocalStrandMerge(nextItems) })
       },
 
       removeItem: async (itemId) => {
@@ -128,6 +144,7 @@ export const useCartStore = create<CartState>()(
           try {
             const cart = await CartApi.updateItem(itemId, quantity)
             set({ items: cart.items })
+            notifyHalfStrandMerge(cart.halfStrandsMerged)
             return
           } catch {
             // fall through
@@ -138,11 +155,10 @@ export const useCartStore = create<CartState>()(
         if (!item) return
 
         const cappedQuantity = Math.min(quantity, item.product.stock)
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.id === itemId ? { ...i, quantity: cappedQuantity } : i,
-          ),
-        }))
+        const nextItems = get().items.map((i) =>
+          i.id === itemId ? { ...i, quantity: cappedQuantity } : i,
+        )
+        set({ items: applyLocalStrandMerge(nextItems) })
       },
 
       clearCart: async () => {
@@ -200,6 +216,7 @@ export const useCartStore = create<CartState>()(
               })),
             )
             set({ items: cart.items })
+            notifyHalfStrandMerge(cart.halfStrandsMerged)
           } else {
             await get().pullFromServer()
           }
@@ -210,7 +227,16 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'crystal-cart',
-      version: 2,
+      version: 3,
+      migrate: (persisted) => {
+        const state = persisted as { items?: CartItem[]; syncing?: boolean }
+        const items = Array.isArray(state.items) ? state.items : []
+        const { items: merged } = mergeHalfStrands(items)
+        return {
+          items: merged,
+          syncing: false,
+        }
+      },
     },
   ),
 )

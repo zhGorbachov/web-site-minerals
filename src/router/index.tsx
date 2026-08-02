@@ -12,6 +12,9 @@ const WishlistPage   = lazy(() => import('@/pages/WishlistPage').then((m) => ({ 
 const AboutPage      = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })))
 const ContactsPage   = lazy(() => import('@/pages/ContactsPage').then((m) => ({ default: m.ContactsPage })))
 const AuthPage       = lazy(() => import('@/pages/AuthPage').then((m) => ({ default: m.AuthPage })))
+const ForgotPasswordPage = lazy(() =>
+  import('@/pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })),
+)
 const ProfilePage    = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const CheckoutPage   = lazy(() => import('@/pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })))
 const CheckoutResultPage = lazy(() =>
@@ -128,6 +131,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageFallback />}>
             <ProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'forgot-password',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <ForgotPasswordPage />
           </Suspense>
         ),
       },

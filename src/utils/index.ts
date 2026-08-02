@@ -27,3 +27,17 @@ export {
   type CartPricingInputItem,
 } from './pricing'
 export { getDiscountLabel } from './discountLabel'
+export {
+  DEFAULT_WRIST_SIZES,
+  DEFAULT_STRAND_LENGTHS,
+  isMineralStrandAttributes,
+  getMineralStrandLengths,
+  productRequiresOptions,
+  getBraceletWristSizes,
+} from './productOptions'
+export {
+  isHalfStrandLabel,
+  findWholeStrandLabel,
+  mergeHalfStrands,
+  type StrandMergeCartItem,
+} from './strandMerge'
