@@ -29,6 +29,8 @@ export interface Order {
   totalPrice: number
   paymentMethod: string
   deliveryMethod: string
+  /** Full name of the bank-transfer payer (as on the card statement). */
+  payerFullName?: string | null
   liqpayOrderId?: string | null
   items: OrderItem[]
   createdAt: string

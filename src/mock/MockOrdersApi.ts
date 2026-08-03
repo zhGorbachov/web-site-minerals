@@ -61,6 +61,8 @@ function buildOrder(
     totalPrice,
     paymentMethod,
     deliveryMethod: payload?.deliveryMethod ?? 'nova_poshta',
+    payerFullName:
+      paymentMethod === 'bank_transfer' ? payload?.payerFullName?.trim() || null : null,
     liqpayOrderId: isLiqPay ? orderId : null,
     createdAt: new Date().toISOString(),
     items,

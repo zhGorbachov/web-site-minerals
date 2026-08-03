@@ -570,6 +570,11 @@ export function AdminPage() {
                           {' · '}
                           {t('admin.ordersDelivery')}: {order.deliveryMethod}
                         </p>
+                        {order.payerFullName && (
+                          <p className={styles.orderMethods}>
+                            {t('admin.ordersPayerFullName')}: {order.payerFullName}
+                          </p>
+                        )}
 
                         {order.items.length > 0 && (
                           <>

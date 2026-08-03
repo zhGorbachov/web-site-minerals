@@ -192,6 +192,8 @@ model Order {
   totalPrice     Decimal       @db.Decimal(10, 2)
   paymentMethod  String
   deliveryMethod String
+  /** Full name of the bank-transfer payer (as on the card statement), for matching payments. */
+  payerFullName  String?
   liqpayOrderId  String?       @unique
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

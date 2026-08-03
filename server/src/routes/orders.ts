@@ -18,12 +18,23 @@ const guestOrderItemSchema = z.object({
   selectedOptions: z.record(z.string()).optional(),
 })
 
-const createOrderSchema = z.object({
-  paymentMethod: z.string().min(1).default('cod'),
-  deliveryMethod: z.string().min(1).default('nova_poshta'),
-  language: z.enum(['uk', 'en']).optional(),
-  items: z.array(guestOrderItemSchema).optional(),
-})
+const createOrderSchema = z
+  .object({
+    paymentMethod: z.string().min(1).default('cod'),
+    deliveryMethod: z.string().min(1).default('nova_poshta'),
+    language: z.enum(['uk', 'en']).optional(),
+    payerFullName: z.string().trim().optional(),
+    items: z.array(guestOrderItemSchema).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.paymentMethod === 'bank_transfer' && !data.payerFullName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'payerFullName is required for bank transfer',
+        path: ['payerFullName'],
+      })
+    }
+  })
 
 function mapOrder(order: {
   id: string
@@ -33,6 +44,7 @@ function mapOrder(order: {
   totalPrice: { toNumber?: () => number } | number
   paymentMethod: string
   deliveryMethod: string
+  payerFullName?: string | null
   liqpayOrderId: string | null
   createdAt: Date
   items: Array<{
@@ -53,6 +65,7 @@ function mapOrder(order: {
     totalPrice: Number(order.totalPrice),
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
+    payerFullName: order.payerFullName ?? null,
     liqpayOrderId: order.liqpayOrderId,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
@@ -187,6 +200,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           totalPrice,
           paymentMethod: parsed.data.paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
+          payerFullName:
+            parsed.data.paymentMethod === 'bank_transfer'
+              ? parsed.data.payerFullName!
+              : null,
           items: {
             create: pricedLines,
           },
@@ -283,6 +300,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           totalPrice,
           paymentMethod: parsed.data.paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
+          payerFullName:
+            parsed.data.paymentMethod === 'bank_transfer'
+              ? parsed.data.payerFullName!
+              : null,
           items: {
             create: pricedLines.map((item) => ({
               productId: item.product.id,

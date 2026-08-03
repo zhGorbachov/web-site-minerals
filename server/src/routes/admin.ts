@@ -366,6 +366,7 @@ function mapAdminOrder(order: {
   totalPrice: { toNumber?: () => number } | number
   paymentMethod: string
   deliveryMethod: string
+  payerFullName?: string | null
   liqpayOrderId: string | null
   createdAt: Date
   items: Array<{
@@ -392,6 +393,7 @@ function mapAdminOrder(order: {
     totalPrice: Number(order.totalPrice),
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
+    payerFullName: order.payerFullName ?? null,
     liqpayOrderId: order.liqpayOrderId,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({

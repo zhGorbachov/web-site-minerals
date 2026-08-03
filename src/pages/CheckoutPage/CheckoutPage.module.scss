@@ -488,7 +488,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 10px;
   padding: $spacing-3;
   border: 1px solid $color-border;
   border-radius: $radius-md;
@@ -522,6 +521,12 @@
   letter-spacing: 0.02em;
   word-break: break-all;
   line-height: $line-height-normal;
+}
+
+.bankPayerField {
+  margin-top: $spacing-2;
+  padding-top: $spacing-3;
+  border-top: 1px solid $color-border;
 }
 
 .payRow {

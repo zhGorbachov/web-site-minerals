@@ -5,6 +5,8 @@ export type CreateOrderPayload = {
   paymentMethod?: string
   deliveryMethod?: string
   language?: 'uk' | 'en'
+  /** Required for bank_transfer — full name of the payer as on the bank statement. */
+  payerFullName?: string
   items?: CartItem[]
 }
 
@@ -37,6 +39,10 @@ export const OrdersApi = {
       paymentMethod: payload?.paymentMethod,
       deliveryMethod: payload?.deliveryMethod,
       language: payload?.language,
+    }
+
+    if (payload?.payerFullName?.trim()) {
+      body.payerFullName = payload.payerFullName.trim()
     }
 
     if (!getAuthToken() && payload?.items?.length) {

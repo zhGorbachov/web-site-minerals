@@ -51,6 +51,7 @@ type FieldKey =
   | 'branch'
   | 'postalIndex'
   | 'payment'
+  | 'payerFullName'
 
 type FieldErrors = Partial<Record<FieldKey, boolean>>
 
@@ -63,6 +64,7 @@ const FIELD_STEP: Record<FieldKey, StepId> = {
   branch: 2,
   postalIndex: 2,
   payment: 3,
+  payerFullName: 3,
 }
 
 const emptyLocation = (): CheckoutLocation => ({
@@ -213,6 +215,7 @@ export function CheckoutPage() {
   })
   const [location, setLocation] = useState<CheckoutLocation>(emptyLocation)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
+  const [payerFullName, setPayerFullName] = useState('')
   const [comment, setComment] = useState('')
   const [commentOpen, setCommentOpen] = useState(false)
   const [errorStep, setErrorStep] = useState<StepId | null>(null)
@@ -462,6 +465,9 @@ export function CheckoutPage() {
     }
 
     if (!paymentMethod) errors.payment = true
+    if (paymentMethod === 'bank_transfer' && !payerFullName.trim()) {
+      errors.payerFullName = true
+    }
 
     const order: FieldKey[] = [
       'firstName',
@@ -472,6 +478,7 @@ export function CheckoutPage() {
       'branch',
       'postalIndex',
       'payment',
+      'payerFullName',
     ]
     const first = order.find((key) => errors[key]) ?? null
 
@@ -482,6 +489,7 @@ export function CheckoutPage() {
     else if (first === 'address') message = t('checkout.errorAddress')
     else if (first === 'branch') message = t('checkout.errorBranch')
     else if (first === 'payment') message = t('checkout.errorPayment')
+    else if (first === 'payerFullName') message = t('checkout.errorPayerFullName')
     else if (first) message = t('checkout.errorRequired')
 
     return { errors, first, message }
@@ -660,6 +668,9 @@ export function CheckoutPage() {
         paymentMethod,
         deliveryMethod: location.deliveryMethod,
         language: language === 'en' ? 'en' : 'uk',
+        ...(paymentMethod === 'bank_transfer'
+          ? { payerFullName: payerFullName.trim() }
+          : {}),
         ...(!user ? { items } : {}),
       })
       await clearCart()
@@ -680,6 +691,7 @@ export function CheckoutPage() {
   const selectPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethod(method)
     clearFieldError('payment')
+    if (method !== 'bank_transfer') clearFieldError('payerFullName')
     setError(null)
     setErrorStep(null)
   }
@@ -1047,30 +1059,36 @@ export function CheckoutPage() {
               title={t('checkout.stepPayment')}
               expanded={expandedSteps[3]}
               done={Boolean(paymentMethod)}
-              invalid={Boolean(fieldErrors.payment)}
+              invalid={Boolean(fieldErrors.payment || fieldErrors.payerFullName)}
               onToggle={() => toggleStep(3)}
             >
               <div className={styles.optionList} data-checkout-field="payment">
-                <button
-                  type="button"
+                <div
                   className={[
                     styles.optionCard,
                     paymentMethod === 'bank_transfer' ? styles.selected : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  onClick={() => selectPaymentMethod('bank_transfer')}
                 >
-                  <span className={styles.radio}>
-                    {paymentMethod === 'bank_transfer' && <span className={styles.dot} />}
-                  </span>
-                  <span className={styles.optionIcon}>
-                    <BankTransferIcon />
-                  </span>
-                  <span className={styles.optionContent}>
-                    <span className={styles.optionTitle}>{t('checkout.paymentBank')}</span>
-                    <span className={styles.optionHint}>{t('checkout.paymentBankHint')}</span>
-                    {paymentMethod === 'bank_transfer' && (
+                  <button
+                    type="button"
+                    className={styles.optionCardHeader}
+                    onClick={() => selectPaymentMethod('bank_transfer')}
+                  >
+                    <span className={styles.radio}>
+                      {paymentMethod === 'bank_transfer' && <span className={styles.dot} />}
+                    </span>
+                    <span className={styles.optionIcon}>
+                      <BankTransferIcon />
+                    </span>
+                    <span className={styles.optionContent}>
+                      <span className={styles.optionTitle}>{t('checkout.paymentBank')}</span>
+                      <span className={styles.optionHint}>{t('checkout.paymentBankHint')}</span>
+                    </span>
+                  </button>
+                  {paymentMethod === 'bank_transfer' && (
+                    <div className={styles.optionCardBody}>
                       <div className={styles.bankDetails}>
                         <div className={styles.bankDetailRow}>
                           <span className={styles.bankDetailLabel}>
@@ -1104,10 +1122,25 @@ export function CheckoutPage() {
                             {t('checkout.paymentBankPurpose')}
                           </span>
                         </div>
+                        <div className={styles.bankPayerField} data-checkout-field="payerFullName">
+                          <Input
+                            label={t('checkout.paymentBankPayerFullName')}
+                            value={payerFullName}
+                            onChange={(e) => {
+                              clearFieldError('payerFullName')
+                              setPayerFullName(e.target.value)
+                            }}
+                            placeholder={t('checkout.paymentBankPayerFullNamePlaceholder')}
+                            hint={t('checkout.paymentBankPayerFullNameHint')}
+                            autoComplete="name"
+                            required
+                            invalid={Boolean(fieldErrors.payerFullName)}
+                          />
+                        </div>
                       </div>
-                    )}
-                  </span>
-                </button>
+                    </div>
+                  )}
+                </div>
 
                 <button
                   type="button"

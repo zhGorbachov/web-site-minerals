@@ -147,6 +147,9 @@ export type UiTranslationSchema = {
     paymentBankTaxId: string
     paymentBankPurposeLabel: string
     paymentBankPurpose: string
+    paymentBankPayerFullName: string
+    paymentBankPayerFullNameHint: string
+    paymentBankPayerFullNamePlaceholder: string
     paymentGooglePay: string
     paymentGooglePayHint: string
     paymentApplePay: string
@@ -174,6 +177,7 @@ export type UiTranslationSchema = {
     errorAddress: string
     errorPostalIndex: string
     errorPayment: string
+    errorPayerFullName: string
     errorSubmit: string
     contactSummary: string
     locationSummaryBranch: string
@@ -390,6 +394,7 @@ export type UiTranslationSchema = {
     ordersItemPrice: string
     ordersDelivery: string
     ordersPaymentMethod: string
+    ordersPayerFullName: string
     ordersPaginationAria: string
     paymentStatus: {
       unpaid: string
@@ -633,6 +638,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Призначення',
     paymentBankPurpose: 'Оплата за товар',
+    paymentBankPayerFullName: 'ПІБ платника',
+    paymentBankPayerFullNameHint:
+      'Прізвище, імʼя та по батькові — як у банківській виписці з картки, з якої буде оплата',
+    paymentBankPayerFullNamePlaceholder: 'Прізвище Імʼя По батькові',
     paymentGooglePay: 'Google Pay',
     paymentGooglePayHint: 'Оплата через LiqPay',
     paymentApplePay: 'Apple Pay',
@@ -660,6 +669,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     errorAddress: 'Вкажіть адресу доставки',
     errorPostalIndex: 'Вкажіть коректний 5-значний поштовий індекс',
     errorPayment: 'Оберіть спосіб оплати',
+    errorPayerFullName: 'Вкажіть ПІБ платника як у банківській виписці',
     errorSubmit: 'Не вдалося оформити замовлення. Спробуйте ще раз',
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, відділення: {branch}',
@@ -877,6 +887,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ordersItemPrice: 'ціна',
     ordersDelivery: 'Доставка',
     ordersPaymentMethod: 'Спосіб оплати',
+    ordersPayerFullName: 'ПІБ платника',
     ordersPaginationAria: 'Сторінки замовлень',
     paymentStatus: {
       unpaid: 'Не оплачено',
@@ -1125,6 +1136,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Payment purpose',
     paymentBankPurpose: 'Payment for goods',
+    paymentBankPayerFullName: 'Payer full name',
+    paymentBankPayerFullNameHint:
+      'Surname, first name and patronymic — as shown on the bank statement of the card you will pay from',
+    paymentBankPayerFullNamePlaceholder: 'Surname First name Patronymic',
     paymentGooglePay: 'Google Pay',
     paymentGooglePayHint: 'Pay via LiqPay',
     paymentApplePay: 'Apple Pay',
@@ -1152,6 +1167,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     errorAddress: 'Enter a delivery address',
     errorPostalIndex: 'Enter a valid 5-digit postal index',
     errorPayment: 'Select a payment method',
+    errorPayerFullName: 'Enter the payer full name as on the bank statement',
     errorSubmit: 'Could not place the order. Please try again',
     contactSummary: '{name}, {phone}',
     locationSummaryBranch: '{city}, branch: {branch}',
@@ -1369,6 +1385,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ordersItemPrice: 'price',
     ordersDelivery: 'Delivery',
     ordersPaymentMethod: 'Payment method',
+    ordersPayerFullName: 'Payer full name',
     ordersPaginationAria: 'Order pages',
     paymentStatus: {
       unpaid: 'Unpaid',
