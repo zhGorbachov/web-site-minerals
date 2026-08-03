@@ -111,11 +111,7 @@ export function CheckoutResultPage() {
                 {t('cart.continueShopping')}
               </Button>
               {view === 'paid' && (
-                <Button
-                  as={Link}
-                  to={`/login?returnTo=${encodeURIComponent('/profile#review')}`}
-                  variant="secondary"
-                >
+                <Button as={Link} to="/about#leave-review" variant="secondary">
                   {t('storeReviews.leaveReview')}
                 </Button>
               )}

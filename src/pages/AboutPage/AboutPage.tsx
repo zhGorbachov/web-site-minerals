@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { isAxiosError } from 'axios'
 import {
   Heart,
   Truck,
@@ -17,14 +18,17 @@ import {
 } from 'lucide-react'
 import type { StoreReview, StoreReviewSort } from '@/types'
 import { ReviewsApi } from '@/api'
-import { Breadcrumbs, Loader } from '@/components/ui'
+import { Breadcrumbs, Button, Loader } from '@/components/ui'
 import { NovaPoshtaIcon, UkrposhtaIcon, CashOnDeliveryIcon } from '@/components/BrandIcons'
 import { mockImages } from '@/assets/mock/Images'
 import { scrollToHashTarget } from '@/utils/hashNav'
 import { useTranslation } from '@/i18n/useTranslation'
 import { translations } from '@/i18n/Translations'
+import { useAuthStore } from '@/store'
 import { useLanguageStore } from '@/store/languageStore'
 import styles from './AboutPage.module.scss'
+
+const GUEST_REVIEW_DONE_KEY = 'crystal-guest-review-done'
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -66,6 +70,7 @@ export function AboutPage() {
   const location = useLocation()
   const { t, language } = useTranslation()
   const languageStore = useLanguageStore((state) => state.language)
+  const user = useAuthStore((s) => s.user)
   const about = translations[languageStore].about
 
   const [reviews, setReviews] = useState<StoreReview[]>([])
@@ -73,6 +78,18 @@ export function AboutPage() {
   const [sort, setSort] = useState<StoreReviewSort>('date')
   const [sortOpen, setSortOpen] = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
+
+  const [guestRating, setGuestRating] = useState(5)
+  const [guestText, setGuestText] = useState('')
+  const [guestSubmitting, setGuestSubmitting] = useState(false)
+  const [guestError, setGuestError] = useState<string | null>(null)
+  const [guestDone, setGuestDone] = useState(() => {
+    try {
+      return localStorage.getItem(GUEST_REVIEW_DONE_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
 
   useEffect(() => {
     if (!sortOpen) return
@@ -93,7 +110,7 @@ export function AboutPage() {
     }, 200)
 
     return () => window.clearTimeout(timer)
-  }, [location.pathname, location.hash, reviewsLoading])
+  }, [location.pathname, location.hash, reviewsLoading, guestDone])
 
   useEffect(() => {
     let cancelled = false
@@ -115,6 +132,37 @@ export function AboutPage() {
 
   const sortLabel = sort === 'rating' ? t('storeReviews.sortByRating') : t('storeReviews.sortByDate')
 
+  const reviewAuthorLabel = (review: StoreReview) =>
+    review.userId ? review.author : t('storeReviews.anonymousAuthor')
+
+  const handleGuestReviewSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setGuestError(null)
+    setGuestSubmitting(true)
+    try {
+      const review = await ReviewsApi.create({
+        rating: guestRating,
+        text: guestText,
+        language: language === 'en' ? 'en' : 'uk',
+      })
+      try {
+        localStorage.setItem(GUEST_REVIEW_DONE_KEY, '1')
+      } catch {
+        /* ignore */
+      }
+      setGuestDone(true)
+      setGuestText('')
+      setReviews((prev) => [review, ...prev].slice(0, 5))
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data?.error === 'invalid_payload') {
+        setGuestError(t('profile.reviewPlaceholder'))
+      } else {
+        setGuestError(t('profile.reviewError'))
+      }
+    } finally {
+      setGuestSubmitting(false)
+    }
+  }
   return (
     <div className={styles.page}>
       <div className="container">
@@ -285,7 +333,7 @@ export function AboutPage() {
                   </div>
                   <p className={styles.reviewText}>{review.text}</p>
                   <div className={styles.reviewMeta}>
-                    <p className={styles.reviewAuthor}>{review.author}</p>
+                    <p className={styles.reviewAuthor}>{reviewAuthorLabel(review)}</p>
                     <time className={styles.reviewDate} dateTime={review.createdAt}>
                       {new Date(review.createdAt).toLocaleDateString(language === 'uk' ? 'uk-UA' : 'en-US')}
                     </time>
@@ -293,6 +341,69 @@ export function AboutPage() {
                 </article>
               ))}
             </div>
+          )}
+        </motion.section>
+
+        <motion.section {...fadeIn} className={styles.section} id="leave-review">
+          <div className={styles.sectionHeader}>
+            <div className={[styles.sectionIconWrap, SECTION_ICONS.reviews.tone].join(' ')}>
+              <SECTION_ICONS.reviews.icon size={22} />
+            </div>
+            <h2 className={styles.sectionTitle}>{t('storeReviews.guestFormTitle')}</h2>
+          </div>
+
+          {user ? (
+            <div className={styles.leaveReviewBox}>
+              <p className={styles.leaveReviewHint}>{t('profile.reviewHint')}</p>
+              <Button as={Link} to="/profile#review">
+                {t('storeReviews.leaveReview')}
+              </Button>
+            </div>
+          ) : guestDone ? (
+            <p className={styles.leaveReviewSuccess}>{t('storeReviews.guestSuccess')}</p>
+          ) : (
+            <form className={styles.leaveReviewForm} onSubmit={handleGuestReviewSubmit}>
+              <p className={styles.leaveReviewHint}>{t('storeReviews.guestHint')}</p>
+              <fieldset className={styles.ratingField}>
+                <legend className={styles.ratingLabel}>{t('profile.reviewRatingLabel')}</legend>
+                <div className={styles.ratingStars}>
+                  {Array.from({ length: 5 }).map((_, index) => {
+                    const value = index + 1
+                    const active = value <= guestRating
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        className={[styles.ratingStarBtn, active ? styles.ratingStarBtnActive : '']
+                          .filter(Boolean)
+                          .join(' ')}
+                        onClick={() => setGuestRating(value)}
+                        aria-label={t('about.reviewRating', { rating: value })}
+                      >
+                        <Star size={22} fill={active ? 'currentColor' : 'none'} />
+                      </button>
+                    )
+                  })}
+                </div>
+              </fieldset>
+              <label className={styles.reviewTextLabel}>
+                <span className={styles.srOnly}>{t('storeReviews.guestFormTitle')}</span>
+                <textarea
+                  className={styles.reviewTextarea}
+                  value={guestText}
+                  onChange={(e) => setGuestText(e.target.value)}
+                  placeholder={t('profile.reviewPlaceholder')}
+                  rows={4}
+                  maxLength={1000}
+                  required
+                  minLength={10}
+                />
+              </label>
+              {guestError && <p className={styles.leaveReviewError}>{guestError}</p>}
+              <Button type="submit" disabled={guestSubmitting || guestText.trim().length < 10}>
+                {t('profile.reviewSubmit')}
+              </Button>
+            </form>
           )}
         </motion.section>
 

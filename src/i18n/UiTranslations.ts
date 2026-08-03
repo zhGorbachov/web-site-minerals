@@ -360,6 +360,10 @@ export type UiTranslationSchema = {
     sortAria: string
     empty: string
     leaveReview: string
+    anonymousAuthor: string
+    guestHint: string
+    guestFormTitle: string
+    guestSuccess: string
   }
   admin: {
     title: string
@@ -853,6 +857,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     sortAria: 'Сортування відгуків',
     empty: 'Відгуків поки немає',
     leaveReview: 'Залишити відгук',
+    anonymousAuthor: 'Анонім',
+    guestHint: 'Відгук буде опубліковано анонімно — без імені та контактів.',
+    guestFormTitle: 'Залишити відгук',
+    guestSuccess: 'Дякуємо! Ваш анонімний відгук опубліковано.',
   },
   admin: {
     title: 'Адмін-панель',
@@ -1351,6 +1359,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     sortAria: 'Sort reviews',
     empty: 'No reviews yet',
     leaveReview: 'Leave a review',
+    anonymousAuthor: 'Anonymous',
+    guestHint: 'Your review will be published anonymously — without your name or contacts.',
+    guestFormTitle: 'Leave a review',
+    guestSuccess: 'Thank you! Your anonymous review has been published.',
   },
   admin: {
     title: 'Admin panel',

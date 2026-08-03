@@ -67,6 +67,44 @@ function getVisiblePageNumbers(currentPage: number, totalPages: number): number[
   return Array.from({ length: VISIBLE_PAGE_NUMBERS }, (_, i) => start + i)
 }
 
+function paymentMethodLabel(
+  method: string,
+  t: (key: TranslationKey) => string,
+): string {
+  switch (method) {
+    case 'bank_transfer':
+      return t('checkout.paymentBank')
+    case 'pickup':
+    case 'cod':
+      return t('checkout.paymentPickup')
+    case 'google_pay':
+      return t('checkout.paymentGooglePay')
+    case 'apple_pay':
+      return t('checkout.paymentApplePay')
+    case 'liqpay':
+      return 'LiqPay'
+    default:
+      return method
+  }
+}
+
+function deliveryMethodLabel(
+  method: string,
+  t: (key: TranslationKey) => string,
+): string {
+  switch (method) {
+    case 'nova_poshta':
+      return t('checkout.novaPoshta')
+    case 'ukrposhta':
+      return t('checkout.ukrposhta')
+    case 'self_pickup':
+    case 'pickup':
+      return t('checkout.selfPickup')
+    default:
+      return method
+  }
+}
+
 const emptyForm: AdminProductPayload = {
   name: '',
   slug: '',
@@ -566,13 +604,16 @@ export function AdminPage() {
                         </div>
 
                         <p className={styles.orderMethods}>
-                          {t('admin.ordersPaymentMethod')}: {order.paymentMethod}
+                          {t('admin.ordersPaymentMethod')}:{' '}
+                          {paymentMethodLabel(order.paymentMethod, t)}
                           {' · '}
-                          {t('admin.ordersDelivery')}: {order.deliveryMethod}
+                          {t('admin.ordersDelivery')}:{' '}
+                          {deliveryMethodLabel(order.deliveryMethod, t)}
                         </p>
-                        {order.payerFullName && (
-                          <p className={styles.orderMethods}>
-                            {t('admin.ordersPayerFullName')}: {order.payerFullName}
+                        {(order.paymentMethod === 'bank_transfer' || order.payerFullName) && (
+                          <p className={styles.orderPayer}>
+                            {t('admin.ordersPayerFullName')}:{' '}
+                            <span>{order.payerFullName?.trim() || '—'}</span>
                           </p>
                         )}
 

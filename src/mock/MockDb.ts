@@ -5,7 +5,7 @@ import { subcategories as seedSubcategories } from './subcategories'
 import { products as seedProducts } from './products'
 
 const STORAGE_KEY = 'crystal-mock-db'
-const STORAGE_VERSION = 7
+const STORAGE_VERSION = 8
 
 export type MockUserRecord = {
   password: string
@@ -100,14 +100,22 @@ function createDemoOrders(): Order[] {
     const day = String((index % 27) + 1).padStart(2, '0')
     const month = String((index % 11) + 1).padStart(2, '0')
 
+    const isBankTransfer = index % 3 === 0
+    const paymentMethod = isBankTransfer
+      ? 'bank_transfer'
+      : index % 3 === 1
+        ? 'pickup'
+        : 'google_pay'
+
     return {
       id,
       userId: DEMO_CUSTOMER.id,
       status,
       totalPrice: unitPrice * quantity,
-      paymentMethod: index % 2 === 0 ? 'cod' : 'liqpay',
+      paymentMethod,
       paymentStatus: payments[index],
-      deliveryMethod: index % 2 === 0 ? 'nova_poshta' : 'pickup',
+      deliveryMethod: index % 2 === 0 ? 'nova_poshta' : 'self_pickup',
+      payerFullName: isBankTransfer ? 'Шевченко Тарас Григорович' : null,
       createdAt: `2026-${month}-${day}T${String(10 + (index % 8)).padStart(2, '0')}:30:00Z`,
       items: [
         {

@@ -28,27 +28,40 @@ export const MockReviewsApi = {
   },
 
   async create(payload: CreateStoreReviewPayload): Promise<StoreReview> {
-    const user = MockDb.resolveSession(getAuthToken())
-    if (!user) throw new MockApiError(401, 'unauthorized')
-
     const rating = Math.trunc(payload.rating)
     const text = payload.text.trim()
     if (rating < 1 || rating > 5 || text.length < 10 || text.length > 1000) {
       throw new MockApiError(400, 'invalid_payload')
     }
 
-    if (MockDb.getReviews().some((review) => review.userId === user.id)) {
-      throw new MockApiError(409, 'already_reviewed')
-    }
+    const user = MockDb.resolveSession(getAuthToken())
 
-    if (MockDb.getOrders(user.id).length === 0) {
-      throw new MockApiError(403, 'purchase_required')
+    if (user) {
+      if (MockDb.getReviews().some((review) => review.userId === user.id)) {
+        throw new MockApiError(409, 'already_reviewed')
+      }
+
+      if (MockDb.getOrders(user.id).length === 0) {
+        throw new MockApiError(403, 'purchase_required')
+      }
+
+      const review: StoreReview = {
+        id: `review-${Date.now()}`,
+        userId: user.id,
+        author: `${user.firstName} ${user.lastName.charAt(0)}.`.trim(),
+        rating,
+        text,
+        createdAt: new Date().toISOString(),
+      }
+
+      MockDb.addReview(review)
+      return review
     }
 
     const review: StoreReview = {
       id: `review-${Date.now()}`,
-      userId: user.id,
-      author: `${user.firstName} ${user.lastName.charAt(0)}.`.trim(),
+      userId: null,
+      author: payload.language === 'en' ? 'Anonymous' : 'Анонім',
       rating,
       text,
       createdAt: new Date().toISOString(),

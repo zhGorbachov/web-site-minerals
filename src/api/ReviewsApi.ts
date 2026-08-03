@@ -23,7 +23,11 @@ export const ReviewsApi = {
   },
 
   async create(payload: CreateStoreReviewPayload) {
-    const { data } = await api.post<StoreReview>('/reviews', payload)
+    const { data } = await api.post<StoreReview>('/reviews', {
+      rating: payload.rating,
+      text: payload.text,
+      ...(payload.language ? { language: payload.language } : {}),
+    })
     return data
   },
 }

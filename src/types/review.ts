@@ -12,4 +12,6 @@ export interface StoreReview {
 export type CreateStoreReviewPayload = {
   rating: number
   text: string
+  /** Used for guest anonymous author label (uk/en). */
+  language?: 'uk' | 'en'
 }

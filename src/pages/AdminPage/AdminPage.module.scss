@@ -417,6 +417,21 @@
   line-height: $line-height-normal;
 }
 
+.orderPayer {
+  margin: $spacing-1 0 0;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+  color: $color-text;
+  line-height: $line-height-normal;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+
+  span {
+    font-weight: $font-weight-semibold;
+  }
+}
+
 .orderTotal {
   display: flex;
   flex-direction: column;

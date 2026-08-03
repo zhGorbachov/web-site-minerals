@@ -321,6 +321,57 @@ export function CheckoutPage() {
     }
   }, [user, profileKey, getProfile])
 
+  const isContactComplete = (value: CheckoutContact = contact) =>
+    Boolean(value.firstName.trim()) &&
+    Boolean(value.lastName.trim()) &&
+    isValidLocalPhone(value.phone)
+
+  const isLocationComplete = (value: CheckoutLocation = location) => {
+    if (value.deliveryMethod === 'self_pickup') return true
+    if (value.deliveryMethod === 'ukrposhta') {
+      return isValidUkrposhtaIndex(value.postalIndex)
+    }
+    if (!value.city.trim() || !value.cityRef) return false
+    if (value.novaPoshtaType === 'courier') return Boolean(value.address.trim())
+    return Boolean(value.branch.trim()) && Boolean(value.warehouseRef)
+  }
+
+  useEffect(() => {
+    if (!isContactComplete(contact)) {
+      setContactDone(false)
+      return
+    }
+    saveContact(profileKey, {
+      firstName: contact.firstName.trim(),
+      lastName: contact.lastName.trim(),
+      phone: normalizeLocalPhone(contact.phone),
+      email: contact.email.trim(),
+    })
+    setContactDone(true)
+  }, [contact, profileKey, saveContact])
+
+  useEffect(() => {
+    if (!isLocationComplete(location)) {
+      setLocationDone(false)
+      return
+    }
+    saveLocation(profileKey, {
+      deliveryMethod: location.deliveryMethod,
+      novaPoshtaType: location.novaPoshtaType,
+      ukrposhtaType: location.ukrposhtaType,
+      city: location.city.trim(),
+      cityRef: location.cityRef,
+      branch: location.branch.trim(),
+      warehouseRef: location.warehouseRef,
+      address:
+        location.deliveryMethod === 'self_pickup'
+          ? t('checkout.selfPickupAddress')
+          : location.address.trim(),
+      postalIndex: location.postalIndex.trim(),
+    })
+    setLocationDone(true)
+  }, [location, profileKey, saveLocation, language])
+
   const toggleStep = (step: StepId) => {
     setExpandedSteps((prev) => ({ ...prev, [step]: !prev[step] }))
   }
@@ -357,12 +408,7 @@ export function CheckoutPage() {
                 <Button as={Link} to="/catalog" size="lg">
                   {t('cart.continueShopping')}
                 </Button>
-                <Button
-                  as={Link}
-                  to={`/login?returnTo=${encodeURIComponent('/profile#review')}`}
-                  variant="secondary"
-                  size="lg"
-                >
+                <Button as={Link} to="/about#leave-review" variant="secondary" size="lg">
                   {t('storeReviews.leaveReview')}
                 </Button>
               </div>
@@ -431,21 +477,6 @@ export function CheckoutPage() {
     })
   })()
 
-  const isContactComplete = (value: CheckoutContact = contact) =>
-    Boolean(value.firstName.trim()) &&
-    Boolean(value.lastName.trim()) &&
-    isValidLocalPhone(value.phone)
-
-  const isLocationComplete = (value: CheckoutLocation = location) => {
-    if (value.deliveryMethod === 'self_pickup') return true
-    if (value.deliveryMethod === 'ukrposhta') {
-      return isValidUkrposhtaIndex(value.postalIndex)
-    }
-    if (!value.city.trim() || !value.cityRef) return false
-    if (value.novaPoshtaType === 'courier') return Boolean(value.address.trim())
-    return Boolean(value.branch.trim()) && Boolean(value.warehouseRef)
-  }
-
   const collectFieldErrors = (): { errors: FieldErrors; first: FieldKey | null; message: string | null } => {
     const errors: FieldErrors = {}
 
@@ -509,42 +540,6 @@ export function CheckoutPage() {
         : location.address.trim(),
     postalIndex: location.postalIndex.trim(),
   })
-
-  useEffect(() => {
-    if (!isContactComplete(contact)) {
-      setContactDone(false)
-      return
-    }
-    saveContact(profileKey, {
-      firstName: contact.firstName.trim(),
-      lastName: contact.lastName.trim(),
-      phone: normalizeLocalPhone(contact.phone),
-      email: contact.email.trim(),
-    })
-    setContactDone(true)
-  }, [contact, profileKey, saveContact])
-
-  useEffect(() => {
-    if (!isLocationComplete(location)) {
-      setLocationDone(false)
-      return
-    }
-    saveLocation(profileKey, {
-      deliveryMethod: location.deliveryMethod,
-      novaPoshtaType: location.novaPoshtaType,
-      ukrposhtaType: location.ukrposhtaType,
-      city: location.city.trim(),
-      cityRef: location.cityRef,
-      branch: location.branch.trim(),
-      warehouseRef: location.warehouseRef,
-      address:
-        location.deliveryMethod === 'self_pickup'
-          ? t('checkout.selfPickupAddress')
-          : location.address.trim(),
-      postalIndex: location.postalIndex.trim(),
-    })
-    setLocationDone(true)
-  }, [location, profileKey, saveLocation, language])
 
   const setDeliveryMethod = (method: DeliveryMethod) => {
     setFieldErrors((prev) => {
