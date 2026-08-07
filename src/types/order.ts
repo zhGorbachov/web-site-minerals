@@ -31,25 +31,8 @@ export interface Order {
   deliveryMethod: string
   /** Full name of the bank-transfer payer (as on the card statement). */
   payerFullName?: string | null
-  liqpayOrderId?: string | null
   items: OrderItem[]
   createdAt: string
 }
 
-export type OrderPaymentCheckout = {
-  data: string
-  signature: string
-  checkoutUrl: string
-}
-
-export type CreateOrderResult = Order & {
-  payment?: OrderPaymentCheckout
-}
-
-export type OrderPaymentStatus = {
-  id: string
-  status: OrderStatus
-  paymentStatus: PaymentStatus
-  paymentMethod: string
-  totalPrice: number
-}
+export type CreateOrderResult = Order

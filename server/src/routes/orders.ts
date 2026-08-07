@@ -2,8 +2,6 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { optionalAuth, requireAuth } from '../lib/auth.js'
-import { env, isLiqPayConfigured } from '../lib/env.js'
-import { encodeCheckout } from '../lib/liqpay.js'
 import {
   calculateCartPricing,
   getDiscountedUnitPrice,
@@ -20,7 +18,7 @@ const guestOrderItemSchema = z.object({
 
 const createOrderSchema = z
   .object({
-    paymentMethod: z.string().min(1).default('cod'),
+    paymentMethod: z.enum(['bank_transfer', 'pickup', 'cod']).default('pickup'),
     deliveryMethod: z.string().min(1).default('nova_poshta'),
     language: z.enum(['uk', 'en']).optional(),
     payerFullName: z.string().trim().optional(),
@@ -45,7 +43,6 @@ function mapOrder(order: {
   paymentMethod: string
   deliveryMethod: string
   payerFullName?: string | null
-  liqpayOrderId: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -66,7 +63,6 @@ function mapOrder(order: {
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
     payerFullName: order.payerFullName ?? null,
-    liqpayOrderId: order.liqpayOrderId,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,
@@ -80,25 +76,6 @@ function mapOrder(order: {
   }
 }
 
-function buildLiqPayPayment(order: {
-  id: string
-  totalPrice: { toNumber?: () => number } | number
-  liqpayOrderId: string | null
-}, language?: 'uk' | 'en') {
-  const liqpayOrderId = order.liqpayOrderId!
-  const amount = Number(order.totalPrice)
-  return {
-    payment: encodeCheckout({
-      amount,
-      orderId: liqpayOrderId,
-      description: `Order ${order.id}`,
-      language,
-      resultUrl: `${env.clientUrl}/checkout/result?orderId=${encodeURIComponent(order.id)}`,
-      serverUrl: `${env.apiUrl}/api/payments/liqpay/callback`,
-    }),
-  }
-}
-
 ordersRouter.get('/', requireAuth, async (req, res) => {
   const orders = await prisma.order.findMany({
     where: { userId: req.userId },
@@ -109,32 +86,6 @@ ordersRouter.get('/', requireAuth, async (req, res) => {
   res.json(orders.map(mapOrder))
 })
 
-ordersRouter.get('/:id/payment-status', async (req, res) => {
-  const order = await prisma.order.findUnique({
-    where: { id: req.params.id },
-    select: {
-      id: true,
-      status: true,
-      paymentStatus: true,
-      paymentMethod: true,
-      totalPrice: true,
-    },
-  })
-
-  if (!order) {
-    res.status(404).json({ error: 'Order not found' })
-    return
-  }
-
-  res.json({
-    id: order.id,
-    status: order.status,
-    paymentStatus: order.paymentStatus,
-    paymentMethod: order.paymentMethod,
-    totalPrice: Number(order.totalPrice),
-  })
-})
-
 ordersRouter.post('/', optionalAuth, async (req, res) => {
   const parsed = createOrderSchema.safeParse(req.body ?? {})
   if (!parsed.success) {
@@ -142,16 +93,8 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
     return
   }
 
-  const isLiqPay =
-    parsed.data.paymentMethod === 'liqpay' ||
-    parsed.data.paymentMethod === 'google_pay' ||
-    parsed.data.paymentMethod === 'apple_pay'
-  if (isLiqPay && !isLiqPayConfigured()) {
-    res.status(503).json({ error: 'Online payment is not configured' })
-    return
-  }
-
-  const paymentStatus = isLiqPay ? 'awaiting_payment' : 'unpaid'
+  const paymentMethod =
+    parsed.data.paymentMethod === 'cod' ? 'pickup' : parsed.data.paymentMethod
 
   if (req.userId) {
     const [cart, user] = await Promise.all([
@@ -196,28 +139,18 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         data: {
           userId: req.userId!,
           status: 'pending',
-          paymentStatus,
+          paymentStatus: 'unpaid',
           totalPrice,
-          paymentMethod: parsed.data.paymentMethod,
+          paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
           payerFullName:
-            parsed.data.paymentMethod === 'bank_transfer'
-              ? parsed.data.payerFullName!
-              : null,
+            paymentMethod === 'bank_transfer' ? parsed.data.payerFullName! : null,
           items: {
             create: pricedLines,
           },
         },
         include: { items: true },
       })
-
-      const withLiqPayId = isLiqPay
-        ? await tx.order.update({
-            where: { id: created.id },
-            data: { liqpayOrderId: created.id },
-            include: { items: true },
-          })
-        : created
 
       for (const item of cart.items) {
         await tx.product.update({
@@ -227,16 +160,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       }
 
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } })
-      return withLiqPayId
+      return created
     })
 
-    const mapped = mapOrder(order)
-    if (isLiqPay) {
-      res.status(201).json({ ...mapped, ...buildLiqPayPayment(order, parsed.data.language) })
-      return
-    }
-
-    res.status(201).json(mapped)
+    res.status(201).json(mapOrder(order))
     return
   }
 
@@ -296,14 +223,12 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         data: {
           userId: null,
           status: 'pending',
-          paymentStatus,
+          paymentStatus: 'unpaid',
           totalPrice,
-          paymentMethod: parsed.data.paymentMethod,
+          paymentMethod,
           deliveryMethod: parsed.data.deliveryMethod,
           payerFullName:
-            parsed.data.paymentMethod === 'bank_transfer'
-              ? parsed.data.payerFullName!
-              : null,
+            paymentMethod === 'bank_transfer' ? parsed.data.payerFullName! : null,
           items: {
             create: pricedLines.map((item) => ({
               productId: item.product.id,
@@ -317,14 +242,6 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         include: { items: true },
       })
 
-      const withLiqPayId = isLiqPay
-        ? await tx.order.update({
-            where: { id: created.id },
-            data: { liqpayOrderId: created.id },
-            include: { items: true },
-          })
-        : created
-
       for (const item of resolvedItems) {
         await tx.product.update({
           where: { id: item.product.id },
@@ -332,16 +249,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         })
       }
 
-      return withLiqPayId
+      return created
     })
 
-    const mapped = mapOrder(order)
-    if (isLiqPay) {
-      res.status(201).json({ ...mapped, ...buildLiqPayPayment(order, parsed.data.language) })
-      return
-    }
-
-    res.status(201).json(mapped)
+    res.status(201).json(mapOrder(order))
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Could not create order'
     if (message === 'Product not found' || message === 'Insufficient stock') {

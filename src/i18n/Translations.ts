@@ -206,7 +206,7 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           title: 'Оплата',
-          text: 'Оплата на рахунок, післяплатою, а також Apple Pay і Google Pay.',
+          text: 'Оплата на рахунок або післяплатою.',
         },
       ],
       values: [
@@ -376,7 +376,7 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           title: 'Payment',
-          text: 'Bank transfer, cash on delivery, as well as Apple Pay and Google Pay.',
+          text: 'Bank transfer or cash on delivery.',
         },
       ],
       values: [

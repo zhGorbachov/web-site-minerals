@@ -4,12 +4,7 @@ export type NovaPoshtaType = 'warehouse' | 'parcel_locker' | 'courier'
 
 export type UkrposhtaType = 'basic' | 'priority'
 
-export type PaymentMethod = 'bank_transfer' | 'pickup' | 'google_pay' | 'apple_pay'
-
-/** Payment methods that redirect through LiqPay checkout. */
-export function isLiqPayPaymentMethod(method: string | null | undefined): boolean {
-  return method === 'google_pay' || method === 'apple_pay' || method === 'liqpay'
-}
+export type PaymentMethod = 'bank_transfer' | 'pickup'
 
 export interface CheckoutContact {
   firstName: string

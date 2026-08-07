@@ -1,4 +1,4 @@
-import type { Order, CartItem, CreateOrderResult, OrderPaymentStatus } from '@/types'
+import type { Order, CartItem, CreateOrderResult } from '@/types'
 import { api, mediaUrl, getAuthToken } from './client'
 
 export type CreateOrderPayload = {
@@ -50,15 +50,6 @@ export const OrdersApi = {
     }
 
     const { data } = await api.post<CreateOrderResult>('/orders', body)
-    const { payment, ...order } = data
-    return {
-      ...mapOrder(order),
-      ...(payment ? { payment } : {}),
-    }
-  },
-
-  async paymentStatus(orderId: string) {
-    const { data } = await api.get<OrderPaymentStatus>(`/orders/${orderId}/payment-status`)
-    return data
+    return mapOrder(data)
   },
 }

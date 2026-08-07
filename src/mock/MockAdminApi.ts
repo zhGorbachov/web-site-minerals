@@ -236,10 +236,7 @@ export const MockAdminApi = {
     const orders = MockDb.getAllOrders()
       .filter((order) => {
         if (!q) return true
-        return (
-          order.id.toLowerCase().includes(q) ||
-          (order.liqpayOrderId?.toLowerCase().includes(q) ?? false)
-        )
+        return order.id.toLowerCase().includes(q)
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 

@@ -77,12 +77,6 @@ function paymentMethodLabel(
     case 'pickup':
     case 'cod':
       return t('checkout.paymentPickup')
-    case 'google_pay':
-      return t('checkout.paymentGooglePay')
-    case 'apple_pay':
-      return t('checkout.paymentApplePay')
-    case 'liqpay':
-      return 'LiqPay'
     default:
       return method
   }
@@ -236,11 +230,7 @@ export function AdminPage() {
   const filteredOrders = useMemo(() => {
     const q = orderSearch.trim().toLowerCase()
     if (!q) return orders
-    return orders.filter(
-      (order) =>
-        order.id.toLowerCase().includes(q) ||
-        (order.liqpayOrderId?.toLowerCase().includes(q) ?? false),
-    )
+    return orders.filter((order) => order.id.toLowerCase().includes(q))
   }, [orders, orderSearch])
 
   const ordersTotalPages = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PAGE_SIZE))

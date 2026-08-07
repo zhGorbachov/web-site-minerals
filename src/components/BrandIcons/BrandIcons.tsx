@@ -1,7 +1,5 @@
 import novaPoshtaIcon from '@/assets/icons/NovaPoshta.png'
 import ukrposhtaIcon from '@/assets/icons/Ukrposhta.png'
-import applePayIcon from '@/assets/icons/ApplePay.png'
-import googlePayIcon from '@/assets/icons/GooglePay.png'
 import bankTransferIcon from '@/assets/icons/BankTransfer.png'
 import cashOnDeliveryIcon from '@/assets/icons/CashOnDelivery.png'
 import selfPickupIcon from '@/assets/icons/SelfPickup.png'
@@ -78,40 +76,10 @@ export function SelfPickupIcon({ className }: IconProps) {
   )
 }
 
-export function ApplePayIcon({ className }: IconProps) {
-  return (
-    <BrandImage
-      src={applePayIcon}
-      className={[styles.payBadge, className].filter(Boolean).join(' ')}
-    />
-  )
-}
-
-export function GooglePayIcon({ className }: IconProps) {
-  return (
-    <BrandImage
-      src={googlePayIcon}
-      className={[styles.payBadge, className].filter(Boolean).join(' ')}
-    />
-  )
-}
-
-/** Google Pay + Apple Pay badges for online (LiqPay) payment. */
-export function OnlinePayIcons({ className }: IconProps) {
-  return (
-    <span className={[styles.payRow, className].filter(Boolean).join(' ')}>
-      <GooglePayIcon />
-      <ApplePayIcon />
-    </span>
-  )
-}
-
 export const BRAND_ICON_SRC = {
   novaPoshta: novaPoshtaIcon,
   ukrposhta: ukrposhtaIcon,
   bankTransfer: bankTransferIcon,
   cashOnDelivery: cashOnDeliveryIcon,
   selfPickup: selfPickupIcon,
-  applePay: applePayIcon,
-  googlePay: googlePayIcon,
 } as const

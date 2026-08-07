@@ -21,7 +21,6 @@ import type {
   PaymentMethod,
   UkrposhtaType,
 } from '@/types'
-import { isLiqPayPaymentMethod } from '@/types'
 import { NovaPoshtaApi, OrdersApi } from '@/api'
 import {
   NovaPoshtaIcon,
@@ -29,8 +28,6 @@ import {
   BankTransferIcon,
   CashOnDeliveryIcon,
   SelfPickupIcon,
-  GooglePayIcon,
-  ApplePayIcon,
 } from '@/components/BrandIcons'
 import { useAuthStore, useCartStore, useCheckoutStore, GUEST_CHECKOUT_PROFILE_KEY } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -89,29 +86,6 @@ function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
 
 function isValidUkrposhtaIndex(value: string) {
   return /^\d{5}$/.test(value.trim())
-}
-
-function redirectToLiqPay(payment: { data: string; signature: string; checkoutUrl: string }) {
-  const form = document.createElement('form')
-  form.method = 'POST'
-  form.action = payment.checkoutUrl
-  form.acceptCharset = 'utf-8'
-  form.style.display = 'none'
-
-  const dataInput = document.createElement('input')
-  dataInput.type = 'hidden'
-  dataInput.name = 'data'
-  dataInput.value = payment.data
-  form.appendChild(dataInput)
-
-  const signatureInput = document.createElement('input')
-  signatureInput.type = 'hidden'
-  signatureInput.name = 'signature'
-  signatureInput.value = payment.signature
-  form.appendChild(signatureInput)
-
-  document.body.appendChild(form)
-  form.submit()
 }
 
 function StepBadge({
@@ -659,7 +633,7 @@ export function CheckoutPage() {
     setError(null)
     setErrorStep(null)
     try {
-      const result = await OrdersApi.create({
+      await OrdersApi.create({
         paymentMethod,
         deliveryMethod: location.deliveryMethod,
         language: language === 'en' ? 'en' : 'uk',
@@ -669,12 +643,6 @@ export function CheckoutPage() {
         ...(!user ? { items } : {}),
       })
       await clearCart()
-
-      if (isLiqPayPaymentMethod(paymentMethod) && result.payment) {
-        redirectToLiqPay(result.payment)
-        return
-      }
-
       setSuccess(true)
     } catch {
       setError(t('checkout.errorSubmit'))
@@ -1156,48 +1124,6 @@ export function CheckoutPage() {
                   <span className={styles.optionContent}>
                     <span className={styles.optionTitle}>{t('checkout.paymentPickup')}</span>
                     <span className={styles.optionHint}>{t('checkout.paymentPickupHint')}</span>
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={[
-                    styles.optionCard,
-                    paymentMethod === 'google_pay' ? styles.selected : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  onClick={() => selectPaymentMethod('google_pay')}
-                >
-                  <span className={styles.radio}>
-                    {paymentMethod === 'google_pay' && <span className={styles.dot} />}
-                  </span>
-                  <span className={styles.optionIconWide}>
-                    <GooglePayIcon />
-                  </span>
-                  <span className={styles.optionContent}>
-                    <span className={styles.optionTitle}>{t('checkout.paymentGooglePay')}</span>
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={[
-                    styles.optionCard,
-                    paymentMethod === 'apple_pay' ? styles.selected : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  onClick={() => selectPaymentMethod('apple_pay')}
-                >
-                  <span className={styles.radio}>
-                    {paymentMethod === 'apple_pay' && <span className={styles.dot} />}
-                  </span>
-                  <span className={styles.optionIconWide}>
-                    <ApplePayIcon />
-                  </span>
-                  <span className={styles.optionContent}>
-                    <span className={styles.optionTitle}>{t('checkout.paymentApplePay')}</span>
                   </span>
                 </button>
               </div>

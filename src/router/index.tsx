@@ -17,9 +17,6 @@ const ForgotPasswordPage = lazy(() =>
 )
 const ProfilePage    = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const CheckoutPage   = lazy(() => import('@/pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })))
-const CheckoutResultPage = lazy(() =>
-  import('@/pages/CheckoutResultPage').then((m) => ({ default: m.CheckoutResultPage })),
-)
 const AdminPage      = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })))
 const AuthCallbackPage = lazy(() =>
   import('@/pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })),
@@ -147,14 +144,6 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageFallback />}>
             <CheckoutPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'checkout/result',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CheckoutResultPage />
           </Suspense>
         ),
       },

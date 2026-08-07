@@ -44,7 +44,7 @@ services:
     restart: unless-stopped
     ports:
       - '80:80'
-      # Uncomment when using a domain + HTTPS (LiqPay / production TLS):
+      # Uncomment when using a domain + HTTPS:
       # - '443:443'
     depends_on:
       - api

@@ -100,12 +100,8 @@ function createDemoOrders(): Order[] {
     const day = String((index % 27) + 1).padStart(2, '0')
     const month = String((index % 11) + 1).padStart(2, '0')
 
-    const isBankTransfer = index % 3 === 0
-    const paymentMethod = isBankTransfer
-      ? 'bank_transfer'
-      : index % 3 === 1
-        ? 'pickup'
-        : 'google_pay'
+    const isBankTransfer = index % 2 === 0
+    const paymentMethod = isBankTransfer ? 'bank_transfer' : 'pickup'
 
     return {
       id,

@@ -10,7 +10,6 @@ import { catalogRouter } from './routes/catalog.js'
 import { cartRouter } from './routes/cart.js'
 import { wishlistRouter } from './routes/wishlist.js'
 import { ordersRouter } from './routes/orders.js'
-import { paymentsRouter } from './routes/payments.js'
 import { adminRouter } from './routes/admin.js'
 import { uploadRouter, uploadsDir } from './routes/upload.js'
 import { novaPoshtaRouter } from './routes/novaPoshta.js'
@@ -42,7 +41,6 @@ app.use('/api', catalogRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/wishlist', wishlistRouter)
 app.use('/api/orders', ordersRouter)
-app.use('/api/payments', paymentsRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/admin/upload', uploadRouter)
 app.use('/api/nova-poshta', novaPoshtaRouter)

@@ -367,7 +367,6 @@ function mapAdminOrder(order: {
   paymentMethod: string
   deliveryMethod: string
   payerFullName?: string | null
-  liqpayOrderId: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -394,7 +393,6 @@ function mapAdminOrder(order: {
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
     payerFullName: order.payerFullName ?? null,
-    liqpayOrderId: order.liqpayOrderId,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,
@@ -422,11 +420,7 @@ adminRouter.get('/orders', async (req, res) => {
   const orders = await prisma.order.findMany({
     where: id
       ? {
-          OR: [
-            { id },
-            { id: { contains: id, mode: 'insensitive' } },
-            { liqpayOrderId: id },
-          ],
+          OR: [{ id }, { id: { contains: id, mode: 'insensitive' } }],
         }
       : undefined,
     include: {

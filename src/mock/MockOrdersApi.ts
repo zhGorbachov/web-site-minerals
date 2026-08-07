@@ -1,4 +1,4 @@
-import type { CartItem, CreateOrderResult, Order, OrderPaymentStatus } from '@/types'
+import type { CartItem, CreateOrderResult, Order } from '@/types'
 import type { CreateOrderPayload } from '@/api/OrdersApi'
 import { getAuthToken } from '@/api/client'
 import {
@@ -50,20 +50,19 @@ function buildOrder(
   })
 
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const paymentMethod = payload?.paymentMethod ?? 'cod'
-  const isLiqPay = paymentMethod === 'liqpay' || paymentMethod === 'google_pay' || paymentMethod === 'apple_pay'
+  const paymentMethod =
+    payload?.paymentMethod === 'cod' ? 'pickup' : (payload?.paymentMethod ?? 'pickup')
 
   return {
     id: orderId,
     userId,
     status: 'pending',
-    paymentStatus: isLiqPay ? 'awaiting_payment' : 'unpaid',
+    paymentStatus: 'unpaid',
     totalPrice,
     paymentMethod,
     deliveryMethod: payload?.deliveryMethod ?? 'nova_poshta',
     payerFullName:
       paymentMethod === 'bank_transfer' ? payload?.payerFullName?.trim() || null : null,
-    liqpayOrderId: isLiqPay ? orderId : null,
     createdAt: new Date().toISOString(),
     items,
   }
@@ -108,22 +107,5 @@ export const MockOrdersApi = {
     const order = buildOrder(orderId, GUEST_USER_ID, sourceItems, payload)
     MockDb.setOrders(GUEST_USER_ID, [order, ...MockDb.getOrders(GUEST_USER_ID)])
     return order
-  },
-
-  async paymentStatus(orderId: string): Promise<OrderPaymentStatus> {
-    const userId = resolveUserId()
-    const pools = [
-      ...(userId ? MockDb.getOrders(userId) : []),
-      ...MockDb.getOrders(GUEST_USER_ID),
-    ]
-    const order = pools.find((item) => item.id === orderId)
-    if (!order) throw new MockApiError(404, 'Order not found')
-    return {
-      id: order.id,
-      status: order.status,
-      paymentStatus: order.paymentStatus ?? 'unpaid',
-      paymentMethod: order.paymentMethod,
-      totalPrice: order.totalPrice,
-    }
   },
 }
