@@ -594,18 +594,28 @@ export function AdminPage() {
                         </div>
 
                         <p className={styles.orderMethods}>
-                          {t('admin.ordersPaymentMethod')}:{' '}
-                          {paymentMethodLabel(order.paymentMethod, t)}
-                          {' · '}
                           {t('admin.ordersDelivery')}:{' '}
                           {deliveryMethodLabel(order.deliveryMethod, t)}
                         </p>
-                        {(order.paymentMethod === 'bank_transfer' || order.payerFullName) && (
-                          <p className={styles.orderPayer}>
-                            {t('admin.ordersPayerFullName')}:{' '}
-                            <span>{order.payerFullName?.trim() || '—'}</span>
-                          </p>
-                        )}
+                        <p className={styles.orderPayer}>
+                          {t('admin.ordersPaymentMethod')}:{' '}
+                          <span>{paymentMethodLabel(order.paymentMethod, t)}</span>
+                          {(order.paymentMethod === 'pickup' ||
+                            order.paymentMethod === 'cod') && (
+                            <>
+                              <br />
+                              {t('admin.ordersCodHint')}
+                            </>
+                          )}
+                          {(order.paymentMethod === 'bank_transfer' ||
+                            order.payerFullName) && (
+                            <>
+                              <br />
+                              {t('admin.ordersPayerFullName')}:{' '}
+                              <span>{order.payerFullName?.trim() || '—'}</span>
+                            </>
+                          )}
+                        </p>
 
                         {order.items.length > 0 && (
                           <>

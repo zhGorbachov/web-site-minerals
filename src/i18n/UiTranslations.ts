@@ -389,6 +389,7 @@ export type UiTranslationSchema = {
     ordersDelivery: string
     ordersPaymentMethod: string
     ordersPayerFullName: string
+    ordersCodHint: string
     ordersPaginationAria: string
     paymentStatus: {
       unpaid: string
@@ -876,6 +877,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ordersDelivery: 'Доставка',
     ordersPaymentMethod: 'Спосіб оплати',
     ordersPayerFullName: 'ПІБ платника',
+    ordersCodHint:
+      'Післяплата — оформіть відправлення з наложеним платежем на пошті',
     ordersPaginationAria: 'Сторінки замовлень',
     paymentStatus: {
       unpaid: 'Не оплачено',
@@ -1368,6 +1371,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ordersDelivery: 'Delivery',
     ordersPaymentMethod: 'Payment method',
     ordersPayerFullName: 'Payer full name',
+    ordersCodHint:
+      'Cash on delivery — create the shipment with COD at the post office',
     ordersPaginationAria: 'Order pages',
     paymentStatus: {
       unpaid: 'Unpaid',
