@@ -496,7 +496,16 @@
   line-height: $line-height-tight;
 }
 
+.bankDetailValueRow {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-2;
+  min-width: 0;
+}
+
 .bankDetailValue {
+  flex: 1;
+  min-width: 0;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   color: $color-text;
@@ -504,6 +513,8 @@
 }
 
 .bankDetailValueMono {
+  flex: 1;
+  min-width: 0;
   font-size: $font-size-sm;
   font-weight: $font-weight-semibold;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -511,6 +522,33 @@
   letter-spacing: 0.02em;
   word-break: break-all;
   line-height: $line-height-normal;
+}
+
+.bankDetailCopy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -2px;
+  padding: 0;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    color: $color-primary-dark;
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 1px;
+  }
 }
 
 .bankPayerField {

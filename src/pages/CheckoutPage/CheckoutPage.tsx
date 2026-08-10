@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Check,
   ChevronDown,
   ChevronUp,
+  Copy,
   Package,
   Pencil,
   Truck,
@@ -75,6 +76,63 @@ const emptyLocation = (): CheckoutLocation => ({
   address: '',
   postalIndex: '',
 })
+
+type BankDetailFieldProps = {
+  label: string
+  value: string
+  mono?: boolean
+  copyLabel: string
+  copiedLabel: string
+}
+
+function BankDetailField({ label, value, mono, copyLabel, copiedLabel }: BankDetailFieldProps) {
+  const [copied, setCopied] = useState(false)
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+    }
+  }, [])
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+    } catch {
+      const textarea = document.createElement('textarea')
+      textarea.value = value
+      textarea.setAttribute('readonly', '')
+      textarea.style.position = 'absolute'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+
+    setCopied(true)
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+    resetTimerRef.current = setTimeout(() => setCopied(false), 1600)
+  }
+
+  return (
+    <div className={styles.bankDetailRow}>
+      <span className={styles.bankDetailLabel}>{label}</span>
+      <div className={styles.bankDetailValueRow}>
+        <span className={mono ? styles.bankDetailValueMono : styles.bankDetailValue}>{value}</span>
+        <button
+          type="button"
+          className={styles.bankDetailCopy}
+          onClick={handleCopy}
+          aria-label={copied ? copiedLabel : copyLabel}
+          title={copied ? copiedLabel : copyLabel}
+        >
+          {copied ? <Check size={14} strokeWidth={2.25} /> : <Copy size={14} strokeWidth={2} />}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function formatWarehouseLabel(warehouse: NovaPoshtaWarehouse) {
   const number = warehouse.number || ''
@@ -1053,38 +1111,32 @@ export function CheckoutPage() {
                   {paymentMethod === 'bank_transfer' && (
                     <div className={styles.optionCardBody}>
                       <div className={styles.bankDetails}>
-                        <div className={styles.bankDetailRow}>
-                          <span className={styles.bankDetailLabel}>
-                            {t('checkout.paymentBankRecipientLabel')}
-                          </span>
-                          <span className={styles.bankDetailValue}>
-                            {t('checkout.paymentBankRecipient')}
-                          </span>
-                        </div>
-                        <div className={styles.bankDetailRow}>
-                          <span className={styles.bankDetailLabel}>
-                            {t('checkout.paymentBankIbanLabel')}
-                          </span>
-                          <span className={styles.bankDetailValueMono}>
-                            {t('checkout.paymentBankIban')}
-                          </span>
-                        </div>
-                        <div className={styles.bankDetailRow}>
-                          <span className={styles.bankDetailLabel}>
-                            {t('checkout.paymentBankTaxIdLabel')}
-                          </span>
-                          <span className={styles.bankDetailValueMono}>
-                            {t('checkout.paymentBankTaxId')}
-                          </span>
-                        </div>
-                        <div className={styles.bankDetailRow}>
-                          <span className={styles.bankDetailLabel}>
-                            {t('checkout.paymentBankPurposeLabel')}
-                          </span>
-                          <span className={styles.bankDetailValue}>
-                            {t('checkout.paymentBankPurpose')}
-                          </span>
-                        </div>
+                        <BankDetailField
+                          label={t('checkout.paymentBankRecipientLabel')}
+                          value={t('checkout.paymentBankRecipient')}
+                          copyLabel={t('checkout.paymentBankCopy')}
+                          copiedLabel={t('checkout.paymentBankCopied')}
+                        />
+                        <BankDetailField
+                          label={t('checkout.paymentBankIbanLabel')}
+                          value={t('checkout.paymentBankIban')}
+                          mono
+                          copyLabel={t('checkout.paymentBankCopy')}
+                          copiedLabel={t('checkout.paymentBankCopied')}
+                        />
+                        <BankDetailField
+                          label={t('checkout.paymentBankTaxIdLabel')}
+                          value={t('checkout.paymentBankTaxId')}
+                          mono
+                          copyLabel={t('checkout.paymentBankCopy')}
+                          copiedLabel={t('checkout.paymentBankCopied')}
+                        />
+                        <BankDetailField
+                          label={t('checkout.paymentBankPurposeLabel')}
+                          value={t('checkout.paymentBankPurpose')}
+                          copyLabel={t('checkout.paymentBankCopy')}
+                          copiedLabel={t('checkout.paymentBankCopied')}
+                        />
                         <div className={styles.bankPayerField} data-checkout-field="payerFullName">
                           <Input
                             label={t('checkout.paymentBankPayerFullName')}

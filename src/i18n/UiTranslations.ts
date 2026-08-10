@@ -147,6 +147,8 @@ export type UiTranslationSchema = {
     paymentBankTaxId: string
     paymentBankPurposeLabel: string
     paymentBankPurpose: string
+    paymentBankCopy: string
+    paymentBankCopied: string
     paymentBankPayerFullName: string
     paymentBankPayerFullNameHint: string
     paymentBankPayerFullNamePlaceholder: string
@@ -633,6 +635,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Призначення',
     paymentBankPurpose: 'Оплата за товар',
+    paymentBankCopy: 'Копіювати',
+    paymentBankCopied: 'Скопійовано',
     paymentBankPayerFullName: 'ПІБ платника',
     paymentBankPayerFullNameHint:
       'Прізвище, імʼя та по батькові — як у банківській виписці з картки, з якої буде оплата',
@@ -1127,6 +1131,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paymentBankTaxId: '3817313230',
     paymentBankPurposeLabel: 'Payment purpose',
     paymentBankPurpose: 'Payment for goods',
+    paymentBankCopy: 'Copy',
+    paymentBankCopied: 'Copied',
     paymentBankPayerFullName: 'Payer full name',
     paymentBankPayerFullNameHint:
       'Surname, first name and patronymic — as shown on the bank statement of the card you will pay from',
