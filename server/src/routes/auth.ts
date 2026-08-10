@@ -153,17 +153,22 @@ authRouter.post('/register', async (req, res) => {
     }
   }
 
-  const result = await issueCode(phone, 'register', {
-    firstName: parsed.data.firstName,
-    lastName: parsed.data.lastName,
-    email,
-    passwordHash: await bcrypt.hash(parsed.data.password, 10),
-  })
-  if (result === 'too_soon') {
-    res.status(429).json({ error: 'code_send_too_soon' })
-    return
+  try {
+    const result = await issueCode(phone, 'register', {
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
+      email,
+      passwordHash: await bcrypt.hash(parsed.data.password, 10),
+    })
+    if (result === 'too_soon') {
+      res.status(429).json({ error: 'code_send_too_soon' })
+      return
+    }
+    res.status(202).json({ ok: true })
+  } catch (error) {
+    console.error('[auth/register] SMS send failed', error)
+    res.status(502).json({ error: 'sms_send_failed' })
   }
-  res.status(202).json({ ok: true })
 })
 
 authRouter.post('/register/verify', async (req, res) => {
@@ -229,12 +234,17 @@ authRouter.post('/password/forgot', async (req, res) => {
     res.status(202).json({ ok: true })
     return
   }
-  const result = await issueCode(phone, 'password_reset')
-  if (result === 'too_soon') {
-    res.status(429).json({ error: 'code_send_too_soon' })
-    return
+  try {
+    const result = await issueCode(phone, 'password_reset')
+    if (result === 'too_soon') {
+      res.status(429).json({ error: 'code_send_too_soon' })
+      return
+    }
+    res.status(202).json({ ok: true })
+  } catch (error) {
+    console.error('[auth/password/forgot] SMS send failed', error)
+    res.status(502).json({ error: 'sms_send_failed' })
   }
-  res.status(202).json({ ok: true })
 })
 
 authRouter.post('/password/reset', async (req, res) => {
