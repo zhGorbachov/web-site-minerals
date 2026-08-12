@@ -36,16 +36,16 @@ export const INSTAGRAM_CONTACTS: MessengerContact[] = [
   },
 ]
 
-// 098 is displayed first (standalone), 066 is grouped with messengers
+// 066 is displayed first (grouped with messengers), 098 is standalone
 export const PHONE_CONTACTS: PhoneContact[] = [
-  { display: '+38 (098) 813-31-46', href: 'tel:+380988133146' },
   { display: '+38 (066) 834-43-22', href: 'tel:+380668344322', messengers: MESSENGER_066 },
+  { display: '+38 (098) 813-31-46', href: 'tel:+380988133146' },
 ]
 
 // Flat list for footer / other uses
 export const MESSENGER_CONTACTS: MessengerContact[] = [...MESSENGER_066, ...INSTAGRAM_CONTACTS]
 
-export const PRIMARY_PHONE = PHONE_CONTACTS[1] // 066 is the messenger-linked number
+export const PRIMARY_PHONE = PHONE_CONTACTS[0] // 066 is the messenger-linked number
 
 export const EMAIL_CONTACTS: EmailContact[] = [
   { display: 'glusenkoilla3@icloud.com', href: 'mailto:glusenkoilla3@icloud.com' },

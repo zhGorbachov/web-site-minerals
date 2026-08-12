@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, Trash2, ShoppingCart } from 'lucide-react'
+import { Heart, Trash2, ShoppingCart, Home } from 'lucide-react'
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { useCartStore, useWishlistStore } from '@/store'
@@ -92,6 +92,11 @@ export function WishlistPage() {
             title={t('wishlist.emptyTitle')}
             description={t('wishlist.emptyDescription')}
             action={{ label: t('common.toCatalog'), onClick: openCatalog, variant: 'catalog' }}
+            secondaryAction={{
+              label: t('notFound.goHome'),
+              to: '/',
+              icon: <Home />,
+            }}
           />
         </div>
       </div>

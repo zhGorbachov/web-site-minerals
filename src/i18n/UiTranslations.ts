@@ -525,7 +525,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     aboutDescription1:
       'Ми — команда, яка щиро захоплюється красою мінералів і вже багато років допомагає людям знаходити саме ті камені, які надихають, прикрашають та дарують естетичне задоволення.',
     aboutDescription2:
-      'У нашому асортименті — натуральні мінерали, колекційні зразки, галтовка, намистини, браслети, підвіски, кулони та інші вироби з природного каменю.',
+      'У нашому асортименті — натуральні мінерали, колекційні зразки, галтовка, намистини, браслети, підвіски та інші вироби з природного каменю.',
     aboutCta: 'Дізнатись більше',
   },
   category: {
@@ -639,7 +639,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paymentBankCopied: 'Скопійовано',
     paymentBankPayerFullName: 'ПІБ платника',
     paymentBankPayerFullNameHint:
-      'Прізвище, імʼя та по батькові — як у банківській виписці з картки, з якої буде оплата',
+      'Вкажіть ПІБ людини, яка здійснюватиме оплату. Може відрізнятися від даних отримувача.',
     paymentBankPayerFullNamePlaceholder: 'Прізвище Імʼя По батькові',
     comment: 'Коментар до замовлення',
     commentPlaceholder: 'Побажання до доставки або замовлення',
@@ -1135,7 +1135,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paymentBankCopied: 'Copied',
     paymentBankPayerFullName: 'Payer full name',
     paymentBankPayerFullNameHint:
-      'Surname, first name and patronymic — as shown on the bank statement of the card you will pay from',
+      'Enter the full name of the person who will make the payment. It may differ from the recipient details.',
     paymentBankPayerFullNamePlaceholder: 'Surname First name Patronymic',
     comment: 'Order comment',
     commentPlaceholder: 'Delivery or order notes',

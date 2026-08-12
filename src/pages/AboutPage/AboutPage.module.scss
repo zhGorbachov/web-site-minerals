@@ -137,15 +137,29 @@
 
 .contentList {
   margin: 0;
-  padding-left: $spacing-5;
+  padding-left: 0;
   display: flex;
   flex-direction: column;
   gap: $spacing-2;
+  list-style: none;
 
   li {
+    position: relative;
+    padding-left: $spacing-5;
     font-size: $font-size-base;
     color: $color-text-muted;
     line-height: $line-height-relaxed;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: $spacing-2;
+      top: 0.65em;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
   }
 }
 

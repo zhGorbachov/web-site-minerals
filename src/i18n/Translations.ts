@@ -160,7 +160,7 @@ export const translations: Record<Language, TranslationSchema> = {
       heroTitle: 'Ласкаво просимо до нашого світу натурального каміння!',
       heroParagraphs: [
         'Ми — команда, яка щиро захоплюється красою мінералів і вже багато років допомагає людям знаходити саме ті камені, які надихають, прикрашають та дарують естетичне задоволення.',
-        'У нашому асортименті ви знайдете натуральні мінерали, колекційні зразки, галтовку, намистини, браслети, підвіски, кулони та багато інших виробів із природного каменю. Ми ретельно відбираємо кожен екземпляр, адже цінуємо його природну красу, унікальний малюнок і якість.',
+        'У нашому асортименті ви знайдете натуральні мінерали, колекційні зразки, галтовку, намистини, браслети, підвіски та багато інших виробів із природного каменю. Ми ретельно відбираємо кожен екземпляр, адже цінуємо його природну красу, унікальний малюнок і якість.',
         'Для нас важливо, щоб кожен покупець залишився задоволений. Саме тому ми завжди готові допомогти з вибором, відповісти на запитання та зробити процес покупки максимально простим і комфортним.',
         'Щиро дякуємо кожному, хто обирає наш магазин. Ваша довіра надихає нас постійно розширювати асортимент, вдосконалювати сервіс і відкривати для вас нові дивовижні мінерали.',
         'Запрошуємо відкрити для себе красу, створену самою природою!',
@@ -194,7 +194,7 @@ export const translations: Record<Language, TranslationSchema> = {
       reviewsTitle: 'Відгуки',
       reviewRating: 'Оцінка {rating} з 5',
       valuesTitle: 'Наші цінності',
-      faqTitle: 'Часті запитання',
+      faqTitle: 'Цікаво знати',
       deliveryItems: [
         {
           title: 'Нова Пошта',
@@ -203,6 +203,10 @@ export const translations: Record<Language, TranslationSchema> = {
         {
           title: 'Укрпошта',
           text: 'Відправляємо з понеділка по пʼятницю по всій Україні.',
+        },
+        {
+          title: 'Самовивіз',
+          text: 'Забирайте замовлення самостійно з нашого магазину за адресою: вул. Короленка, 32А, Кропивницький.',
         },
         {
           title: 'Оплата',
@@ -364,7 +368,7 @@ export const translations: Record<Language, TranslationSchema> = {
       reviewsTitle: 'Reviews',
       reviewRating: 'Rating {rating} out of 5',
       valuesTitle: 'Our values',
-      faqTitle: 'Frequently asked questions',
+      faqTitle: 'Good to know',
       deliveryItems: [
         {
           title: 'Nova Poshta',
@@ -373,6 +377,10 @@ export const translations: Record<Language, TranslationSchema> = {
         {
           title: 'Ukrposhta',
           text: 'We ship Monday to Friday across Ukraine.',
+        },
+        {
+          title: 'Self-pickup',
+          text: 'Pick up your order from our store at Korolenka St., 32A, Kropyvnytskyi.',
         },
         {
           title: 'Payment',

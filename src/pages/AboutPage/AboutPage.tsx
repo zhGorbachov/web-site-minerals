@@ -19,7 +19,12 @@ import {
 import type { StoreReview, StoreReviewSort } from '@/types'
 import { ReviewsApi } from '@/api'
 import { Breadcrumbs, Button, Loader } from '@/components/ui'
-import { NovaPoshtaIcon, UkrposhtaIcon, CashOnDeliveryIcon } from '@/components/BrandIcons'
+import {
+  NovaPoshtaIcon,
+  UkrposhtaIcon,
+  SelfPickupIcon,
+  CashOnDeliveryIcon,
+} from '@/components/BrandIcons'
 import { mockImages } from '@/assets/mock/Images'
 import { scrollToHashTarget } from '@/utils/hashNav'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -44,6 +49,7 @@ type DeliveryIcon =
 const DELIVERY_ICONS: DeliveryIcon[] = [
   { type: 'brand', node: <NovaPoshtaIcon className={styles.brandIcon} /> },
   { type: 'brand', node: <UkrposhtaIcon className={styles.brandIcon} /> },
+  { type: 'brand', node: <SelfPickupIcon className={styles.brandIcon} /> },
   { type: 'brand', node: <CashOnDeliveryIcon className={styles.brandIcon} /> },
 ]
 
