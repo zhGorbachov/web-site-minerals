@@ -5,7 +5,7 @@ import { subcategories as seedSubcategories } from './subcategories'
 import { products as seedProducts } from './products'
 
 const STORAGE_KEY = 'crystal-mock-db'
-const STORAGE_VERSION = 8
+const STORAGE_VERSION = 10
 
 export type MockUserRecord = {
   password: string

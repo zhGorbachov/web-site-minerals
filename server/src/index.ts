@@ -5,6 +5,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { env } from './lib/env.js'
+import { ensureBootstrapAdmin } from './lib/bootstrapAdmin.js'
 import { authRouter } from './routes/auth.js'
 import { catalogRouter } from './routes/catalog.js'
 import { cartRouter } from './routes/cart.js'
@@ -51,6 +52,14 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: 'Internal server error' })
 })
 
-app.listen(env.port, () => {
-  console.log(`API listening on http://localhost:${env.port}`)
+async function main() {
+  await ensureBootstrapAdmin()
+  app.listen(env.port, () => {
+    console.log(`API listening on http://localhost:${env.port}`)
+  })
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
 })

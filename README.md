@@ -79,7 +79,7 @@ Then continue from **Install & run** below.
 copy .env.example .env
 copy server\.env.example server\.env
 
-# 3. Install API deps, push schema, seed catalog + admin user
+# 3. Install API deps, push schema, seed catalog
 cd server
 npm install
 npx prisma db push
@@ -104,15 +104,17 @@ npm run dev
 
 ## Default admin account
 
-After seeding (or in mock mode):
+**Real API / Postgres:** the operator is created (or promoted) automatically on every API start. Override via `ADMIN_*` in `server/.env`.
 
 | Field    | Value                   |
 |----------|-------------------------|
-| Phone    | `0501112233` (UI shows **+38**) |
+| Phone    | `0668344322` (UI shows **+38**) |
 | Email    | `admin@luxstones.local` |
-| Password | `admin123`              |
+| Password | `hMJ5Pz&B6*%*Efez33`    |
 
 Login accepts **phone only** (or Google). Open http://localhost:5174/login, sign in, then go to **Profile → Admin** or http://localhost:5174/admin.
+
+**Mock mode** uses a separate demo admin: phone `0501112233`, password `admin123`.
 
 In mock mode you can also try a demo customer with orders and a personal discount:
 
@@ -141,6 +143,10 @@ JWT_SECRET=dev-change-me-minerals-jwt-secret
 JWT_EXPIRES_IN=7d
 API_URL=http://localhost:3001
 
+# Bootstrap admin (created/updated on every API start; defaults work without these)
+# ADMIN_PHONE=0668344322
+# ADMIN_PASSWORD=hMJ5Pz&B6*%*Efez33
+
 # Optional — Google OAuth (account chooser)
 # Redirect URI: http://localhost:3001/api/auth/google/callback
 GOOGLE_CLIENT_ID=
@@ -163,7 +169,7 @@ Copy from `server/.env.example`.
 | `npm run db:down` | Stop Docker Postgres |
 | *(Podman)* `podman start/stop minerals-postgres` | Start/stop Postgres without Docker |
 | `npm run db:migrate` | `prisma db push` |
-| `npm run db:seed` | Reseed catalog + admin user |
+| `npm run db:seed` | Reseed catalog (admin is bootstrapped on API start) |
 | `npm run dev:server` | Start Express API |
 | `npm run dev` | Start Vite frontend (needs API running) |
 

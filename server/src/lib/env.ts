@@ -33,6 +33,11 @@ export const env = {
   otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES ?? 10),
   otpMaxAttempts: Number(process.env.OTP_MAX_ATTEMPTS ?? 5),
   otpResendCooldownSeconds: Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60),
+  adminPhone: process.env.ADMIN_PHONE?.trim() || '0668344322',
+  adminPassword: process.env.ADMIN_PASSWORD || 'hMJ5Pz&B6*%*Efez33',
+  adminFirstName: process.env.ADMIN_FIRST_NAME?.trim() || 'Адмін',
+  adminLastName: process.env.ADMIN_LAST_NAME?.trim() || 'Глущенко',
+  adminEmail: process.env.ADMIN_EMAIL?.trim() || 'admin@luxstones.local',
 }
 
 export function isGoogleConfigured() {

@@ -78,13 +78,11 @@ OAuth and Nova Poshta keys are optional.
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-The API entrypoint runs `prisma db push` on each start. First-time catalog/admin seed:
+The API entrypoint runs `prisma db push` on each start, then bootstraps the admin user from `ADMIN_*` env (defaults: phone `0668344322`, password `hMJ5Pz&B6*%*Efez33`). First-time catalog seed:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec api npx prisma db seed
 ```
-
-Default admin after seed (same as local): phone `0501112233`, password `admin123`.
 
 ## 6. Verify
 
