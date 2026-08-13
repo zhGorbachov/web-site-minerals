@@ -191,6 +191,15 @@ export type UiTranslationSchema = {
     description: string
     goHome: string
   }
+  error: {
+    title: string
+    description: string
+    chunkTitle: string
+    chunkDescription: string
+    retry: string
+    goHome: string
+    details: string
+  }
   sort: {
     aria: string
     listAria: string
@@ -679,6 +688,15 @@ export const uiTranslationsUk: UiTranslationSchema = {
     title: 'Сторінку не знайдено',
     description: 'На жаль, сторінка, яку ви шукаєте, не існує або була переміщена.',
     goHome: 'На головну',
+  },
+  error: {
+    title: 'Щось пішло не так',
+    description: 'Сталася неочікувана помилка. Спробуйте оновити сторінку або повернутися на головну.',
+    chunkTitle: 'Не вдалося завантажити сторінку',
+    chunkDescription: 'Можливо, сайт щойно оновився. Оновіть сторінку, щоб завантажити нову версію.',
+    retry: 'Оновити сторінку',
+    goHome: 'На головну',
+    details: 'Деталі помилки',
   },
   sort: {
     aria: 'Сортування',
@@ -1175,6 +1193,15 @@ export const uiTranslationsEn: UiTranslationSchema = {
     title: 'Page not found',
     description: 'Sorry, the page you are looking for does not exist or has been moved.',
     goHome: 'Go home',
+  },
+  error: {
+    title: 'Something went wrong',
+    description: 'An unexpected error occurred. Try refreshing the page or go back home.',
+    chunkTitle: 'Failed to load the page',
+    chunkDescription: 'The site may have just been updated. Refresh the page to load the new version.',
+    retry: 'Refresh page',
+    goHome: 'Go home',
+    details: 'Error details',
   },
   sort: {
     aria: 'Sort',

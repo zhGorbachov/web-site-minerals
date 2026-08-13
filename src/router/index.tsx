@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider, ScrollRestoration } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouterProvider, ScrollRestoration } from 'react-router-dom'
 import { MainLayout } from '@/layouts/MainLayout'
 import { Loader } from '@/components/ui'
+import { ErrorPage } from '@/pages/ErrorPage'
 
 const HomePage       = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })))
 const CatalogPage    = lazy(() => import('@/pages/CatalogPage').then((m) => ({ default: m.CatalogPage })))
@@ -42,134 +43,141 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <LayoutWithScroll />,
+    errorElement: <ErrorPage />,
     children: [
       {
-        index: true,
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <HomePage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'catalog',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CatalogPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'catalog/:category',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CategoryPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'catalog/:category/:subcategory',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CategoryPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'product/:slug',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <ProductPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'cart',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CartPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'wishlist',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <WishlistPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'about',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AboutPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'contacts',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <ContactsPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'login',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AuthPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'profile',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <ProfilePage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'forgot-password',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <ForgotPasswordPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'checkout',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CheckoutPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'admin',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AdminPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'auth/callback',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AuthCallbackPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '*',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <NotFoundPage />
-          </Suspense>
-        ),
+        element: <Outlet />,
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <HomePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'catalog',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <CatalogPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'catalog/:category',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <CategoryPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'catalog/:category/:subcategory',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <CategoryPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'product/:slug',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <ProductPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'cart',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <CartPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'wishlist',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <WishlistPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'about',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <AboutPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'contacts',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <ContactsPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'login',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <AuthPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'profile',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <ProfilePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'forgot-password',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <ForgotPasswordPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'checkout',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <CheckoutPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'admin',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <AdminPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'auth/callback',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <AuthCallbackPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: '*',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <NotFoundPage />
+              </Suspense>
+            ),
+          },
+        ],
       },
     ],
   },
