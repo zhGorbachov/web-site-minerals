@@ -63,7 +63,7 @@ export async function sendVerificationSms(phone: string, code: string) {
   }
 
   const codeStatus = data?.response_code
-  if (codeStatus == null || !SUCCESS_CODES.has(codeStatus)) {
+  if (data == null || codeStatus == null || !SUCCESS_CODES.has(codeStatus)) {
     console.error('[TurboSMS] send rejected', {
       phone: toInternationalPhone(phone),
       sender: env.turboSmsSender,
