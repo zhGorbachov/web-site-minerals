@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
-import { ensureCoreCategories } from '../src/lib/bootstrapCategories.js'
 import { demoReviews } from './demo-reviews.js'
 import seedData from './seed-data.json' with { type: 'json' }
 
@@ -55,7 +54,6 @@ async function main() {
     console.log('No seeded mock products found')
   }
 
-  await ensureCoreCategories(prisma)
   console.log(
     `Kept core categories and ${seedData.subcategories.length} subcategories (empty ones stay for the storefront)`,
   )
