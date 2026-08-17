@@ -30,7 +30,7 @@ function withOrderMedia(order: AdminOrder): AdminOrder {
 export type AdminProductPayload = {
   name: string
   slug?: string
-  sku: string
+  sku?: string
   shortDescription: string
   description: string
   price: number

@@ -9,6 +9,7 @@ import type {
 import { getAuthToken } from '@/api/client'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, slugify } from './MockDb'
+import { buildProductSku, uniqueSku } from '@/utils/sku'
 
 function requireAdmin() {
   const user = MockDb.resolveSession(getAuthToken())
@@ -45,16 +46,25 @@ export const MockAdminApi = {
     if (MockDb.getProducts().some((p) => p.slug === slug)) {
       throw new MockApiError(409, 'slug_taken')
     }
-    if (MockDb.getProducts().some((p) => p.sku === payload.sku)) {
-      throw new MockApiError(409, 'sku_taken')
-    }
+    const skuBase =
+      payload.sku?.trim() ||
+      buildProductSku({
+        categorySlug: sub.categorySlug,
+        subCategorySlug: sub.slug,
+        name: payload.name,
+      })
+    if (!skuBase) throw new MockApiError(400, 'Invalid payload')
+    const sku = uniqueSku(
+      skuBase,
+      MockDb.getProducts().map((p) => p.sku),
+    )
 
     const now = new Date().toISOString()
     const product: Product = {
       id: `prod-${Date.now()}`,
       name: payload.name,
       slug,
-      sku: payload.sku,
+      sku,
       shortDescription: payload.shortDescription,
       description: payload.description,
       price: payload.price,
@@ -100,7 +110,8 @@ export const MockAdminApi = {
     if (products.some((p) => p.id !== id && p.slug === slug)) {
       throw new MockApiError(409, 'slug_taken')
     }
-    if (payload.sku && products.some((p) => p.id !== id && p.sku === payload.sku)) {
+    const nextSku = payload.sku?.trim() || current.sku
+    if (nextSku !== current.sku && products.some((p) => p.id !== id && p.sku === nextSku)) {
       throw new MockApiError(409, 'sku_taken')
     }
 
@@ -108,7 +119,7 @@ export const MockAdminApi = {
       ...current,
       name: payload.name ?? current.name,
       slug,
-      sku: payload.sku ?? current.sku,
+      sku: nextSku,
       shortDescription: payload.shortDescription ?? current.shortDescription,
       description: payload.description ?? current.description,
       price: payload.price ?? current.price,

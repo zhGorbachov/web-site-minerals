@@ -13,6 +13,7 @@ import { MediaUploader } from '@/components/MediaUploader'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import type { Category, OrderStatus, PaymentStatus, Product, SubCategory } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
+import { buildProductSku, uniqueSku } from '@/utils/sku'
 import styles from './AdminPage.module.scss'
 
 type Tab = 'orders' | 'products' | 'create' | 'subcategories' | 'users'
@@ -154,6 +155,7 @@ export function AdminPage() {
   const [stockDrafts, setStockDrafts] = useState<Record<string, number>>({})
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<AdminProductPayload>(emptyForm)
+  const [skuManual, setSkuManual] = useState(false)
   const [saving, setSaving] = useState(false)
 
   const [subForm, setSubForm] = useState({
@@ -269,6 +271,18 @@ export function AdminPage() {
     [subcategories, form.subCategoryId],
   )
   const formCategorySlug = selectedSubcategory?.categorySlug ?? ''
+  const suggestedSku = useMemo(() => {
+    if (!selectedSubcategory) return ''
+    return uniqueSku(
+      buildProductSku({
+        categorySlug: selectedSubcategory.categorySlug,
+        subCategorySlug: selectedSubcategory.slug,
+        name: form.name,
+      }),
+      products.map((p) => p.sku),
+    )
+  }, [selectedSubcategory, form.name, products])
+  const skuValue = editingId || skuManual ? (form.sku ?? '') : suggestedSku
 
   const handleSubcategoryChange = (subCategoryId: string) => {
     const nextSlug = subcategories.find((sub) => sub.id === subCategoryId)?.categorySlug
@@ -359,6 +373,7 @@ export function AdminPage() {
 
   const startEdit = (product: Product) => {
     setEditingId(product.id)
+    setSkuManual(true)
     setTab('create')
     setForm({
       name: product.name,
@@ -381,6 +396,7 @@ export function AdminPage() {
 
   const resetForm = () => {
     setEditingId(null)
+    setSkuManual(false)
     setForm({
       ...emptyForm,
       subCategoryId: subcategories[0]?.id ?? '',
@@ -400,6 +416,7 @@ export function AdminPage() {
       discountPrice: form.discountPrice || null,
       video: form.video || null,
       slug: form.slug || undefined,
+      sku: skuValue || undefined,
     }
 
     try {
@@ -827,9 +844,13 @@ export function AdminPage() {
                 />
                 <Input
                   label={t('admin.sku')}
-                  value={form.sku}
-                  onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
-                  required
+                  value={skuValue}
+                  onChange={(e) => {
+                    setSkuManual(true)
+                    setForm((f) => ({ ...f, sku: e.target.value }))
+                  }}
+                  hint={t('admin.skuHint')}
+                  placeholder={suggestedSku || t('admin.skuPlaceholder')}
                 />
                 <Input
                   label={t('admin.slug')}

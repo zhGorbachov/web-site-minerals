@@ -1,6 +1,9 @@
 export type HomeCategorySize = 'large' | 'small'
 
-/** Categories shown as tiles on the home page (always, regardless of DB). */
+/**
+ * Home tiles: 2 large (top) + 3 small (bottom).
+ * These five categories are part of the storefront, not mock data.
+ */
 export const HOME_PAGE_CATEGORIES = [
   { slug: 'mineraly', size: 'large' as const },
   { slug: 'nytky', size: 'large' as const },

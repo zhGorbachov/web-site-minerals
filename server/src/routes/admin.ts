@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { requireAdmin } from '../lib/auth.js'
 import { serializeProduct, serializeSubCategory } from '../lib/serialize.js'
+import { buildProductSku, uniqueSku } from '../lib/sku.js'
 
 export const adminRouter = Router()
 
@@ -27,7 +28,7 @@ function slugify(value: string) {
 const productBodySchema = z.object({
   name: z.string().trim().min(1),
   slug: z.string().trim().min(1).optional(),
-  sku: z.string().trim().min(1),
+  sku: z.string().trim().optional(),
   shortDescription: z.string().trim().min(1),
   description: z.string().trim().min(1),
   price: z.number().positive(),
@@ -81,18 +82,29 @@ adminRouter.post('/products', async (req, res) => {
     return
   }
 
-  const existingSku = await prisma.product.findUnique({ where: { sku: parsed.data.sku } })
-  if (existingSku) {
-    res.status(409).json({ error: 'sku_taken' })
+  const skuBase =
+    parsed.data.sku?.trim() ||
+    buildProductSku({
+      categorySlug: sub.categorySlug,
+      subCategorySlug: sub.slug,
+      name: parsed.data.name,
+    })
+  if (!skuBase) {
+    res.status(400).json({ error: 'Invalid payload' })
     return
   }
+  const takenSkus = await prisma.product.findMany({ select: { sku: true } })
+  const sku = uniqueSku(
+    skuBase,
+    takenSkus.map((item) => item.sku),
+  )
 
   const product = await prisma.product.create({
     data: {
       id: `prod-${Date.now()}`,
       name: parsed.data.name,
       slug,
-      sku: parsed.data.sku,
+      sku,
       shortDescription: parsed.data.shortDescription,
       description: parsed.data.description,
       price: parsed.data.price,
@@ -163,7 +175,7 @@ adminRouter.patch('/products/:id', async (req, res) => {
     data: {
       name: parsed.data.name,
       slug: parsed.data.slug,
-      sku: parsed.data.sku,
+      sku: parsed.data.sku?.trim() || undefined,
       shortDescription: parsed.data.shortDescription,
       description: parsed.data.description,
       price: parsed.data.price,

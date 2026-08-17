@@ -16,7 +16,8 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:migrate": "npm --prefix server run db:push",
-    "db:seed": "npm --prefix server run db:seed"
+    "db:seed": "npm --prefix server run db:seed",
+    "db:clear-seed": "npm --prefix server run db:clear-seed"
   },
   "dependencies": {
     "axios": "^1.18.1",
