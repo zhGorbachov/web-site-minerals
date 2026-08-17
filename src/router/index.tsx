@@ -19,6 +19,9 @@ const ForgotPasswordPage = lazy(() =>
 const ProfilePage    = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const CheckoutPage   = lazy(() => import('@/pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })))
 const AdminPage      = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })))
+const AdminSubcategoryFormPage = lazy(() =>
+  import('@/pages/AdminPage').then((m) => ({ default: m.AdminSubcategoryFormPage })),
+)
 const AuthCallbackPage = lazy(() =>
   import('@/pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })),
 )
@@ -158,6 +161,22 @@ const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageFallback />}>
                 <AdminPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'admin/subcategories/new',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <AdminSubcategoryFormPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'admin/subcategories/:id/edit',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <AdminSubcategoryFormPage />
               </Suspense>
             ),
           },

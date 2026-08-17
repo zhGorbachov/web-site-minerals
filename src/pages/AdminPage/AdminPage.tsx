@@ -1,22 +1,21 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { isAxiosError } from 'axios'
-import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Trash2, Plus, Layers } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Trash2, Plus } from 'lucide-react'
 import { AdminApi, CatalogApi } from '@/api'
 import type { AdminOrder, AdminProductPayload, AdminUser } from '@/api'
 import { useAuthStore } from '@/store'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
-import { Button, Input, Breadcrumbs, Select } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import type { SelectOption } from '@/components/ui'
 import { MediaUploader } from '@/components/MediaUploader'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import type { Category, OrderStatus, PaymentStatus, Product, SubCategory } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
+import { AdminShell } from './AdminShell'
+import { isAdminTab, mapAdminError, type AdminTab } from './adminShared'
 import styles from './AdminPage.module.scss'
-
-type Tab = 'orders' | 'products' | 'create' | 'subcategories' | 'users'
 
 const ORDER_STATUSES: OrderStatus[] = [
   'pending',
@@ -52,6 +51,7 @@ const STATUS_TONES: Partial<Record<OrderStatus, SelectOption['tone']>> = {
 }
 
 const ORDERS_PAGE_SIZE = 8
+const SUBCATEGORIES_PAGE_SIZE = 10
 const VISIBLE_PAGE_NUMBERS = 5
 
 function getVisiblePageNumbers(currentPage: number, totalPages: number): number[] {
@@ -123,24 +123,20 @@ function deriveShortDescription(description: string): string {
   return text.length <= 200 ? text : `${text.slice(0, 197).trimEnd()}…`
 }
 
-function mapError(error: unknown): TranslationKey {
-  if (isAxiosError(error)) {
-    const code = error.response?.data?.error
-    if (code === 'slug_taken') return 'admin.errorSlugTaken'
-    if (code === 'sku_taken') return 'admin.errorSkuTaken'
-    if (code === 'product_in_orders') return 'admin.errorInOrders'
-    if (code === 'subcategory_has_products') return 'admin.errorSubHasProducts'
-    if (error.response?.status === 403) return 'admin.forbidden'
-  }
-  return 'admin.errorGeneric'
-}
-
 export function AdminPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const user = useAuthStore((s) => s.user)
+  const tab: AdminTab = isAdminTab(searchParams.get('tab')) ? searchParams.get('tab')! : 'orders'
 
-  const [tab, setTab] = useState<Tab>('orders')
+  const setTab = (next: AdminTab) => {
+    const params = new URLSearchParams(searchParams)
+    if (next === 'orders') params.delete('tab')
+    else params.set('tab', next)
+    setSearchParams(params, { replace: true })
+  }
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategories, setSubcategories] = useState<SubCategory[]>([])
@@ -164,23 +160,10 @@ export function AdminPage() {
   const [skuManual, setSkuManual] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const [subForm, setSubForm] = useState({
-    name: '',
-    slug: '',
-    categoryId: '',
-    image: '',
-  })
-  const [editingSubId, setEditingSubId] = useState<string | null>(null)
+  const [subSearch, setSubSearch] = useState('')
+  const [subsPage, setSubsPage] = useState(0)
 
   const isAdmin = user?.role === 'admin' || user?.role === 'manager'
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/login', { replace: true })
-      return
-    }
-    if (!isAdmin) return
-  }, [user, isAdmin, navigate])
 
   const load = async () => {
     setLoading(true)
@@ -210,14 +193,11 @@ export function AdminPage() {
           ]),
         ),
       )
-      if (!subForm.categoryId && cats[0]) {
-        setSubForm((s) => ({ ...s, categoryId: cats[0].id }))
-      }
       if (!form.subCategoryId && subs[0]) {
         setForm((f) => ({ ...f, subCategoryId: subs[0].id }))
       }
     } catch (err) {
-      setError(t(mapError(err)))
+      setError(t(mapAdminError(err)))
     } finally {
       setLoading(false)
     }
@@ -227,6 +207,15 @@ export function AdminPage() {
     if (isAdmin) void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin])
+
+  useEffect(() => {
+    const flashMsg = (location.state as { flash?: string } | null)?.flash
+    if (!flashMsg) return
+    setMessage(flashMsg)
+    setError(null)
+    window.setTimeout(() => setMessage(null), 2500)
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: {} })
+  }, [location.pathname, location.search, location.state, navigate])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -272,6 +261,45 @@ export function AdminPage() {
       return hay.includes(q)
     })
   }, [users, userSearch])
+
+  const filteredSubs = useMemo(() => {
+    const q = subSearch.trim().toLowerCase()
+    if (!q) return subcategories
+    return subcategories.filter((sub) => {
+      const categoryName =
+        categories.find((cat) => cat.id === sub.categoryId)?.name ?? sub.categorySlug
+      return (
+        sub.name.toLowerCase().includes(q) ||
+        sub.slug.toLowerCase().includes(q) ||
+        categoryName.toLowerCase().includes(q)
+      )
+    })
+  }, [subcategories, categories, subSearch])
+
+  const subsTotalPages = Math.max(1, Math.ceil(filteredSubs.length / SUBCATEGORIES_PAGE_SIZE))
+  const subsVisiblePages = getVisiblePageNumbers(subsPage, subsTotalPages)
+  const pagedSubs = useMemo(
+    () =>
+      filteredSubs.slice(
+        subsPage * SUBCATEGORIES_PAGE_SIZE,
+        (subsPage + 1) * SUBCATEGORIES_PAGE_SIZE,
+      ),
+    [filteredSubs, subsPage],
+  )
+
+  useEffect(() => {
+    setSubsPage(0)
+  }, [subSearch])
+
+  useEffect(() => {
+    if (subsPage > subsTotalPages - 1) {
+      setSubsPage(Math.max(0, subsTotalPages - 1))
+    }
+  }, [subsPage, subsTotalPages])
+
+  const goToSubsPage = (page: number) => {
+    setSubsPage(Math.max(0, Math.min(page, subsTotalPages - 1)))
+  }
 
   const selectedSubcategory = useMemo(
     () => subcategories.find((sub) => sub.id === form.subCategoryId),
@@ -327,7 +355,7 @@ export function AdminPage() {
       setOrders((list) => list.map((order) => (order.id === orderId ? updated : order)))
       flash(t('admin.ordersSaved'))
     } catch (err) {
-      setError(t(mapError(err)))
+      setError(t(mapAdminError(err)))
     } finally {
       setUpdatingOrderId(null)
     }
@@ -357,25 +385,10 @@ export function AdminPage() {
       }))
       flash(t('admin.usersSaved'))
     } catch (err) {
-      setError(t(mapError(err)))
+      setError(t(mapAdminError(err)))
     } finally {
       setSaving(false)
     }
-  }
-
-  if (!user) return null
-
-  if (!isAdmin) {
-    return (
-      <div className={styles.page}>
-        <div className="container">
-          <p className={styles.error}>{t('admin.forbidden')}</p>
-          <Button as={Link} to="/">
-            {t('auth.backHome')}
-          </Button>
-        </div>
-      </div>
-    )
   }
 
   const startEdit = (product: Product) => {
@@ -438,7 +451,7 @@ export function AdminPage() {
       setTab('products')
       await load()
     } catch (err) {
-      setError(t(mapError(err)))
+      setError(t(mapAdminError(err)))
     } finally {
       setSaving(false)
     }
@@ -452,7 +465,7 @@ export function AdminPage() {
       setProducts((list) => list.map((p) => (p.id === id ? updated : p)))
       flash(t('admin.successSaved'))
     } catch (err) {
-      setError(t(mapError(err)))
+      setError(t(mapAdminError(err)))
     }
   }
 
@@ -463,61 +476,7 @@ export function AdminPage() {
       flash(t('admin.successDeleted'))
       await load()
     } catch (err) {
-      setError(t(mapError(err)))
-    }
-  }
-
-  const resetSubForm = () => {
-    setEditingSubId(null)
-    setSubForm({
-      name: '',
-      slug: '',
-      image: '',
-      categoryId: categories[0]?.id ?? '',
-    })
-  }
-
-  const startEditSub = (sub: SubCategory) => {
-    setEditingSubId(sub.id)
-    setSubForm({
-      name: sub.name,
-      slug: sub.slug,
-      categoryId: sub.categoryId,
-      image: sub.image,
-    })
-    window.requestAnimationFrame(() => {
-      document.getElementById('admin-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }
-
-  const handleSaveSub = async (e: FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
-    try {
-      if (editingSubId) {
-        await AdminApi.updateSubcategory(editingSubId, {
-          name: subForm.name,
-          slug: subForm.slug || undefined,
-          categoryId: subForm.categoryId,
-          image: subForm.image,
-        })
-        flash(t('admin.successSubSaved'))
-      } else {
-        await AdminApi.createSubcategory({
-          name: subForm.name,
-          slug: subForm.slug || undefined,
-          categoryId: subForm.categoryId,
-          image: subForm.image || undefined,
-        })
-        flash(t('admin.successSubCreated'))
-      }
-      resetSubForm()
-      await load()
-    } catch (err) {
-      setError(t(mapError(err)))
-    } finally {
-      setSaving(false)
+      setError(t(mapAdminError(err)))
     }
   }
 
@@ -525,11 +484,10 @@ export function AdminPage() {
     if (!window.confirm(t('admin.removeSubConfirm'))) return
     try {
       await AdminApi.deleteSubcategory(id)
-      if (editingSubId === id) resetSubForm()
       flash(t('admin.successSubDeleted'))
       await load()
     } catch (err) {
-      setError(t(mapError(err)))
+      setError(t(mapAdminError(err)))
     }
   }
 
@@ -541,53 +499,15 @@ export function AdminPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <div className="container">
-        <Breadcrumbs
-          items={[
-            { label: t('about.breadcrumbHome'), href: '/' },
-            { label: t('profile.title'), href: '/profile' },
-            { label: t('admin.title') },
-          ]}
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <h1 className={styles.title}>{t('admin.title')}</h1>
-          <p className={styles.subtitle}>{t('admin.subtitle')}</p>
-
-          <div className={styles.tabs} role="tablist">
-            {(
-              [
-                ['orders', t('admin.tabOrders')],
-                ['products', t('admin.tabProducts')],
-                ['create', t('admin.tabAddProduct')],
-                ['subcategories', t('admin.tabSubcategories')],
-                ['users', t('admin.tabUsers')],
-              ] as const
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={tab === id}
-                className={[styles.tab, tab === id ? styles.tabActive : ''].filter(Boolean).join(' ')}
-                onClick={() => {
-                  if (id === 'create' && !editingId) resetForm()
-                  setTab(id)
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {message && <p className={styles.success}>{message}</p>}
-          {error && <p className={styles.error}>{error}</p>}
-
+    <AdminShell
+      activeTab={tab}
+      onTabChange={(id) => {
+        if (id === 'create' && !editingId) resetForm()
+        setTab(id)
+      }}
+      message={message}
+      error={error}
+    >
           {loading ? (
             <p className={styles.muted}>{t('admin.loading')}</p>
           ) : tab === 'orders' ? (
@@ -1024,101 +944,129 @@ export function AdminPage() {
             </form>
           ) : tab === 'subcategories' ? (
             <div className={styles.panel}>
-              {subcategories.length === 0 ? (
-                <p className={styles.muted}>{t('admin.subEmpty')}</p>
+              <div className={styles.listToolbar}>
+                <div className={styles.listToolbarSearch}>
+                  <Input
+                    label={t('admin.tabSubcategories')}
+                    placeholder={t('admin.subSearchPlaceholder')}
+                    value={subSearch}
+                    onChange={(e) => setSubSearch(e.target.value)}
+                  />
+                </div>
+                <Button
+                  as={Link}
+                  to="/admin/subcategories/new"
+                  leftIcon={<Plus size={16} />}
+                  className={styles.listToolbarAction}
+                >
+                  {t('admin.createSubcategory')}
+                </Button>
+              </div>
+              {filteredSubs.length === 0 ? (
+                <p className={styles.muted}>
+                  {subcategories.length === 0 ? t('admin.subEmpty') : t('admin.subSearchEmpty')}
+                </p>
               ) : (
-                <ul className={styles.productList}>
-                  {subcategories.map((sub) => {
-                    const categoryName =
-                      categories.find((cat) => cat.id === sub.categoryId)?.name ?? sub.categorySlug
-                    return (
-                      <li key={sub.id} className={styles.productCard}>
-                        <div className={styles.productTop}>
-                          {sub.image ? (
-                            <img src={sub.image} alt="" className={styles.thumb} />
-                          ) : (
-                            <div className={styles.thumb} />
-                          )}
-                          <div className={styles.productMeta}>
-                            <h3 className={styles.productName}>{sub.name}</h3>
-                            <p className={styles.productSku}>
-                              {categoryName} · {sub.slug}
-                            </p>
+                <>
+                  <ul className={styles.productList}>
+                    {pagedSubs.map((sub) => {
+                      const categoryName =
+                        categories.find((cat) => cat.id === sub.categoryId)?.name ?? sub.categorySlug
+                      return (
+                        <li key={sub.id} className={styles.productCard}>
+                          <div className={styles.productTop}>
+                            {sub.image ? (
+                              <img src={sub.image} alt="" className={styles.thumb} />
+                            ) : (
+                              <div className={styles.thumb} />
+                            )}
+                            <div className={styles.productMeta}>
+                              <h3 className={styles.productName}>{sub.name}</h3>
+                              <p className={styles.productSku}>
+                                {categoryName} · {sub.slug}
+                              </p>
+                            </div>
+                            <div className={styles.rowActions}>
+                              <Link
+                                to={`/admin/subcategories/${sub.id}/edit`}
+                                className={styles.iconAction}
+                                aria-label={t('admin.edit')}
+                              >
+                                <Pencil size={16} />
+                              </Link>
+                              <button
+                                type="button"
+                                className={styles.iconActionDanger}
+                                aria-label={t('admin.remove')}
+                                onClick={() => void handleDeleteSub(sub.id)}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
-                          <div className={styles.rowActions}>
-                            <button
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  {subsTotalPages > 1 && (
+                    <nav className={styles.pagination} aria-label={t('admin.subPaginationAria')}>
+                      <motion.button
+                        type="button"
+                        className={styles.paginationBtn}
+                        onClick={() => goToSubsPage(subsPage - 1)}
+                        disabled={subsPage === 0}
+                        aria-label={t('common.paginationPrev')}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      >
+                        <ChevronLeft size={15} />
+                      </motion.button>
+                      <div className={styles.paginationNumbers}>
+                        {subsVisiblePages.map((pageIndex) => {
+                          const isActive = pageIndex === subsPage
+                          return (
+                            <motion.button
+                              key={pageIndex}
                               type="button"
-                              className={styles.iconAction}
-                              aria-label={t('admin.edit')}
-                              onClick={() => startEditSub(sub)}
+                              className={[
+                                styles.paginationNumber,
+                                isActive ? styles.paginationNumberActive : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                              onClick={() => goToSubsPage(pageIndex)}
+                              aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
+                              aria-current={isActive ? 'page' : undefined}
+                              whileTap={{ scale: 0.92 }}
+                              transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                             >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              type="button"
-                              className={styles.iconActionDanger}
-                              aria-label={t('admin.remove')}
-                              onClick={() => void handleDeleteSub(sub.id)}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-
-              <form id="admin-sub-form" className={styles.subForm} onSubmit={handleSaveSub}>
-                <label className={styles.selectLabel}>
-                  {t('admin.category')}
-                  <select
-                    className={styles.select}
-                    value={subForm.categoryId}
-                    onChange={(e) => setSubForm((s) => ({ ...s, categoryId: e.target.value }))}
-                    required
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className={styles.formGrid}>
-                  <Input
-                    label={t('admin.subName')}
-                    value={subForm.name}
-                    onChange={(e) => setSubForm((s) => ({ ...s, name: e.target.value }))}
-                    required
-                  />
-                  <Input
-                    label={t('admin.subSlug')}
-                    value={subForm.slug}
-                    onChange={(e) => setSubForm((s) => ({ ...s, slug: e.target.value }))}
-                  />
-                </div>
-                <div className={styles.mediaSection}>
-                  <span className={styles.mediaLabel}>{t('admin.subImage')}</span>
-                  <MediaUploader
-                    images={subForm.image ? [subForm.image] : []}
-                    onImagesChange={(next) => setSubForm((s) => ({ ...s, image: next[0] ?? '' }))}
-                    maxImages={1}
-                    allowVideo={false}
-                  />
-                </div>
-                <div className={styles.formActions}>
-                  <Button type="submit" loading={saving} leftIcon={<Layers size={16} />}>
-                    {editingSubId ? t('admin.updateSubcategory') : t('admin.createSubcategory')}
-                  </Button>
-                  {editingSubId && (
-                    <Button type="button" variant="ghost" onClick={resetSubForm}>
-                      {t('admin.cancelEdit')}
-                    </Button>
+                              {isActive && (
+                                <motion.span
+                                  layoutId="adminSubsPaginationPill"
+                                  className={styles.paginationPill}
+                                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                                />
+                              )}
+                              <span className={styles.paginationNumberLabel}>{pageIndex + 1}</span>
+                            </motion.button>
+                          )
+                        })}
+                      </div>
+                      <motion.button
+                        type="button"
+                        className={styles.paginationBtn}
+                        onClick={() => goToSubsPage(subsPage + 1)}
+                        disabled={subsPage >= subsTotalPages - 1}
+                        aria-label={t('common.paginationNext')}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      >
+                        <ChevronRight size={15} />
+                      </motion.button>
+                    </nav>
                   )}
-                </div>
-              </form>
+                </>
+              )}
             </div>
           ) : (
             <div className={styles.panel}>
@@ -1193,8 +1141,6 @@ export function AdminPage() {
               )}
             </div>
           )}
-        </motion.div>
-      </div>
-    </div>
+    </AdminShell>
   )
 }

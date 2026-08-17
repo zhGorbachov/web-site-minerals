@@ -372,6 +372,8 @@ export type UiTranslationSchema = {
     tabProducts: string
     tabAddProduct: string
     tabSubcategories: string
+    tabAddSubcategory: string
+    tabEditSubcategory: string
     tabUsers: string
     tabOrders: string
     forbidden: string
@@ -450,6 +452,10 @@ export type UiTranslationSchema = {
     subSlug: string
     subImage: string
     subEmpty: string
+    subSearchEmpty: string
+    subSearchPlaceholder: string
+    subPaginationAria: string
+    subNotFound: string
     successSaved: string
     successCreated: string
     successDeleted: string
@@ -881,6 +887,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     tabProducts: 'Товари',
     tabAddProduct: 'Новий товар',
     tabSubcategories: 'Підкатегорії',
+    tabAddSubcategory: 'Нова підкатегорія',
+    tabEditSubcategory: 'Редагувати підкатегорію',
     tabUsers: 'Клієнти',
     tabOrders: 'Замовлення',
     forbidden: 'Доступ лише для адміністратора',
@@ -960,6 +968,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     subSlug: 'Slug підкатегорії',
     subImage: 'Зображення',
     subEmpty: 'Підкатегорій ще немає',
+    subSearchEmpty: 'Підкатегорій не знайдено',
+    subSearchPlaceholder: 'Пошук за назвою, slug або категорією...',
+    subPaginationAria: 'Сторінки підкатегорій',
+    subNotFound: 'Підкатегорію не знайдено',
     successSaved: 'Збережено',
     successCreated: 'Товар створено',
     successDeleted: 'Товар видалено',
@@ -1397,6 +1409,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     tabProducts: 'Products',
     tabAddProduct: 'New product',
     tabSubcategories: 'Subcategories',
+    tabAddSubcategory: 'New subcategory',
+    tabEditSubcategory: 'Edit subcategory',
     tabUsers: 'Customers',
     tabOrders: 'Orders',
     forbidden: 'Admin access only',
@@ -1476,6 +1490,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     subSlug: 'Subcategory slug',
     subImage: 'Image',
     subEmpty: 'No subcategories yet',
+    subSearchEmpty: 'No subcategories found',
+    subSearchPlaceholder: 'Search by name, slug or category...',
+    subPaginationAria: 'Subcategory pages',
+    subNotFound: 'Subcategory not found',
     successSaved: 'Saved',
     successCreated: 'Product created',
     successDeleted: 'Product deleted',

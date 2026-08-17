@@ -91,6 +91,32 @@
   }
 }
 
+.listToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+
+  @include tablet-up {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: $spacing-4;
+  }
+}
+
+.listToolbarSearch {
+  flex: 1;
+  min-width: 0;
+}
+
+.listToolbarAction {
+  width: 100%;
+
+  @include tablet-up {
+    width: auto;
+    flex-shrink: 0;
+  }
+}
+
 .productList {
   list-style: none;
   margin: 0;
@@ -238,6 +264,7 @@
   color: $color-text;
   cursor: pointer;
   flex-shrink: 0;
+  text-decoration: none;
 
   @include tablet-up {
     background: $color-surface;
@@ -275,17 +302,6 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-2;
-}
-
-.subForm {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-4;
-
-  &:not(:first-child) {
-    padding-top: $spacing-4;
-    border-top: 1px solid $color-border;
-  }
 }
 
 .mediaLabel {
