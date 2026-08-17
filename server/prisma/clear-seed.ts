@@ -54,9 +54,20 @@ async function main() {
     console.log('No seeded mock products found')
   }
 
-  console.log(
-    `Kept core categories and ${seedData.subcategories.length} subcategories (empty ones stay for the storefront)`,
-  )
+  const emptySubs = await prisma.subCategory.findMany({
+    where: { products: { none: {} } },
+    select: { id: true },
+  })
+  if (emptySubs.length > 0) {
+    const deletedSubs = await prisma.subCategory.deleteMany({
+      where: { id: { in: emptySubs.map((sub) => sub.id) } },
+    })
+    console.log(`Removed ${deletedSubs.count} empty subcategories`)
+  } else {
+    console.log('No empty subcategories to remove')
+  }
+
+  console.log('Kept the five core categories, users and bootstrap admin')
 
   let deletedReviews = 0
   for (const review of demoReviews) {
@@ -66,7 +77,7 @@ async function main() {
     deletedReviews += result.count
   }
   console.log(`Removed ${deletedReviews} demo store reviews`)
-  console.log('Done. Core categories, subcategories, users and bootstrap admin were not removed.')
+  console.log('Done. The five categories, users and bootstrap admin were not removed.')
 }
 
 main()

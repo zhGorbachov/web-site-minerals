@@ -14,18 +14,8 @@ export type CoreCategory = {
   description: string
 }
 
-export type CoreSubCategory = {
-  id: string
-  categoryId: string
-  categorySlug: string
-  name: string
-  slug: string
-  image: string
-}
-
 type SeedData = {
   categories: CoreCategory[]
-  subcategories: CoreSubCategory[]
 }
 
 let cachedSeed: SeedData | undefined
@@ -42,21 +32,17 @@ export function loadCoreCategories(): CoreCategory[] {
   return loadSeedData().categories
 }
 
-export function loadCoreSubcategories(): CoreSubCategory[] {
-  return loadSeedData().subcategories
-}
-
 export function coreCategorySlugs(): string[] {
   return loadCoreCategories().map((category) => category.slug)
 }
 
 /**
- * Ensures the hardcoded storefront categories and subcategories exist.
+ * Ensures the five hardcoded storefront categories exist.
  * Syncs images from seed-data so catalog photos can be updated on deploy.
- * Empty subcategories are kept — the storefront shows an empty state.
+ * Subcategories are not created — admins add them as needed.
  */
 export async function ensureCoreCategories(client: PrismaClient = prisma) {
-  const { categories, subcategories } = loadSeedData()
+  const { categories } = loadSeedData()
 
   for (const category of categories) {
     const existing =
@@ -84,48 +70,5 @@ export async function ensureCoreCategories(client: PrismaClient = prisma) {
     }
   }
 
-  const dbCategories = await client.category.findMany({
-    where: { slug: { in: categories.map((category) => category.slug) } },
-    select: { id: true, slug: true },
-  })
-  const categoryIdBySlug = new Map(dbCategories.map((category) => [category.slug, category.id]))
-
-  for (const sub of subcategories) {
-    const categoryId = categoryIdBySlug.get(sub.categorySlug)
-    if (!categoryId) continue
-
-    const existing =
-      (await client.subCategory.findUnique({ where: { id: sub.id } })) ??
-      (await client.subCategory.findFirst({
-        where: { categorySlug: sub.categorySlug, slug: sub.slug },
-      }))
-
-    if (!existing) {
-      await client.subCategory.create({
-        data: {
-          id: sub.id,
-          categoryId,
-          categorySlug: sub.categorySlug,
-          name: sub.name,
-          slug: sub.slug,
-          image: sub.image,
-        },
-      })
-      continue
-    }
-
-    if (existing.image !== sub.image || existing.categoryId !== categoryId) {
-      await client.subCategory.update({
-        where: { id: existing.id },
-        data: {
-          image: sub.image,
-          categoryId,
-          categorySlug: sub.categorySlug,
-        },
-      })
-    }
-  }
-
   console.log(`Core categories ready: ${categories.map((c) => c.slug).join(', ')}`)
-  console.log(`Core subcategories ready: ${subcategories.length}`)
 }

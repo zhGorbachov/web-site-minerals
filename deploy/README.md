@@ -81,16 +81,17 @@ docker compose -f docker-compose.prod.yml up -d --build
 The API entrypoint runs `prisma db push` on each start, then bootstraps:
 
 - the five storefront categories (Низки, Підвіски, Браслети, Пахощі, Мінерали) — always present, home page stays **2+3**
-- core subcategories (Агат, Аметист, …) — always present; empty ones stay in the catalog and show “товарів цієї підкатегорії ще нема”
 - the admin user from `ADMIN_*` env (defaults: phone `0668344322`, password `hMJ5Pz&B6*%*Efez33`)
 
-Optional demo catalog (mock products). Skip this on a live shop:
+Subcategories are **not** created automatically — add them in admin as needed.
+
+Optional demo catalog (mock products and seed subcategories). Skip this on a live shop:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec api npx prisma db seed
 ```
 
-Strip mock products and leftover demo reviews before going live. The five categories, their subcategories, users and admin stay:
+Strip mock products, default seed subcategories, and leftover demo reviews before going live. The five categories, users and admin stay:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec api npm run db:clear-seed

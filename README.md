@@ -170,7 +170,7 @@ Copy from `server/.env.example`.
 | *(Podman)* `podman start/stop minerals-postgres` | Start/stop Postgres without Docker |
 | `npm run db:migrate` | `prisma db push` |
 | `npm run db:seed` | Reseed catalog (admin is bootstrapped on API start) |
-| `npm run db:clear-seed` | Remove mock products and leftover demo reviews (keeps the 5 categories, users, admin) |
+| `npm run db:clear-seed` | Remove mock products, default seed subcategories, and leftover demo reviews (keeps the 5 categories, users, admin) |
 | `npm run dev:server` | Start Express API |
 | `npm run dev` | Start Vite frontend (needs API running) |
 
