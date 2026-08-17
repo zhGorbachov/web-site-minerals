@@ -8,13 +8,9 @@ import {
 } from '@/utils/productOptions'
 import styles from './ProductAttributesEditor.module.scss'
 
-const BEAD_SIZE_PRESETS = ['4', '6', '8', '10', '12', '14']
-const BEAD_COUNT_PRESETS = ['20', '24', '28', '32', '36', '40', '44', '48']
+const BEAD_SIZE_PRESETS = ['2', '3', '4', '6', '8', '10', '12', '14']
 const THREAD_LENGTH_PRESETS = ['1 м', '5 м', '10 м', '25 м', '50 м', '100 м']
-const STRAND_LENGTH_PRESETS: StrandLengthOption[] = [
-  ...DEFAULT_STRAND_LENGTHS,
-  { label: 'Низка 40 см', value: '40 см' },
-]
+const STRAND_LENGTH_PRESETS: StrandLengthOption[] = [...DEFAULT_STRAND_LENGTHS]
 
 type AttrMap = Record<string, unknown>
 
@@ -46,6 +42,13 @@ function toggleValue(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
+function normalizeWristSize(raw: string): string {
+  const trimmed = raw.trim()
+  if (!trimmed) return trimmed
+  if (/\d/.test(trimmed) && !/см|cm/i.test(trimmed)) return `${trimmed} см`
+  return trimmed
+}
+
 function ChipMultiSelect({
   label,
   hint,
@@ -53,6 +56,7 @@ function ChipMultiSelect({
   presets,
   onChange,
   addPlaceholder,
+  normalize,
 }: {
   label: string
   hint?: string
@@ -60,13 +64,14 @@ function ChipMultiSelect({
   presets: string[]
   onChange: (next: string[]) => void
   addPlaceholder: string
+  normalize?: (value: string) => string
 }) {
   const [draft, setDraft] = useState('')
   const extras = values.filter((v) => !presets.includes(v))
   const options = [...presets, ...extras]
 
   const addCustom = () => {
-    const next = draft.trim()
+    const next = (normalize ?? ((value: string) => value))(draft.trim())
     if (!next) return
     if (!values.includes(next)) onChange([...values, next])
     setDraft('')
@@ -338,21 +343,16 @@ export function ProductAttributesEditor({
             addPlaceholder={t('admin.attrAddCustom')}
           />
           <ChipMultiSelect
-            label={t('admin.attrBeadCounts')}
-            hint={t('admin.attrBeadCountsHint')}
-            values={asStringArray(attributes.beadCounts)}
-            presets={BEAD_COUNT_PRESETS}
-            onChange={(beadCounts) => {
-              let next = patchAttr(attributes, 'beadCounts', beadCounts)
-              if (
-                beadCounts.length > 0 &&
-                asStrandLengths(next.strandLengths).length === 0
-              ) {
-                next = patchAttr(next, 'strandLengths', DEFAULT_STRAND_LENGTHS)
-              }
-              onChange(next)
+            label={t('admin.attrWristSizes')}
+            hint={t('admin.attrWristSizesHint')}
+            values={asStringArray(attributes.wristSizes)}
+            presets={DEFAULT_WRIST_SIZES}
+            onChange={(wristSizes) => {
+              const next = patchAttr(attributes, 'wristSizes', wristSizes)
+              onChange(patchAttr(next, 'beadCounts', []))
             }}
             addPlaceholder={t('admin.attrAddCustom')}
+            normalize={normalizeWristSize}
           />
           <StrandLengthsEditor
             values={
@@ -432,13 +432,14 @@ export function ProductAttributesEditor({
           presets={DEFAULT_WRIST_SIZES}
           onChange={(wristSizes) => onChange(patchAttr(attributes, 'wristSizes', wristSizes))}
           addPlaceholder={t('admin.attrAddCustom')}
+          normalize={normalizeWristSize}
         />
         <div className={styles.textGrid}>
           <TextField
             label={t('admin.attrWristRange')}
             value={String(attributes.wristSize ?? '')}
             onChange={(wristSize) => onChange(patchAttr(attributes, 'wristSize', wristSize))}
-            placeholder="14–21 см"
+            placeholder="14–22 см"
           />
           <TextField
             label={t('admin.attrThreadColor')}

@@ -12,8 +12,10 @@ export interface MineralAttributes {
   shape?: string
   /** Bead diameter options in mm, e.g. ['6','8','10'] */
   beadSizes?: string[]
-  /** Bead count options, e.g. ['36','40','44'] */
+  /** Bead count options, e.g. ['36','40','44'] — legacy, replaced by wristSizes in admin */
   beadCounts?: string[]
+  /** Selectable wrist sizes, e.g. ['14 см','15 см'] */
+  wristSizes?: string[]
   strandLengths?: StrandLengthOption[]
 }
 

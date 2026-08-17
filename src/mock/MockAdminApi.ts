@@ -65,7 +65,8 @@ export const MockAdminApi = {
       name: payload.name,
       slug,
       sku,
-      shortDescription: payload.shortDescription,
+      shortDescription:
+        payload.shortDescription?.trim() || payload.description || '—',
       description: payload.description,
       price: payload.price,
       discountPrice: payload.discountPrice ?? undefined,
@@ -120,7 +121,10 @@ export const MockAdminApi = {
       name: payload.name ?? current.name,
       slug,
       sku: nextSku,
-      shortDescription: payload.shortDescription ?? current.shortDescription,
+      shortDescription:
+        payload.shortDescription?.trim() ||
+        payload.description ||
+        current.shortDescription,
       description: payload.description ?? current.description,
       price: payload.price ?? current.price,
       discountPrice:

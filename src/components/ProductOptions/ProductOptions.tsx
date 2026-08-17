@@ -72,19 +72,22 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
 
   if (categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
+    const hasBeadSizes = Boolean(attrs.beadSizes?.length)
+    const hasWristSizes = Boolean(attrs.wristSizes?.length)
+    const hasBeadCounts = Boolean(attrs.beadCounts?.length)
     const strandLengths = getMineralStrandLengths(attrs)
     const hasOptions = Boolean(
-      attrs.beadSizes?.length || attrs.beadCounts?.length || strandLengths.length,
+      hasBeadSizes || hasWristSizes || hasBeadCounts || strandLengths.length,
     )
     if (!hasOptions) return null
 
     return (
       <div className={styles.options}>
-        {attrs.beadSizes && attrs.beadSizes.length > 0 && (
+        {hasBeadSizes && (
           <div className={styles.optionGroup}>
             <span className={styles.optionLabel}>{t('productOptions.beadSize')}</span>
             <div className={styles.sizeGrid}>
-              {attrs.beadSizes.map((size) => (
+              {attrs.beadSizes!.map((size) => (
                 <button
                   key={size}
                   type="button"
@@ -98,12 +101,31 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
           </div>
         )}
 
-        {attrs.beadCounts && attrs.beadCounts.length > 0 && (
+        {hasWristSizes && (
           <div className={styles.optionGroup}>
-            {attrs.beadSizes?.length ? <span className={styles.sectionDivider} /> : null}
+            {hasBeadSizes ? <span className={styles.sectionDivider} /> : null}
+            <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
+            <div className={styles.lengthPills}>
+              {attrs.wristSizes!.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  className={[styles.lengthPill, selected.wristSize === size ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => handleSelect('wristSize', size)}
+                >
+                  {formatWristSize(size, language)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {hasBeadCounts && (
+          <div className={styles.optionGroup}>
+            {hasBeadSizes || hasWristSizes ? <span className={styles.sectionDivider} /> : null}
             <span className={styles.optionLabel}>{t('productOptions.beadCount')}</span>
             <div className={styles.lengthPills}>
-              {attrs.beadCounts.map((count) => (
+              {attrs.beadCounts!.map((count) => (
                 <button
                   key={count}
                   type="button"
@@ -119,7 +141,7 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
 
         {strandLengths.length > 0 && (
           <div className={styles.optionGroup}>
-            {attrs.beadSizes?.length || attrs.beadCounts?.length ? (
+            {hasBeadSizes || hasWristSizes || hasBeadCounts ? (
               <span className={styles.sectionDivider} />
             ) : null}
             <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>

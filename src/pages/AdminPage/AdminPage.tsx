@@ -104,7 +104,6 @@ const emptyForm: AdminProductPayload = {
   name: '',
   slug: '',
   sku: '',
-  shortDescription: '',
   description: '',
   price: 0,
   discountPrice: null,
@@ -116,6 +115,12 @@ const emptyForm: AdminProductPayload = {
   popular: false,
   isNew: true,
   attributes: {},
+}
+
+function deriveShortDescription(description: string): string {
+  const text = description.trim().replace(/\s+/g, ' ')
+  if (!text) return '—'
+  return text.length <= 200 ? text : `${text.slice(0, 197).trimEnd()}…`
 }
 
 function mapError(error: unknown): TranslationKey {
@@ -379,7 +384,6 @@ export function AdminPage() {
       name: product.name,
       slug: product.slug,
       sku: product.sku,
-      shortDescription: product.shortDescription,
       description: product.description,
       price: product.price,
       discountPrice: product.discountPrice ?? null,
@@ -413,6 +417,7 @@ export function AdminPage() {
     setError(null)
     const payload: AdminProductPayload = {
       ...form,
+      shortDescription: deriveShortDescription(form.description),
       discountPrice: form.discountPrice || null,
       video: form.video || null,
       slug: form.slug || undefined,
@@ -911,12 +916,6 @@ export function AdminPage() {
                 onChange={(attributes) => setForm((f) => ({ ...f, attributes }))}
               />
 
-              <Input
-                label={t('admin.shortDescription')}
-                value={form.shortDescription}
-                onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))}
-                required
-              />
               <label className={styles.selectLabel}>
                 {t('admin.description')}
                 <textarea

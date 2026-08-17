@@ -1,15 +1,6 @@
 import type { BraceletAttributes, MineralAttributes, Product, StrandLengthOption } from '@/types'
 
-export const DEFAULT_WRIST_SIZES = [
-  '14 см',
-  '15 см',
-  '16 см',
-  '17 см',
-  '18 см',
-  '19 см',
-  '20 см',
-  '21 см',
-]
+export const DEFAULT_WRIST_SIZES = Array.from({ length: 9 }, (_, i) => `${i + 14} см`)
 
 /** Default buyer choice for every mineral strand: whole or half. */
 export const DEFAULT_STRAND_LENGTHS: StrandLengthOption[] = [
@@ -42,6 +33,7 @@ export function productRequiresOptions(product: Product): boolean {
     return Boolean(
       attrs.beadSizes?.length ||
         attrs.beadCounts?.length ||
+        attrs.wristSizes?.length ||
         getMineralStrandLengths(attrs).length,
     )
   }

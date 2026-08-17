@@ -25,11 +25,19 @@ function slugify(value: string) {
     .slice(0, 80)
 }
 
+function resolveShortDescription(description: string, shortDescription?: string) {
+  const trimmed = shortDescription?.trim()
+  if (trimmed) return trimmed
+  const text = description.trim().replace(/\s+/g, ' ')
+  if (!text) return '—'
+  return text.length <= 200 ? text : `${text.slice(0, 197).trimEnd()}…`
+}
+
 const productBodySchema = z.object({
   name: z.string().trim().min(1),
   slug: z.string().trim().min(1).optional(),
   sku: z.string().trim().optional(),
-  shortDescription: z.string().trim().min(1),
+  shortDescription: z.string().trim().optional(),
   description: z.string().trim().min(1),
   price: z.number().positive(),
   discountPrice: z.number().positive().nullable().optional(),
@@ -105,7 +113,7 @@ adminRouter.post('/products', async (req, res) => {
       name: parsed.data.name,
       slug,
       sku,
-      shortDescription: parsed.data.shortDescription,
+      shortDescription: resolveShortDescription(parsed.data.description, parsed.data.shortDescription),
       description: parsed.data.description,
       price: parsed.data.price,
       discountPrice: parsed.data.discountPrice ?? null,
@@ -176,7 +184,13 @@ adminRouter.patch('/products/:id', async (req, res) => {
       name: parsed.data.name,
       slug: parsed.data.slug,
       sku: parsed.data.sku?.trim() || undefined,
-      shortDescription: parsed.data.shortDescription,
+      shortDescription:
+        parsed.data.shortDescription !== undefined || parsed.data.description !== undefined
+          ? resolveShortDescription(
+              parsed.data.description ?? existing.description,
+              parsed.data.shortDescription,
+            )
+          : undefined,
       description: parsed.data.description,
       price: parsed.data.price,
       discountPrice:

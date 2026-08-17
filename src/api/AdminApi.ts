@@ -31,7 +31,7 @@ export type AdminProductPayload = {
   name: string
   slug?: string
   sku?: string
-  shortDescription: string
+  shortDescription?: string
   description: string
   price: number
   discountPrice?: number | null
