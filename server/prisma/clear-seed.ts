@@ -1,18 +1,15 @@
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
+import { ensureCoreCategories } from '../src/lib/bootstrapCategories.js'
 import { demoReviews } from './demo-reviews.js'
 import seedData from './seed-data.json' with { type: 'json' }
 
 const prisma = new PrismaClient()
 
-const coreCategorySlugs = new Set(seedData.categories.map((category) => category.slug))
-const coreCategoryIds = new Set(seedData.categories.map((category) => category.id))
-
 async function main() {
   console.log('Clearing seeded mock catalog...')
 
   const seedProductIds = seedData.products.map((product) => product.id)
-  const seedSubcategoryIds = seedData.subcategories.map((sub) => sub.id)
 
   const mockProducts = await prisma.product.findMany({
     where: {
@@ -58,34 +55,9 @@ async function main() {
     console.log('No seeded mock products found')
   }
 
-  const leftoverSeedSubs = await prisma.subCategory.findMany({
-    where: { id: { in: seedSubcategoryIds } },
-    select: { id: true, _count: { select: { products: true } } },
-  })
-  const emptySubIds = leftoverSeedSubs.filter((sub) => sub._count.products === 0).map((sub) => sub.id)
-  if (emptySubIds.length > 0) {
-    const deletedSubs = await prisma.subCategory.deleteMany({ where: { id: { in: emptySubIds } } })
-    console.log(`Removed ${deletedSubs.count} empty seeded subcategories`)
-  }
-
-  for (const category of seedData.categories) {
-    const existing =
-      (await prisma.category.findUnique({ where: { slug: category.slug } })) ??
-      (await prisma.category.findUnique({ where: { id: category.id } }))
-    if (existing) continue
-
-    await prisma.category.create({
-      data: {
-        id: category.id,
-        name: category.name,
-        slug: category.slug,
-        image: category.image,
-        description: category.description,
-      },
-    })
-  }
+  await ensureCoreCategories(prisma)
   console.log(
-    `Kept core categories: ${[...coreCategorySlugs].join(', ')} (ids ${[...coreCategoryIds].join(', ')})`,
+    `Kept core categories and ${seedData.subcategories.length} subcategories (empty ones stay for the storefront)`,
   )
 
   let deletedReviews = 0
@@ -96,7 +68,7 @@ async function main() {
     deletedReviews += result.count
   }
   console.log(`Removed ${deletedReviews} demo store reviews`)
-  console.log('Done. Core categories, users and bootstrap admin were not removed.')
+  console.log('Done. Core categories, subcategories, users and bootstrap admin were not removed.')
 }
 
 main()

@@ -545,8 +545,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     productCount: '{count} товарів',
     paginationAria: 'Сторінки товарів',
     aboutSection: 'Про категорію',
-    emptyTitle: 'Товарів не знайдено',
-    emptyDescription: 'У цій підкатегорії поки немає товарів',
+    emptyTitle: 'Товарів цієї підкатегорії ще нема',
+    emptyDescription: 'Асортимент постійно поповнюється — загляньте пізніше',
   },
   product: {
     notFoundTitle: 'Товар не знайдено',
@@ -1054,8 +1054,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     productCount: '{count} products',
     paginationAria: 'Product pages',
     aboutSection: 'About category',
-    emptyTitle: 'No products found',
-    emptyDescription: 'There are no products in this subcategory yet',
+    emptyTitle: 'There are no products in this subcategory yet',
+    emptyDescription: 'The assortment is updated regularly — check back later',
   },
   product: {
     notFoundTitle: 'Product not found',

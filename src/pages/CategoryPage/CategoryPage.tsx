@@ -118,7 +118,7 @@ export function CategoryPage() {
           <h1 className={styles.title}>
             {activeSubcategory?.name ?? category?.name ?? '...'}
           </h1>
-          {isSubcategoryView && !loading && (
+          {isSubcategoryView && !loading && products.length > 0 && (
             <div className={styles.headerActions}>
               <p className={styles.count}>{t('category.productCount', { count: products.length })}</p>
               <ProductSort value={sortBy} onChange={setSortBy} />
