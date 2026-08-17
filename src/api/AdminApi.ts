@@ -45,6 +45,13 @@ export type AdminProductPayload = {
   subCategoryId: string
 }
 
+export type AdminSubcategoryPayload = {
+  name: string
+  slug?: string
+  categoryId: string
+  image?: string
+}
+
 export type UploadedMedia = {
   url: string
   type: 'image' | 'video'
@@ -90,14 +97,18 @@ export const AdminApi = {
     await api.delete(`/admin/products/${id}`)
   },
 
-  async createSubcategory(payload: {
-    name: string
-    slug?: string
-    categoryId: string
-    image?: string
-  }) {
+  async createSubcategory(payload: AdminSubcategoryPayload) {
     const { data } = await api.post<SubCategory>('/admin/subcategories', payload)
     return withMediaUrls(data) as SubCategory
+  },
+
+  async updateSubcategory(id: string, payload: Partial<AdminSubcategoryPayload>) {
+    const { data } = await api.patch<SubCategory>(`/admin/subcategories/${id}`, payload)
+    return withMediaUrls(data) as SubCategory
+  },
+
+  async deleteSubcategory(id: string) {
+    await api.delete(`/admin/subcategories/${id}`)
   },
 
   async uploadFiles(files: File[]) {

@@ -3,6 +3,7 @@ import type {
   AdminOrder,
   AdminOrderUpdatePayload,
   AdminProductPayload,
+  AdminSubcategoryPayload,
   AdminUser,
   UploadedMedia,
 } from '@/api/AdminApi'
@@ -162,18 +163,15 @@ export const MockAdminApi = {
     MockDb.setProducts(products.filter((p) => p.id !== id))
   },
 
-  async createSubcategory(payload: {
-    name: string
-    slug?: string
-    categoryId: string
-    image?: string
-  }): Promise<SubCategory> {
+  async createSubcategory(payload: AdminSubcategoryPayload): Promise<SubCategory> {
     requireAdmin()
     const category = MockDb.getCategories().find((c) => c.id === payload.categoryId)
     if (!category) throw new MockApiError(400, 'Invalid category')
 
     const slug = payload.slug?.trim() || slugify(payload.name)
-    if (MockDb.getSubcategories().some((s) => s.slug === slug)) {
+    if (
+      MockDb.getSubcategories().some((s) => s.categorySlug === category.slug && s.slug === slug)
+    ) {
       throw new MockApiError(409, 'slug_taken')
     }
 
@@ -191,6 +189,66 @@ export const MockAdminApi = {
 
     MockDb.setSubcategories([...MockDb.getSubcategories(), subcategory])
     return subcategory
+  },
+
+  async updateSubcategory(
+    id: string,
+    payload: Partial<AdminSubcategoryPayload>,
+  ): Promise<SubCategory> {
+    requireAdmin()
+    const list = MockDb.getSubcategories()
+    const index = list.findIndex((s) => s.id === id)
+    if (index < 0) throw new MockApiError(404, 'Not found')
+
+    const current = list[index]
+    const nextCategoryId = payload.categoryId ?? current.categoryId
+    const category = MockDb.getCategories().find((c) => c.id === nextCategoryId)
+    if (!category) throw new MockApiError(400, 'Invalid category')
+
+    const slug = payload.slug?.trim() || current.slug
+    if (
+      list.some(
+        (s) => s.id !== id && s.categorySlug === category.slug && s.slug === slug,
+      )
+    ) {
+      throw new MockApiError(409, 'slug_taken')
+    }
+
+    const updated: SubCategory = {
+      ...current,
+      name: payload.name?.trim() || current.name,
+      slug,
+      categoryId: category.id,
+      categorySlug: category.slug,
+      image: payload.image === undefined ? current.image : payload.image || category.image,
+      updatedAt: new Date().toISOString(),
+    }
+
+    const next = [...list]
+    next[index] = updated
+    MockDb.setSubcategories(next)
+
+    if (slug !== current.slug || category.slug !== current.categorySlug) {
+      MockDb.setProducts(
+        MockDb.getProducts().map((product) =>
+          product.subCategoryId === id
+            ? { ...product, subCategorySlug: slug, categorySlug: category.slug }
+            : product,
+        ),
+      )
+    }
+
+    return updated
+  },
+
+  async deleteSubcategory(id: string): Promise<void> {
+    requireAdmin()
+    const list = MockDb.getSubcategories()
+    if (!list.some((s) => s.id === id)) throw new MockApiError(404, 'Not found')
+    if (MockDb.getProducts().some((p) => p.subCategoryId === id)) {
+      throw new MockApiError(409, 'subcategory_has_products')
+    }
+    MockDb.setSubcategories(list.filter((s) => s.id !== id))
   },
 
   async uploadFiles(files: File[]): Promise<UploadedMedia[]> {

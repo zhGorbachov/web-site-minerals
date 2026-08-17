@@ -2,6 +2,7 @@ export { api, getAuthToken, setAuthToken, mediaUrl, API_URL, isMockMode } from '
 export type { AuthResponse } from './AuthApi'
 export type {
   AdminProductPayload,
+  AdminSubcategoryPayload,
   UploadedMedia,
   AdminUser,
   AdminOrder,

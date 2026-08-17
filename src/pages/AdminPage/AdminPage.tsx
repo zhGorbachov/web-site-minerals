@@ -129,6 +129,7 @@ function mapError(error: unknown): TranslationKey {
     if (code === 'slug_taken') return 'admin.errorSlugTaken'
     if (code === 'sku_taken') return 'admin.errorSkuTaken'
     if (code === 'product_in_orders') return 'admin.errorInOrders'
+    if (code === 'subcategory_has_products') return 'admin.errorSubHasProducts'
     if (error.response?.status === 403) return 'admin.forbidden'
   }
   return 'admin.errorGeneric'
@@ -169,6 +170,7 @@ export function AdminPage() {
     categoryId: '',
     image: '',
   })
+  const [editingSubId, setEditingSubId] = useState<string | null>(null)
 
   const isAdmin = user?.role === 'admin' || user?.role === 'manager'
 
@@ -465,24 +467,69 @@ export function AdminPage() {
     }
   }
 
-  const handleCreateSub = async (e: FormEvent) => {
+  const resetSubForm = () => {
+    setEditingSubId(null)
+    setSubForm({
+      name: '',
+      slug: '',
+      image: '',
+      categoryId: categories[0]?.id ?? '',
+    })
+  }
+
+  const startEditSub = (sub: SubCategory) => {
+    setEditingSubId(sub.id)
+    setSubForm({
+      name: sub.name,
+      slug: sub.slug,
+      categoryId: sub.categoryId,
+      image: sub.image,
+    })
+    window.requestAnimationFrame(() => {
+      document.getElementById('admin-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
+  const handleSaveSub = async (e: FormEvent) => {
     e.preventDefault()
     setSaving(true)
     setError(null)
     try {
-      await AdminApi.createSubcategory({
-        name: subForm.name,
-        slug: subForm.slug || undefined,
-        categoryId: subForm.categoryId,
-        image: subForm.image || undefined,
-      })
-      flash(t('admin.successSubCreated'))
-      setSubForm((s) => ({ ...s, name: '', slug: '', image: '' }))
+      if (editingSubId) {
+        await AdminApi.updateSubcategory(editingSubId, {
+          name: subForm.name,
+          slug: subForm.slug || undefined,
+          categoryId: subForm.categoryId,
+          image: subForm.image,
+        })
+        flash(t('admin.successSubSaved'))
+      } else {
+        await AdminApi.createSubcategory({
+          name: subForm.name,
+          slug: subForm.slug || undefined,
+          categoryId: subForm.categoryId,
+          image: subForm.image || undefined,
+        })
+        flash(t('admin.successSubCreated'))
+      }
+      resetSubForm()
       await load()
     } catch (err) {
       setError(t(mapError(err)))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDeleteSub = async (id: string) => {
+    if (!window.confirm(t('admin.removeSubConfirm'))) return
+    try {
+      await AdminApi.deleteSubcategory(id)
+      if (editingSubId === id) resetSubForm()
+      flash(t('admin.successSubDeleted'))
+      await load()
+    } catch (err) {
+      setError(t(mapError(err)))
     }
   }
 
@@ -976,48 +1023,103 @@ export function AdminPage() {
               </div>
             </form>
           ) : tab === 'subcategories' ? (
-            <form className={styles.panel} onSubmit={handleCreateSub}>
-              <label className={styles.selectLabel}>
-                {t('admin.category')}
-                <select
-                  className={styles.select}
-                  value={subForm.categoryId}
-                  onChange={(e) => setSubForm((s) => ({ ...s, categoryId: e.target.value }))}
-                  required
-                >
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className={styles.formGrid}>
-                <Input
-                  label={t('admin.subName')}
-                  value={subForm.name}
-                  onChange={(e) => setSubForm((s) => ({ ...s, name: e.target.value }))}
-                  required
-                />
-                <Input
-                  label={t('admin.subSlug')}
-                  value={subForm.slug}
-                  onChange={(e) => setSubForm((s) => ({ ...s, slug: e.target.value }))}
-                />
-              </div>
-              <div className={styles.mediaSection}>
-                <span className={styles.mediaLabel}>{t('admin.subImage')}</span>
-                <MediaUploader
-                  images={subForm.image ? [subForm.image] : []}
-                  onImagesChange={(next) => setSubForm((s) => ({ ...s, image: next[0] ?? '' }))}
-                  maxImages={1}
-                  allowVideo={false}
-                />
-              </div>
-              <Button type="submit" loading={saving} leftIcon={<Layers size={16} />}>
-                {t('admin.createSubcategory')}
-              </Button>
-            </form>
+            <div className={styles.panel}>
+              {subcategories.length === 0 ? (
+                <p className={styles.muted}>{t('admin.subEmpty')}</p>
+              ) : (
+                <ul className={styles.productList}>
+                  {subcategories.map((sub) => {
+                    const categoryName =
+                      categories.find((cat) => cat.id === sub.categoryId)?.name ?? sub.categorySlug
+                    return (
+                      <li key={sub.id} className={styles.productCard}>
+                        <div className={styles.productTop}>
+                          {sub.image ? (
+                            <img src={sub.image} alt="" className={styles.thumb} />
+                          ) : (
+                            <div className={styles.thumb} />
+                          )}
+                          <div className={styles.productMeta}>
+                            <h3 className={styles.productName}>{sub.name}</h3>
+                            <p className={styles.productSku}>
+                              {categoryName} · {sub.slug}
+                            </p>
+                          </div>
+                          <div className={styles.rowActions}>
+                            <button
+                              type="button"
+                              className={styles.iconAction}
+                              aria-label={t('admin.edit')}
+                              onClick={() => startEditSub(sub)}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.iconActionDanger}
+                              aria-label={t('admin.remove')}
+                              onClick={() => void handleDeleteSub(sub.id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+
+              <form id="admin-sub-form" className={styles.subForm} onSubmit={handleSaveSub}>
+                <label className={styles.selectLabel}>
+                  {t('admin.category')}
+                  <select
+                    className={styles.select}
+                    value={subForm.categoryId}
+                    onChange={(e) => setSubForm((s) => ({ ...s, categoryId: e.target.value }))}
+                    required
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className={styles.formGrid}>
+                  <Input
+                    label={t('admin.subName')}
+                    value={subForm.name}
+                    onChange={(e) => setSubForm((s) => ({ ...s, name: e.target.value }))}
+                    required
+                  />
+                  <Input
+                    label={t('admin.subSlug')}
+                    value={subForm.slug}
+                    onChange={(e) => setSubForm((s) => ({ ...s, slug: e.target.value }))}
+                  />
+                </div>
+                <div className={styles.mediaSection}>
+                  <span className={styles.mediaLabel}>{t('admin.subImage')}</span>
+                  <MediaUploader
+                    images={subForm.image ? [subForm.image] : []}
+                    onImagesChange={(next) => setSubForm((s) => ({ ...s, image: next[0] ?? '' }))}
+                    maxImages={1}
+                    allowVideo={false}
+                  />
+                </div>
+                <div className={styles.formActions}>
+                  <Button type="submit" loading={saving} leftIcon={<Layers size={16} />}>
+                    {editingSubId ? t('admin.updateSubcategory') : t('admin.createSubcategory')}
+                  </Button>
+                  {editingSubId && (
+                    <Button type="button" variant="ghost" onClick={resetSubForm}>
+                      {t('admin.cancelEdit')}
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </div>
           ) : (
             <div className={styles.panel}>
               <Input

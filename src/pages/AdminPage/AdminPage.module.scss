@@ -277,6 +277,17 @@
   gap: $spacing-2;
 }
 
+.subForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+
+  &:not(:first-child) {
+    padding-top: $spacing-4;
+    border-top: 1px solid $color-border;
+  }
+}
+
 .mediaLabel {
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;

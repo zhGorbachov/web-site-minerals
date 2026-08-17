@@ -62,6 +62,12 @@ const subcategoryBodySchema = z.object({
   image: z.string().trim().min(1).optional(),
 })
 
+const subcategoryPatchSchema = subcategoryBodySchema
+  .extend({
+    image: z.string().trim().optional(),
+  })
+  .partial()
+
 adminRouter.get('/products', async (_req, res) => {
   const products = await prisma.product.findMany({
     include: productInclude,
@@ -287,6 +293,85 @@ adminRouter.post('/subcategories', async (req, res) => {
   })
 
   res.status(201).json(serializeSubCategory(sub))
+})
+
+adminRouter.patch('/subcategories/:id', async (req, res) => {
+  const parsed = subcategoryPatchSchema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() })
+    return
+  }
+
+  const existing = await prisma.subCategory.findUnique({ where: { id: req.params.id } })
+  if (!existing) {
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  const nextCategoryId = parsed.data.categoryId ?? existing.categoryId
+  const category = await prisma.category.findUnique({ where: { id: nextCategoryId } })
+  if (!category) {
+    res.status(400).json({ error: 'Invalid category' })
+    return
+  }
+
+  const slug = parsed.data.slug?.trim() || existing.slug
+  if (slug !== existing.slug || category.slug !== existing.categorySlug) {
+    const clash = await prisma.subCategory.findFirst({
+      where: {
+        categorySlug: category.slug,
+        slug,
+        NOT: { id: existing.id },
+      },
+    })
+    if (clash) {
+      res.status(409).json({ error: 'slug_taken' })
+      return
+    }
+  }
+
+  const image =
+    parsed.data.image === undefined ? undefined : parsed.data.image || category.image
+
+  const sub = await prisma.subCategory.update({
+    where: { id: existing.id },
+    data: {
+      name: parsed.data.name,
+      slug,
+      categoryId: category.id,
+      categorySlug: category.slug,
+      image,
+    },
+  })
+
+  if (slug !== existing.slug || category.slug !== existing.categorySlug) {
+    await prisma.product.updateMany({
+      where: { subCategoryId: existing.id },
+      data: {
+        subCategorySlug: slug,
+        categorySlug: category.slug,
+      },
+    })
+  }
+
+  res.json(serializeSubCategory(sub))
+})
+
+adminRouter.delete('/subcategories/:id', async (req, res) => {
+  const existing = await prisma.subCategory.findUnique({ where: { id: req.params.id } })
+  if (!existing) {
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  const productCount = await prisma.product.count({ where: { subCategoryId: existing.id } })
+  if (productCount > 0) {
+    res.status(409).json({ error: 'subcategory_has_products' })
+    return
+  }
+
+  await prisma.subCategory.delete({ where: { id: existing.id } })
+  res.status(204).send()
 })
 
 const discountSchema = z.object({

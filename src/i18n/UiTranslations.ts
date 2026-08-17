@@ -444,14 +444,19 @@ export type UiTranslationSchema = {
     popular: string
     isNew: string
     createSubcategory: string
+    updateSubcategory: string
     category: string
     subName: string
     subSlug: string
     subImage: string
+    subEmpty: string
     successSaved: string
     successCreated: string
     successDeleted: string
     successSubCreated: string
+    successSubSaved: string
+    successSubDeleted: string
+    removeSubConfirm: string
     errorGeneric: string
     attributesTitle: string
     attributesMineralTitle: string
@@ -492,6 +497,7 @@ export type UiTranslationSchema = {
     errorSlugTaken: string
     errorSkuTaken: string
     errorInOrders: string
+    errorSubHasProducts: string
   }
 }
 
@@ -948,14 +954,19 @@ export const uiTranslationsUk: UiTranslationSchema = {
     popular: 'Популярний',
     isNew: 'Новинка',
     createSubcategory: 'Додати підкатегорію',
+    updateSubcategory: 'Зберегти зміни',
     category: 'Категорія',
     subName: 'Назва підкатегорії',
     subSlug: 'Slug підкатегорії',
     subImage: 'Зображення',
+    subEmpty: 'Підкатегорій ще немає',
     successSaved: 'Збережено',
     successCreated: 'Товар створено',
     successDeleted: 'Товар видалено',
     successSubCreated: 'Підкатегорію створено',
+    successSubSaved: 'Підкатегорію збережено',
+    successSubDeleted: 'Підкатегорію видалено',
+    removeSubConfirm: 'Видалити цю підкатегорію?',
     errorGeneric: 'Щось пішло не так',
     attributesTitle: 'Параметри товару',
     attributesMineralTitle: 'Параметри мінералу',
@@ -1002,6 +1013,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     errorSlugTaken: 'Такий slug уже зайнятий',
     errorSkuTaken: 'Такий SKU уже зайнятий',
     errorInOrders: 'Неможливо видалити: товар є в замовленнях',
+    errorSubHasProducts: 'Неможливо видалити: у підкатегорії є товари',
   },
 }
 
@@ -1458,14 +1470,19 @@ export const uiTranslationsEn: UiTranslationSchema = {
     popular: 'Popular',
     isNew: 'New',
     createSubcategory: 'Add subcategory',
+    updateSubcategory: 'Save changes',
     category: 'Category',
     subName: 'Subcategory name',
     subSlug: 'Subcategory slug',
     subImage: 'Image',
+    subEmpty: 'No subcategories yet',
     successSaved: 'Saved',
     successCreated: 'Product created',
     successDeleted: 'Product deleted',
     successSubCreated: 'Subcategory created',
+    successSubSaved: 'Subcategory saved',
+    successSubDeleted: 'Subcategory deleted',
+    removeSubConfirm: 'Delete this subcategory?',
     errorGeneric: 'Something went wrong',
     attributesTitle: 'Product options',
     attributesMineralTitle: 'Mineral details',
@@ -1512,5 +1529,6 @@ export const uiTranslationsEn: UiTranslationSchema = {
     errorSlugTaken: 'This slug is already taken',
     errorSkuTaken: 'This SKU is already taken',
     errorInOrders: 'Cannot delete: product is used in orders',
+    errorSubHasProducts: 'Cannot delete: subcategory has products',
   },
 }
