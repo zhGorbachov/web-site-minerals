@@ -430,6 +430,8 @@ export type UiTranslationSchema = {
     media: string
     mediaDropTitle: string
     mediaDropHint: string
+    mediaDropHintImage: string
+    addImage: string
     addImages: string
     addVideo: string
     video: string
@@ -932,6 +934,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     media: 'Медіа',
     mediaDropTitle: 'Вставте, перетягніть або оберіть файли',
     mediaDropHint: 'Можна вставити одне чи кілька зображень з буфера (Ctrl+V / ⌘V), або завантажити фото та відео',
+    mediaDropHintImage: 'Можна вставити зображення з буфера (Ctrl+V / ⌘V), перетягнути або обрати файл',
+    addImage: 'Додати фото',
     addImages: 'Додати фото',
     addVideo: 'Додати відео',
     video: 'Відео',
@@ -947,7 +951,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     category: 'Категорія',
     subName: 'Назва підкатегорії',
     subSlug: 'Slug підкатегорії',
-    subImage: 'Зображення (URL)',
+    subImage: 'Зображення',
     successSaved: 'Збережено',
     successCreated: 'Товар створено',
     successDeleted: 'Товар видалено',
@@ -1439,6 +1443,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     media: 'Media',
     mediaDropTitle: 'Paste, drop or choose files',
     mediaDropHint: 'Paste one or more images from clipboard (Ctrl+V / ⌘V), or upload photos and a video',
+    mediaDropHintImage: 'Paste an image from clipboard (Ctrl+V / ⌘V), drop or choose a file',
+    addImage: 'Add photo',
     addImages: 'Add photos',
     addVideo: 'Add video',
     video: 'Video',
@@ -1454,7 +1460,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     category: 'Category',
     subName: 'Subcategory name',
     subSlug: 'Subcategory slug',
-    subImage: 'Image URL',
+    subImage: 'Image',
     successSaved: 'Saved',
     successCreated: 'Product created',
     successDeleted: 'Product deleted',

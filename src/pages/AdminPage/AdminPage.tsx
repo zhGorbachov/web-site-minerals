@@ -1006,12 +1006,15 @@ export function AdminPage() {
                   onChange={(e) => setSubForm((s) => ({ ...s, slug: e.target.value }))}
                 />
               </div>
-              <Input
-                label={t('admin.subImage')}
-                value={subForm.image}
-                onChange={(e) => setSubForm((s) => ({ ...s, image: e.target.value }))}
-                placeholder="/media/Amethyst.jpg"
-              />
+              <div className={styles.mediaSection}>
+                <span className={styles.mediaLabel}>{t('admin.subImage')}</span>
+                <MediaUploader
+                  images={subForm.image ? [subForm.image] : []}
+                  onImagesChange={(next) => setSubForm((s) => ({ ...s, image: next[0] ?? '' }))}
+                  maxImages={1}
+                  allowVideo={false}
+                />
+              </div>
               <Button type="submit" loading={saving} leftIcon={<Layers size={16} />}>
                 {t('admin.createSubcategory')}
               </Button>

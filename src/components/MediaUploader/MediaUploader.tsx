@@ -9,10 +9,19 @@ type Props = {
   images: string[]
   video?: string | null
   onImagesChange: (images: string[]) => void
-  onVideoChange: (video: string | null) => void
+  onVideoChange?: (video: string | null) => void
+  maxImages?: number
+  allowVideo?: boolean
 }
 
-export function MediaUploader({ images, video, onImagesChange, onVideoChange }: Props) {
+export function MediaUploader({
+  images,
+  video,
+  onImagesChange,
+  onVideoChange,
+  maxImages,
+  allowVideo = true,
+}: Props) {
   const { t } = useTranslation()
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,26 +36,30 @@ export function MediaUploader({ images, video, onImagesChange, onVideoChange }: 
       setError(null)
       try {
         const uploaded = await AdminApi.uploadFiles(files)
-        const nextImages = [...images]
+        let nextImages = [...images]
         let nextVideo = video ?? null
 
         for (const file of uploaded) {
           if (file.type === 'video') {
-            nextVideo = file.url
+            if (allowVideo) nextVideo = file.url
           } else if (!nextImages.includes(file.url)) {
             nextImages.push(file.url)
           }
         }
 
+        if (maxImages != null && nextImages.length > maxImages) {
+          nextImages = nextImages.slice(-maxImages)
+        }
+
         onImagesChange(nextImages)
-        onVideoChange(nextVideo)
+        onVideoChange?.(nextVideo)
       } catch {
         setError(t('admin.uploadError'))
       } finally {
         setUploading(false)
       }
     },
-    [images, video, onImagesChange, onVideoChange, t],
+    [images, video, onImagesChange, onVideoChange, maxImages, allowVideo, t],
   )
 
   const handlePaste = async (e: React.ClipboardEvent) => {
@@ -64,8 +77,10 @@ export function MediaUploader({ images, video, onImagesChange, onVideoChange }: 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-    const files = Array.from(e.dataTransfer.files).filter(
-      (f) => f.type.startsWith('image/') || f.type.startsWith('video/'),
+    const files = Array.from(e.dataTransfer.files).filter((f) =>
+      allowVideo
+        ? f.type.startsWith('image/') || f.type.startsWith('video/')
+        : f.type.startsWith('image/'),
     )
     await upload(files)
   }
@@ -89,7 +104,9 @@ export function MediaUploader({ images, video, onImagesChange, onVideoChange }: 
       >
         <Upload size={22} aria-hidden="true" />
         <p className={styles.dropTitle}>{t('admin.mediaDropTitle')}</p>
-        <p className={styles.dropHint}>{t('admin.mediaDropHint')}</p>
+        <p className={styles.dropHint}>
+          {t(allowVideo ? 'admin.mediaDropHint' : 'admin.mediaDropHintImage')}
+        </p>
 
         <div className={styles.dropActions}>
           <button
@@ -99,24 +116,26 @@ export function MediaUploader({ images, video, onImagesChange, onVideoChange }: 
             disabled={uploading}
           >
             <ImagePlus size={16} />
-            {t('admin.addImages')}
+            {t(maxImages === 1 ? 'admin.addImage' : 'admin.addImages')}
           </button>
-          <button
-            type="button"
-            className={styles.pickBtn}
-            onClick={() => videoInputRef.current?.click()}
-            disabled={uploading}
-          >
-            <Film size={16} />
-            {t('admin.addVideo')}
-          </button>
+          {allowVideo && (
+            <button
+              type="button"
+              className={styles.pickBtn}
+              onClick={() => videoInputRef.current?.click()}
+              disabled={uploading}
+            >
+              <Film size={16} />
+              {t('admin.addVideo')}
+            </button>
+          )}
         </div>
 
         <input
           ref={imageInputRef}
           type="file"
           accept="image/*"
-          multiple
+          multiple={maxImages !== 1}
           hidden
           onChange={(e) => {
             const files = Array.from(e.target.files ?? [])
@@ -142,7 +161,7 @@ export function MediaUploader({ images, video, onImagesChange, onVideoChange }: 
 
       {images.length > 0 && (
         <div className={styles.previewBlock}>
-          <span className={styles.previewLabel}>{t('admin.images')}</span>
+          {maxImages !== 1 && <span className={styles.previewLabel}>{t('admin.images')}</span>}
           <ul className={styles.previewGrid}>
             {images.map((src) => (
               <li key={src} className={styles.previewItem}>

@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
-import { demoReviews } from './demo-reviews.js'
 import seedData from './seed-data.json' with { type: 'json' }
 
 const prisma = new PrismaClient()
@@ -10,7 +9,6 @@ async function main() {
 
   await prisma.orderItem.deleteMany()
   await prisma.order.deleteMany()
-  await prisma.storeReview.deleteMany()
   await prisma.cartItem.deleteMany()
   await prisma.cart.deleteMany()
   await prisma.wishlistItem.deleteMany()
@@ -76,9 +74,6 @@ async function main() {
   console.log(
     `Seeded ${seedData.categories.length} categories, ${seedData.subcategories.length} subcategories, ${seedData.products.length} products`,
   )
-
-  await prisma.storeReview.createMany({ data: demoReviews })
-  console.log(`Seeded ${demoReviews.length} store reviews`)
 }
 
 main()

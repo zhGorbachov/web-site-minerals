@@ -89,7 +89,7 @@ Optional demo catalog (mock products). Skip this on a live shop:
 docker compose -f docker-compose.prod.yml exec api npx prisma db seed
 ```
 
-Strip mock products / demo reviews before going live. The five categories, users and admin stay:
+Strip mock products and leftover demo reviews before going live. The five categories, users and admin stay:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec api npm run db:clear-seed

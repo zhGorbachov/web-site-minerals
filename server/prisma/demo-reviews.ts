@@ -1,4 +1,4 @@
-/** Demo store reviews used by `seed.ts` and stripped by `clear-seed.ts`. */
+/** Known mock store reviews stripped by `clear-seed.ts`. Not seeded anymore. */
 export const demoReviews = [
   {
     authorName: 'Олена К.',
