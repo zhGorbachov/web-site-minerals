@@ -32,13 +32,24 @@ export function AdminShell({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+  const hydrated = useAuthStore((s) => s.hydrated)
   const isAdmin = user?.role === 'admin' || user?.role === 'manager'
 
   useEffect(() => {
-    if (!user) {
+    if (hydrated && !user) {
       navigate('/login', { replace: true })
     }
-  }, [user, navigate])
+  }, [hydrated, user, navigate])
+
+  if (!hydrated && !user) {
+    return (
+      <div className={styles.page}>
+        <div className="container">
+          <p className={styles.muted}>{t('admin.loading')}</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!user) return null
 

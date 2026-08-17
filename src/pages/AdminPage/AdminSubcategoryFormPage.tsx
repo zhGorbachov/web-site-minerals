@@ -40,12 +40,15 @@ export function AdminSubcategoryFormPage() {
   useEffect(() => {
     if (!isAdmin) return
 
+    let cancelled = false
+
     const load = async () => {
       setLoading(true)
       setError(null)
       setNotFound(false)
       try {
         const cats = await CatalogApi.getCategories()
+        if (cancelled) return
         setCategories(cats)
 
         if (!id) {
@@ -57,6 +60,7 @@ export function AdminSubcategoryFormPage() {
         }
 
         const subs = await CatalogApi.getSubcategories()
+        if (cancelled) return
         const sub = subs.find((item) => item.id === id)
         if (!sub) {
           setNotFound(true)
@@ -70,14 +74,19 @@ export function AdminSubcategoryFormPage() {
           image: sub.image,
         })
       } catch (err) {
-        setError(t(mapAdminError(err)))
+        if (!cancelled) setError(t(mapAdminError(err)))
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     void load()
-  }, [id, isAdmin, t])
+    return () => {
+      cancelled = true
+    }
+    // t is recreated every render — do not put it in deps or the page will flicker.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isAdmin])
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault()
