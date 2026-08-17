@@ -9,6 +9,8 @@ const imgMap = {
   mineralsCategory: 'MineralsCategory.jpg',
   threads: 'Threads.jpg',
   bracelets: 'Bracelets.jpg',
+  pendants: 'Pendants.jpg',
+  incense: 'Incense.jpg',
   moonstone: 'Moonstone.jpg',
   beadsAgate: 'BeadsAgate.jpg',
   amethyst: 'Amethyst.jpg',

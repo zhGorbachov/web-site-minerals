@@ -113,6 +113,16 @@ docker compose -f docker-compose.prod.yml logs -f caddy
 
 ## Updates
 
+`db:clear-seed` only changes the database — **no restart needed**.
+
+To bounce the running stack without new code:
+
+```bash
+docker compose -f docker-compose.prod.yml restart
+```
+
+To deploy new code or media (images, frontend, API):
+
 ```bash
 cd web-site-minerals
 git pull

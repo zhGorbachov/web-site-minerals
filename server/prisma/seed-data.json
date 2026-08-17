@@ -31,7 +31,7 @@
       "id": "cat-5",
       "name": "Пахощі",
       "slug": "pahoshchi",
-      "image": "/media/Amethyst.jpg",
+      "image": "/media/Incense.jpg",
       "description": "Натуральні пахощі для медитації, релаксу та створення затишної атмосфери",
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"
@@ -40,7 +40,7 @@
       "id": "cat-4",
       "name": "Підвіски",
       "slug": "pidvisky",
-      "image": "/media/Moonstone.jpg",
+      "image": "/media/Pendants.jpg",
       "description": "Підвіски та кулони з натуральних мінералів ручної роботи",
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"

@@ -28,27 +28,35 @@ export function coreCategorySlugs(): string[] {
 
 /**
  * Ensures the hardcoded storefront categories exist.
- * Does not overwrite names/images if the row is already there.
+ * Syncs image from seed-data so catalog photos can be updated on deploy.
  */
 export async function ensureCoreCategories() {
   const categories = loadCoreCategories()
 
   for (const category of categories) {
-    const bySlug = await prisma.category.findUnique({ where: { slug: category.slug } })
-    if (bySlug) continue
+    const existing =
+      (await prisma.category.findUnique({ where: { slug: category.slug } })) ??
+      (await prisma.category.findUnique({ where: { id: category.id } }))
 
-    const byId = await prisma.category.findUnique({ where: { id: category.id } })
-    if (byId) continue
+    if (!existing) {
+      await prisma.category.create({
+        data: {
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          image: category.image,
+          description: category.description,
+        },
+      })
+      continue
+    }
 
-    await prisma.category.create({
-      data: {
-        id: category.id,
-        name: category.name,
-        slug: category.slug,
-        image: category.image,
-        description: category.description,
-      },
-    })
+    if (existing.image !== category.image) {
+      await prisma.category.update({
+        where: { id: existing.id },
+        data: { image: category.image },
+      })
+    }
   }
 
   console.log(`Core categories ready: ${categories.map((c) => c.slug).join(', ')}`)

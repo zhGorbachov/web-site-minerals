@@ -3,6 +3,8 @@ import MineralsHero from './MineralsHero.jpg'
 import MineralsCategory from './MineralsCategory.jpg'
 import Threads from './Threads.jpg'
 import Bracelets from './Bracelets.jpg'
+import Pendants from './Pendants.jpg'
+import Incense from './Incense.jpg'
 import BeadsAgate from './BeadsAgate.jpg'
 import BlueAgate from './BlueAgate.jpg'
 import Jasper from './Jasper.jpg'
@@ -32,6 +34,8 @@ export const mockImages = {
   mineralsCategory: MineralsCategory,
   threads: Threads,
   bracelets: Bracelets,
+  pendants: Pendants,
+  incense: Incense,
   beadsAgate: BeadsAgate,
   blueAgate: BlueAgate,
   jasper: Jasper,
