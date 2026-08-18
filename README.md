@@ -202,7 +202,7 @@ web-site-minerals/
 
 ## Deploy (AWS Lightsail)
 
-See [deploy/README.md](deploy/README.md) for IP-whitelisted production deploy with Docker Compose.
+See [deploy/README.md](deploy/README.md) for production deploy (Caddy + HTTPS on lux-stones.com.ua).
 
 ## Google OAuth (optional)
 

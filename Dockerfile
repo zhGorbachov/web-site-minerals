@@ -48,4 +48,4 @@ CMD ["node", "dist/index.js"]
 FROM caddy:2-alpine AS caddy
 COPY --from=frontend-build /app/dist /srv
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
-EXPOSE 80
+EXPOSE 80 443

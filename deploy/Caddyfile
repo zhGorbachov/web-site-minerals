@@ -1,14 +1,15 @@
-# Production reverse proxy.
-# Default: HTTP on :80 (IP whitelist via Lightsail firewall).
-#
-# For OAuth in production (or a custom domain), switch to HTTPS:
-#   1. Point DNS A record to the Lightsail static IP.
-#   2. Replace `:80` below with your domain, e.g. `shop.example.com {`
-#   3. Publish port 443 in docker-compose.prod.yml (and open 443 in Lightsail).
-#   4. Set CLIENT_URL / API_URL to https://shop.example.com
-# Caddy will obtain Let's Encrypt certificates automatically.
+# Production reverse proxy for lux-stones.com.ua.
+# Caddy obtains Let's Encrypt certificates automatically (ports 80 + 443).
 
-:80 {
+{
+	email admin@lux-stones.com.ua
+}
+
+www.lux-stones.com.ua {
+	redir https://lux-stones.com.ua{uri} permanent
+}
+
+lux-stones.com.ua {
 	encode gzip
 
 	handle /api/* {

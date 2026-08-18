@@ -44,8 +44,11 @@ services:
     restart: unless-stopped
     ports:
       - '80:80'
-      # Uncomment when using a domain + HTTPS:
-      # - '443:443'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
       - api
     networks:
@@ -54,6 +57,8 @@ services:
 volumes:
   minerals_pg_data:
   minerals_uploads:
+  caddy_data:
+  caddy_config:
 
 networks:
   minerals:

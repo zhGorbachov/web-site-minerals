@@ -1,16 +1,18 @@
-# Deploy to AWS Lightsail (IP whitelist)
+# Deploy to AWS Lightsail
 
-Basic production stack: **Caddy + Express API + Postgres** via Docker Compose on a single Lightsail Linux instance. Access is limited to allowlisted IPs through the **Lightsail Networking firewall** (not application code).
+Production stack: **Caddy + Express API + Postgres** via Docker Compose on a single Lightsail Linux instance. Public HTTPS on [lux-stones.com.ua](https://lux-stones.com.ua); SSH stays IP-restricted.
 
 ## Architecture
 
 ```
-Browser (allowlisted IP)
-  → Lightsail firewall :80
-    → Caddy
+Browser
+  → Lightsail firewall :80 / :443
+    → Caddy (Let's Encrypt)
          ├─ /              → SPA (/srv)
          └─ /api|/media|/uploads → api:3001 → postgres (internal)
 ```
+
+`www.lux-stones.com.ua` redirects to the apex domain.
 
 ## 1. Create a Lightsail instance
 
@@ -20,23 +22,35 @@ Browser (allowlisted IP)
 4. Create and attach a **Static IP**.
 5. Download or use an SSH key pair.
 
-## 2. Restrict firewall to your IPs
+## 2. Firewall
 
 Lightsail → your instance → **Networking**:
 
-1. Remove the default **HTTP** rule that allows `0.0.0.0/0` (and the same for **SSH** if present).
-2. Add **Custom** / application rules:
-
 | Application | Port | Restrict to |
 |-------------|------|-------------|
-| HTTP        | 80   | `YOUR_IP_1/32`, `YOUR_IP_2/32`, … |
-| SSH         | 22   | same CIDRs |
+| HTTP        | 80   | `0.0.0.0/0` (Let's Encrypt HTTP-01 + redirect to HTTPS) |
+| HTTPS       | 443  | `0.0.0.0/0` |
+| SSH         | 22   | `YOUR_IP/32` only |
 
-Placeholders are also listed in [`deploy/.env.example`](.env.example) under `ALLOWED_IPS` (documentation only — the app does not read them).
+If HTTP was previously limited to your IP, Let's Encrypt cannot issue a certificate — open port 80 to the world.
 
 Find your public IP: [https://checkip.amazonaws.com](https://checkip.amazonaws.com).
 
-## 3. Install Docker on the instance
+## 3. DNS (nic.ua)
+
+Domain DNS is **not** registered inside Lightsail. At the registrar:
+
+1. Use **NIC.UA name servers** (not parking NS).
+2. A records:
+
+| Name | Type | Value |
+|------|------|--------|
+| `@`  | A    | Lightsail Static IP |
+| `www`| A    | same IP |
+
+Wait until `nslookup lux-stones.com.ua 8.8.8.8` returns that IP before starting Caddy with HTTPS.
+
+## 4. Install Docker on the instance
 
 SSH in, then:
 
@@ -53,7 +67,7 @@ sudo usermod -aG docker $USER
 # re-login (or newgrp docker) so docker works without sudo
 ```
 
-## 4. Get the code and configure env
+## 5. Get the code and configure env
 
 ```bash
 git clone <YOUR_REPO_URL> web-site-minerals
@@ -65,14 +79,14 @@ nano .env   # or vim
 
 Set at least:
 
-- `CLIENT_URL=http://YOUR_STATIC_IP`
-- `API_URL=http://YOUR_STATIC_IP`
+- `CLIENT_URL=https://lux-stones.com.ua`
+- `API_URL=https://lux-stones.com.ua`
 - `JWT_SECRET` — long random string
 - `POSTGRES_PASSWORD` — strong password
 
 OAuth and Nova Poshta keys are optional.
 
-## 5. Build and start
+## 6. Build and start
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
@@ -98,12 +112,12 @@ docker compose -f docker-compose.prod.yml exec api npm run db:clear-seed
 # or: sh deploy/clear-seed.sh
 ```
 
-## 6. Verify
+## 7. Verify
 
-From an allowlisted IP open `http://YOUR_STATIC_IP`.
+Open [https://lux-stones.com.ua](https://lux-stones.com.ua).
 
-- Health: `http://YOUR_STATIC_IP/api/health` → `{"ok":true}`
-- From a non-allowlisted IP the connection should time out / be refused by the firewall.
+- Health: `https://lux-stones.com.ua/api/health` → `{"ok":true}`
+- Certificate: Caddy logs should mention obtaining a certificate for `lux-stones.com.ua`
 
 Useful commands:
 
@@ -131,9 +145,15 @@ git pull
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
+After changing `CLIENT_URL` / `API_URL` in `.env`, recreate the API container:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d api
+```
+
 ## Notes
 
-- **No HTTPS/domain** in this basic setup (HTTP on port 80). Add TLS / custom domain later if needed.
+- TLS certificates live in the `caddy_data` Docker volume (survive rebuilds).
 - Postgres is **not** published to the host; only reachable on the Docker network.
 - Uploads persist in the `minerals_uploads` volume; DB data in `minerals_pg_data`.
 - Local dev still uses root [`docker-compose.yml`](../docker-compose.yml) (Postgres only) and is unchanged.
