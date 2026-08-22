@@ -245,9 +245,7 @@ export const MockAdminApi = {
     requireAdmin()
     const list = MockDb.getSubcategories()
     if (!list.some((s) => s.id === id)) throw new MockApiError(404, 'Not found')
-    if (MockDb.getProducts().some((p) => p.subCategoryId === id)) {
-      throw new MockApiError(409, 'subcategory_has_products')
-    }
+    MockDb.setProducts(MockDb.getProducts().filter((p) => p.subCategoryId !== id))
     MockDb.setSubcategories(list.filter((s) => s.id !== id))
   },
 

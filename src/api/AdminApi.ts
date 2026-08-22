@@ -108,7 +108,7 @@ export const AdminApi = {
   },
 
   async deleteSubcategory(id: string) {
-    await api.delete(`/admin/subcategories/${id}`)
+    await api.delete(`/admin/subcategories/${encodeURIComponent(id)}`)
   },
 
   async uploadFiles(files: File[]) {

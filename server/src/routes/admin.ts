@@ -364,13 +364,31 @@ adminRouter.delete('/subcategories/:id', async (req, res) => {
     return
   }
 
-  const productCount = await prisma.product.count({ where: { subCategoryId: existing.id } })
-  if (productCount > 0) {
-    res.status(409).json({ error: 'subcategory_has_products' })
-    return
+  const products = await prisma.product.findMany({
+    where: { subCategoryId: existing.id },
+    select: { id: true },
+  })
+  const productIds = products.map((product) => product.id)
+
+  if (productIds.length > 0) {
+    const orderCount = await prisma.orderItem.count({
+      where: { productId: { in: productIds } },
+    })
+    if (orderCount > 0) {
+      res.status(409).json({ error: 'subcategory_has_products' })
+      return
+    }
+
+    await prisma.$transaction([
+      prisma.cartItem.deleteMany({ where: { productId: { in: productIds } } }),
+      prisma.wishlistItem.deleteMany({ where: { productId: { in: productIds } } }),
+      prisma.product.deleteMany({ where: { id: { in: productIds } } }),
+      prisma.subCategory.delete({ where: { id: existing.id } }),
+    ])
+  } else {
+    await prisma.subCategory.delete({ where: { id: existing.id } })
   }
 
-  await prisma.subCategory.delete({ where: { id: existing.id } })
   res.status(204).send()
 })
 

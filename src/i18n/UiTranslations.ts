@@ -463,6 +463,7 @@ export type UiTranslationSchema = {
     successSubSaved: string
     successSubDeleted: string
     removeSubConfirm: string
+    removeSubConfirmWithProducts: string
     errorGeneric: string
     attributesTitle: string
     attributesMineralTitle: string
@@ -979,6 +980,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     successSubSaved: 'Підкатегорію збережено',
     successSubDeleted: 'Підкатегорію видалено',
     removeSubConfirm: 'Видалити цю підкатегорію?',
+    removeSubConfirmWithProducts:
+      'У підкатегорії є товари. Видалити підкатегорію разом з усіма її товарами?',
     errorGeneric: 'Щось пішло не так',
     attributesTitle: 'Параметри товару',
     attributesMineralTitle: 'Параметри мінералу',
@@ -1025,7 +1028,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     errorSlugTaken: 'Такий slug уже зайнятий',
     errorSkuTaken: 'Такий SKU уже зайнятий',
     errorInOrders: 'Неможливо видалити: товар є в замовленнях',
-    errorSubHasProducts: 'Неможливо видалити: у підкатегорії є товари',
+    errorSubHasProducts: 'Неможливо видалити: товари підкатегорії є в замовленнях',
   },
 }
 
@@ -1501,6 +1504,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     successSubSaved: 'Subcategory saved',
     successSubDeleted: 'Subcategory deleted',
     removeSubConfirm: 'Delete this subcategory?',
+    removeSubConfirmWithProducts:
+      'This subcategory has products. Delete the subcategory and all of its products?',
     errorGeneric: 'Something went wrong',
     attributesTitle: 'Product options',
     attributesMineralTitle: 'Mineral details',
@@ -1547,6 +1552,6 @@ export const uiTranslationsEn: UiTranslationSchema = {
     errorSlugTaken: 'This slug is already taken',
     errorSkuTaken: 'This SKU is already taken',
     errorInOrders: 'Cannot delete: product is used in orders',
-    errorSubHasProducts: 'Cannot delete: subcategory has products',
+    errorSubHasProducts: 'Cannot delete: subcategory products are used in orders',
   },
 }

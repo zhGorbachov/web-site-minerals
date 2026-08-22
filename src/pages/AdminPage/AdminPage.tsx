@@ -100,14 +100,20 @@ function deliveryMethodLabel(
   }
 }
 
-const emptyForm: AdminProductPayload = {
+type ProductForm = Omit<AdminProductPayload, 'price' | 'discountPrice' | 'stock'> & {
+  price: string
+  discountPrice: string
+  stock: string
+}
+
+const emptyForm: ProductForm = {
   name: '',
   slug: '',
   sku: '',
   description: '',
-  price: 0,
-  discountPrice: null,
-  stock: 0,
+  price: '',
+  discountPrice: '',
+  stock: '',
   images: [],
   video: null,
   subCategoryId: '',
@@ -156,7 +162,7 @@ export function AdminPage() {
   >({})
   const [stockDrafts, setStockDrafts] = useState<Record<string, number>>({})
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<AdminProductPayload>(emptyForm)
+  const [form, setForm] = useState<ProductForm>(emptyForm)
   const [skuManual, setSkuManual] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -400,9 +406,9 @@ export function AdminPage() {
       slug: product.slug,
       sku: product.sku,
       description: product.description,
-      price: product.price,
-      discountPrice: product.discountPrice ?? null,
-      stock: product.stock,
+      price: String(product.price),
+      discountPrice: product.discountPrice != null ? String(product.discountPrice) : '',
+      stock: String(product.stock),
       images: product.images,
       video: product.video ?? null,
       subCategoryId: product.subCategoryId,
@@ -432,8 +438,10 @@ export function AdminPage() {
     setError(null)
     const payload: AdminProductPayload = {
       ...form,
+      price: Number(form.price),
+      stock: Number(form.stock),
       shortDescription: deriveShortDescription(form.description),
-      discountPrice: form.discountPrice || null,
+      discountPrice: form.discountPrice === '' ? null : Number(form.discountPrice),
       video: form.video || null,
       slug: form.slug || undefined,
       sku: skuValue || undefined,
@@ -481,7 +489,11 @@ export function AdminPage() {
   }
 
   const handleDeleteSub = async (id: string) => {
-    if (!window.confirm(t('admin.removeSubConfirm'))) return
+    const productCount = products.filter((p) => p.subCategoryId === id).length
+    const confirmed = window.confirm(
+      productCount > 0 ? t('admin.removeSubConfirmWithProducts') : t('admin.removeSubConfirm'),
+    )
+    if (!confirmed) return
     try {
       await AdminApi.deleteSubcategory(id)
       flash(t('admin.successSubDeleted'))
@@ -835,7 +847,7 @@ export function AdminPage() {
                   min={0}
                   step="0.01"
                   value={form.price}
-                  onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                   required
                 />
                 <Input
@@ -843,20 +855,15 @@ export function AdminPage() {
                   type="number"
                   min={0}
                   step="0.01"
-                  value={form.discountPrice ?? ''}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      discountPrice: e.target.value === '' ? null : Number(e.target.value),
-                    }))
-                  }
+                  value={form.discountPrice}
+                  onChange={(e) => setForm((f) => ({ ...f, discountPrice: e.target.value }))}
                 />
                 <Input
                   label={t('admin.stock')}
                   type="number"
                   min={0}
                   value={form.stock}
-                  onChange={(e) => setForm((f) => ({ ...f, stock: Number(e.target.value) }))}
+                  onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
                   required
                 />
               </div>
