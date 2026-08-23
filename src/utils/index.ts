@@ -1,3 +1,9 @@
+export {
+  SUBCATEGORY_QUERY_KEY,
+  parseSelectedSubcategories,
+  toggleSubcategorySelection,
+  catalogCategoryPath,
+} from './catalogFilters'
 export { formatPrice, formatPriceRange } from './formatPrice'
 export { getHashScrollOffset, isHashNavLinkActive, scrollToHashTarget } from './hashNav'
 export {

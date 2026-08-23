@@ -49,7 +49,9 @@ ol {
   list-style: none;
 }
 
-a {
+a,
+a:link,
+a:visited {
   color: inherit;
   text-decoration: none;
 }

@@ -130,12 +130,21 @@
 
   &:link,
   &:visited {
-    color: $color-text;
+    color: #1a2438;
   }
 }
 
 .canHover .primaryLink:hover {
   color: $color-primary;
+}
+
+.primaryLinkActive {
+  color: $color-primary;
+
+  &:link,
+  &:visited {
+    color: $color-primary;
+  }
 }
 
 .chevron {
@@ -164,11 +173,12 @@
   font-weight: $font-weight-medium;
   color: $color-text-muted;
   text-decoration: none;
-  transition: color $transition-base;
+  border-radius: $radius-sm;
+  transition: color $transition-base, background $transition-base;
 
   &:link,
   &:visited {
-    color: $color-text-muted;
+    color: #5c6b82;
   }
 
   &:focus-visible {
@@ -178,14 +188,16 @@
 }
 
 .canHover .subLink:hover {
-  color: $color-primary;
+  color: $color-text;
 }
 
 .subLinkActive {
+  background: rgba(var(--color-primary-rgb), 0.14);
+  font-weight: $font-weight-semibold;
+
   &:link,
   &:visited {
-    color: $color-primary;
-    font-weight: $font-weight-semibold;
+    color: #1a2438;
   }
 }
 

@@ -4,6 +4,7 @@ import { ChevronDown, LayoutGrid, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Category, SubCategory } from '@/types'
 import { CATALOG_MENU_ORDER } from '@/config/Catalog'
+import { parseSelectedSubcategories } from '@/utils/catalogFilters'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CatalogMenu.module.scss'
 
@@ -67,8 +68,16 @@ export function CatalogMenu({
     })
   }
 
-  const isSubcategoryActive = (categorySlug: string, subSlug: string) =>
-    location.pathname === `/catalog/${categorySlug}/${subSlug}`
+  const isCategoryActive = (categorySlug: string) => {
+    const parts = location.pathname.split('/').filter(Boolean)
+    return parts[0] === 'catalog' && parts[1] === categorySlug
+  }
+
+  const isSubcategoryActive = (categorySlug: string, subSlug: string) => {
+    const parts = location.pathname.split('/').filter(Boolean)
+    if (parts[0] !== 'catalog' || parts[1] !== categorySlug) return false
+    return parseSelectedSubcategories(parts[2], location.search).includes(subSlug)
+  }
 
   return (
     <nav
@@ -109,7 +118,12 @@ export function CatalogMenu({
                   <div className={styles.categoryHeader}>
                     <Link
                       to={`/catalog/${cat.slug}`}
-                      className={styles.primaryLink}
+                      className={[
+                        styles.primaryLink,
+                        isCategoryActive(cat.slug) ? styles.primaryLinkActive : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       onClick={onNavigate}
                     >
                       {cat.name}

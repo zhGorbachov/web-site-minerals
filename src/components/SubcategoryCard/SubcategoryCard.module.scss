@@ -2,27 +2,38 @@
 @use '@/styles/mixins' as *;
 
 .card {
-  border-radius: $radius-md;
-  overflow: hidden;
-  box-shadow: $shadow-sm;
+  @include card;
   transition: box-shadow $transition-base;
 
   &:hover {
-    box-shadow: $shadow-md;
+    box-shadow: $shadow-card-hover;
   }
 }
 
 .link {
-  position: relative;
-  display: block;
-  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   text-decoration: none;
+  color: $color-text;
+  @include focus-ring;
+
+  &:link,
+  &:visited,
+  &:hover,
+  &:active {
+    color: $color-text;
+  }
+}
+
+.imageWrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
   background: $color-surface;
 }
 
 .image {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -33,21 +44,16 @@
   }
 }
 
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba($color-black, 0.35);
-  pointer-events: none;
-}
-
-.label {
-  position: absolute;
-  top: $spacing-4;
-  left: $spacing-4;
-  z-index: 1;
-  font-size: clamp($font-size-sm, 3.5vw, $font-size-md);
-  font-weight: $font-weight-bold;
-  color: $color-white;
+.title {
+  display: block;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
   line-height: $line-height-tight;
-  text-shadow: 0 1px 4px rgba($color-black, 0.6);
+  @include text-clamp(2);
+
+  @include tablet-up {
+    padding: $spacing-4 $spacing-5;
+    font-size: $font-size-md;
+  }
 }

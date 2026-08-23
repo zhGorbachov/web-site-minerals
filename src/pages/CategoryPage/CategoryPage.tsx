@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, PackageSearch } from 'lucide-react'
 import type { Category, SubCategory, Product } from '@/types'
@@ -7,11 +7,11 @@ import { CategoryService } from '@/services/CategoryService'
 import { SubCategoryService } from '@/services/SubCategoryService'
 import { ProductService } from '@/services/ProductService'
 import { SubcategoryNav } from '@/components/SubcategoryNav'
-import { SubcategoryCard } from '@/components/SubcategoryCard'
 import { ProductGrid } from '@/components/ProductGrid'
 import { ProductSort } from '@/components/ProductSort'
 import { Breadcrumbs, EmptyState } from '@/components/ui'
 import { sortProducts, type ProductSortOption } from '@/utils'
+import { parseSelectedSubcategories } from '@/utils/catalogFilters'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CategoryPage.module.scss'
 
@@ -38,6 +38,7 @@ export function CategoryPage() {
     category: string
     subcategory?: string
   }>()
+  const [searchParams] = useSearchParams()
 
   const [category, setCategory] = useState<Category | undefined>()
   const [subcategories, setSubcategories] = useState<SubCategory[]>([])
@@ -45,8 +46,6 @@ export function CategoryPage() {
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<ProductSortOption>('default')
   const [productsPage, setProductsPage] = useState(0)
-
-  const isSubcategoryView = Boolean(subcategorySlug)
 
   useEffect(() => {
     if (!categorySlug) return
@@ -56,25 +55,39 @@ export function CategoryPage() {
     void Promise.all([
       CategoryService.getBySlug(categorySlug),
       SubCategoryService.getByCategory(categorySlug),
-      isSubcategoryView
-        ? ProductService.getBySubcategory(subcategorySlug!)
-        : Promise.resolve([]),
+      ProductService.getByCategory(categorySlug),
     ]).then(([cat, subs, prods]) => {
       setCategory(cat)
       setSubcategories(subs)
       setProducts(prods)
       setLoading(false)
     })
-  }, [categorySlug, subcategorySlug, isSubcategoryView, language])
+  }, [categorySlug, language])
 
-  useEffect(() => {
-    setProductsPage(0)
-  }, [subcategorySlug, sortBy, products])
+  const selectedSlugs = useMemo(() => {
+    const parsed = parseSelectedSubcategories(subcategorySlug, searchParams)
+    if (subcategories.length === 0) return parsed
+    const allowed = new Set(subcategories.map((sub) => sub.slug))
+    return parsed.filter((slug) => allowed.has(slug))
+  }, [subcategorySlug, searchParams, subcategories])
 
-  const activeSubcategory = subcategories.find((s) => s.slug === subcategorySlug)
+  const selectedSubs = useMemo(
+    () =>
+      selectedSlugs
+        .map((slug) => subcategories.find((sub) => sub.slug === slug))
+        .filter((sub): sub is SubCategory => Boolean(sub)),
+    [selectedSlugs, subcategories],
+  )
+
+  const filteredProducts = useMemo(() => {
+    if (selectedSlugs.length === 0) return products
+    const selected = new Set(selectedSlugs)
+    return products.filter((product) => selected.has(product.subCategorySlug))
+  }, [products, selectedSlugs])
+
   const sortedProducts = useMemo(
-    () => sortProducts(products, sortBy, language),
-    [products, sortBy, language],
+    () => sortProducts(filteredProducts, sortBy, language),
+    [filteredProducts, sortBy, language],
   )
   const totalPages = Math.max(1, Math.ceil(sortedProducts.length / SUBCATEGORY_PAGE_SIZE))
   const visiblePageNumbers = getVisiblePageNumbers(productsPage, totalPages)
@@ -87,6 +100,12 @@ export function CategoryPage() {
     [sortedProducts, productsPage],
   )
 
+  const selectedKey = selectedSlugs.join(',')
+
+  useEffect(() => {
+    setProductsPage(0)
+  }, [selectedKey, sortBy, products])
+
   useEffect(() => {
     if (productsPage > totalPages - 1) {
       setProductsPage(Math.max(0, totalPages - 1))
@@ -97,12 +116,18 @@ export function CategoryPage() {
     setProductsPage(page)
   }
 
+  const title =
+    selectedSubs.length === 1 ? selectedSubs[0].name : (category?.name ?? '...')
+
   const breadcrumbs = [
     { label: t('nav.home'), href: '/' },
     { label: t('nav.catalog'), href: '/catalog' },
     { label: category?.name ?? '...', href: `/catalog/${categorySlug}` },
-    ...(activeSubcategory ? [{ label: activeSubcategory.name }] : []),
+    ...(selectedSubs.length === 1 ? [{ label: selectedSubs[0].name }] : []),
   ]
+
+  const hasSubNav = subcategories.length > 0
+  const showAbout = !loading && Boolean(category) && selectedSlugs.length === 0
 
   return (
     <div className={styles.page}>
@@ -115,140 +140,120 @@ export function CategoryPage() {
           transition={{ duration: 0.3 }}
           className={styles.header}
         >
-          <h1 className={styles.title}>
-            {activeSubcategory?.name ?? category?.name ?? '...'}
-          </h1>
-          {isSubcategoryView && !loading && products.length > 0 && (
+          <h1 className={styles.title}>{title}</h1>
+          {!loading && filteredProducts.length > 0 && (
             <div className={styles.headerActions}>
-              <p className={styles.count}>{t('category.productCount', { count: products.length })}</p>
+              <p className={styles.count}>
+                {t('category.productCount', { count: filteredProducts.length })}
+              </p>
               <ProductSort value={sortBy} onChange={setSortBy} />
             </div>
           )}
         </motion.div>
 
-        {!isSubcategoryView ? (
-          <>
-            <div className={styles.subcategoryGrid}>
-              {loading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className={styles.subcategorySkeleton} />
-                  ))
-                : subcategories.map((sub) => (
-                    <SubcategoryCard
-                      key={sub.id}
-                      subcategory={sub}
-                      categorySlug={categorySlug ?? ''}
-                    />
-                  ))}
-            </div>
-
-            {!loading && category && (
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className={styles.bottomSection}
-                aria-label={t('category.aboutSection')}
-              >
-                <h2 className={styles.bottomTitle}>{t('category.aboutSection')}</h2>
-                <div className={styles.featuredPhoto}>
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className={styles.featuredImage}
-                  />
-                </div>
-                {category.description && (
-                  <p className={styles.bottomDescription}>{category.description}</p>
-                )}
-              </motion.section>
-            )}
-          </>
-        ) : (
-          <div className={styles.layout}>
+        <div className={hasSubNav ? styles.layout : undefined}>
+          {hasSubNav && (
             <aside className={styles.sidebar}>
               <SubcategoryNav
                 subcategories={subcategories}
-                activeSlug={subcategorySlug}
+                selectedSlugs={selectedSlugs}
                 categorySlug={categorySlug ?? ''}
               />
             </aside>
+          )}
 
-            <div className={styles.content}>
-              {!loading && products.length === 0 ? (
-                <EmptyState
-                  icon={<PackageSearch />}
-                  title={t('category.emptyTitle')}
-                  description={t('category.emptyDescription')}
+          <div className={styles.content}>
+            {!loading && filteredProducts.length === 0 ? (
+              <EmptyState
+                icon={<PackageSearch />}
+                title={t('category.emptyTitle')}
+                description={t('category.emptyDescription')}
+              />
+            ) : (
+              <>
+                <ProductGrid
+                  products={visibleProducts}
+                  loading={loading}
+                  skeletonCount={SUBCATEGORY_PAGE_SIZE}
                 />
-              ) : (
-                <>
-                  <ProductGrid
-                    products={visibleProducts}
-                    loading={loading}
-                    skeletonCount={SUBCATEGORY_PAGE_SIZE}
-                  />
-                  {!loading && totalPages > 1 && (
-                    <nav className={styles.pagination} aria-label={t('category.paginationAria')}>
-                      <motion.button
-                        type="button"
-                        className={styles.paginationBtn}
-                        onClick={() => goToProductsPage(productsPage - 1)}
-                        disabled={productsPage === 0}
-                        aria-label={t('common.paginationPrev')}
-                        whileTap={{ scale: 0.9 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                      >
-                        <ChevronLeft size={15} />
-                      </motion.button>
-                      <div className={styles.paginationNumbers}>
-                        {visiblePageNumbers.map((pageIndex) => {
-                          const isActive = pageIndex === productsPage
-                          return (
-                            <motion.button
-                              key={pageIndex}
-                              type="button"
-                              className={[
-                                styles.paginationNumber,
-                                isActive ? styles.paginationNumberActive : '',
-                              ]
-                                .filter(Boolean)
-                                .join(' ')}
-                              onClick={() => goToProductsPage(pageIndex)}
-                              aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
-                              aria-current={isActive ? 'page' : undefined}
-                              whileTap={{ scale: 0.92 }}
-                              transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                            >
-                              {isActive && (
-                                <motion.span
-                                  layoutId="categoryProductsPaginationPill"
-                                  className={styles.paginationPill}
-                                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                                />
-                              )}
-                              <span className={styles.paginationNumberLabel}>{pageIndex + 1}</span>
-                            </motion.button>
-                          )
-                        })}
-                      </div>
-                      <motion.button
-                        type="button"
-                        className={styles.paginationBtn}
-                        onClick={() => goToProductsPage(productsPage + 1)}
-                        disabled={productsPage >= totalPages - 1}
-                        aria-label={t('common.paginationNext')}
-                        whileTap={{ scale: 0.9 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                      >
-                        <ChevronRight size={15} />
-                      </motion.button>
-                    </nav>
-                  )}
-                </>
-              )}
-            </div>
+                {!loading && totalPages > 1 && (
+                  <nav className={styles.pagination} aria-label={t('category.paginationAria')}>
+                    <motion.button
+                      type="button"
+                      className={styles.paginationBtn}
+                      onClick={() => goToProductsPage(productsPage - 1)}
+                      disabled={productsPage === 0}
+                      aria-label={t('common.paginationPrev')}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                    >
+                      <ChevronLeft size={15} />
+                    </motion.button>
+                    <div className={styles.paginationNumbers}>
+                      {visiblePageNumbers.map((pageIndex) => {
+                        const isActive = pageIndex === productsPage
+                        return (
+                          <motion.button
+                            key={pageIndex}
+                            type="button"
+                            className={[
+                              styles.paginationNumber,
+                              isActive ? styles.paginationNumberActive : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
+                            onClick={() => goToProductsPage(pageIndex)}
+                            aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
+                            aria-current={isActive ? 'page' : undefined}
+                            whileTap={{ scale: 0.92 }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                          >
+                            {isActive && (
+                              <motion.span
+                                layoutId="categoryProductsPaginationPill"
+                                className={styles.paginationPill}
+                                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                              />
+                            )}
+                            <span className={styles.paginationNumberLabel}>{pageIndex + 1}</span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                    <motion.button
+                      type="button"
+                      className={styles.paginationBtn}
+                      onClick={() => goToProductsPage(productsPage + 1)}
+                      disabled={productsPage >= totalPages - 1}
+                      aria-label={t('common.paginationNext')}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                    >
+                      <ChevronRight size={15} />
+                    </motion.button>
+                  </nav>
+                )}
+              </>
+            )}
           </div>
+        </div>
+
+        {showAbout && category && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className={styles.bottomSection}
+            aria-label={t('category.aboutSection')}
+          >
+            <h2 className={styles.bottomTitle}>{t('category.aboutSection')}</h2>
+            <div className={styles.featuredPhoto}>
+              <img src={category.image} alt={category.name} className={styles.featuredImage} />
+            </div>
+            {category.description && (
+              <p className={styles.bottomDescription}>{category.description}</p>
+            )}
+          </motion.section>
         )}
       </div>
     </div>

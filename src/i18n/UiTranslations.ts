@@ -265,6 +265,7 @@ export type UiTranslationSchema = {
   }
   subcategoryNav: {
     title: string
+    hint: string
   }
   badge: {
     cartCount: string
@@ -558,7 +559,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     productCount: '{count} товарів',
     paginationAria: 'Сторінки товарів',
     aboutSection: 'Про категорію',
-    emptyTitle: 'Товарів цієї підкатегорії ще нема',
+    emptyTitle: 'Товарів ще нема',
     emptyDescription: 'Асортимент постійно поповнюється — загляньте пізніше',
   },
   product: {
@@ -780,6 +781,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
   },
   subcategoryNav: {
     title: 'Підкатегорії',
+    hint: 'Можна обрати кілька',
   },
   badge: {
     cartCount: '{count} товарів у кошику',
@@ -1082,7 +1084,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     productCount: '{count} products',
     paginationAria: 'Product pages',
     aboutSection: 'About category',
-    emptyTitle: 'There are no products in this subcategory yet',
+    emptyTitle: 'There are no products yet',
     emptyDescription: 'The assortment is updated regularly — check back later',
   },
   product: {
@@ -1304,6 +1306,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
   },
   subcategoryNav: {
     title: 'Subcategories',
+    hint: 'You can select several',
   },
   badge: {
     cartCount: '{count} items in cart',

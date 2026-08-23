@@ -56,7 +56,7 @@
 }
 
 .subcategorySkeleton {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 1.18;
   border-radius: $radius-md;
   background: linear-gradient(90deg, $color-surface 25%, #EBEBEB 50%, $color-surface 75%);
   background-size: 200% 100%;
@@ -73,6 +73,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-4;
+  margin-top: $spacing-10;
 }
 
 .bottomTitle {
@@ -104,9 +105,10 @@
   line-height: $line-height-relaxed;
 }
 
-// Desktop two-column layout — subcategory product view
 .layout {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
 
   @include desktop-up {
     display: grid;
@@ -117,11 +119,7 @@
 }
 
 .sidebar {
-  display: none;
-
-  @include desktop-up {
-    display: block;
-  }
+  min-width: 0;
 }
 
 .content {

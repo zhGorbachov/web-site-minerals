@@ -26,7 +26,7 @@ import MenBracelet from './MenBracelet.jpg'
 import KidsBracelet from './KidsBracelet.jpg'
 import HandmadeBracelet from './HandmadeBracelet.jpg'
 import LimitedBracelet from './LimitedBracelet.jpg'
-import AboutStore from './AboutStore.jpg'
+import AboutStore from './AboutStore.png'
 
 export const mockImages = {
   homeHero: HomeHero,

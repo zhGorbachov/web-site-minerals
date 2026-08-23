@@ -22,14 +22,15 @@ export function SubcategoryCard({ subcategory, categorySlug }: SubcategoryCardPr
         to={`/catalog/${categorySlug}/${subcategory.slug}`}
         className={styles.link}
       >
-        <img
-          src={subcategory.image}
-          alt={subcategory.name}
-          className={styles.image}
-          loading="lazy"
-        />
-        <div className={styles.overlay} />
-        <span className={styles.label}>{subcategory.name}</span>
+        <div className={styles.imageWrapper}>
+          <img
+            src={subcategory.image}
+            alt=""
+            className={styles.image}
+            loading="lazy"
+          />
+        </div>
+        <span className={styles.title}>{subcategory.name}</span>
       </Link>
     </motion.div>
   )

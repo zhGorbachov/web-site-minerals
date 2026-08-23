@@ -38,7 +38,9 @@ p {
   line-height: $line-height-relaxed;
 }
 
-a {
+a,
+a:link,
+a:visited {
   color: inherit;
   text-decoration: none;
 }

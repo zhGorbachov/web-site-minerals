@@ -69,15 +69,7 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: 'catalog/:category',
-            element: (
-              <Suspense fallback={<PageFallback />}>
-                <CategoryPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'catalog/:category/:subcategory',
+            path: 'catalog/:category/:subcategory?',
             element: (
               <Suspense fallback={<PageFallback />}>
                 <CategoryPage />
