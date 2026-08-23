@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { mediaUrl } from '@/api/client'
 import { MediaUploader } from '@/components/MediaUploader'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -45,6 +46,7 @@ export function ProductVariantsEditor({
   onVariantsChange,
 }: Props) {
   const { t } = useTranslation()
+  const [enabledImages, setEnabledImages] = useState<Set<string>>(() => new Set())
   const bindable = getBindableOptions(categorySlug, attributes, {
     wristSize: t('productOptions.wristSize'),
     beadSize: t('productOptions.beadSize'),
@@ -60,6 +62,7 @@ export function ProductVariantsEditor({
 
   const handleImagesChange = (nextImages: string[]) => {
     onImagesChange(nextImages)
+    setEnabledImages((prev) => new Set([...prev].filter((image) => nextImages.includes(image))))
     emit(syncVariantsWithImages(nextImages, drafts))
   }
 
@@ -73,6 +76,12 @@ export function ProductVariantsEditor({
   }
 
   const toggleBound = (draft: ProductVariant, enabled: boolean) => {
+    setEnabledImages((prev) => {
+      const next = new Set(prev)
+      if (enabled) next.add(draft.image)
+      else next.delete(draft.image)
+      return next
+    })
     if (!enabled) {
       patchDraft(draft.image, {
         name: undefined,
@@ -82,14 +91,7 @@ export function ProductVariantsEditor({
         options: undefined,
         attributes: undefined,
       })
-      return
     }
-    const price = Number(defaultPrice)
-    patchDraft(draft.image, {
-      name: draft.name,
-      price: Number.isFinite(price) && price > 0 ? price : draft.price,
-      stock: draft.stock > 0 ? draft.stock : 1,
-    })
   }
 
   return (
@@ -109,7 +111,7 @@ export function ProductVariantsEditor({
           </div>
           <ul className={styles.cards}>
             {drafts.map((draft, index) => {
-              const enabled = isBoundVariant(draft)
+              const enabled = enabledImages.has(draft.image) || isBoundVariant(draft)
               const bindToken = bindTokenOf(draft)
               return (
                 <li key={draft.id} className={[styles.card, enabled ? styles.cardOn : ''].filter(Boolean).join(' ')}>
@@ -160,10 +162,13 @@ export function ProductVariantsEditor({
                           <input
                             type="number"
                             min={0}
-                            value={draft.stock}
+                            value={draft.stock > 0 ? draft.stock : ''}
                             onChange={(e) =>
-                              patchDraft(draft.image, { stock: Math.max(0, Number(e.target.value) || 0) })
+                              patchDraft(draft.image, {
+                                stock: e.target.value === '' ? 0 : Math.max(0, Number(e.target.value) || 0),
+                              })
                             }
+                            placeholder="0"
                           />
                         </label>
                       </div>

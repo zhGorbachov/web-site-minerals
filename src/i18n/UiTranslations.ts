@@ -234,6 +234,7 @@ export type UiTranslationSchema = {
     availableWristSize: string
     characteristics: string
     choosePiece: string
+    overview: string
     mohsScale: string
     attrSize: string
     attrWeight: string
@@ -457,6 +458,9 @@ export type UiTranslationSchema = {
     stockFromVariants: string
     stockFromVariantsValue: string
     subcategory: string
+    subcategoryRequired: string
+    noSubsInCategory: string
+    addSubcategoryNow: string
     featured: string
     popular: string
     isNew: string
@@ -764,6 +768,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     availableWristSize: 'Доступний розмір: {size}',
     characteristics: 'Характеристики',
     choosePiece: 'Оберіть екземпляр',
+    overview: 'Загальний вигляд',
     mohsScale: ' (за Моосом)',
     attrSize: 'Розмір',
     attrWeight: 'Вага',
@@ -990,6 +995,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     stockFromVariants: 'Залишок рахується з екземплярів нижче',
     stockFromVariantsValue: '{count} шт. (сума екземплярів)',
     subcategory: 'Підкатегорія',
+    subcategoryRequired: 'Оберіть підкатегорію',
+    noSubsInCategory:
+      'У категорії «{name}» ще немає підкатегорій. Товар додається в підкатегорію, не в категорію напряму.',
+    addSubcategoryNow: 'Додати підкатегорію',
     featured: 'Рекомендований',
     popular: 'Популярний',
     isNew: 'Новинка',
@@ -1304,6 +1313,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     availableWristSize: 'Available size: {size}',
     characteristics: 'Specifications',
     choosePiece: 'Choose a piece',
+    overview: 'Overview',
     mohsScale: ' (Mohs scale)',
     attrSize: 'Size',
     attrWeight: 'Weight',
@@ -1530,6 +1540,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     stockFromVariants: 'Stock is the sum of the pieces below',
     stockFromVariantsValue: '{count} pcs (sum of pieces)',
     subcategory: 'Subcategory',
+    subcategoryRequired: 'Select a subcategory',
+    noSubsInCategory:
+      'Category “{name}” has no subcategories yet. Products are added to a subcategory, not to the category itself.',
+    addSubcategoryNow: 'Add a subcategory',
     featured: 'Featured',
     popular: 'Popular',
     isNew: 'New',

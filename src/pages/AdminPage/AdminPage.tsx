@@ -171,6 +171,7 @@ export function AdminPage() {
   const [stockDrafts, setStockDrafts] = useState<Record<string, number>>({})
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ProductForm>(emptyForm)
+  const [formCategoryId, setFormCategoryId] = useState('')
   const [skuManual, setSkuManual] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -207,9 +208,16 @@ export function AdminPage() {
           ]),
         ),
       )
-      if (!form.subCategoryId && subs[0]) {
-        setForm((f) => ({ ...f, subCategoryId: subs[0].id }))
-      }
+      setForm((f) => {
+        if (f.subCategoryId) return f
+        const firstCatId = cats[0]?.id ?? ''
+        const firstSub = subs.find((sub) => sub.categoryId === firstCatId) ?? subs[0]
+        return firstSub ? { ...f, subCategoryId: firstSub.id } : f
+      })
+      setFormCategoryId((current) => {
+        if (current && cats.some((cat) => cat.id === current)) return current
+        return cats[0]?.id ?? ''
+      })
     } catch (err) {
       setError(t(mapAdminError(err)))
     } finally {
@@ -319,7 +327,19 @@ export function AdminPage() {
     () => subcategories.find((sub) => sub.id === form.subCategoryId),
     [subcategories, form.subCategoryId],
   )
-  const formCategorySlug = selectedSubcategory?.categorySlug ?? ''
+  const selectedCategory = useMemo(
+    () => categories.find((cat) => cat.id === formCategoryId),
+    [categories, formCategoryId],
+  )
+  const categorySubs = useMemo(
+    () =>
+      subcategories
+        .filter((sub) => sub.categoryId === formCategoryId)
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name, language === 'uk' ? 'uk' : 'en')),
+    [subcategories, formCategoryId, language],
+  )
+  const formCategorySlug = selectedCategory?.slug ?? selectedSubcategory?.categorySlug ?? ''
   const formBoundVariants = toStoredVariants(form.variants)
   const formDerived = formBoundVariants.length
     ? deriveProductPricingFromVariants(formBoundVariants, Number(form.price) || 0)
@@ -337,18 +357,40 @@ export function AdminPage() {
   }, [selectedSubcategory, form.name, products])
   const skuValue = editingId || skuManual ? (form.sku ?? '') : suggestedSku
 
+  const applyCategoryChange = (
+    next: ProductForm,
+    nextSlug: string | undefined,
+    prevSlug: string | undefined,
+  ): ProductForm => {
+    if (!nextSlug || !prevSlug || nextSlug === prevSlug) return next
+    return {
+      ...next,
+      attributes: {},
+      variants: next.variants.map((variant) => ({ ...variant, options: undefined })),
+    }
+  }
+
+  const handleCategoryChange = (categoryId: string) => {
+    const nextSubs = subcategories
+      .filter((sub) => sub.categoryId === categoryId)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, language === 'uk' ? 'uk' : 'en'))
+    const prevSlug = selectedCategory?.slug ?? selectedSubcategory?.categorySlug
+    const nextSlug = categories.find((cat) => cat.id === categoryId)?.slug
+    setFormCategoryId(categoryId)
+    setForm((f) =>
+      applyCategoryChange(
+        { ...f, subCategoryId: nextSubs[0]?.id ?? '' },
+        nextSlug,
+        prevSlug,
+      ),
+    )
+  }
+
   const handleSubcategoryChange = (subCategoryId: string) => {
     const nextSlug = subcategories.find((sub) => sub.id === subCategoryId)?.categorySlug
-    const prevSlug = selectedSubcategory?.categorySlug
-    setForm((f) => ({
-      ...f,
-      subCategoryId,
-      attributes: nextSlug && prevSlug && nextSlug !== prevSlug ? {} : f.attributes,
-      variants:
-        nextSlug && prevSlug && nextSlug !== prevSlug
-          ? f.variants.map((variant) => ({ ...variant, options: undefined }))
-          : f.variants,
-    }))
+    const prevSlug = selectedSubcategory?.categorySlug ?? selectedCategory?.slug
+    setForm((f) => applyCategoryChange({ ...f, subCategoryId }, nextSlug, prevSlug))
   }
 
   const flash = (text: string) => {
@@ -417,6 +459,8 @@ export function AdminPage() {
     setEditingId(product.id)
     setSkuManual(true)
     setTab('create')
+    const productSub = subcategories.find((sub) => sub.id === product.subCategoryId)
+    setFormCategoryId(productSub?.categoryId ?? categories[0]?.id ?? '')
     setForm({
       name: product.name,
       slug: product.slug,
@@ -439,14 +483,21 @@ export function AdminPage() {
   const resetForm = () => {
     setEditingId(null)
     setSkuManual(false)
+    const firstCatId = categories[0]?.id ?? ''
+    const firstSub = subcategories.find((sub) => sub.categoryId === firstCatId)
+    setFormCategoryId(firstCatId)
     setForm({
       ...emptyForm,
-      subCategoryId: subcategories[0]?.id ?? '',
+      subCategoryId: firstSub?.id ?? '',
     })
   }
 
   const handleSaveProduct = async (e: FormEvent) => {
     e.preventDefault()
+    if (!form.subCategoryId) {
+      setError(t('admin.subcategoryRequired'))
+      return
+    }
     if (!form.images.length) {
       setError(t('admin.imagesRequired'))
       return
@@ -897,21 +948,54 @@ export function AdminPage() {
                 />
               </div>
 
-              <label className={styles.selectLabel}>
-                {t('admin.subcategory')}
-                <select
-                  className={styles.select}
-                  value={form.subCategoryId}
-                  onChange={(e) => handleSubcategoryChange(e.target.value)}
-                  required
-                >
-                  {subcategories.map((sub) => (
-                    <option key={sub.id} value={sub.id}>
-                      {sub.categorySlug} / {sub.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className={styles.formGrid}>
+                <label className={styles.selectLabel}>
+                  {t('admin.category')}
+                  <select
+                    className={styles.select}
+                    value={formCategoryId}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    required
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {categorySubs.length > 0 ? (
+                  <label className={styles.selectLabel}>
+                    {t('admin.subcategory')}
+                    <select
+                      className={styles.select}
+                      value={form.subCategoryId}
+                      onChange={(e) => handleSubcategoryChange(e.target.value)}
+                      required
+                    >
+                      {categorySubs.map((sub) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <div className={styles.fieldNote}>
+                    <span>
+                      {t('admin.noSubsInCategory', { name: selectedCategory?.name ?? '' })}
+                    </span>
+                    {formCategoryId ? (
+                      <Link
+                        className={styles.fieldNoteLink}
+                        to={`/admin/subcategories/new?categoryId=${encodeURIComponent(formCategoryId)}`}
+                      >
+                        {t('admin.addSubcategoryNow')}
+                      </Link>
+                    ) : null}
+                  </div>
+                )}
+              </div>
 
               <ProductAttributesEditor
                 categorySlug={formCategorySlug}

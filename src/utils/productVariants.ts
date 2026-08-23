@@ -102,6 +102,15 @@ export function getProductVariants(product: Pick<Product, 'variants'>): ProductV
   return parseVariants(product.variants)
 }
 
+/** Unbound (general) photos first, then photos tied to specific pieces. */
+export function getProductGalleryImages(product: Pick<Product, 'images' | 'variants'>): string[] {
+  const images = product.images.filter(Boolean)
+  const bound = new Set(getProductVariants(product).map((variant) => variant.image))
+  const general = images.filter((image) => !bound.has(image))
+  if (!general.length) return images
+  return [...general, ...images.filter((image) => bound.has(image))]
+}
+
 export function hasProductVariants(product: Pick<Product, 'variants'>): boolean {
   return getProductVariants(product).length > 0
 }
@@ -236,8 +245,9 @@ export function findBestMatchingVariant(
 
   const matches = variants.filter((variant) => variantMatchesOptions(variant, selectedOptions))
   if (!matches.length) {
-    const byId = findVariantById(product, currentVariantId ?? selectedOptions[VARIANT_ID_OPTION_KEY])
-    return byId ?? variants.find((variant) => variant.stock > 0) ?? variants[0]
+    const currentId = currentVariantId ?? selectedOptions[VARIANT_ID_OPTION_KEY]
+    if (!currentId) return undefined
+    return findVariantById(product, currentId)
   }
 
   const current = matches.find((variant) => variant.id === currentVariantId)

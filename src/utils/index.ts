@@ -45,6 +45,7 @@ export {
   VARIANT_ID_OPTION_KEY,
   hasProductVariants,
   getProductVariants,
+  getProductGalleryImages,
   getCatalogPricing,
   getAvailableStock,
   getCartUnitPrice,

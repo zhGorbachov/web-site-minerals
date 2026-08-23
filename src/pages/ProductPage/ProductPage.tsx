@@ -23,13 +23,14 @@ import {
   findVariantByImage,
   getAvailableStock,
   getCatalogPricing,
+  getProductGalleryImages,
   getProductVariants,
   getSelectedVariant,
   getVariantCompareAtPrice,
   getVariantDisplayName,
   getVariantUnitPrice,
   hasProductVariants,
-  pickDefaultVariant,
+  optionsWithoutVariantId,
 } from '@/utils/productVariants'
 import styles from './ProductPage.module.scss'
 
@@ -65,12 +66,6 @@ export function ProductPage() {
         const rel = await ProductService.getRelated(prod)
         setProduct(prod)
         setRelated(rel)
-        const first = pickDefaultVariant(prod)
-        if (first) {
-          setSelectedOptions(buildVariantSelection(first))
-          const imageIndex = prod.images.indexOf(first.image)
-          setGalleryIndex(imageIndex >= 0 ? imageIndex : 0)
-        }
       } else {
         setProduct(undefined)
         setRelated([])
@@ -81,9 +76,13 @@ export function ProductPage() {
 
   const maxSelectable = product ? Math.max(0, getAvailableStock(product, selectedOptions) - cartQuantity) : 0
   const availableStock = product ? getAvailableStock(product, selectedOptions) : 0
+  const atMaxInCart = availableStock > 0 && maxSelectable === 0
+
+  const galleryImages = product ? getProductGalleryImages(product) : []
 
   const syncGalleryToVariant = (nextProduct: Product, variantImage: string) => {
-    const index = nextProduct.images.indexOf(variantImage)
+    const images = getProductGalleryImages(nextProduct)
+    const index = images.indexOf(variantImage)
     if (index >= 0) setGalleryIndex(index)
   }
 
@@ -101,8 +100,13 @@ export function ProductPage() {
     syncGalleryToVariant(product, match.image)
   }
 
-  const handleVariantPick = (variantId: string) => {
+  const handleVariantPick = (variantId: string | null) => {
     if (!product) return
+    if (!variantId) {
+      setSelectedOptions(optionsWithoutVariantId(selectedOptions))
+      setGalleryIndex(0)
+      return
+    }
     const variant = findVariantById(product, variantId)
     if (!variant) return
     setSelectedOptions(buildVariantSelection(variant, selectedOptions))
@@ -112,10 +116,12 @@ export function ProductPage() {
   const handleGalleryIndex = (index: number) => {
     setGalleryIndex(index)
     if (!product) return
-    const variant = findVariantByImage(product, product.images[index])
+    const variant = findVariantByImage(product, galleryImages[index])
     if (variant) {
       setSelectedOptions(buildVariantSelection(variant, selectedOptions))
+      return
     }
+    setSelectedOptions(optionsWithoutVariantId(selectedOptions))
   }
 
   useEffect(() => {
@@ -213,11 +219,11 @@ export function ProductPage() {
         >
           <div className={styles.galleryCol}>
             <ProductGallery
-              images={product.images}
+              images={galleryImages}
               productName={displayName}
               activeIndex={galleryIndex}
               onActiveIndexChange={handleGalleryIndex}
-              captions={product.images.map((src) => {
+              captions={galleryImages.map((src) => {
                 const variant = findVariantByImage(product, src)
                 if (!variant) return undefined
                 return {
@@ -348,7 +354,7 @@ export function ProductPage() {
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
-                      key={addedToCart ? 'added' : maxSelectable === 0 ? 'max' : 'add'}
+                      key={addedToCart ? 'added' : atMaxInCart ? 'max' : 'add'}
                       className={styles.addToCartLabel}
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -357,7 +363,7 @@ export function ProductPage() {
                     >
                       {addedToCart
                         ? t('cart.added')
-                        : maxSelectable === 0
+                        : atMaxInCart
                           ? t('cart.maxInCart')
                           : t('cart.addToCart')}
                     </motion.span>

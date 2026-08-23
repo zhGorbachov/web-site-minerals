@@ -15,6 +15,8 @@ import { getColorOptions } from '@/i18n/localizeCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { getBraceletWristSizes, getMineralStrandLengths } from '@/utils/productOptions'
 import {
+  getCatalogPricing,
+  getProductGalleryImages,
   getProductVariants,
   getVariantOptionValues,
   getVariantUnitPrice,
@@ -397,16 +399,42 @@ export function ProductVariantPicker({
 }: {
   product: Product
   selectedId?: string
-  onSelect: (variantId: string) => void
+  onSelect: (variantId: string | null) => void
 }) {
   const { t, language } = useTranslation()
   const variants = getProductVariants(product)
   if (variants.length === 0) return null
 
+  const catalog = getCatalogPricing(product)
+  const overviewImage = getProductGalleryImages(product)[0] ?? product.images[0]
+  const overviewActive = !selectedId
+
   return (
     <div className={styles.variantPicker} aria-label={t('productOptions.choosePiece')}>
       <span className={styles.optionLabel}>{t('productOptions.choosePiece')}</span>
       <ul className={styles.variantList}>
+        <li>
+          <button
+            type="button"
+            className={[
+              styles.variantCard,
+              overviewActive ? styles.variantCardActive : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => onSelect(null)}
+          >
+            {overviewImage ? <img src={overviewImage} alt="" /> : null}
+            <span className={styles.variantMeta}>
+              <span className={styles.variantName}>{t('productOptions.overview')}</span>
+              <span className={styles.variantPrice}>
+                {catalog.hasRange
+                  ? t('product.fromPrice', { price: formatPrice(catalog.min, language) })
+                  : formatPrice(catalog.min, language)}
+              </span>
+            </span>
+          </button>
+        </li>
         {variants.map((variant) => {
           const active = variant.id === selectedId
           const out = variant.stock <= 0

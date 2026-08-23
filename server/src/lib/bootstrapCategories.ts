@@ -39,7 +39,8 @@ export function coreCategorySlugs(): string[] {
 /**
  * Ensures the five hardcoded storefront categories exist.
  * Syncs images from seed-data so catalog photos can be updated on deploy.
- * Subcategories are not created — admins add them as needed.
+ * If a core category has no subcategories, creates a default one with the same
+ * name so products can be added without a separate admin step.
  */
 export async function ensureCoreCategories(client: PrismaClient = prisma) {
   const { categories } = loadSeedData()
@@ -70,5 +71,41 @@ export async function ensureCoreCategories(client: PrismaClient = prisma) {
     }
   }
 
+  await ensureDefaultSubcategories(client, categories)
+
   console.log(`Core categories ready: ${categories.map((c) => c.slug).join(', ')}`)
+}
+
+async function ensureDefaultSubcategories(client: PrismaClient, categories: CoreCategory[]) {
+  const created: string[] = []
+
+  for (const category of categories) {
+    const dbCat = await client.category.findUnique({ where: { slug: category.slug } })
+    if (!dbCat) continue
+
+    const existingCount = await client.subCategory.count({ where: { categoryId: dbCat.id } })
+    if (existingCount > 0) continue
+
+    const slug = category.slug
+    const clash = await client.subCategory.findFirst({
+      where: { categorySlug: dbCat.slug, slug },
+    })
+    if (clash) continue
+
+    await client.subCategory.create({
+      data: {
+        id: `sub-core-${category.slug}`,
+        categoryId: dbCat.id,
+        categorySlug: dbCat.slug,
+        name: category.name,
+        slug,
+        image: dbCat.image,
+      },
+    })
+    created.push(category.slug)
+  }
+
+  if (created.length) {
+    console.log(`Default subcategories created: ${created.join(', ')}`)
+  }
 }

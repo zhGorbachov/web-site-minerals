@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Layers } from 'lucide-react'
 import { AdminApi, CatalogApi } from '@/api'
 import { useAuthStore } from '@/store'
@@ -22,6 +22,8 @@ export function AdminSubcategoryFormPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
+  const preselectedCategoryId = searchParams.get('categoryId') ?? ''
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin' || user?.role === 'manager'
   const isEdit = Boolean(id)
@@ -52,9 +54,13 @@ export function AdminSubcategoryFormPage() {
         setCategories(cats)
 
         if (!id) {
+          const fromQuery =
+            preselectedCategoryId && cats.some((cat) => cat.id === preselectedCategoryId)
+              ? preselectedCategoryId
+              : ''
           setForm({
             ...emptySubForm,
-            categoryId: cats[0]?.id ?? '',
+            categoryId: fromQuery || cats[0]?.id || '',
           })
           return
         }
@@ -86,7 +92,7 @@ export function AdminSubcategoryFormPage() {
     }
     // t is recreated every render — do not put it in deps or the page will flicker.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, isAdmin])
+  }, [id, isAdmin, preselectedCategoryId])
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault()

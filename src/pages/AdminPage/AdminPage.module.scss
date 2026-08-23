@@ -298,6 +298,26 @@
   color: $color-text;
 }
 
+.fieldNote {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.fieldNoteLink {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  text-decoration: none;
+  width: fit-content;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .mediaSection {
   display: flex;
   flex-direction: column;

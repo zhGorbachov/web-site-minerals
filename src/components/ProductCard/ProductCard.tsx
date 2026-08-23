@@ -173,6 +173,8 @@ export function ProductCard({ product }: ProductCardProps) {
                           {t('productCard.goToProduct')}
                         </button>
                       </>
+                    ) : product.stock <= 0 ? (
+                      <p className={styles.cartMenuHint}>{t('product.outOfStock')}</p>
                     ) : maxSelectable === 0 ? (
                       <p className={styles.cartMenuHint}>{t('productCard.maxInCart')}</p>
                     ) : (
