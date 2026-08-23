@@ -3,6 +3,7 @@ export type { SubCategory } from './subcategory'
 export type {
   Product,
   ProductAttributes,
+  ProductVariant,
   MineralAttributes,
   ThreadAttributes,
   BraceletAttributes,

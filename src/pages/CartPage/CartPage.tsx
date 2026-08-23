@@ -7,7 +7,14 @@ import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice, getUnitPrice, getDiscountLabel } from '@/utils'
+import { formatPrice, getDiscountLabel } from '@/utils'
+import {
+  getAvailableStock,
+  getCartUnitPrice,
+  getSelectedVariant,
+  getVariantDisplayName,
+  optionsWithoutVariantId,
+} from '@/utils/productVariants'
 import { Button, EmptyState } from '@/components/ui'
 import styles from './CartPage.module.scss'
 
@@ -136,8 +143,13 @@ export function CartPage() {
             <AnimatePresence initial={false}>
               {items.map((item) => {
                 const product = localizeProduct(item.product, language)
-                const unitPrice = getUnitPrice(product)
+                const variant = getSelectedVariant(product, item.selectedOptions)
+                const unitPrice = getCartUnitPrice(product, item.selectedOptions)
                 const isSelected = selectedIds.has(item.id)
+                const maxQty = getAvailableStock(product, item.selectedOptions)
+                const visibleOptions = optionsWithoutVariantId(item.selectedOptions)
+                const lineName = getVariantDisplayName(product, variant)
+                const lineImage = variant?.image ?? product.images[0]
 
                 const formatOptionValue = (key: string, value: string) => {
                   if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
@@ -173,13 +185,13 @@ export function CartPage() {
                     </label>
 
                     <Link to={`/product/${product.slug}`} className={styles.itemImage}>
-                      <img src={product.images[0]} alt={product.name} />
+                      <img src={lineImage} alt={lineName} />
                     </Link>
 
                     <div className={styles.itemBody}>
                       <div className={styles.itemHeader}>
                         <Link to={`/product/${product.slug}`} className={styles.itemName}>
-                          {product.name}
+                          {lineName}
                         </Link>
                         <button
                           type="button"
@@ -195,9 +207,9 @@ export function CartPage() {
                         <span className={styles.itemCategory}>{product.subCategoryName}</span>
                       )}
 
-                      {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                      {Object.keys(visibleOptions).length > 0 && (
                         <div className={styles.itemOptions}>
-                          {Object.entries(item.selectedOptions).map(([key, value]) => (
+                          {Object.entries(visibleOptions).map(([key, value]) => (
                             <span key={key} className={styles.optionChip}>
                               {OPTION_LABEL_KEYS[key] ? t(OPTION_LABEL_KEYS[key]) : key}:{' '}
                               {formatOptionValue(key, value)}
@@ -221,7 +233,7 @@ export function CartPage() {
                             type="button"
                             className={styles.qtyBtn}
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={item.quantity >= product.stock}
+                            disabled={item.quantity >= maxQty}
                             aria-label={t('common.increaseQty')}
                           >
                             <Plus size={16} />

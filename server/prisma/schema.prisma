@@ -127,6 +127,7 @@ model Product {
   images          String[]
   video           String?
   attributes      Json
+  variants        Json     @default("[]")
   featured        Boolean  @default(false)
   popular         Boolean  @default(false)
   isNew           Boolean  @default(false)

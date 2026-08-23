@@ -1,6 +1,7 @@
 import type { Cart, Product } from '@/types'
 import { getAuthToken } from '@/api/client'
 import { mergeHalfStrands } from '@/utils/strandMerge'
+import { getAvailableStock } from '@/utils/productVariants'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, type MockCart } from './MockDb'
 
@@ -64,10 +65,13 @@ export const MockCartApi = {
     )
 
     if (existing) {
-      existing.quantity = Math.min(existing.quantity + quantity, product.stock)
+      existing.quantity = Math.min(
+        existing.quantity + quantity,
+        getAvailableStock(product, selectedOptions),
+      )
       existing.product = product
     } else {
-      const capped = Math.min(quantity, product.stock)
+      const capped = Math.min(quantity, getAvailableStock(product, selectedOptions))
       if (capped > 0) {
         cart.items.push({
           id: `item-${productId}-${Date.now()}`,
@@ -95,7 +99,10 @@ export const MockCartApi = {
       return toCart(cart)
     }
 
-    item.quantity = Math.min(quantity, item.product.stock)
+    item.quantity = Math.min(
+      quantity,
+      getAvailableStock(item.product, item.selectedOptions),
+    )
     const { cart: mergedCart, mergedPairs } = applyStrandMerge(cart)
     MockDb.setCart(userId, mergedCart)
     return toCart(mergedCart, mergedPairs || undefined)
@@ -135,10 +142,16 @@ export const MockCartApi = {
           optionsMatch(item.selectedOptions, incoming.selectedOptions),
       )
       if (existing) {
-        existing.quantity = Math.min(existing.quantity + incoming.quantity, product.stock)
+        existing.quantity = Math.min(
+          existing.quantity + incoming.quantity,
+          getAvailableStock(product, incoming.selectedOptions),
+        )
         existing.product = product
       } else {
-        const capped = Math.min(incoming.quantity, product.stock)
+        const capped = Math.min(
+          incoming.quantity,
+          getAvailableStock(product, incoming.selectedOptions),
+        )
         if (capped > 0) {
           cart.items.push({
             id: `item-${incoming.productId}-${Date.now()}`,

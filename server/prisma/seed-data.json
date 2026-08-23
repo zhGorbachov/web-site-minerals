@@ -335,6 +335,11 @@
           "8",
           "10"
         ],
+        "beadCounts": [
+          "36",
+          "40",
+          "44"
+        ],
         "strandLengths": [
           {
             "label": "Низка 39 см",
@@ -584,6 +589,11 @@
           "8",
           "10"
         ],
+        "beadCounts": [
+          "36",
+          "40",
+          "44"
+        ],
         "strandLengths": [
           {
             "label": "Низка 39 см",
@@ -700,6 +710,11 @@
       "attributes": {
         "color": "Чорний",
         "length": "50 м",
+        "lengths": [
+          "10 м",
+          "25 м",
+          "50 м"
+        ],
         "diameter": "1 мм",
         "material": "Кристальний еластик"
       },
@@ -755,6 +770,16 @@
       ],
       "attributes": {
         "wristSize": "14–21 см",
+        "wristSizes": [
+          "14 см",
+          "15 см",
+          "16 см",
+          "17 см",
+          "18 см",
+          "19 см",
+          "20 см",
+          "21 см"
+        ],
         "threadColor": "Прозорий",
         "stones": [
           "Рожевий кварц",
@@ -840,19 +865,54 @@
       "shortDescription": "Чоловічий браслет з лабрадориту 10 мм",
       "description": "Строгий чоловічий браслет з великих намистин лабрадориту. Камінь магії та трансформації.",
       "price": 320,
-      "stock": 8,
+      "stock": 7,
       "images": [
         "/media/Labradorite.jpg",
-        "/media/MenBracelet.jpg"
+        "/media/MenBracelet.jpg",
+        "/media/Obsidian.jpg"
       ],
       "attributes": {
-        "wristSize": "18–23 см",
+        "wristSize": "16–20 см",
+        "wristSizes": [
+          "16 см",
+          "18 см",
+          "20 см"
+        ],
         "threadColor": "Чорний",
         "stones": [
           "Лабрадорит"
         ],
         "material": "Еластична нитка"
       },
+      "variants": [
+        {
+          "id": "var-brc-lbr-16",
+          "image": "/media/MenBracelet.jpg",
+          "price": 320,
+          "stock": 3,
+          "options": {
+            "wristSize": "16 см"
+          }
+        },
+        {
+          "id": "var-brc-lbr-18",
+          "image": "/media/Labradorite.jpg",
+          "price": 340,
+          "stock": 2,
+          "options": {
+            "wristSize": "18 см"
+          }
+        },
+        {
+          "id": "var-brc-lbr-20",
+          "image": "/media/Obsidian.jpg",
+          "price": 360,
+          "stock": 2,
+          "options": {
+            "wristSize": "20 см"
+          }
+        }
+      ],
       "featured": false,
       "popular": true,
       "isNew": true,
@@ -982,24 +1042,58 @@
       "subCategoryId": "sub-5",
       "subCategorySlug": "labradoryt",
       "categorySlug": "mineraly",
-      "name": "Лабрадорит (кабошон)",
+      "name": "Лабрадорит",
       "slug": "labradoryt-kaboshon",
       "sku": "MIN-LBR-001",
-      "shortDescription": "Лабрадорит, кабошон 20×15 мм, яскравий лабрадоресценс",
-      "description": "Лабрадорит з яскравим блакитно-зеленим відблиском. Потужний магічний камінь.",
-      "price": 130,
-      "stock": 20,
+      "shortDescription": "Натуральний лабрадорит, кожен камінь унікальний",
+      "description": "Лабрадорит з яскравим блакитно-зеленим відблиском. Кожен екземпляр — окремий камінь зі своїм розміром, вагою і малюнком. Оберіть саме той, який вам відгукується.",
+      "price": 110,
+      "stock": 3,
       "images": [
-        "/media/Labradorite.jpg"
+        "/media/Labradorite.jpg",
+        "/media/Moonstone.jpg",
+        "/media/ObsidianRock.jpg"
       ],
       "attributes": {
-        "weight": "5 г",
-        "size": "20×15 мм",
         "color": "Сірий/блакитний",
         "origin": "Мадагаскар",
         "hardness": "6–6.5",
         "shape": "Кабошон"
       },
+      "variants": [
+        {
+          "id": "var-lbr-1",
+          "image": "/media/Labradorite.jpg",
+          "price": 110,
+          "stock": 1,
+          "attributes": {
+            "weight": "110 г",
+            "size": "6 см"
+          }
+        },
+        {
+          "id": "var-lbr-2",
+          "name": "Лабрадорит круглуватий",
+          "image": "/media/Moonstone.jpg",
+          "price": 110,
+          "stock": 1,
+          "attributes": {
+            "weight": "110 г",
+            "size": "5.5 см"
+          }
+        },
+        {
+          "id": "var-lbr-3",
+          "name": "Лабрадорит з синім спалахом",
+          "image": "/media/ObsidianRock.jpg",
+          "price": 150,
+          "stock": 1,
+          "attributes": {
+            "weight": "150 г",
+            "size": "7 см"
+          }
+        }
+      ],
       "featured": false,
       "popular": false,
       "isNew": true,
@@ -1074,7 +1168,9 @@
       "description": "Ароматні палички з натурального сандалового дерева для медитації та створення затишної атмосфери. М'який деревний аромат тримається до 40 хвилин.",
       "price": 95,
       "stock": 30,
-      "images": ["/media/Jasper.jpg"],
+      "images": [
+        "/media/Jasper.jpg"
+      ],
       "attributes": {
         "scent": "Сандал",
         "quantity": "20 шт",
@@ -1099,7 +1195,9 @@
       "description": "Заспокійні палички з натуральною лавандою. Ідеальні для вечірнього релаксу та ароматерапії.",
       "price": 75,
       "stock": 25,
-      "images": ["/media/Amethyst.jpg"],
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
       "attributes": {
         "scent": "Лаванда",
         "quantity": "15 шт",
@@ -1124,7 +1222,9 @@
       "description": "Компактні ароматичні конуси з натурального сандалу. Зручні для невеликих приміщень та швидкого ароматизування простору.",
       "price": 65,
       "stock": 20,
-      "images": ["/media/Jasper.jpg"],
+      "images": [
+        "/media/Jasper.jpg"
+      ],
       "attributes": {
         "scent": "Сандал",
         "quantity": "12 шт",
@@ -1150,7 +1250,9 @@
       "price": 85,
       "discountPrice": 72,
       "stock": 15,
-      "images": ["/media/Amethyst.jpg"],
+      "images": [
+        "/media/Amethyst.jpg"
+      ],
       "attributes": {
         "scent": "Пало санто",
         "quantity": "10 шт",

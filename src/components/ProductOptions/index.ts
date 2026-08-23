@@ -1,1 +1,1 @@
-export { ProductOptions, ProductSelections, ProductCharacteristics } from './ProductOptions'
+export { ProductOptions, ProductSelections, ProductCharacteristics, ProductVariantPicker } from './ProductOptions'

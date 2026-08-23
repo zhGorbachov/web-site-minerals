@@ -6,6 +6,7 @@ import type { Product } from '@/types'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice, productRequiresOptions } from '@/utils'
+import { getCatalogPricing } from '@/utils/productVariants'
 import styles from './ProductCard.module.scss'
 
 interface ProductCardProps {
@@ -24,7 +25,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const cartQuantity = useCartStore((s) => s.getCartQuantity(product.id))
   const { toggleWishlist, isInWishlist } = useWishlistStore()
 
-  const displayPrice = product.discountPrice ?? product.price
+  const catalog = getCatalogPricing(product)
+  const displayPrice = catalog.min
   const productUrl = `/product/${product.slug}`
   const inWishlist = isInWishlist(product.id)
   const needsOptions = productRequiresOptions(product)
@@ -88,9 +90,9 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.isNew && (
             <span className={styles.badgeNew}>{t('product.badgeNew')}</span>
           )}
-          {product.discountPrice && (
+          {catalog.compareAt && !catalog.hasRange && (
             <span className={styles.badgeSale}>
-              -{Math.round((1 - product.discountPrice / product.price) * 100)}%
+              -{Math.round((1 - displayPrice / catalog.compareAt) * 100)}%
             </span>
           )}
         </div>
@@ -107,14 +109,16 @@ export function ProductCard({ product }: ProductCardProps) {
               <span
                 className={[
                   styles.price,
-                  product.discountPrice ? styles.priceDiscounted : '',
+                  product.discountPrice && !catalog.hasRange ? styles.priceDiscounted : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
               >
-                {formatPrice(displayPrice, language)}
+                {catalog.hasRange
+                  ? t('product.fromPrice', { price: formatPrice(displayPrice, language) })
+                  : formatPrice(displayPrice, language)}
               </span>
-              {product.discountPrice && (
+              {product.discountPrice && !catalog.hasRange && (
                 <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
               )}
             </div>

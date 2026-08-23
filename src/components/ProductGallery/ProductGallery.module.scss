@@ -148,6 +148,7 @@
 }
 
 .thumb {
+  position: relative;
   flex-shrink: 0;
   width: 64px;
   height: 64px;
@@ -180,4 +181,18 @@
   &:hover:not(.thumbActive) {
     opacity: 0.9;
   }
+}
+
+.thumbCaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 4px;
+  background: rgba($color-black, 0.62);
+  color: $color-white;
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+  @include text-clamp(1);
 }

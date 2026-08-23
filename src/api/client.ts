@@ -48,14 +48,23 @@ export function mediaUrl(path: string) {
   return path
 }
 
-export function withMediaUrls<T extends { image?: string; images?: string[]; video?: string | null }>(
-  item: T,
-): T {
+export function withMediaUrls<
+  T extends {
+    image?: string
+    images?: string[]
+    video?: string | null
+    variants?: Array<{ image?: string }>
+  },
+>(item: T): T {
   return {
     ...item,
     image: item.image ? mediaUrl(item.image) : item.image,
     images: item.images?.map(mediaUrl),
     video: item.video ? mediaUrl(item.video) : item.video ?? undefined,
+    variants: item.variants?.map((variant) => ({
+      ...variant,
+      image: variant.image ? mediaUrl(variant.image) : variant.image,
+    })),
   }
 }
 

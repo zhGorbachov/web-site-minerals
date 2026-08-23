@@ -1,12 +1,19 @@
 import { Router } from 'express'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { optionalAuth, requireAuth } from '../lib/auth.js'
 import {
   calculateCartPricing,
   getDiscountedUnitPrice,
-  getUnitPrice,
 } from '../lib/pricing.js'
+import {
+  applyVariantStockChange,
+  getCartUnitPrice,
+  getSelectedVariant,
+  getVariantDisplayName,
+  parseVariants,
+} from '../lib/productVariants.js'
 
 export const ordersRouter = Router()
 
@@ -115,16 +122,22 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
 
     const pricingItems = cart.items.map((item) => ({
       categorySlug: item.product.categorySlug,
-      unitPrice: getUnitPrice(item.product),
+      unitPrice: getCartUnitPrice(
+        item.product,
+        item.selectedOptions as Record<string, string> | null,
+      ),
       quantity: item.quantity,
     }))
     const pricing = calculateCartPricing(pricingItems, user?.discountPercent)
     const pricedLines = cart.items.map((item) => {
-      const unit = getUnitPrice(item.product)
+      const options = (item.selectedOptions as Record<string, string> | null) ?? undefined
+      const variants = parseVariants(item.product.variants)
+      const variant = getSelectedVariant(variants, options)
+      const unit = getCartUnitPrice(item.product, options)
       return {
         productId: item.productId,
-        productName: item.product.name,
-        productImage: item.product.images[0] ?? '',
+        productName: getVariantDisplayName(item.product.name, variant),
+        productImage: variant?.image ?? item.product.images[0] ?? '',
         quantity: item.quantity,
         price: getDiscountedUnitPrice(item.product.categorySlug, unit, pricing),
       }
@@ -134,36 +147,52 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       0,
     )
 
-    const order = await prisma.$transaction(async (tx) => {
-      const created = await tx.order.create({
-        data: {
-          userId: req.userId!,
-          status: 'pending',
-          paymentStatus: 'unpaid',
-          totalPrice,
-          paymentMethod,
-          deliveryMethod: parsed.data.deliveryMethod,
-          payerFullName:
-            paymentMethod === 'bank_transfer' ? parsed.data.payerFullName! : null,
-          items: {
-            create: pricedLines,
+    try {
+      const order = await prisma.$transaction(async (tx) => {
+        const created = await tx.order.create({
+          data: {
+            userId: req.userId!,
+            status: 'pending',
+            paymentStatus: 'unpaid',
+            totalPrice,
+            paymentMethod,
+            deliveryMethod: parsed.data.deliveryMethod,
+            payerFullName:
+              paymentMethod === 'bank_transfer' ? parsed.data.payerFullName! : null,
+            items: {
+              create: pricedLines,
+            },
           },
-        },
-        include: { items: true },
+          include: { items: true },
+        })
+
+        for (const item of cart.items) {
+          const options = (item.selectedOptions as Record<string, string> | null) ?? undefined
+          const next = applyVariantStockChange(item.product, options, item.quantity)
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: next.stock,
+              ...(next.variants
+                ? { variants: next.variants as Prisma.InputJsonValue }
+                : {}),
+            },
+          })
+        }
+
+        await tx.cartItem.deleteMany({ where: { cartId: cart.id } })
+        return created
       })
 
-      for (const item of cart.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        })
+      res.status(201).json(mapOrder(order))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not create order'
+      if (message === 'Insufficient stock') {
+        res.status(400).json({ error: message })
+        return
       }
-
-      await tx.cartItem.deleteMany({ where: { cartId: cart.id } })
-      return created
-    })
-
-    res.status(201).json(mapOrder(order))
+      res.status(500).json({ error: 'Could not create order' })
+    }
     return
   }
 
@@ -183,11 +212,15 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
     resolvedItems = guestItems.map((item) => {
       const product = productById.get(item.productId)
       if (!product) throw new Error('Product not found')
-      if (product.stock < item.quantity) throw new Error('Insufficient stock')
+      applyVariantStockChange(product, item.selectedOptions, item.quantity)
+      const variants = parseVariants(product.variants)
+      const variant = getSelectedVariant(variants, item.selectedOptions)
       return {
         product,
         quantity: item.quantity,
-        unitPrice: getUnitPrice(product),
+        unitPrice: getCartUnitPrice(product, item.selectedOptions),
+        selectedOptions: item.selectedOptions,
+        variant,
       }
     })
   } catch (error) {
@@ -211,6 +244,9 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
     product: item.product,
     quantity: item.quantity,
     price: getDiscountedUnitPrice(item.product.categorySlug, item.unitPrice, pricing),
+    productName: getVariantDisplayName(item.product.name, item.variant),
+    productImage: item.variant?.image ?? item.product.images[0] ?? '',
+    selectedOptions: item.selectedOptions,
   }))
   const totalPrice = pricedLines.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -232,8 +268,8 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           items: {
             create: pricedLines.map((item) => ({
               productId: item.product.id,
-              productName: item.product.name,
-              productImage: item.product.images[0] ?? '',
+              productName: item.productName,
+              productImage: item.productImage,
               quantity: item.quantity,
               price: item.price,
             })),
@@ -243,9 +279,19 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       })
 
       for (const item of resolvedItems) {
+        const next = applyVariantStockChange(
+          item.product,
+          item.selectedOptions,
+          item.quantity,
+        )
         await tx.product.update({
           where: { id: item.product.id },
-          data: { stock: { decrement: item.quantity } },
+          data: {
+            stock: next.stock,
+            ...(next.variants
+              ? { variants: next.variants as Prisma.InputJsonValue }
+              : {}),
+          },
         })
       }
 

@@ -1,4 +1,5 @@
 import type { BraceletAttributes, MineralAttributes, Product, StrandLengthOption } from '@/types'
+import { hasProductVariants } from './productVariants'
 
 export const DEFAULT_WRIST_SIZES = Array.from({ length: 9 }, (_, i) => `${i + 14} см`)
 
@@ -28,6 +29,7 @@ export function getMineralStrandLengths(attrs: MineralAttributes): StrandLengthO
 }
 
 export function productRequiresOptions(product: Product): boolean {
+  if (hasProductVariants(product)) return true
   if (product.categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
     return Boolean(

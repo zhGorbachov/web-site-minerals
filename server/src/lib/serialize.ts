@@ -53,6 +53,7 @@ export function serializeProduct(
     images: product.images,
     video: product.video ?? undefined,
     attributes: product.attributes,
+    variants: Array.isArray(product.variants) ? product.variants : [],
     featured: product.featured,
     popular: product.popular,
     isNew: product.isNew,

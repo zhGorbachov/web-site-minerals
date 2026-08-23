@@ -11,6 +11,10 @@ import { getAuthToken } from '@/api/client'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, slugify } from './MockDb'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
+import {
+  deriveProductPricingFromVariants,
+  parseVariants,
+} from '@/utils/productVariants'
 
 function requireAdmin() {
   const user = MockDb.resolveSession(getAuthToken())
@@ -61,6 +65,10 @@ export const MockAdminApi = {
     )
 
     const now = new Date().toISOString()
+    const variants = parseVariants(payload.variants)
+    const derived = variants.length
+      ? deriveProductPricingFromVariants(variants, payload.price)
+      : { price: payload.price, stock: payload.stock }
     const product: Product = {
       id: `prod-${Date.now()}`,
       name: payload.name,
@@ -69,12 +77,13 @@ export const MockAdminApi = {
       shortDescription:
         payload.shortDescription?.trim() || payload.description || '—',
       description: payload.description,
-      price: payload.price,
+      price: derived.price,
       discountPrice: payload.discountPrice ?? undefined,
-      stock: payload.stock,
+      stock: derived.stock,
       images: payload.images,
       video: payload.video ?? undefined,
       attributes: (payload.attributes ?? {}) as ProductAttributes,
+      variants,
       featured: payload.featured ?? false,
       popular: payload.popular ?? false,
       isNew: payload.isNew ?? true,
@@ -117,6 +126,16 @@ export const MockAdminApi = {
       throw new MockApiError(409, 'sku_taken')
     }
 
+    const variants =
+      payload.variants !== undefined ? parseVariants(payload.variants) : current.variants
+    const derived =
+      payload.variants !== undefined
+        ? deriveProductPricingFromVariants(
+            parseVariants(payload.variants),
+            payload.price ?? current.price,
+          )
+        : null
+
     const updated: Product = {
       ...current,
       name: payload.name ?? current.name,
@@ -127,16 +146,17 @@ export const MockAdminApi = {
         payload.description ||
         current.shortDescription,
       description: payload.description ?? current.description,
-      price: payload.price ?? current.price,
+      price: derived?.price ?? payload.price ?? current.price,
       discountPrice:
         payload.discountPrice === null
           ? undefined
           : (payload.discountPrice ?? current.discountPrice),
-      stock: payload.stock ?? current.stock,
+      stock: derived?.stock ?? payload.stock ?? current.stock,
       images: payload.images ?? current.images,
       video:
         payload.video === null ? undefined : (payload.video ?? current.video),
       attributes: (payload.attributes as ProductAttributes | undefined) ?? current.attributes,
+      variants,
       featured: payload.featured ?? current.featured,
       popular: payload.popular ?? current.popular,
       isNew: payload.isNew ?? current.isNew,

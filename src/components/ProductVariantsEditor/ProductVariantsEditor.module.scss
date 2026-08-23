@@ -1,0 +1,127 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.listHead {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.title {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.hint {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  line-height: $line-height-normal;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  padding: $spacing-3;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+}
+
+.cardOn {
+  border-color: rgba(var(--color-primary-rgb), 0.45);
+  background: rgba(var(--color-primary-rgb), 0.04);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: $radius-sm;
+  background: $color-surface;
+  flex-shrink: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-3;
+
+  @include tablet-up {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+
+  input,
+  select {
+    width: 100%;
+    min-height: 40px;
+    padding: $spacing-2 $spacing-3;
+    border: 1.5px solid $color-border;
+    border-radius: $radius-md;
+    font: inherit;
+    font-size: $font-size-sm;
+    color: $color-text;
+    background: $color-white;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
+    }
+  }
+}

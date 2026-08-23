@@ -1,4 +1,4 @@
-import type { Order, OrderStatus, PaymentStatus, Product, SubCategory, User } from '@/types'
+import type { Order, OrderStatus, PaymentStatus, Product, ProductVariant, SubCategory, User } from '@/types'
 import { api, mediaUrl, withMediaUrls } from './client'
 
 export type AdminOrderCustomer = {
@@ -39,6 +39,7 @@ export type AdminProductPayload = {
   images: string[]
   video?: string | null
   attributes?: Record<string, unknown>
+  variants?: ProductVariant[]
   featured?: boolean
   popular?: boolean
   isNew?: boolean

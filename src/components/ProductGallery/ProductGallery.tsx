@@ -7,32 +7,49 @@ import styles from './ProductGallery.module.scss'
 interface ProductGalleryProps {
   images: string[]
   productName: string
+  activeIndex?: number
+  onActiveIndexChange?: (index: number) => void
+  captions?: Array<{ title?: string; price?: string; outOfStock?: boolean } | undefined>
 }
 
 const SWIPE_THRESHOLD = 48
 
-export function ProductGallery({ images, productName }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  productName,
+  activeIndex: activeIndexProp,
+  onActiveIndexChange,
+  captions,
+}: ProductGalleryProps) {
   const { t } = useTranslation()
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [internalIndex, setInternalIndex] = useState(0)
   const thumbsRef = useRef<HTMLDivElement>(null)
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
   const isSwiping = useRef(false)
 
   const hasMultiple = images.length > 1
-  const lastIndex = images.length - 1
+  const lastIndex = Math.max(0, images.length - 1)
+  const isControlled = activeIndexProp != null
+  const activeIndex = Math.max(0, Math.min(isControlled ? activeIndexProp : internalIndex, lastIndex))
 
   const goTo = useCallback((index: number) => {
-    setActiveIndex(Math.max(0, Math.min(index, lastIndex)))
-  }, [lastIndex])
+    const next = Math.max(0, Math.min(index, lastIndex))
+    if (!isControlled) setInternalIndex(next)
+    onActiveIndexChange?.(next)
+  }, [isControlled, lastIndex, onActiveIndexChange])
 
   const goPrev = useCallback(() => {
-    setActiveIndex((i) => (i === 0 ? lastIndex : i - 1))
-  }, [lastIndex])
+    goTo(activeIndex === 0 ? lastIndex : activeIndex - 1)
+  }, [activeIndex, lastIndex, goTo])
 
   const goNext = useCallback(() => {
-    setActiveIndex((i) => (i === lastIndex ? 0 : i + 1))
-  }, [lastIndex])
+    goTo(activeIndex === lastIndex ? 0 : activeIndex + 1)
+  }, [activeIndex, lastIndex, goTo])
+
+  useEffect(() => {
+    if (!isControlled && internalIndex > lastIndex) setInternalIndex(lastIndex)
+  }, [isControlled, internalIndex, lastIndex])
 
   useEffect(() => {
     const thumb = thumbsRef.current?.children[activeIndex] as HTMLElement | undefined
@@ -150,6 +167,9 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   alt={t('productGallery.thumbnailAlt', { name: productName, n: index + 1 })}
                   draggable={false}
                 />
+                {captions?.[index]?.title && (
+                  <span className={styles.thumbCaption}>{captions[index]?.title}</span>
+                )}
               </button>
             ))}
           </div>

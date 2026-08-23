@@ -5,13 +5,32 @@ import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lu
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { ProductGallery } from '@/components/ProductGallery'
-import { ProductSelections, ProductCharacteristics } from '@/components/ProductOptions'
+import {
+  ProductSelections,
+  ProductCharacteristics,
+  ProductVariantPicker,
+} from '@/components/ProductOptions'
 import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils'
+import {
+  buildVariantSelection,
+  findBestMatchingVariant,
+  findVariantById,
+  findVariantByImage,
+  getAvailableStock,
+  getCatalogPricing,
+  getProductVariants,
+  getSelectedVariant,
+  getVariantCompareAtPrice,
+  getVariantDisplayName,
+  getVariantUnitPrice,
+  hasProductVariants,
+  pickDefaultVariant,
+} from '@/utils/productVariants'
 import styles from './ProductPage.module.scss'
 
 export function ProductPage() {
@@ -21,6 +40,7 @@ export function ProductPage() {
   const [related, setRelated] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
+  const [galleryIndex, setGalleryIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
   const [addAnimKey, setAddAnimKey] = useState(0)
@@ -39,11 +59,18 @@ export function ProductPage() {
     setAddedToCart(false)
     setQuantity(1)
     setSelectedOptions({})
+    setGalleryIndex(0)
     void ProductService.getBySlug(slug).then(async (prod) => {
       if (prod) {
         const rel = await ProductService.getRelated(prod)
         setProduct(prod)
         setRelated(rel)
+        const first = pickDefaultVariant(prod)
+        if (first) {
+          setSelectedOptions(buildVariantSelection(first))
+          const imageIndex = prod.images.indexOf(first.image)
+          setGalleryIndex(imageIndex >= 0 ? imageIndex : 0)
+        }
       } else {
         setProduct(undefined)
         setRelated([])
@@ -52,7 +79,44 @@ export function ProductPage() {
     })
   }, [slug, language])
 
-  const maxSelectable = product ? Math.max(0, product.stock - cartQuantity) : 0
+  const maxSelectable = product ? Math.max(0, getAvailableStock(product, selectedOptions) - cartQuantity) : 0
+  const availableStock = product ? getAvailableStock(product, selectedOptions) : 0
+
+  const syncGalleryToVariant = (nextProduct: Product, variantImage: string) => {
+    const index = nextProduct.images.indexOf(variantImage)
+    if (index >= 0) setGalleryIndex(index)
+  }
+
+  const handleOptionsChange = (next: Record<string, string>) => {
+    if (!product || !hasProductVariants(product)) {
+      setSelectedOptions(next)
+      return
+    }
+    const match = findBestMatchingVariant(product, next, selectedOptions.variantId)
+    if (!match) {
+      setSelectedOptions(next)
+      return
+    }
+    setSelectedOptions(buildVariantSelection(match, next))
+    syncGalleryToVariant(product, match.image)
+  }
+
+  const handleVariantPick = (variantId: string) => {
+    if (!product) return
+    const variant = findVariantById(product, variantId)
+    if (!variant) return
+    setSelectedOptions(buildVariantSelection(variant, selectedOptions))
+    syncGalleryToVariant(product, variant.image)
+  }
+
+  const handleGalleryIndex = (index: number) => {
+    setGalleryIndex(index)
+    if (!product) return
+    const variant = findVariantByImage(product, product.images[index])
+    if (variant) {
+      setSelectedOptions(buildVariantSelection(variant, selectedOptions))
+    }
+  }
 
   useEffect(() => {
     if (!product || maxSelectable <= 0) return
@@ -112,9 +176,19 @@ export function ProductPage() {
     )
   }
 
-  const displayPrice = product.discountPrice ?? product.price
+  const selectedVariant = getSelectedVariant(product, selectedOptions)
+  const catalogPricing = getCatalogPricing(product)
+  const displayPrice = selectedVariant
+    ? getVariantUnitPrice(product, selectedVariant)
+    : catalogPricing.min
+  const compareAt = selectedVariant
+    ? getVariantCompareAtPrice(product, selectedVariant)
+    : catalogPricing.compareAt
   const inWishlist = isInWishlist(product.id)
   const categoryLabel = product.subCategoryName ?? product.subCategorySlug
+  const variants = getProductVariants(product)
+  const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock > 0
+  const displayName = getVariantDisplayName(product, selectedVariant)
 
   const breadcrumbs = [
     { label: t('nav.home'), href: '/' },
@@ -138,7 +212,20 @@ export function ProductPage() {
           transition={{ duration: 0.4 }}
         >
           <div className={styles.galleryCol}>
-            <ProductGallery images={product.images} productName={product.name} />
+            <ProductGallery
+              images={product.images}
+              productName={displayName}
+              activeIndex={galleryIndex}
+              onActiveIndexChange={handleGalleryIndex}
+              captions={product.images.map((src) => {
+                const variant = findVariantByImage(product, src)
+                if (!variant) return undefined
+                return {
+                  title: variant.name?.trim() || undefined,
+                  outOfStock: variant.stock <= 0,
+                }
+              })}
+            />
             {product.video && (
               <video
                 className={styles.productVideo}
@@ -151,37 +238,49 @@ export function ProductPage() {
           </div>
 
           <div className={styles.infoCol}>
-            <h1 className={styles.productTitle}>{product.name}</h1>
+            <h1 className={styles.productTitle}>{displayName}</h1>
 
             <div className={styles.metaRow}>
-              {product.stock > 0 ? (
+              {inStock ? (
                 <span className={styles.inStock}>{t('product.inStock')}</span>
               ) : (
                 <span className={styles.outOfStock}>{t('product.outOfStock')}</span>
               )}
 
               <div className={styles.priceBlock}>
-                {product.discountPrice && (
-                  <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
+                {compareAt != null && (
+                  <span className={styles.oldPrice}>{formatPrice(compareAt, language)}</span>
                 )}
                 <span
                   className={[
                     styles.price,
-                    product.discountPrice ? styles.priceDiscounted : '',
+                    compareAt != null ? styles.priceDiscounted : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {formatPrice(displayPrice, language)}
+                  {!selectedVariant && catalogPricing?.hasRange
+                    ? t('product.fromPrice', { price: formatPrice(displayPrice, language) })
+                    : formatPrice(displayPrice, language)}
                 </span>
               </div>
             </div>
 
+            {variants.length > 0 && (
+              <div className={styles.optionsBlock}>
+                <ProductVariantPicker
+                  product={product}
+                  selectedId={selectedVariant?.id}
+                  onSelect={handleVariantPick}
+                />
+              </div>
+            )}
+
             <div className={styles.optionsBlock}>
               <ProductSelections
-                key={product.id}
                 product={product}
-                onOptionsChange={setSelectedOptions}
+                selectedOptions={selectedOptions}
+                onOptionsChange={handleOptionsChange}
               />
             </div>
 
@@ -191,7 +290,7 @@ export function ProductPage() {
                   type="button"
                   className={styles.qtyBtn}
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={product.stock === 0}
+                  disabled={availableStock === 0}
                   aria-label={t('common.decreaseQty')}
                 >
                   <Minus size={16} />
@@ -201,7 +300,7 @@ export function ProductPage() {
                   type="button"
                   className={styles.qtyBtn}
                   onClick={() => setQuantity((q) => Math.min(maxSelectable, q + 1))}
-                  disabled={product.stock === 0 || maxSelectable === 0 || quantity >= maxSelectable}
+                  disabled={availableStock === 0 || maxSelectable === 0 || quantity >= maxSelectable}
                   aria-label={t('common.increaseQty')}
                 >
                   <Plus size={16} />
@@ -229,7 +328,7 @@ export function ProductPage() {
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  disabled={product.stock === 0 || maxSelectable === 0}
+                  disabled={availableStock === 0 || maxSelectable === 0}
                   leftIcon={
                     <span className={styles.addToCartIcon}>
                       <AnimatePresence mode="wait" initial={false}>
@@ -277,7 +376,7 @@ export function ProductPage() {
             </div>
 
             <div className={styles.characteristicsBlock}>
-              <ProductCharacteristics product={product} />
+              <ProductCharacteristics product={product} variant={selectedVariant} />
             </div>
 
             <div className={styles.descriptionBlock}>

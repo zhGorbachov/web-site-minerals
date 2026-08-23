@@ -188,10 +188,10 @@ export const productEn: Record<
       'Moonstone with a magical opalescent glow. A symbol of intuition and femininity.',
   },
   'labradoryt-kaboshon': {
-    name: 'Labradorite (Cabochon)',
-    shortDescription: 'Labradorite cabochon, 20×15 mm, vivid labradorescence',
+    name: 'Labradorite',
+    shortDescription: 'Natural labradorite, each stone is unique',
     description:
-      'Labradorite with a bright blue-green flash. A powerful magical stone.',
+      'Labradorite with a bright blue-green flash. Each piece is a unique stone with its own size, weight and pattern. Choose the one that speaks to you.',
   },
   'dytyachyy-braslet-veselka': {
     name: 'Rainbow Children\'s Bracelet',
@@ -288,6 +288,8 @@ export const attributeValueEn: Record<string, string> = {
   'Тигрове око': "Tiger's eye",
   'Тигрове oko': "Tiger's eye",
   'Лабрадорит': 'Labradorite',
+  'Лабрадорит круглуватий': 'Rounded labradorite',
+  'Лабрадорит з синім спалахом': 'Labradorite with a blue flash',
   'Місячний камінь': 'Moonstone',
   'Агат кольоровий': 'Colorful agate',
 }

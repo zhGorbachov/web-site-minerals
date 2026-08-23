@@ -8,11 +8,17 @@ import { useAuthStore } from '@/store'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { Button, Input, Select } from '@/components/ui'
 import type { SelectOption } from '@/components/ui'
-import { MediaUploader } from '@/components/MediaUploader'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
-import type { Category, OrderStatus, PaymentStatus, Product, SubCategory } from '@/types'
+import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
+import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, SubCategory } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
+import {
+  deriveProductPricingFromVariants,
+  hasProductVariants,
+  parseVariants,
+  toStoredVariants,
+} from '@/utils/productVariants'
 import { AdminShell } from './AdminShell'
 import { isAdminTab, mapAdminError, type AdminTab } from './adminShared'
 import styles from './AdminPage.module.scss'
@@ -104,6 +110,7 @@ type ProductForm = Omit<AdminProductPayload, 'price' | 'discountPrice' | 'stock'
   price: string
   discountPrice: string
   stock: string
+  variants: ProductVariant[]
 }
 
 const emptyForm: ProductForm = {
@@ -121,6 +128,7 @@ const emptyForm: ProductForm = {
   popular: false,
   isNew: true,
   attributes: {},
+  variants: [],
 }
 
 function deriveShortDescription(description: string): string {
@@ -312,6 +320,10 @@ export function AdminPage() {
     [subcategories, form.subCategoryId],
   )
   const formCategorySlug = selectedSubcategory?.categorySlug ?? ''
+  const formBoundVariants = toStoredVariants(form.variants)
+  const formDerived = formBoundVariants.length
+    ? deriveProductPricingFromVariants(formBoundVariants, Number(form.price) || 0)
+    : null
   const suggestedSku = useMemo(() => {
     if (!selectedSubcategory) return ''
     return uniqueSku(
@@ -332,6 +344,10 @@ export function AdminPage() {
       ...f,
       subCategoryId,
       attributes: nextSlug && prevSlug && nextSlug !== prevSlug ? {} : f.attributes,
+      variants:
+        nextSlug && prevSlug && nextSlug !== prevSlug
+          ? f.variants.map((variant) => ({ ...variant, options: undefined }))
+          : f.variants,
     }))
   }
 
@@ -416,6 +432,7 @@ export function AdminPage() {
       popular: product.popular,
       isNew: product.isNew,
       attributes: (product.attributes as Record<string, unknown>) ?? {},
+      variants: parseVariants(product.variants),
     })
   }
 
@@ -436,15 +453,20 @@ export function AdminPage() {
     }
     setSaving(true)
     setError(null)
+    const storedVariants = toStoredVariants(form.variants)
+    const derived = storedVariants.length
+      ? deriveProductPricingFromVariants(storedVariants, Number(form.price) || 0)
+      : null
     const payload: AdminProductPayload = {
       ...form,
-      price: Number(form.price),
-      stock: Number(form.stock),
+      price: derived ? derived.price : Number(form.price),
+      stock: derived ? derived.stock : Number(form.stock),
       shortDescription: deriveShortDescription(form.description),
       discountPrice: form.discountPrice === '' ? null : Number(form.discountPrice),
       video: form.video || null,
       slug: form.slug || undefined,
       sku: skuValue || undefined,
+      variants: storedVariants,
     }
 
     try {
@@ -787,6 +809,9 @@ export function AdminPage() {
                       <label className={styles.stockLabel} htmlFor={`stock-${product.id}`}>
                         {t('admin.stock')}
                       </label>
+                      {hasProductVariants(product) ? (
+                        <p className={styles.muted}>{t('admin.stockFromVariantsValue', { count: product.stock })}</p>
+                      ) : (
                       <div className={styles.stockRow}>
                         <input
                           id={`stock-${product.id}`}
@@ -812,6 +837,7 @@ export function AdminPage() {
                           {t('admin.saveStock')}
                         </Button>
                       </div>
+                      )}
                     </div>
                   </li>
                 ))}
@@ -848,7 +874,8 @@ export function AdminPage() {
                   step="0.01"
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                  required
+                  required={!formDerived}
+                  hint={formDerived ? t('admin.priceFromVariants', { price: String(formDerived.price) }) : undefined}
                 />
                 <Input
                   label={t('admin.discountPrice')}
@@ -862,9 +889,11 @@ export function AdminPage() {
                   label={t('admin.stock')}
                   type="number"
                   min={0}
-                  value={form.stock}
+                  value={formDerived ? String(formDerived.stock) : form.stock}
                   onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
-                  required
+                  required={!formDerived}
+                  disabled={Boolean(formDerived)}
+                  hint={formDerived ? t('admin.stockFromVariants') : undefined}
                 />
               </div>
 
@@ -903,11 +932,17 @@ export function AdminPage() {
 
               <div className={styles.mediaSection}>
                 <span className={styles.mediaLabel}>{t('admin.media')}</span>
-                <MediaUploader
+                <ProductVariantsEditor
                   images={form.images}
                   video={form.video}
+                  variants={form.variants}
+                  categorySlug={formCategorySlug}
+                  attributes={(form.attributes as Record<string, unknown>) ?? {}}
+                  defaultName={form.name}
+                  defaultPrice={form.price}
                   onImagesChange={(images) => setForm((f) => ({ ...f, images }))}
                   onVideoChange={(video) => setForm((f) => ({ ...f, video }))}
+                  onVariantsChange={(variants) => setForm((f) => ({ ...f, variants }))}
                 />
               </div>
 

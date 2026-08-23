@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma.js'
 import { requireAuth } from '../lib/auth.js'
 import { serializeProduct } from '../lib/serialize.js'
 import { mergeHalfStrands, type StrandMergeCartItem } from '../lib/strandMerge.js'
+import { getAvailableStock } from '../lib/productVariants.js'
 
 export const cartRouter = Router()
 
@@ -160,13 +161,19 @@ cartRouter.post('/items', async (req, res) => {
   )
 
   if (existing) {
-    const nextQty = Math.min(existing.quantity + parsed.data.quantity, product.stock)
+    const nextQty = Math.min(
+      existing.quantity + parsed.data.quantity,
+      getAvailableStock(product, parsed.data.selectedOptions),
+    )
     await prisma.cartItem.update({
       where: { id: existing.id },
       data: { quantity: nextQty },
     })
   } else {
-    const qty = Math.min(parsed.data.quantity, product.stock)
+    const qty = Math.min(
+      parsed.data.quantity,
+      getAvailableStock(product, parsed.data.selectedOptions),
+    )
     if (qty <= 0) {
       res.status(400).json({ error: 'Out of stock' })
       return
@@ -203,7 +210,10 @@ cartRouter.patch('/items/:itemId', async (req, res) => {
     return
   }
 
-  const quantity = Math.min(parsed.data.quantity, item.product.stock)
+  const quantity = Math.min(
+    parsed.data.quantity,
+    getAvailableStock(item.product, item.selectedOptions as Record<string, string> | null),
+  )
   await prisma.cartItem.update({
     where: { id: item.id },
     data: { quantity },
@@ -265,10 +275,15 @@ cartRouter.post('/merge', async (req, res) => {
     if (existing) {
       await prisma.cartItem.update({
         where: { id: existing.id },
-        data: { quantity: Math.min(existing.quantity + item.quantity, product.stock) },
+        data: {
+          quantity: Math.min(
+            existing.quantity + item.quantity,
+            getAvailableStock(product, item.selectedOptions),
+          ),
+        },
       })
     } else {
-      const qty = Math.min(item.quantity, product.stock)
+      const qty = Math.min(item.quantity, getAvailableStock(product, item.selectedOptions))
       if (qty > 0) {
         await prisma.cartItem.create({
           data: {

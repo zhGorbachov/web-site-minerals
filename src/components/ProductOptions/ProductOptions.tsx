@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import type {
   Product,
+  ProductVariant,
   MineralAttributes,
   ThreadAttributes,
   BraceletAttributes,
@@ -13,10 +14,18 @@ import { attributeValueEn, colorKeyByUk } from '@/i18n/CatalogEn'
 import { getColorOptions } from '@/i18n/localizeCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { getBraceletWristSizes, getMineralStrandLengths } from '@/utils/productOptions'
+import {
+  getProductVariants,
+  getVariantOptionValues,
+  getVariantUnitPrice,
+  isOptionValueOutOfStock,
+} from '@/utils/productVariants'
+import { formatPrice } from '@/utils/formatPrice'
 import styles from './ProductOptions.module.scss'
 
 interface ProductOptionsProps {
   product: Product
+  selectedOptions?: Record<string, string>
   onOptionsChange: (options: Record<string, string>) => void
 }
 
@@ -53,21 +62,30 @@ function getStoredColorValue(key: string): string {
   return Object.entries(colorKeyByUk).find(([, value]) => value === key)?.[0] ?? key
 }
 
-function useProductOptionState(onOptionsChange: (options: Record<string, string>) => void) {
-  const [selected, setSelected] = useState<Record<string, string>>({})
+function useProductOptionState(
+  onOptionsChange: (options: Record<string, string>) => void,
+  selectedOptions?: Record<string, string>,
+) {
+  const [internal, setInternal] = useState<Record<string, string>>({})
+  const selected = selectedOptions ?? internal
 
   const handleSelect = (key: string, value: string) => {
     const updated = { ...selected, [key]: value }
-    setSelected(updated)
+    if (selectedOptions == null) setInternal(updated)
     onOptionsChange(updated)
   }
 
   return { selected, handleSelect }
 }
 
-export function ProductSelections({ product, onOptionsChange }: ProductOptionsProps) {
+function optionValues(product: Product, key: string, fallback: string[]): string[] {
+  const fromVariants = getVariantOptionValues(product, key)
+  return fromVariants.length ? fromVariants : fallback
+}
+
+export function ProductSelections({ product, selectedOptions, onOptionsChange }: ProductOptionsProps) {
   const { t, language } = useTranslation()
-  const { selected, handleSelect } = useProductOptionState(onOptionsChange)
+  const { selected, handleSelect } = useProductOptionState(onOptionsChange, selectedOptions)
   const { categorySlug } = product
 
   if (categorySlug === 'mineraly') {
@@ -87,16 +105,24 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
           <div className={styles.optionGroup}>
             <span className={styles.optionLabel}>{t('productOptions.beadSize')}</span>
             <div className={styles.sizeGrid}>
-              {attrs.beadSizes!.map((size) => (
+              {optionValues(product, 'beadSize', attrs.beadSizes!).map((size) => {
+                const disabled = isOptionValueOutOfStock(product, 'beadSize', size)
+                return (
                 <button
                   key={size}
                   type="button"
-                  className={[styles.sizeChip, selected.beadSize === size ? styles.sizeChipActive : ''].filter(Boolean).join(' ')}
+                  className={[
+                    styles.sizeChip,
+                    selected.beadSize === size ? styles.sizeChipActive : '',
+                    disabled ? styles.optionDisabled : '',
+                  ].filter(Boolean).join(' ')}
                   onClick={() => handleSelect('beadSize', size)}
+                  disabled={disabled}
                 >
                   {size}
                 </button>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -106,16 +132,24 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
             {hasBeadSizes ? <span className={styles.sectionDivider} /> : null}
             <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
             <div className={styles.lengthPills}>
-              {attrs.wristSizes!.map((size) => (
+              {optionValues(product, 'wristSize', attrs.wristSizes!).map((size) => {
+                const disabled = isOptionValueOutOfStock(product, 'wristSize', size)
+                return (
                 <button
                   key={size}
                   type="button"
-                  className={[styles.lengthPill, selected.wristSize === size ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  className={[
+                    styles.lengthPill,
+                    selected.wristSize === size ? styles.lengthPillActive : '',
+                    disabled ? styles.optionDisabled : '',
+                  ].filter(Boolean).join(' ')}
                   onClick={() => handleSelect('wristSize', size)}
+                  disabled={disabled}
                 >
                   {formatWristSize(size, language)}
                 </button>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -125,16 +159,24 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
             {hasBeadSizes || hasWristSizes ? <span className={styles.sectionDivider} /> : null}
             <span className={styles.optionLabel}>{t('productOptions.beadCount')}</span>
             <div className={styles.lengthPills}>
-              {attrs.beadCounts!.map((count) => (
+              {optionValues(product, 'beadCount', attrs.beadCounts!).map((count) => {
+                const disabled = isOptionValueOutOfStock(product, 'beadCount', count)
+                return (
                 <button
                   key={count}
                   type="button"
-                  className={[styles.lengthPill, selected.beadCount === count ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  className={[
+                    styles.lengthPill,
+                    selected.beadCount === count ? styles.lengthPillActive : '',
+                    disabled ? styles.optionDisabled : '',
+                  ].filter(Boolean).join(' ')}
                   onClick={() => handleSelect('beadCount', count)}
+                  disabled={disabled}
                 >
                   {t('productOptions.beadCountValue', { value: count })}
                 </button>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -146,16 +188,32 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
             ) : null}
             <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>
             <div className={styles.lengthPills}>
-              {strandLengths.map((length) => (
+              {optionValues(
+                product,
+                'strandLength',
+                strandLengths.map((length) => length.label),
+              ).map((label) => {
+                const length = strandLengths.find((item) => item.label === label) ?? {
+                  label,
+                  value: label,
+                }
+                const disabled = isOptionValueOutOfStock(product, 'strandLength', length.label)
+                return (
                 <button
                   key={length.value}
                   type="button"
-                  className={[styles.lengthPill, selected.strandLength === length.label ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  className={[
+                    styles.lengthPill,
+                    selected.strandLength === length.label ? styles.lengthPillActive : '',
+                    disabled ? styles.optionDisabled : '',
+                  ].filter(Boolean).join(' ')}
                   onClick={() => handleSelect('strandLength', length.label)}
+                  disabled={disabled}
                 >
                   {length.label}
                 </button>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -172,16 +230,24 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
           <div className={styles.optionGroup}>
             <span className={styles.optionLabel}>{t('productOptions.threadLength')}</span>
             <div className={styles.lengthPills}>
-              {attrs.lengths.map((length) => (
+              {optionValues(product, 'length', attrs.lengths).map((length) => {
+                const disabled = isOptionValueOutOfStock(product, 'length', length)
+                return (
                 <button
                   key={length}
                   type="button"
-                  className={[styles.lengthPill, selected.length === length ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                  className={[
+                    styles.lengthPill,
+                    selected.length === length ? styles.lengthPillActive : '',
+                    disabled ? styles.optionDisabled : '',
+                  ].filter(Boolean).join(' ')}
                   onClick={() => handleSelect('length', length)}
+                  disabled={disabled}
                 >
                   {translateAttrValue(length, language)}
                 </button>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -216,16 +282,24 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
         <div className={styles.optionGroup}>
           <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
           <div className={styles.lengthPills}>
-            {wristSizes.map((size) => (
+            {optionValues(product, 'wristSize', wristSizes).map((size) => {
+              const disabled = isOptionValueOutOfStock(product, 'wristSize', size)
+              return (
               <button
                 key={size}
                 type="button"
-                className={[styles.lengthPill, selected.wristSize === size ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
+                className={[
+                  styles.lengthPill,
+                  selected.wristSize === size ? styles.lengthPillActive : '',
+                  disabled ? styles.optionDisabled : '',
+                ].filter(Boolean).join(' ')}
                 onClick={() => handleSelect('wristSize', size)}
+                disabled={disabled}
               >
                 {formatWristSize(size, language)}
               </button>
-            ))}
+              )
+            })}
           </div>
           {attrs.wristSize && (
             <p className={styles.hint}>
@@ -242,19 +316,31 @@ export function ProductSelections({ product, onOptionsChange }: ProductOptionsPr
   return null
 }
 
-export function ProductCharacteristics({ product }: Pick<ProductOptionsProps, 'product'>) {
+export function ProductCharacteristics({
+  product,
+  variant,
+}: {
+  product: Product
+  variant?: ProductVariant
+}) {
   const { t, language } = useTranslation()
   const { categorySlug } = product
+  const overlay = variant?.attributes
 
   if (categorySlug === 'mineraly') {
-    const attrs = product.attributes as MineralAttributes
+    const attrs = {
+      ...(product.attributes as MineralAttributes),
+      ...(overlay ?? {}),
+    }
     const strandLengths = getMineralStrandLengths(attrs)
     const hasStrandOptions = Boolean(
       attrs.beadSizes?.length || attrs.beadCounts?.length || strandLengths.length,
     )
     return (
       <CharacteristicsPanel
-        items={buildMineralCharacteristics(attrs, t, language, { strand: hasStrandOptions })}
+        items={buildMineralCharacteristics(attrs, t, language, {
+          strand: hasStrandOptions && !overlay?.weight && !overlay?.size,
+        })}
         characteristicsLabel={t('productOptions.characteristics')}
       />
     )
@@ -291,12 +377,72 @@ export function ProductCharacteristics({ product }: Pick<ProductOptionsProps, 'p
   )
 }
 
-export function ProductOptions({ product, onOptionsChange }: ProductOptionsProps) {
+export function ProductOptions({ product, selectedOptions, onOptionsChange }: ProductOptionsProps) {
   return (
     <>
-      <ProductSelections product={product} onOptionsChange={onOptionsChange} />
+      <ProductSelections
+        product={product}
+        selectedOptions={selectedOptions}
+        onOptionsChange={onOptionsChange}
+      />
       <ProductCharacteristics product={product} />
     </>
+  )
+}
+
+export function ProductVariantPicker({
+  product,
+  selectedId,
+  onSelect,
+}: {
+  product: Product
+  selectedId?: string
+  onSelect: (variantId: string) => void
+}) {
+  const { t, language } = useTranslation()
+  const variants = getProductVariants(product)
+  if (variants.length === 0) return null
+
+  return (
+    <div className={styles.variantPicker} aria-label={t('productOptions.choosePiece')}>
+      <span className={styles.optionLabel}>{t('productOptions.choosePiece')}</span>
+      <ul className={styles.variantList}>
+        {variants.map((variant) => {
+          const active = variant.id === selectedId
+          const out = variant.stock <= 0
+          const name =
+            variant.name?.trim() ||
+            Object.values(variant.options ?? {})[0] ||
+            product.name
+          return (
+            <li key={variant.id}>
+              <button
+                type="button"
+                className={[
+                  styles.variantCard,
+                  active ? styles.variantCardActive : '',
+                  out ? styles.variantCardOut : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() => onSelect(variant.id)}
+              >
+                <img src={variant.image} alt="" />
+                <span className={styles.variantMeta}>
+                  <span className={styles.variantName}>{name}</span>
+                  <span className={styles.variantPrice}>
+                    {formatPrice(getVariantUnitPrice(product, variant), language)}
+                  </span>
+                  {out && (
+                    <span className={styles.variantStockOut}>{t('product.outOfStock')}</span>
+                  )}
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }
 

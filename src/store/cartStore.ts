@@ -5,6 +5,7 @@ import { CartApi } from '@/api'
 import { getAuthToken } from '@/api/client'
 import { calculateCartPricing, toPricingItems, type CartPricing } from '@/utils/pricing'
 import { mergeHalfStrands } from '@/utils/strandMerge'
+import { getAvailableStock } from '@/utils/productVariants'
 import { useUIStore } from './uiStore'
 
 interface CartState {
@@ -73,14 +74,17 @@ export const useCartStore = create<CartState>()(
         let nextItems: CartItem[]
 
         if (existing) {
-          const nextQuantity = Math.min(existing.quantity + quantity, product.stock)
+          const nextQuantity = Math.min(
+            existing.quantity + quantity,
+            getAvailableStock(product, options),
+          )
           if (nextQuantity === existing.quantity) return
 
           nextItems = get().items.map((item) =>
             item.id === existing.id ? { ...item, quantity: nextQuantity } : item,
           )
         } else {
-          const cappedQuantity = Math.min(quantity, product.stock)
+          const cappedQuantity = Math.min(quantity, getAvailableStock(product, options))
           if (cappedQuantity <= 0) return
 
           const newItem: CartItem = {
@@ -154,7 +158,10 @@ export const useCartStore = create<CartState>()(
         const item = get().items.find((i) => i.id === itemId)
         if (!item) return
 
-        const cappedQuantity = Math.min(quantity, item.product.stock)
+        const cappedQuantity = Math.min(
+          quantity,
+          getAvailableStock(item.product, item.selectedOptions),
+        )
         const nextItems = get().items.map((i) =>
           i.id === itemId ? { ...i, quantity: cappedQuantity } : i,
         )

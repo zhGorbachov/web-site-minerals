@@ -4,11 +4,35 @@ import { getAuthToken } from '@/api/client'
 import {
   calculateCartPricing,
   getDiscountedUnitPrice,
-  getUnitPrice,
   toPricingItems,
 } from '@/utils/pricing'
+import {
+  applyVariantStockChange,
+  getCartUnitPrice,
+  getSelectedVariant,
+  getVariantDisplayName,
+} from '@/utils/productVariants'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb } from './MockDb'
+
+function applyOrderStock(items: CartItem[]) {
+  const products = MockDb.getProducts()
+  const next = products.map((product) => {
+    const related = items.filter((item) => item.product.id === product.id)
+    if (!related.length) return product
+    let updated = product
+    for (const item of related) {
+      const change = applyVariantStockChange(updated, item.selectedOptions, item.quantity)
+      updated = {
+        ...updated,
+        stock: change.stock,
+        variants: change.variants ?? updated.variants,
+      }
+    }
+    return updated
+  })
+  MockDb.setProducts(next)
+}
 
 const GUEST_USER_ID = 'guest'
 
@@ -37,13 +61,14 @@ function buildOrder(
 
   const items = sourceItems.map((item, index) => {
     const product = enrichProduct(item.product)
-    const unit = getUnitPrice(product)
+    const variant = getSelectedVariant(product, item.selectedOptions)
+    const unit = getCartUnitPrice(product, item.selectedOptions)
     return {
       id: `oi-${orderId}-${index}`,
       orderId,
       productId: product.id,
-      productName: product.name,
-      productImage: product.images[0] ?? '',
+      productName: getVariantDisplayName(product, variant),
+      productImage: variant?.image ?? product.images[0] ?? '',
       quantity: item.quantity,
       price: getDiscountedUnitPrice(product.categorySlug, unit, pricing),
     }
@@ -95,6 +120,11 @@ export const MockOrdersApi = {
         payload,
         user?.discountPercent,
       )
+      try {
+        applyOrderStock(sourceItems)
+      } catch {
+        throw new MockApiError(400, 'Insufficient stock')
+      }
       MockDb.setOrders(userId, [order, ...MockDb.getOrders(userId)])
       MockDb.setCart(userId, { ...cart, items: [] })
       return order
@@ -105,6 +135,11 @@ export const MockOrdersApi = {
 
     const orderId = `order-${Date.now()}`
     const order = buildOrder(orderId, GUEST_USER_ID, sourceItems, payload)
+    try {
+      applyOrderStock(sourceItems)
+    } catch {
+      throw new MockApiError(400, 'Insufficient stock')
+    }
     MockDb.setOrders(GUEST_USER_ID, [order, ...MockDb.getOrders(GUEST_USER_ID)])
     return order
   },

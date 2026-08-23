@@ -41,6 +41,20 @@ export interface BraceletAttributes {
 
 export type ProductAttributes = MineralAttributes | ThreadAttributes | BraceletAttributes
 
+/** Unique stone / option-linked SKU: own photo, price and stock. */
+export interface ProductVariant {
+  id: string
+  name?: string
+  image: string
+  price?: number
+  discountPrice?: number
+  stock: number
+  /** Buyer option this photo belongs to, e.g. { wristSize: '16 см' } */
+  options?: Record<string, string>
+  /** Piece-specific specs shown when this photo is selected */
+  attributes?: Record<string, string>
+}
+
 export interface Product {
   id: string
   subCategoryId: string
@@ -59,6 +73,7 @@ export interface Product {
   images: string[]
   video?: string
   attributes: ProductAttributes
+  variants?: ProductVariant[]
   featured: boolean
   popular: boolean
   isNew: boolean

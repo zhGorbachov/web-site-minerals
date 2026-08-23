@@ -5,6 +5,10 @@ import { prisma } from '../lib/prisma.js'
 import { requireAdmin } from '../lib/auth.js'
 import { serializeProduct, serializeSubCategory } from '../lib/serialize.js'
 import { buildProductSku, uniqueSku } from '../lib/sku.js'
+import {
+  deriveProductPricingFromVariants,
+  parseVariants,
+} from '../lib/productVariants.js'
 
 export const adminRouter = Router()
 
@@ -33,6 +37,17 @@ function resolveShortDescription(description: string, shortDescription?: string)
   return text.length <= 200 ? text : `${text.slice(0, 197).trimEnd()}…`
 }
 
+const variantSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().optional(),
+  image: z.string().min(1),
+  price: z.number().positive().optional(),
+  discountPrice: z.number().positive().nullable().optional(),
+  stock: z.number().int().min(0),
+  options: z.record(z.string()).optional(),
+  attributes: z.record(z.string()).optional(),
+})
+
 const productBodySchema = z.object({
   name: z.string().trim().min(1),
   slug: z.string().trim().min(1).optional(),
@@ -45,11 +60,23 @@ const productBodySchema = z.object({
   images: z.array(z.string().min(1)).min(1),
   video: z.string().trim().min(1).nullable().optional(),
   attributes: z.record(z.unknown()).optional(),
+  variants: z.array(variantSchema).optional(),
   featured: z.boolean().optional(),
   popular: z.boolean().optional(),
   isNew: z.boolean().optional(),
   subCategoryId: z.string().min(1),
 })
+
+function resolveVariantPricing(
+  data: { price: number; stock: number; variants?: z.infer<typeof variantSchema>[] },
+) {
+  const variants = parseVariants(data.variants)
+  if (!variants.length) {
+    return { price: data.price, stock: data.stock, variants }
+  }
+  const derived = deriveProductPricingFromVariants(variants, data.price)
+  return { price: derived.price, stock: derived.stock, variants }
+}
 
 const stockSchema = z.object({
   stock: z.number().int().min(0),
@@ -112,6 +139,7 @@ adminRouter.post('/products', async (req, res) => {
     skuBase,
     takenSkus.map((item) => item.sku),
   )
+  const pricing = resolveVariantPricing(parsed.data)
 
   const product = await prisma.product.create({
     data: {
@@ -121,12 +149,13 @@ adminRouter.post('/products', async (req, res) => {
       sku,
       shortDescription: resolveShortDescription(parsed.data.description, parsed.data.shortDescription),
       description: parsed.data.description,
-      price: parsed.data.price,
+      price: pricing.price,
       discountPrice: parsed.data.discountPrice ?? null,
-      stock: parsed.data.stock,
+      stock: pricing.stock,
       images: parsed.data.images,
       video: parsed.data.video ?? null,
       attributes: (parsed.data.attributes ?? {}) as Prisma.InputJsonValue,
+      variants: pricing.variants as Prisma.InputJsonValue,
       featured: parsed.data.featured ?? false,
       popular: parsed.data.popular ?? false,
       isNew: parsed.data.isNew ?? true,
@@ -184,6 +213,21 @@ adminRouter.patch('/products/:id', async (req, res) => {
     }
   }
 
+  let nextPrice = parsed.data.price
+  let nextStock = parsed.data.stock
+  let nextVariants: Prisma.InputJsonValue | undefined
+
+  if (parsed.data.variants !== undefined) {
+    const pricing = resolveVariantPricing({
+      price: parsed.data.price ?? Number(existing.price),
+      stock: parsed.data.stock ?? existing.stock,
+      variants: parsed.data.variants,
+    })
+    nextPrice = pricing.price
+    nextStock = pricing.stock
+    nextVariants = pricing.variants as Prisma.InputJsonValue
+  }
+
   const product = await prisma.product.update({
     where: { id: existing.id },
     data: {
@@ -198,13 +242,14 @@ adminRouter.patch('/products/:id', async (req, res) => {
             )
           : undefined,
       description: parsed.data.description,
-      price: parsed.data.price,
+      price: nextPrice,
       discountPrice:
         parsed.data.discountPrice === undefined ? undefined : parsed.data.discountPrice,
-      stock: parsed.data.stock,
+      stock: nextStock,
       images: parsed.data.images,
       video: parsed.data.video === undefined ? undefined : parsed.data.video,
       attributes: parsed.data.attributes as Prisma.InputJsonValue | undefined,
+      variants: nextVariants,
       featured: parsed.data.featured,
       popular: parsed.data.popular,
       isNew: parsed.data.isNew,

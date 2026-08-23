@@ -83,6 +83,24 @@ export function localizeProduct(product: Product, language: Language): Product {
     }
   }
 
+  if (localized.variants?.length) {
+    localized = {
+      ...localized,
+      variants: localized.variants.map((variant) => ({
+        ...variant,
+        name: variant.name ? translateValue(variant.name, language) : variant.name,
+        attributes: variant.attributes
+          ? Object.fromEntries(
+              Object.entries(variant.attributes).map(([key, value]) => [
+                key,
+                translateValue(value, language),
+              ]),
+            )
+          : variant.attributes,
+      })),
+    }
+  }
+
   return { ...localized, attributes: attrs as Product['attributes'] }
 }
 

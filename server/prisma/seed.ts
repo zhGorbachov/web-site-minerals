@@ -62,6 +62,7 @@ async function main() {
         stock: product.stock,
         images: product.images,
         attributes: product.attributes,
+        variants: product.variants ?? [],
         featured: product.featured,
         popular: product.popular,
         isNew: product.isNew,

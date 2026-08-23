@@ -57,6 +57,7 @@ export type UiTranslationSchema = {
     description: string
     related: string
     badgeNew: string
+    fromPrice: string
   }
   cart: {
     emptyTitle: string
@@ -232,6 +233,7 @@ export type UiTranslationSchema = {
     wristSize: string
     availableWristSize: string
     characteristics: string
+    choosePiece: string
     mohsScale: string
     attrSize: string
     attrWeight: string
@@ -442,6 +444,18 @@ export type UiTranslationSchema = {
     uploadError: string
     removeMedia: string
     imagesRequired: string
+    variantsTitle: string
+    variantsHint: string
+    variantBind: string
+    variantName: string
+    variantNameOther: string
+    variantPrice: string
+    variantOption: string
+    variantOptionNone: string
+    variantPiece: string
+    priceFromVariants: string
+    stockFromVariants: string
+    stockFromVariantsValue: string
     subcategory: string
     featured: string
     popular: string
@@ -570,6 +584,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     description: 'Опис',
     related: 'Схожі товари',
     badgeNew: 'Новинка',
+    fromPrice: 'від {price}',
   },
   cart: {
     emptyTitle: 'Кошик порожній',
@@ -748,6 +763,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     wristSize: "Розмір зап'ястя",
     availableWristSize: 'Доступний розмір: {size}',
     characteristics: 'Характеристики',
+    choosePiece: 'Оберіть екземпляр',
     mohsScale: ' (за Моосом)',
     attrSize: 'Розмір',
     attrWeight: 'Вага',
@@ -960,6 +976,19 @@ export const uiTranslationsUk: UiTranslationSchema = {
     uploadError: 'Не вдалося завантажити файл',
     removeMedia: 'Видалити',
     imagesRequired: 'Додайте хоча б одне зображення',
+    variantsTitle: 'Привʼязка фото до екземплярів',
+    variantsHint:
+      'Увімкніть для фото, яке є окремим каменем або відповідає характеристиці. Ціна і залишок тоді свої для цього фото — покупець не зможе взяти більше, ніж є саме цього екземпляра.',
+    variantBind: 'Окремий екземпляр / привʼязка',
+    variantName: 'Назва екземпляра',
+    variantNameOther: 'Назва цього каменя, якщо відрізняється',
+    variantPrice: 'Ціна цього фото',
+    variantOption: 'Привʼязати до характеристики',
+    variantOptionNone: 'Без привʼязки',
+    variantPiece: 'Екземпляр',
+    priceFromVariants: 'На сайті показується від {price} (найменша серед екземплярів)',
+    stockFromVariants: 'Залишок рахується з екземплярів нижче',
+    stockFromVariantsValue: '{count} шт. (сума екземплярів)',
     subcategory: 'Підкатегорія',
     featured: 'Рекомендований',
     popular: 'Популярний',
@@ -1095,6 +1124,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     description: 'Description',
     related: 'Related products',
     badgeNew: 'New',
+    fromPrice: 'from {price}',
   },
   cart: {
     emptyTitle: 'Your cart is empty',
@@ -1273,6 +1303,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     wristSize: 'Wrist size',
     availableWristSize: 'Available size: {size}',
     characteristics: 'Specifications',
+    choosePiece: 'Choose a piece',
     mohsScale: ' (Mohs scale)',
     attrSize: 'Size',
     attrWeight: 'Weight',
@@ -1485,6 +1516,19 @@ export const uiTranslationsEn: UiTranslationSchema = {
     uploadError: 'Could not upload file',
     removeMedia: 'Remove',
     imagesRequired: 'Add at least one image',
+    variantsTitle: 'Link photos to pieces',
+    variantsHint:
+      'Turn this on for a photo that is a unique stone or matches an option. That photo then has its own price and stock — shoppers cannot add more of that exact piece than you have.',
+    variantBind: 'Unique piece / link',
+    variantName: 'Piece name',
+    variantNameOther: 'Name of this stone, if it is different',
+    variantPrice: 'Price for this photo',
+    variantOption: 'Link to an option',
+    variantOptionNone: 'No link',
+    variantPiece: 'Piece',
+    priceFromVariants: 'The catalog shows from {price} (the lowest piece price)',
+    stockFromVariants: 'Stock is the sum of the pieces below',
+    stockFromVariantsValue: '{count} pcs (sum of pieces)',
     subcategory: 'Subcategory',
     featured: 'Featured',
     popular: 'Popular',

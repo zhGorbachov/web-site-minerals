@@ -42,6 +42,26 @@ export {
   getBraceletWristSizes,
 } from './productOptions'
 export {
+  VARIANT_ID_OPTION_KEY,
+  hasProductVariants,
+  getProductVariants,
+  getCatalogPricing,
+  getAvailableStock,
+  getCartUnitPrice,
+  getSelectedVariant,
+  getVariantUnitPrice,
+  getVariantCompareAtPrice,
+  getVariantDisplayName,
+  pickDefaultVariant,
+  findVariantByImage,
+  findBestMatchingVariant,
+  buildVariantSelection,
+  optionsWithoutVariantId,
+  getVariantOptionValues,
+  isOptionValueOutOfStock,
+  type CatalogPricing,
+} from './productVariants'
+export {
   isHalfStrandLabel,
   findWholeStrandLabel,
   mergeHalfStrands,
