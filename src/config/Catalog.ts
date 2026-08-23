@@ -16,3 +16,10 @@ export const HOME_PAGE_CATEGORY_SLUGS = HOME_PAGE_CATEGORIES.map((c) => c.slug)
 
 /** Order of top-level categories in the catalog drawer/menu. */
 export const CATALOG_MENU_ORDER = ['nytky', 'pidvisky', 'brаslety', 'pahoshchi', 'mineraly'] as const
+
+/** Incense is a flat category: products sit on the category, without subcategories. */
+export const CATEGORIES_WITHOUT_SUBCATEGORIES = new Set(['pahoshchi'])
+
+export function categoryHasSubcategories(slug: string) {
+  return !CATEGORIES_WITHOUT_SUBCATEGORIES.has(slug)
+}

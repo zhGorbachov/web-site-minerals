@@ -7,11 +7,13 @@ import { CategoryService } from '@/services/CategoryService'
 import { SubCategoryService } from '@/services/SubCategoryService'
 import { ProductService } from '@/services/ProductService'
 import { SubcategoryNav } from '@/components/SubcategoryNav'
+import { SubcategoryCard } from '@/components/SubcategoryCard'
 import { ProductGrid } from '@/components/ProductGrid'
 import { ProductSort } from '@/components/ProductSort'
 import { Breadcrumbs, EmptyState } from '@/components/ui'
 import { sortProducts, type ProductSortOption } from '@/utils'
 import { parseSelectedSubcategories } from '@/utils/catalogFilters'
+import { categoryHasSubcategories } from '@/config/Catalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CategoryPage.module.scss'
 
@@ -50,26 +52,32 @@ export function CategoryPage() {
   useEffect(() => {
     if (!categorySlug) return
 
+    const needsProducts =
+      !categoryHasSubcategories(categorySlug) ||
+      Boolean(subcategorySlug) ||
+      searchParams.getAll('sub').length > 0
+
     setLoading(true)
     setSortBy('default')
     void Promise.all([
       CategoryService.getBySlug(categorySlug),
       SubCategoryService.getByCategory(categorySlug),
-      ProductService.getByCategory(categorySlug),
+      needsProducts ? ProductService.getByCategory(categorySlug) : Promise.resolve([]),
     ]).then(([cat, subs, prods]) => {
       setCategory(cat)
       setSubcategories(subs)
       setProducts(prods)
       setLoading(false)
     })
-  }, [categorySlug, language])
+  }, [categorySlug, subcategorySlug, searchParams, language])
 
   const selectedSlugs = useMemo(() => {
+    if (!categoryHasSubcategories(categorySlug ?? '')) return []
     const parsed = parseSelectedSubcategories(subcategorySlug, searchParams)
     if (subcategories.length === 0) return parsed
     const allowed = new Set(subcategories.map((sub) => sub.slug))
     return parsed.filter((slug) => allowed.has(slug))
-  }, [subcategorySlug, searchParams, subcategories])
+  }, [categorySlug, subcategorySlug, searchParams, subcategories])
 
   const selectedSubs = useMemo(
     () =>
@@ -126,8 +134,13 @@ export function CategoryPage() {
     ...(selectedSubs.length === 1 ? [{ label: selectedSubs[0].name }] : []),
   ]
 
-  const hasSubNav = subcategories.length > 0
-  const showAbout = !loading && Boolean(category) && selectedSlugs.length === 0
+  const usesSubcategories = categoryHasSubcategories(categorySlug ?? '')
+  const visibleSubcategories = usesSubcategories ? subcategories : []
+  const hasSubNav = visibleSubcategories.length > 0
+  const isCategoryLanding = selectedSlugs.length === 0
+  const showSubcategoryGrid = usesSubcategories && isCategoryLanding && (loading || hasSubNav)
+  const showProducts = !usesSubcategories || selectedSlugs.length > 0
+  const showAbout = !loading && Boolean(category) && isCategoryLanding
 
   return (
     <div className={styles.page}>
@@ -141,7 +154,7 @@ export function CategoryPage() {
           className={styles.header}
         >
           <h1 className={styles.title}>{title}</h1>
-          {!loading && filteredProducts.length > 0 && (
+          {showProducts && !loading && filteredProducts.length > 0 && (
             <div className={styles.headerActions}>
               <p className={styles.count}>
                 {t('category.productCount', { count: filteredProducts.length })}
@@ -151,11 +164,28 @@ export function CategoryPage() {
           )}
         </motion.div>
 
-        <div className={hasSubNav ? styles.layout : undefined}>
-          {hasSubNav && (
+        {showSubcategoryGrid && (
+          <div className={styles.subcategoryGrid}>
+            {loading
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className={styles.subcategorySkeleton} />
+                ))
+              : visibleSubcategories.map((sub) => (
+                  <SubcategoryCard
+                    key={sub.id}
+                    subcategory={sub}
+                    categorySlug={categorySlug ?? ''}
+                  />
+                ))}
+          </div>
+        )}
+
+        {showProducts && (
+        <div className={!isCategoryLanding && hasSubNav ? styles.layout : undefined}>
+          {!isCategoryLanding && hasSubNav && (
             <aside className={styles.sidebar}>
               <SubcategoryNav
-                subcategories={subcategories}
+                subcategories={visibleSubcategories}
                 selectedSlugs={selectedSlugs}
                 categorySlug={categorySlug ?? ''}
               />
@@ -237,6 +267,7 @@ export function CategoryPage() {
             )}
           </div>
         </div>
+        )}
 
         {showAbout && category && (
           <motion.section

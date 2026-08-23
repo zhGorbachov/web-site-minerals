@@ -4,6 +4,7 @@ import type { Category, SubCategory } from '@/types'
 import { CategoryService } from '@/services/CategoryService'
 import { SubCategoryService } from '@/services/SubCategoryService'
 import { CatalogMenu } from '@/components/CatalogMenu'
+import { categoryHasSubcategories } from '@/config/Catalog'
 import { useUIStore } from '@/store'
 import { useScrollLock } from '@/hooks/useScrollLock'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -35,6 +36,7 @@ export function CatalogDrawer() {
     setLoading(true)
     void Promise.all([CategoryService.getAll(), SubCategoryService.getAll()]).then(([cats, subs]) => {
       const grouped = subs.reduce<Record<string, SubCategory[]>>((acc, sub) => {
+        if (!categoryHasSubcategories(sub.categorySlug)) return acc
         if (!acc[sub.categorySlug]) acc[sub.categorySlug] = []
         acc[sub.categorySlug].push(sub)
         return acc
