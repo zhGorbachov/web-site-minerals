@@ -5,6 +5,11 @@ function decimalToNumber(value: Prisma.Decimal | number | null | undefined) {
   return typeof value === 'number' ? value : Number(value)
 }
 
+function discountToNumber(value: Prisma.Decimal | number | null | undefined) {
+  const amount = decimalToNumber(value)
+  return amount != null && amount > 0 ? amount : undefined
+}
+
 export function serializeCategory(category: Category) {
   return {
     id: category.id,
@@ -48,7 +53,7 @@ export function serializeProduct(
     shortDescription: product.shortDescription,
     description: product.description,
     price: decimalToNumber(product.price) ?? 0,
-    discountPrice: decimalToNumber(product.discountPrice),
+    discountPrice: discountToNumber(product.discountPrice),
     stock: product.stock,
     images: product.images,
     video: product.video ?? undefined,

@@ -22,7 +22,9 @@ export const PRODUCT_SORT_OPTIONS: ProductSortOption[] = [
 ]
 
 function getEffectivePrice(product: Product) {
-  return product.discountPrice ?? product.price
+  return product.discountPrice != null && product.discountPrice > 0
+    ? product.discountPrice
+    : product.price
 }
 
 export function sortProducts(

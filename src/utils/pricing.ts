@@ -1,4 +1,4 @@
-import { getCartUnitPrice } from './productVariants'
+import { getCartUnitPrice, normalizeDiscountPrice } from './productVariants'
 
 /** Category slug for «Низки» (strands) — personal discounts do not apply. */
 export const STRANDS_CATEGORY_SLUG = 'nytky'
@@ -18,7 +18,7 @@ export function getUnitPrice(product: {
   price: number
   discountPrice?: number | null
 }): number {
-  return Number(product.discountPrice ?? product.price)
+  return Number(normalizeDiscountPrice(product.discountPrice) ?? product.price)
 }
 
 /** 1000→2%, 2000→3%, … 9000+→10%. Below 1000 → 0%. */
@@ -133,10 +133,7 @@ export function toPricingItems(
 ): CartPricingInputItem[] {
   return items.map((item) => ({
     categorySlug: item.product.categorySlug,
-    unitPrice: getCartUnitPrice(
-      item.product as { price: number; discountPrice?: number | null; variants?: unknown },
-      item.selectedOptions,
-    ),
+    unitPrice: getCartUnitPrice(item.product, item.selectedOptions),
     quantity: item.quantity,
   }))
 }

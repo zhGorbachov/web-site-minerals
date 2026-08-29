@@ -58,19 +58,25 @@ export function parseVariants(raw: unknown): ProductVariant[] {
   return variants
 }
 
+function toNumber(value: { toNumber?: () => number } | number | null | undefined): number | undefined {
+  if (value == null) return undefined
+  const amount = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(amount) ? amount : undefined
+}
+
+function normalizeDiscountPrice(value: { toNumber?: () => number } | number | null | undefined): number | undefined {
+  const amount = toNumber(value)
+  return amount != null && amount > 0 ? amount : undefined
+}
+
 export function getVariantUnitPrice(
   product: { price: { toNumber?: () => number } | number; discountPrice?: { toNumber?: () => number } | number | null },
   variant?: ProductVariant | null,
 ): number {
-  const productSale =
-    product.discountPrice == null
-      ? undefined
-      : typeof product.discountPrice === 'number'
-        ? product.discountPrice
-        : Number(product.discountPrice)
-  const productPrice = typeof product.price === 'number' ? product.price : Number(product.price)
+  const productSale = normalizeDiscountPrice(product.discountPrice)
+  const productPrice = toNumber(product.price) ?? 0
   if (!variant) return Number(productSale ?? productPrice)
-  return Number(variant.discountPrice ?? variant.price ?? productSale ?? productPrice)
+  return Number(normalizeDiscountPrice(variant.discountPrice) ?? variant.price ?? productSale ?? productPrice)
 }
 
 export function getSelectedVariant(

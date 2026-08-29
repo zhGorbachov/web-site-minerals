@@ -29,6 +29,11 @@ function slugify(value: string) {
     .slice(0, 80)
 }
 
+function toDiscountPrice(value: number | null | undefined): number | null {
+  if (value == null || !Number.isFinite(value) || value <= 0) return null
+  return value
+}
+
 function resolveShortDescription(description: string, shortDescription?: string) {
   const trimmed = shortDescription?.trim()
   if (trimmed) return trimmed
@@ -42,7 +47,7 @@ const variantSchema = z.object({
   name: z.string().trim().optional(),
   image: z.string().min(1),
   price: z.number().positive().optional(),
-  discountPrice: z.number().positive().nullable().optional(),
+  discountPrice: z.number().min(0).nullable().optional(),
   stock: z.number().int().min(0),
   options: z.record(z.string()).optional(),
   attributes: z.record(z.string()).optional(),
@@ -55,7 +60,7 @@ const productBodySchema = z.object({
   shortDescription: z.string().trim().optional(),
   description: z.string().trim().min(1),
   price: z.number().positive(),
-  discountPrice: z.number().positive().nullable().optional(),
+  discountPrice: z.number().min(0).nullable().optional(),
   stock: z.number().int().min(0),
   images: z.array(z.string().min(1)).min(1),
   video: z.string().trim().min(1).nullable().optional(),
@@ -150,7 +155,7 @@ adminRouter.post('/products', async (req, res) => {
       shortDescription: resolveShortDescription(parsed.data.description, parsed.data.shortDescription),
       description: parsed.data.description,
       price: pricing.price,
-      discountPrice: parsed.data.discountPrice ?? null,
+      discountPrice: toDiscountPrice(parsed.data.discountPrice),
       stock: pricing.stock,
       images: parsed.data.images,
       video: parsed.data.video ?? null,
@@ -244,7 +249,9 @@ adminRouter.patch('/products/:id', async (req, res) => {
       description: parsed.data.description,
       price: nextPrice,
       discountPrice:
-        parsed.data.discountPrice === undefined ? undefined : parsed.data.discountPrice,
+        parsed.data.discountPrice === undefined
+          ? undefined
+          : toDiscountPrice(parsed.data.discountPrice),
       stock: nextStock,
       images: parsed.data.images,
       video: parsed.data.video === undefined ? undefined : parsed.data.video,

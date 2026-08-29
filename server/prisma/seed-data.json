@@ -628,7 +628,11 @@
       ],
       "attributes": {
         "color": "Чорний",
-        "length": "100 м",
+        "beadSizes": [
+          "4",
+          "6",
+          "8"
+        ],
         "diameter": "1 мм",
         "material": "Вощений поліестер"
       },
@@ -655,7 +659,11 @@
       ],
       "attributes": {
         "color": "Бежевий",
-        "length": "100 м",
+        "beadSizes": [
+          "2",
+          "3",
+          "4"
+        ],
         "diameter": "0.8 мм",
         "material": "Вощений поліестер"
       },
@@ -682,7 +690,6 @@
       ],
       "attributes": {
         "color": "Прозорий",
-        "length": "50 м",
         "diameter": "0.8 мм",
         "material": "Кристальний еластик"
       },
@@ -709,11 +716,21 @@
       ],
       "attributes": {
         "color": "Чорний",
-        "length": "50 м",
-        "lengths": [
-          "10 м",
-          "25 м",
-          "50 м"
+        "beadSizes": [
+          "6",
+          "8",
+          "10",
+          "12"
+        ],
+        "strandLengths": [
+          {
+            "label": "Низка 39 см",
+            "value": "39 см"
+          },
+          {
+            "label": "Пів низки 19.5 см",
+            "value": "19.5 см"
+          }
         ],
         "diameter": "1 мм",
         "material": "Кристальний еластик"
@@ -741,7 +758,6 @@
       ],
       "attributes": {
         "color": "Натуральний",
-        "length": "100 м",
         "diameter": "1.5 мм",
         "material": "Бавовна"
       },
@@ -780,6 +796,10 @@
           "20 см",
           "21 см"
         ],
+        "beadSizes": [
+          "6",
+          "8"
+        ],
         "threadColor": "Прозорий",
         "stones": [
           "Рожевий кварц",
@@ -811,6 +831,9 @@
       ],
       "attributes": {
         "wristSize": "15–20 см",
+        "beadSizes": [
+          "8"
+        ],
         "threadColor": "Срібний",
         "stones": [
           "Аметист"
@@ -878,6 +901,9 @@
           "18 см",
           "20 см"
         ],
+        "beadSizes": [
+          "10"
+        ],
         "threadColor": "Чорний",
         "stones": [
           "Лабрадорит"
@@ -891,6 +917,7 @@
           "price": 320,
           "stock": 3,
           "options": {
+            "beadSize": "10",
             "wristSize": "16 см"
           }
         },
@@ -900,6 +927,7 @@
           "price": 340,
           "stock": 2,
           "options": {
+            "beadSize": "10",
             "wristSize": "18 см"
           }
         },
@@ -909,6 +937,7 @@
           "price": 360,
           "stock": 2,
           "options": {
+            "beadSize": "10",
             "wristSize": "20 см"
           }
         }
@@ -1146,7 +1175,11 @@
       ],
       "attributes": {
         "color": "Рожевий",
-        "length": "50 м",
+        "beadSizes": [
+          "2",
+          "3",
+          "4"
+        ],
         "diameter": "0.5 мм",
         "material": "Натуральний шовк"
       },
@@ -1172,8 +1205,13 @@
         "/media/Jasper.jpg"
       ],
       "attributes": {
+        "saleMode": "weight",
+        "packWeights": [
+          "1 кг",
+          "100 г",
+          "50 г"
+        ],
         "scent": "Сандал",
-        "quantity": "20 шт",
         "burnTime": "до 40 хв",
         "material": "Натуральне дерево"
       },
@@ -1199,8 +1237,12 @@
         "/media/Amethyst.jpg"
       ],
       "attributes": {
+        "saleMode": "weight",
+        "packWeights": [
+          "100 г",
+          "50 г"
+        ],
         "scent": "Лаванда",
-        "quantity": "15 шт",
         "burnTime": "до 35 хв",
         "material": "Натуральні компоненти"
       },
@@ -1226,8 +1268,13 @@
         "/media/Jasper.jpg"
       ],
       "attributes": {
+        "saleMode": "weight",
+        "packWeights": [
+          "1 кг",
+          "100 г",
+          "50 г"
+        ],
         "scent": "Сандал",
-        "quantity": "12 шт",
         "burnTime": "до 20 хв",
         "material": "Натуральні компоненти"
       },
@@ -1254,8 +1301,15 @@
         "/media/Amethyst.jpg"
       ],
       "attributes": {
+        "saleMode": "piece",
+        "pieceWeights": [
+          "5-6 г",
+          "7-8 г",
+          "9-10 г",
+          "11-12 г",
+          "13-14 г"
+        ],
         "scent": "Пало санто",
-        "quantity": "10 шт",
         "burnTime": "до 25 хв",
         "material": "Натуральне дерево"
       },

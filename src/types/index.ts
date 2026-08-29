@@ -7,6 +7,8 @@ export type {
   MineralAttributes,
   ThreadAttributes,
   BraceletAttributes,
+  IncenseAttributes,
+  IncenseSaleMode,
   StrandLengthOption,
 } from './product'
 export type { CartItem, Cart } from './cart'

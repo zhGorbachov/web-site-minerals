@@ -1,7 +1,4 @@
-type StrandLengthOption = {
-  label: string
-  value: string
-}
+import { DEFAULT_STRAND_LENGTHS, STRANDS_CATEGORY_SLUG, type StrandLengthOption } from './catalogDefaults.js'
 
 export type StrandMergeCartItem = {
   id: string
@@ -60,30 +57,16 @@ export function findWholeStrandLabel(
 }
 
 function getStrandLengths(product: StrandMergeCartItem['product']): StrandLengthOption[] {
-  if (product.categorySlug !== 'mineraly') return []
-  const attrs = product.attributes as {
-    strandLengths?: StrandLengthOption[]
-    beadSizes?: string[]
-    beadCounts?: string[]
-    shape?: string
-  } | null
-  if (!attrs) return []
+  if (product.categorySlug !== STRANDS_CATEGORY_SLUG) return []
+  const attrs = product.attributes as { strandLengths?: StrandLengthOption[] } | null
 
-  if (Array.isArray(attrs.strandLengths) && attrs.strandLengths.length) {
-    return attrs.strandLengths.filter(
-      (entry) => entry && typeof entry.label === 'string' && typeof entry.value === 'string',
-    )
-  }
+  const custom = Array.isArray(attrs?.strandLengths)
+    ? attrs.strandLengths.filter(
+        (entry) => entry && typeof entry.label === 'string' && typeof entry.value === 'string',
+      )
+    : []
 
-  const isStrand = Boolean(
-    attrs.beadSizes?.length || attrs.beadCounts?.length || attrs.shape === 'Низка',
-  )
-  if (!isStrand) return []
-
-  return [
-    { label: 'Низка 39 см', value: '39 см' },
-    { label: 'Пів низки 19.5 см', value: '19.5 см' },
-  ]
+  return custom.length ? custom : DEFAULT_STRAND_LENGTHS
 }
 
 function restOptionsKey(options?: Record<string, string> | null): string {

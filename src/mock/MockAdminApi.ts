@@ -13,6 +13,7 @@ import { enrichProduct, MockDb, slugify } from './MockDb'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
+  normalizeDiscountPrice,
   parseVariants,
 } from '@/utils/productVariants'
 
@@ -78,7 +79,7 @@ export const MockAdminApi = {
         payload.shortDescription?.trim() || payload.description || '—',
       description: payload.description,
       price: derived.price,
-      discountPrice: payload.discountPrice ?? undefined,
+      discountPrice: normalizeDiscountPrice(payload.discountPrice),
       stock: derived.stock,
       images: payload.images,
       video: payload.video ?? undefined,
@@ -150,7 +151,9 @@ export const MockAdminApi = {
       discountPrice:
         payload.discountPrice === null
           ? undefined
-          : (payload.discountPrice ?? current.discountPrice),
+          : payload.discountPrice === undefined
+            ? current.discountPrice
+            : normalizeDiscountPrice(payload.discountPrice),
       stock: derived?.stock ?? payload.stock ?? current.stock,
       images: payload.images ?? current.images,
       video:

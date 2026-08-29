@@ -1,15 +1,16 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { Plus, X } from 'lucide-react'
-import type { StrandLengthOption } from '@/types'
+import type { IncenseSaleMode, StrandLengthOption } from '@/types'
 import { useTranslation } from '@/i18n/useTranslation'
 import {
+  DEFAULT_BEAD_SIZES,
+  DEFAULT_PACK_WEIGHTS,
+  DEFAULT_PIECE_WEIGHTS,
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_WRIST_SIZES,
 } from '@/utils/productOptions'
 import styles from './ProductAttributesEditor.module.scss'
 
-const BEAD_SIZE_PRESETS = ['2', '3', '4', '6', '8', '10', '12', '14']
-const THREAD_LENGTH_PRESETS = ['1 м', '5 м', '10 м', '25 м', '50 м', '100 м']
 const STRAND_LENGTH_PRESETS: StrandLengthOption[] = [...DEFAULT_STRAND_LENGTHS]
 
 type AttrMap = Record<string, unknown>
@@ -254,18 +255,57 @@ function patchAttr(attrs: AttrMap, key: string, value: unknown): AttrMap {
   return next
 }
 
-function SectionHeader({
+/**
+ * Parameters drive the buyer's choice and the price, so they are filled in
+ * separately from the free-form specs shown in the product description.
+ */
+function AttributesSection({
   title,
   subtitle,
+  kind,
+  children,
 }: {
   title: string
   subtitle: string
+  kind: 'parameters' | 'characteristics'
+  children: ReactNode
 }) {
+  const { t } = useTranslation()
+  const required = kind === 'parameters'
+
   return (
-    <>
-      <h3 className={styles.title}>{title}</h3>
-      <p className={styles.subtitle}>{subtitle}</p>
-    </>
+    <section
+      className={[styles.section, required ? styles.sectionParameters : ''].filter(Boolean).join(' ')}
+      aria-label={title}
+    >
+      <header className={styles.sectionHeader}>
+        <div className={styles.sectionHead}>
+          <h3 className={styles.title}>{title}</h3>
+          <span
+            className={[styles.badge, required ? styles.badgeRequired : styles.badgeOptional].join(' ')}
+          >
+            {required ? t('admin.badgeRequired') : t('admin.badgeOptional')}
+          </span>
+        </div>
+        <p className={styles.subtitle}>{subtitle}</p>
+      </header>
+      {children}
+    </section>
+  )
+}
+
+function CharacteristicsSection({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
+  const { t } = useTranslation()
+  return (
+    <AttributesSection title={title} subtitle={t('admin.characteristicsHint')} kind="characteristics">
+      {children}
+    </AttributesSection>
   )
 }
 
@@ -278,68 +318,118 @@ export function ProductAttributesEditor({
 
   if (!categorySlug) return null
 
-  // Мінерали: здебільшого лише характеристики. Вибір покупця — лише якщо потрібно (намистини / низка).
+  // Мінерали: лише характеристики, покупець нічого не обирає.
   if (categorySlug === 'mineraly') {
     return (
-      <section className={styles.section} aria-label={t('admin.attributesMineralTitle')}>
-        <SectionHeader
-          title={t('admin.attributesMineralTitle')}
-          subtitle={t('admin.attributesMineralHint')}
-        />
+      <div className={styles.wrap}>
+        <CharacteristicsSection title={t('admin.attributesGenericTitle')}>
+          <div className={styles.textGrid}>
+            <TextField
+              label={t('admin.attrSize')}
+              value={String(attributes.size ?? '')}
+              onChange={(size) => onChange(patchAttr(attributes, 'size', size))}
+              placeholder="10 мм"
+            />
+            <TextField
+              label={t('admin.attrWeight')}
+              value={String(attributes.weight ?? '')}
+              onChange={(weight) => onChange(patchAttr(attributes, 'weight', weight))}
+              placeholder="1.5 г"
+            />
+            <TextField
+              label={t('admin.attrColor')}
+              value={String(attributes.color ?? '')}
+              onChange={(color) => onChange(patchAttr(attributes, 'color', color))}
+            />
+            <TextField
+              label={t('admin.attrOrigin')}
+              value={String(attributes.origin ?? '')}
+              onChange={(origin) => onChange(patchAttr(attributes, 'origin', origin))}
+            />
+            <TextField
+              label={t('admin.attrHardness')}
+              value={String(attributes.hardness ?? '')}
+              onChange={(hardness) => onChange(patchAttr(attributes, 'hardness', hardness))}
+            />
+            <TextField
+              label={t('admin.attrShape')}
+              value={String(attributes.shape ?? '')}
+              onChange={(shape) => onChange(patchAttr(attributes, 'shape', shape))}
+            />
+          </div>
+        </CharacteristicsSection>
+      </div>
+    )
+  }
 
-        <div className={styles.textGrid}>
-          <TextField
-            label={t('admin.attrSize')}
-            value={String(attributes.size ?? '')}
-            onChange={(size) => onChange(patchAttr(attributes, 'size', size))}
-            placeholder="10 мм"
-          />
-          <TextField
-            label={t('admin.attrWeight')}
-            value={String(attributes.weight ?? '')}
-            onChange={(weight) => onChange(patchAttr(attributes, 'weight', weight))}
-            placeholder="1.5 г"
-          />
-          <TextField
-            label={t('admin.attrColor')}
-            value={String(attributes.color ?? '')}
-            onChange={(color) => onChange(patchAttr(attributes, 'color', color))}
-          />
-          <TextField
-            label={t('admin.attrOrigin')}
-            value={String(attributes.origin ?? '')}
-            onChange={(origin) => onChange(patchAttr(attributes, 'origin', origin))}
-          />
-          <TextField
-            label={t('admin.attrHardness')}
-            value={String(attributes.hardness ?? '')}
-            onChange={(hardness) => onChange(patchAttr(attributes, 'hardness', hardness))}
-          />
-          <TextField
-            label={t('admin.attrShape')}
-            value={String(attributes.shape ?? '')}
-            onChange={(shape) => onChange(patchAttr(attributes, 'shape', shape))}
-          />
-        </div>
-
-        <div className={styles.optionalBlock}>
-          <h4 className={styles.optionalTitle}>{t('admin.attributesBuyerOptionsTitle')}</h4>
-          <p className={styles.hint}>{t('admin.attributesBuyerOptionsMineralHint')}</p>
+  // Низки (nytky): ціна залежить від розміру намистини та довжини низки.
+  if (categorySlug === 'nytky') {
+    return (
+      <div className={styles.wrap}>
+        <AttributesSection
+          title={t('admin.attributesThreadTitle')}
+          subtitle={t('admin.attributesThreadHint')}
+          kind="parameters"
+        >
           <ChipMultiSelect
             label={t('admin.attrBeadSizes')}
             hint={t('admin.attrBeadSizesHint')}
             values={asStringArray(attributes.beadSizes)}
-            presets={BEAD_SIZE_PRESETS}
-            onChange={(beadSizes) => {
-              let next = patchAttr(attributes, 'beadSizes', beadSizes)
-              if (
-                beadSizes.length > 0 &&
-                asStrandLengths(next.strandLengths).length === 0
-              ) {
-                next = patchAttr(next, 'strandLengths', DEFAULT_STRAND_LENGTHS)
-              }
-              onChange(next)
-            }}
+            presets={DEFAULT_BEAD_SIZES}
+            onChange={(beadSizes) => onChange(patchAttr(attributes, 'beadSizes', beadSizes))}
+            addPlaceholder={t('admin.attrAddCustom')}
+          />
+          <StrandLengthsEditor
+            values={
+              asStrandLengths(attributes.strandLengths).length
+                ? asStrandLengths(attributes.strandLengths)
+                : DEFAULT_STRAND_LENGTHS
+            }
+            onChange={(strandLengths) =>
+              onChange(patchAttr(attributes, 'strandLengths', strandLengths))
+            }
+          />
+        </AttributesSection>
+
+        <CharacteristicsSection title={t('admin.attributesGenericTitle')}>
+          <div className={styles.textGrid}>
+            <TextField
+              label={t('admin.attrDiameter')}
+              value={String(attributes.diameter ?? '')}
+              onChange={(diameter) => onChange(patchAttr(attributes, 'diameter', diameter))}
+              placeholder="0.8 мм"
+            />
+            <TextField
+              label={t('admin.attrMaterial')}
+              value={String(attributes.material ?? '')}
+              onChange={(material) => onChange(patchAttr(attributes, 'material', material))}
+            />
+            <TextField
+              label={t('admin.attrColor')}
+              value={String(attributes.color ?? '')}
+              onChange={(color) => onChange(patchAttr(attributes, 'color', color))}
+            />
+          </div>
+        </CharacteristicsSection>
+      </div>
+    )
+  }
+
+  // Браслети: ціна залежить від розміру намистини та розміру зап'ястя.
+  if (categorySlug === 'brаslety') {
+    return (
+      <div className={styles.wrap}>
+        <AttributesSection
+          title={t('admin.attributesBraceletTitle')}
+          subtitle={t('admin.attributesBraceletHint')}
+          kind="parameters"
+        >
+          <ChipMultiSelect
+            label={t('admin.attrBeadSizes')}
+            hint={t('admin.attrBeadSizesHint')}
+            values={asStringArray(attributes.beadSizes)}
+            presets={DEFAULT_BEAD_SIZES}
+            onChange={(beadSizes) => onChange(patchAttr(attributes, 'beadSizes', beadSizes))}
             addPlaceholder={t('admin.attrAddCustom')}
           />
           <ChipMultiSelect
@@ -347,55 +437,133 @@ export function ProductAttributesEditor({
             hint={t('admin.attrWristSizesHint')}
             values={asStringArray(attributes.wristSizes)}
             presets={DEFAULT_WRIST_SIZES}
-            onChange={(wristSizes) => {
-              const next = patchAttr(attributes, 'wristSizes', wristSizes)
-              onChange(patchAttr(next, 'beadCounts', []))
-            }}
+            onChange={(wristSizes) => onChange(patchAttr(attributes, 'wristSizes', wristSizes))}
             addPlaceholder={t('admin.attrAddCustom')}
             normalize={normalizeWristSize}
           />
-          <StrandLengthsEditor
-            values={
-              asStrandLengths(attributes.strandLengths).length
-                ? asStrandLengths(attributes.strandLengths)
-                : asStringArray(attributes.beadSizes).length ||
-                    asStringArray(attributes.beadCounts).length ||
-                    String(attributes.shape ?? '') === 'Низка'
-                  ? DEFAULT_STRAND_LENGTHS
-                  : []
-            }
-            onChange={(strandLengths) =>
-              onChange(patchAttr(attributes, 'strandLengths', strandLengths))
-            }
-          />
-        </div>
-      </section>
+        </AttributesSection>
+
+        <CharacteristicsSection title={t('admin.attributesGenericTitle')}>
+          <div className={styles.textGrid}>
+            <TextField
+              label={t('admin.attrWristRange')}
+              value={String(attributes.wristSize ?? '')}
+              onChange={(wristSize) => onChange(patchAttr(attributes, 'wristSize', wristSize))}
+              placeholder="14–22 см"
+            />
+            <TextField
+              label={t('admin.attrThreadColor')}
+              value={String(attributes.threadColor ?? '')}
+              onChange={(threadColor) => onChange(patchAttr(attributes, 'threadColor', threadColor))}
+            />
+            <TextField
+              label={t('admin.attrMaterial')}
+              value={String(attributes.material ?? '')}
+              onChange={(material) => onChange(patchAttr(attributes, 'material', material))}
+            />
+            <TextField
+              label={t('admin.attrStones')}
+              value={asStringArray(attributes.stones).join(', ')}
+              onChange={(raw) => {
+                const stones = raw
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+                onChange(patchAttr(attributes, 'stones', stones))
+              }}
+              placeholder="Аметист, Кварц"
+            />
+          </div>
+        </CharacteristicsSection>
+      </div>
     )
   }
 
-  // Низки (nytky): свої параметри — довжина тощо.
-  if (categorySlug === 'nytky') {
+  // Пахощі: продаж на вагу або поштучно.
+  if (categorySlug === 'pahoshchi') {
+    const saleMode: IncenseSaleMode = attributes.saleMode === 'piece' ? 'piece' : 'weight'
     return (
-      <section className={styles.section} aria-label={t('admin.attributesThreadTitle')}>
-        <SectionHeader
-          title={t('admin.attributesThreadTitle')}
-          subtitle={t('admin.attributesThreadHint')}
-        />
-        <ChipMultiSelect
-          label={t('admin.attrThreadLengths')}
-          hint={t('admin.attrThreadLengthsHint')}
-          values={asStringArray(attributes.lengths)}
-          presets={THREAD_LENGTH_PRESETS}
-          onChange={(lengths) => onChange(patchAttr(attributes, 'lengths', lengths))}
-          addPlaceholder={t('admin.attrAddCustom')}
-        />
+      <div className={styles.wrap}>
+        <AttributesSection
+          title={t('admin.attributesIncenseTitle')}
+          subtitle={t('admin.attributesIncenseHint')}
+          kind="parameters"
+        >
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>{t('admin.attrSaleMode')}</span>
+            <p className={styles.hint}>{t('admin.attrSaleModeHint')}</p>
+            <div className={styles.chips}>
+              {(['weight', 'piece'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className={[styles.chip, saleMode === mode ? styles.chipActive : '']
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => onChange(patchAttr(attributes, 'saleMode', mode))}
+                  aria-pressed={saleMode === mode}
+                >
+                  {mode === 'piece'
+                    ? t('productOptions.saleModePiece')
+                    : t('productOptions.saleModeWeight')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {saleMode === 'weight' ? (
+            <ChipMultiSelect
+              label={t('admin.attrPackWeights')}
+              hint={t('admin.attrPackWeightsHint')}
+              values={asStringArray(attributes.packWeights)}
+              presets={DEFAULT_PACK_WEIGHTS}
+              onChange={(packWeights) => onChange(patchAttr(attributes, 'packWeights', packWeights))}
+              addPlaceholder={t('admin.attrAddCustom')}
+            />
+          ) : (
+            <ChipMultiSelect
+              label={t('admin.attrPieceWeights')}
+              hint={t('admin.attrPieceWeightsHint')}
+              values={asStringArray(attributes.pieceWeights)}
+              presets={DEFAULT_PIECE_WEIGHTS}
+              onChange={(pieceWeights) =>
+                onChange(patchAttr(attributes, 'pieceWeights', pieceWeights))
+              }
+              addPlaceholder={t('admin.attrAddCustom')}
+            />
+          )}
+        </AttributesSection>
+
+        <CharacteristicsSection title={t('admin.attributesGenericTitle')}>
+          <div className={styles.textGrid}>
+            <TextField
+              label={t('admin.attrScent')}
+              value={String(attributes.scent ?? '')}
+              onChange={(scent) => onChange(patchAttr(attributes, 'scent', scent))}
+              placeholder="Пало санто"
+            />
+            <TextField
+              label={t('admin.attrBurnTime')}
+              value={String(attributes.burnTime ?? '')}
+              onChange={(burnTime) => onChange(patchAttr(attributes, 'burnTime', burnTime))}
+              placeholder="до 25 хв"
+            />
+            <TextField
+              label={t('admin.attrMaterial')}
+              value={String(attributes.material ?? '')}
+              onChange={(material) => onChange(patchAttr(attributes, 'material', material))}
+            />
+          </div>
+        </CharacteristicsSection>
+      </div>
+    )
+  }
+
+  // Підвіски тощо — лише характеристики, без вибору покупця.
+  return (
+    <div className={styles.wrap}>
+      <CharacteristicsSection title={t('admin.attributesGenericTitle')}>
         <div className={styles.textGrid}>
-          <TextField
-            label={t('admin.attrDiameter')}
-            value={String(attributes.diameter ?? '')}
-            onChange={(diameter) => onChange(patchAttr(attributes, 'diameter', diameter))}
-            placeholder="0.8 мм"
-          />
           <TextField
             label={t('admin.attrMaterial')}
             value={String(attributes.material ?? '')}
@@ -407,91 +575,12 @@ export function ProductAttributesEditor({
             onChange={(color) => onChange(patchAttr(attributes, 'color', color))}
           />
           <TextField
-            label={t('admin.attrDefaultLength')}
-            value={String(attributes.length ?? '')}
-            onChange={(length) => onChange(patchAttr(attributes, 'length', length))}
-            placeholder="50 м"
+            label={t('admin.attrSize')}
+            value={String(attributes.size ?? '')}
+            onChange={(size) => onChange(patchAttr(attributes, 'size', size))}
           />
         </div>
-      </section>
-    )
-  }
-
-  // Браслети: свої параметри — розмір зап'ястка тощо.
-  if (categorySlug === 'brаslety') {
-    return (
-      <section className={styles.section} aria-label={t('admin.attributesBraceletTitle')}>
-        <SectionHeader
-          title={t('admin.attributesBraceletTitle')}
-          subtitle={t('admin.attributesBraceletHint')}
-        />
-        <ChipMultiSelect
-          label={t('admin.attrWristSizes')}
-          hint={t('admin.attrWristSizesHint')}
-          values={asStringArray(attributes.wristSizes)}
-          presets={DEFAULT_WRIST_SIZES}
-          onChange={(wristSizes) => onChange(patchAttr(attributes, 'wristSizes', wristSizes))}
-          addPlaceholder={t('admin.attrAddCustom')}
-          normalize={normalizeWristSize}
-        />
-        <div className={styles.textGrid}>
-          <TextField
-            label={t('admin.attrWristRange')}
-            value={String(attributes.wristSize ?? '')}
-            onChange={(wristSize) => onChange(patchAttr(attributes, 'wristSize', wristSize))}
-            placeholder="14–22 см"
-          />
-          <TextField
-            label={t('admin.attrThreadColor')}
-            value={String(attributes.threadColor ?? '')}
-            onChange={(threadColor) => onChange(patchAttr(attributes, 'threadColor', threadColor))}
-          />
-          <TextField
-            label={t('admin.attrMaterial')}
-            value={String(attributes.material ?? '')}
-            onChange={(material) => onChange(patchAttr(attributes, 'material', material))}
-          />
-          <TextField
-            label={t('admin.attrStones')}
-            value={asStringArray(attributes.stones).join(', ')}
-            onChange={(raw) => {
-              const stones = raw
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean)
-              onChange(patchAttr(attributes, 'stones', stones))
-            }}
-            placeholder="Аметист, Кварц"
-          />
-        </div>
-      </section>
-    )
-  }
-
-  // Підвіски / пахощі тощо — лише характеристики, без вибірки.
-  return (
-    <section className={styles.section} aria-label={t('admin.attributesGenericTitle')}>
-      <SectionHeader
-        title={t('admin.attributesGenericTitle')}
-        subtitle={t('admin.attributesGenericHint')}
-      />
-      <div className={styles.textGrid}>
-        <TextField
-          label={t('admin.attrMaterial')}
-          value={String(attributes.material ?? '')}
-          onChange={(material) => onChange(patchAttr(attributes, 'material', material))}
-        />
-        <TextField
-          label={t('admin.attrColor')}
-          value={String(attributes.color ?? '')}
-          onChange={(color) => onChange(patchAttr(attributes, 'color', color))}
-        />
-        <TextField
-          label={t('admin.attrSize')}
-          value={String(attributes.size ?? '')}
-          onChange={(size) => onChange(patchAttr(attributes, 'size', size))}
-        />
-      </div>
-    </section>
+      </CharacteristicsSection>
+    </div>
   )
 }

@@ -35,11 +35,21 @@ export {
 export { getDiscountLabel } from './discountLabel'
 export {
   DEFAULT_WRIST_SIZES,
+  DEFAULT_BEAD_SIZES,
   DEFAULT_STRAND_LENGTHS,
+  DEFAULT_PACK_WEIGHTS,
+  DEFAULT_PIECE_WEIGHTS,
+  DEFAULT_INCENSE_SALE_MODE,
   isMineralStrandAttributes,
   getMineralStrandLengths,
+  getThreadBeadSizes,
+  getThreadStrandLengths,
   productRequiresOptions,
   getBraceletWristSizes,
+  getBraceletBeadSizes,
+  getIncenseSaleMode,
+  getIncenseOptionKey,
+  getIncenseWeights,
 } from './productOptions'
 export {
   VARIANT_ID_OPTION_KEY,
@@ -47,6 +57,7 @@ export {
   getProductVariants,
   getProductGalleryImages,
   getCatalogPricing,
+  normalizeDiscountPrice,
   getAvailableStock,
   getCartUnitPrice,
   getSelectedVariant,

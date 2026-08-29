@@ -232,6 +232,13 @@ export type UiTranslationSchema = {
     color: string
     wristSize: string
     availableWristSize: string
+    packWeight: string
+    pieceWeight: string
+    saleMode: string
+    saleModeWeight: string
+    saleModePiece: string
+    saleModeWeightHint: string
+    saleModePieceHint: string
     characteristics: string
     choosePiece: string
     overview: string
@@ -247,6 +254,8 @@ export type UiTranslationSchema = {
     attrMaterial: string
     attrStones: string
     attrThreadColor: string
+    attrScent: string
+    attrBurnTime: string
     beadSizeMm: string
     colors: {
       black: string
@@ -485,16 +494,16 @@ export type UiTranslationSchema = {
     removeSubConfirmWithProducts: string
     errorGeneric: string
     attributesTitle: string
-    attributesMineralTitle: string
     attributesThreadTitle: string
     attributesBraceletTitle: string
+    attributesIncenseTitle: string
     attributesGenericTitle: string
-    attributesMineralHint: string
     attributesThreadHint: string
     attributesBraceletHint: string
-    attributesGenericHint: string
-    attributesBuyerOptionsTitle: string
-    attributesBuyerOptionsMineralHint: string
+    attributesIncenseHint: string
+    characteristicsHint: string
+    badgeRequired: string
+    badgeOptional: string
     attrBeadSizes: string
     attrBeadSizesHint: string
     attrBeadCounts: string
@@ -503,12 +512,17 @@ export type UiTranslationSchema = {
     attrStrandLengthsHint: string
     attrStrandLabel: string
     attrStrandValue: string
-    attrThreadLengths: string
-    attrThreadLengthsHint: string
     attrWristSizes: string
     attrWristSizesHint: string
     attrWristRange: string
-    attrDefaultLength: string
+    attrSaleMode: string
+    attrSaleModeHint: string
+    attrPackWeights: string
+    attrPackWeightsHint: string
+    attrPieceWeights: string
+    attrPieceWeightsHint: string
+    attrScent: string
+    attrBurnTime: string
     attrAddCustom: string
     attrColor: string
     attrOrigin: string
@@ -766,6 +780,13 @@ export const uiTranslationsUk: UiTranslationSchema = {
     color: 'Колір',
     wristSize: "Розмір зап'ястя",
     availableWristSize: 'Доступний розмір: {size}',
+    packWeight: 'Вага',
+    pieceWeight: 'Вага штуки',
+    saleMode: 'Формат продажу',
+    saleModeWeight: 'На вагу',
+    saleModePiece: 'Поштучно',
+    saleModeWeightHint: 'Цей товар продається на вагу',
+    saleModePieceHint: 'Цей товар продається поштучно — оберіть вагу однієї штуки',
     characteristics: 'Характеристики',
     choosePiece: 'Оберіть екземпляр',
     overview: 'Загальний вигляд',
@@ -781,6 +802,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     attrMaterial: 'Матеріал',
     attrStones: 'Каміння',
     attrThreadColor: 'Колір низки',
+    attrScent: 'Аромат',
+    attrBurnTime: 'Час горіння',
     beadSizeMm: '{value} мм',
     colors: {
       black: 'Чорний',
@@ -1024,20 +1047,20 @@ export const uiTranslationsUk: UiTranslationSchema = {
       'У підкатегорії є товари. Видалити підкатегорію разом з усіма її товарами?',
     errorGeneric: 'Щось пішло не так',
     attributesTitle: 'Параметри товару',
-    attributesMineralTitle: 'Параметри мінералу',
     attributesThreadTitle: 'Параметри низки',
     attributesBraceletTitle: 'Параметри браслета',
+    attributesIncenseTitle: 'Параметри пахощів',
     attributesGenericTitle: 'Характеристики',
-    attributesMineralHint:
-      'Для звичайного мінералу достатньо характеристик нижче. Вибірка на сайті з’явиться лише якщо заповнити блок варіантів.',
     attributesThreadHint:
-      'У низок свої параметри: оберіть доступні довжини. Колір покупець обере на сторінці товару.',
+      'Ціна низки залежить від розміру намистини та довжини — оберіть доступні варіанти.',
     attributesBraceletHint:
-      "У браслетів свої параметри: оберіть доступні розміри зап'ястка для цього товару.",
-    attributesGenericHint: 'Лише характеристики — без вибірки на сторінці товару.',
-    attributesBuyerOptionsTitle: 'Варіанти для вибору покупця (необовʼязково)',
-    attributesBuyerOptionsMineralHint:
-      'Залиште порожнім, якщо вибору немає. Для низок намистин завжди є ціла та пів низки (стандарт: 39 см / 19.5 см).',
+      "Ціна браслета залежить від розміру намистини та розміру зап'ястя — оберіть доступні варіанти.",
+    attributesIncenseHint:
+      'Оберіть, як продається товар: на вагу чи поштучно. Далі задайте доступні ваги.',
+    characteristicsHint:
+      'Опис товару. Покупець їх не обирає — вони лише показуються на сторінці товару.',
+    badgeRequired: 'Обовʼязково',
+    badgeOptional: 'Необовʼязково',
     attrBeadSizes: 'Розмір намистини (мм)',
     attrBeadSizesHint: 'Покупець зможе обрати один із позначених розмірів.',
     attrBeadCounts: 'Кількість бусин',
@@ -1047,13 +1070,20 @@ export const uiTranslationsUk: UiTranslationSchema = {
       'Ціла та пів низки. Якщо порожньо — для низок підставляються 39 см і 19.5 см.',
     attrStrandLabel: 'Підпис (напр. Низка 39 см)',
     attrStrandValue: 'Значення (напр. 39 см)',
-    attrThreadLengths: 'Довжина низки',
-    attrThreadLengthsHint: 'Покупець зможе обрати одну з довжин. Можна залишити порожнім.',
     attrWristSizes: "Розмір зап'ястя",
     attrWristSizesHint:
       "Стандарт 14–22 см. Можна додати свій варіант. Якщо нічого не обрати — для браслетів показуються всі стандартні розміри.",
     attrWristRange: "Діапазон розміру (підказка)",
-    attrDefaultLength: 'Довжина за замовчуванням',
+    attrSaleMode: 'Формат продажу',
+    attrSaleModeHint: 'На вагу — покупець обирає вагу порції. Поштучно — вагу однієї штуки.',
+    attrPackWeights: 'Ваги для продажу на вагу',
+    attrPackWeightsHint:
+      'Стандарт: 1 кг, 100 г, 50 г. Можна додати свій варіант. Якщо порожньо — показуються стандартні.',
+    attrPieceWeights: 'Вага однієї штуки',
+    attrPieceWeightsHint:
+      'Стандарт для палосанто: 5-6 г, 7-8 г, 9-10 г, 11-12 г, 13-14 г. Можна додати свій варіант.',
+    attrScent: 'Аромат',
+    attrBurnTime: 'Час горіння',
     attrAddCustom: 'Додати свій варіант',
     attrColor: 'Колір',
     attrOrigin: 'Походження',
@@ -1311,6 +1341,13 @@ export const uiTranslationsEn: UiTranslationSchema = {
     color: 'Color',
     wristSize: 'Wrist size',
     availableWristSize: 'Available size: {size}',
+    packWeight: 'Weight',
+    pieceWeight: 'Piece weight',
+    saleMode: 'Sold as',
+    saleModeWeight: 'By weight',
+    saleModePiece: 'By the piece',
+    saleModeWeightHint: 'This product is sold by weight',
+    saleModePieceHint: 'This product is sold by the piece — pick a single piece weight',
     characteristics: 'Specifications',
     choosePiece: 'Choose a piece',
     overview: 'Overview',
@@ -1326,6 +1363,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     attrMaterial: 'Material',
     attrStones: 'Stones',
     attrThreadColor: 'Thread color',
+    attrScent: 'Scent',
+    attrBurnTime: 'Burn time',
     beadSizeMm: '{value} mm',
     colors: {
       black: 'Black',
@@ -1569,20 +1608,20 @@ export const uiTranslationsEn: UiTranslationSchema = {
       'This subcategory has products. Delete the subcategory and all of its products?',
     errorGeneric: 'Something went wrong',
     attributesTitle: 'Product options',
-    attributesMineralTitle: 'Mineral details',
-    attributesThreadTitle: 'Cord / strand options',
+    attributesThreadTitle: 'Strand options',
     attributesBraceletTitle: 'Bracelet options',
+    attributesIncenseTitle: 'Incense options',
     attributesGenericTitle: 'Specifications',
-    attributesMineralHint:
-      'Most minerals only need the specs below. Buyer selection appears only if you fill the optional variants block.',
     attributesThreadHint:
-      'Cords have their own options: choose available lengths. Color is selected on the product page.',
+      'Strand price depends on bead size and strand length — pick the available options.',
     attributesBraceletHint:
-      'Bracelets have their own options: choose available wrist sizes for this product.',
-    attributesGenericHint: 'Specs only — no buyer selection on the product page.',
-    attributesBuyerOptionsTitle: 'Buyer selection options (optional)',
-    attributesBuyerOptionsMineralHint:
-      'Leave empty if there is no choice. Strand products always offer whole or half (defaults: 39 cm / 19.5 cm).',
+      'Bracelet price depends on bead size and wrist size — pick the available options.',
+    attributesIncenseHint:
+      'Choose how the product is sold: by weight or by the piece. Then set the available weights.',
+    characteristicsHint:
+      'Product description. Buyers do not select these — they are only shown on the product page.',
+    badgeRequired: 'Required',
+    badgeOptional: 'Optional',
     attrBeadSizes: 'Bead size (mm)',
     attrBeadSizesHint: 'The buyer can pick one of the selected sizes.',
     attrBeadCounts: 'Bead count',
@@ -1592,13 +1631,21 @@ export const uiTranslationsEn: UiTranslationSchema = {
       'Whole and half strand. If empty, strand products get 39 cm and 19.5 cm by default.',
     attrStrandLabel: 'Label (e.g. Strand 39 cm)',
     attrStrandValue: 'Value (e.g. 39 cm)',
-    attrThreadLengths: 'Cord length',
-    attrThreadLengthsHint: 'The buyer can pick one of these lengths. Can be left empty.',
     attrWristSizes: 'Wrist size',
     attrWristSizesHint:
       'Defaults are 14–22 cm. You can add a custom size. If none are selected, bracelets show all standard sizes.',
     attrWristRange: 'Size range hint',
-    attrDefaultLength: 'Default length',
+    attrSaleMode: 'Sold as',
+    attrSaleModeHint:
+      'By weight — the buyer picks a portion weight. By the piece — the weight of a single piece.',
+    attrPackWeights: 'Weights for sale by weight',
+    attrPackWeightsHint:
+      'Defaults: 1 kg, 100 g, 50 g. You can add a custom value. If empty, defaults are shown.',
+    attrPieceWeights: 'Single piece weight',
+    attrPieceWeightsHint:
+      'Palo santo defaults: 5-6 g, 7-8 g, 9-10 g, 11-12 g, 13-14 g. You can add a custom value.',
+    attrScent: 'Scent',
+    attrBurnTime: 'Burn time',
     attrAddCustom: 'Add custom option',
     attrColor: 'Color',
     attrOrigin: 'Origin',

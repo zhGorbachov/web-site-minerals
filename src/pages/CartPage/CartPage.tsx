@@ -25,6 +25,8 @@ const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
   length: 'productOptions.threadLength',
   color: 'productOptions.color',
   wristSize: 'productOptions.wristSize',
+  packWeight: 'productOptions.packWeight',
+  pieceWeight: 'productOptions.pieceWeight',
 }
 
 export function CartPage() {

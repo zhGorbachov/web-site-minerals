@@ -23,8 +23,12 @@ export interface ThreadAttributes {
   color?: string
   /** Display-only default length */
   length?: string
-  /** Selectable thread length options, e.g. ['1 м','5 м','10 м'] */
+  /** Legacy cord length options in metres — no longer offered to buyers */
   lengths?: string[]
+  /** Bead diameter options in mm, e.g. ['6','8','10'] */
+  beadSizes?: string[]
+  /** Whole / half strand options offered to the buyer */
+  strandLengths?: StrandLengthOption[]
   diameter?: string
   material?: string
 }
@@ -34,12 +38,33 @@ export interface BraceletAttributes {
   wristSize?: string
   /** Selectable wrist sizes, e.g. ['16 см','17 см','18 см'] */
   wristSizes?: string[]
+  /** Bead diameter options in mm, e.g. ['6','8','10'] */
+  beadSizes?: string[]
   threadColor?: string
   stones?: string[]
   material?: string
 }
 
-export type ProductAttributes = MineralAttributes | ThreadAttributes | BraceletAttributes
+/** How an incense product is sold: by weight or as separate pieces. */
+export type IncenseSaleMode = 'weight' | 'piece'
+
+export interface IncenseAttributes {
+  saleMode?: IncenseSaleMode
+  /** Weight portions for `weight` mode, e.g. ['1 кг','100 г','50 г'] */
+  packWeights?: string[]
+  /** Per-piece weight ranges for `piece` mode, e.g. ['5-6 г','7-8 г'] */
+  pieceWeights?: string[]
+  scent?: string
+  burnTime?: string
+  quantity?: string
+  material?: string
+}
+
+export type ProductAttributes =
+  | MineralAttributes
+  | ThreadAttributes
+  | BraceletAttributes
+  | IncenseAttributes
 
 /** Unique stone / option-linked SKU: own photo, price and stock. */
 export interface ProductVariant {

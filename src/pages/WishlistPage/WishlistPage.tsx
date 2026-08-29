@@ -8,7 +8,7 @@ import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice, productRequiresOptions } from '@/utils'
+import { formatPrice, getCatalogPricing, productRequiresOptions } from '@/utils'
 import { EmptyState } from '@/components/ui'
 import styles from './WishlistPage.module.scss'
 
@@ -164,7 +164,10 @@ export function WishlistPage() {
             <AnimatePresence initial={false}>
               {products.map((rawProduct) => {
                 const product = localizeProduct(rawProduct, language)
-                const displayPrice = product.discountPrice ?? product.price
+                const catalog = getCatalogPricing(product)
+                const displayPrice = catalog.min
+                const hasDiscount =
+                  catalog.compareAt != null && !catalog.hasRange && catalog.compareAt > displayPrice
                 const isSelected = selectedIds.has(product.id)
 
                 return (
@@ -219,16 +222,16 @@ export function WishlistPage() {
                           <span
                             className={[
                               styles.itemPrice,
-                              product.discountPrice ? styles.priceDiscounted : '',
+                              hasDiscount ? styles.priceDiscounted : '',
                             ]
                               .filter(Boolean)
                               .join(' ')}
                           >
                             {formatPrice(displayPrice, language)}
                           </span>
-                          {product.discountPrice && (
+                          {hasDiscount && catalog.compareAt != null && (
                             <span className={styles.oldPrice}>
-                              {formatPrice(product.price, language)}
+                              {formatPrice(catalog.compareAt, language)}
                             </span>
                           )}
                         </div>

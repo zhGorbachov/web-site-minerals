@@ -27,6 +27,10 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const catalog = getCatalogPricing(product)
   const displayPrice = catalog.min
+  const salePercent =
+    !catalog.hasRange && catalog.compareAt != null && catalog.compareAt > displayPrice
+      ? Math.round((1 - displayPrice / catalog.compareAt) * 100)
+      : 0
   const productUrl = `/product/${product.slug}`
   const inWishlist = isInWishlist(product.id)
   const needsOptions = productRequiresOptions(product)
@@ -90,9 +94,9 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.isNew && (
             <span className={styles.badgeNew}>{t('product.badgeNew')}</span>
           )}
-          {catalog.compareAt && !catalog.hasRange && (
+          {salePercent > 0 && (
             <span className={styles.badgeSale}>
-              -{Math.round((1 - displayPrice / catalog.compareAt) * 100)}%
+              -{salePercent}%
             </span>
           )}
         </div>
@@ -109,7 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
               <span
                 className={[
                   styles.price,
-                  product.discountPrice && !catalog.hasRange ? styles.priceDiscounted : '',
+                  salePercent > 0 ? styles.priceDiscounted : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -118,8 +122,8 @@ export function ProductCard({ product }: ProductCardProps) {
                   ? t('product.fromPrice', { price: formatPrice(displayPrice, language) })
                   : formatPrice(displayPrice, language)}
               </span>
-              {product.discountPrice && !catalog.hasRange && (
-                <span className={styles.oldPrice}>{formatPrice(product.price, language)}</span>
+              {salePercent > 0 && catalog.compareAt != null && (
+                <span className={styles.oldPrice}>{formatPrice(catalog.compareAt, language)}</span>
               )}
             </div>
           </div>

@@ -280,6 +280,22 @@ export const attributeValueEn: Record<string, string> = {
   'Натуральний шовк': 'Natural silk',
   'Шовкова нитка': 'Silk thread',
 
+  // Incense weights
+  '1 кг': '1 kg',
+  'кг': 'kg',
+  '100 г': '100 g',
+  '50 г': '50 g',
+  '5-6 г': '5-6 g',
+  '7-8 г': '7-8 g',
+  '9-10 г': '9-10 g',
+  '11-12 г': '11-12 g',
+  '13-14 г': '13-14 g',
+
+  // Scents
+  'Пало санто': 'Palo santo',
+  'Сандал': 'Sandalwood',
+  'Лаванда': 'Lavender',
+
   // Stones
   'Рожевий кварц': 'Rose quartz',
   'Перламутр': 'Mother-of-pearl',

@@ -7,13 +7,22 @@ import type {
   MineralAttributes,
   ThreadAttributes,
   BraceletAttributes,
+  IncenseAttributes,
   ProductAttributes,
 } from '@/types'
 import type { Language } from '@/i18n/Translations'
-import { attributeValueEn, colorKeyByUk } from '@/i18n/CatalogEn'
-import { getColorOptions } from '@/i18n/localizeCatalog'
+import { attributeValueEn } from '@/i18n/CatalogEn'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
-import { getBraceletWristSizes, getMineralStrandLengths } from '@/utils/productOptions'
+import {
+  getBraceletBeadSizes,
+  getBraceletWristSizes,
+  getIncenseOptionKey,
+  getIncenseSaleMode,
+  getIncenseWeights,
+  getMineralStrandLengths,
+  getThreadBeadSizes,
+  getThreadStrandLengths,
+} from '@/utils/productOptions'
 import {
   getCatalogPricing,
   getProductGalleryImages,
@@ -60,10 +69,6 @@ function formatWristSize(size: string, language: Language): string {
   return size.replace(/\s*см/gi, ' cm')
 }
 
-function getStoredColorValue(key: string): string {
-  return Object.entries(colorKeyByUk).find(([, value]) => value === key)?.[0] ?? key
-}
-
 function useProductOptionState(
   onOptionsChange: (options: Record<string, string>) => void,
   selectedOptions?: Record<string, string>,
@@ -83,6 +88,66 @@ function useProductOptionState(
 function optionValues(product: Product, key: string, fallback: string[]): string[] {
   const fromVariants = getVariantOptionValues(product, key)
   return fromVariants.length ? fromVariants : fallback
+}
+
+/** One selectable option group: chips for bead sizes, pills for everything else. */
+function OptionGroup({
+  product,
+  optionKey,
+  label,
+  values,
+  selectedValue,
+  onSelect,
+  appearance = 'pill',
+  renderValue,
+  divider,
+  hint,
+}: {
+  product: Product
+  optionKey: string
+  label: string
+  values: string[]
+  selectedValue?: string
+  onSelect: (value: string) => void
+  appearance?: 'pill' | 'chip'
+  renderValue?: (value: string) => string
+  divider?: boolean
+  hint?: string
+}) {
+  if (!values.length) return null
+  const listClass = appearance === 'chip' ? styles.sizeGrid : styles.lengthPills
+  const itemClass = appearance === 'chip' ? styles.sizeChip : styles.lengthPill
+  const activeClass = appearance === 'chip' ? styles.sizeChipActive : styles.lengthPillActive
+
+  return (
+    <div className={styles.optionGroup}>
+      {divider ? <span className={styles.sectionDivider} /> : null}
+      <span className={styles.optionLabel}>{label}</span>
+      <div className={listClass}>
+        {values.map((value) => {
+          const disabled = isOptionValueOutOfStock(product, optionKey, value)
+          return (
+            <button
+              key={value}
+              type="button"
+              className={[
+                itemClass,
+                selectedValue === value ? activeClass : '',
+                disabled ? styles.optionDisabled : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={() => onSelect(value)}
+              disabled={disabled}
+            >
+              {renderValue ? renderValue(value) : value}
+            </button>
+          )
+        })}
+      </div>
+      {hint ? <p className={styles.hint}>{hint}</p> : null}
+    </div>
+  )
 }
 
 export function ProductSelections({ product, selectedOptions, onOptionsChange }: ProductOptionsProps) {
@@ -225,92 +290,100 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
 
   if (categorySlug === 'nytky') {
     const attrs = product.attributes as ThreadAttributes
-    const colors = getColorOptions(language)
+    const beadSizes = optionValues(product, 'beadSize', getThreadBeadSizes(attrs))
+    const strandLengths = getThreadStrandLengths(attrs)
+    const strandLabels = optionValues(
+      product,
+      'strandLength',
+      strandLengths.map((length) => length.label),
+    )
+
     return (
       <div className={styles.options}>
-        {attrs.lengths && attrs.lengths.length > 0 && (
-          <div className={styles.optionGroup}>
-            <span className={styles.optionLabel}>{t('productOptions.threadLength')}</span>
-            <div className={styles.lengthPills}>
-              {optionValues(product, 'length', attrs.lengths).map((length) => {
-                const disabled = isOptionValueOutOfStock(product, 'length', length)
-                return (
-                <button
-                  key={length}
-                  type="button"
-                  className={[
-                    styles.lengthPill,
-                    selected.length === length ? styles.lengthPillActive : '',
-                    disabled ? styles.optionDisabled : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleSelect('length', length)}
-                  disabled={disabled}
-                >
-                  {translateAttrValue(length, language)}
-                </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-        <div className={styles.optionGroup}>
-          {attrs.lengths?.length ? <span className={styles.sectionDivider} /> : null}
-          <span className={styles.optionLabel}>{t('productOptions.color')}</span>
-          <div className={styles.lengthPills}>
-            {colors.map((color) => {
-              const storedValue = getStoredColorValue(color.key)
-              return (
-                <button
-                  key={color.key}
-                  type="button"
-                  className={[styles.lengthPill, selected.color === storedValue ? styles.lengthPillActive : ''].filter(Boolean).join(' ')}
-                  onClick={() => handleSelect('color', storedValue)}
-                >
-                  {color.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        <OptionGroup
+          product={product}
+          optionKey="beadSize"
+          label={t('productOptions.beadSize')}
+          values={beadSizes}
+          selectedValue={selected.beadSize}
+          onSelect={(value) => handleSelect('beadSize', value)}
+          appearance="chip"
+        />
+        <OptionGroup
+          product={product}
+          optionKey="strandLength"
+          label={t('productOptions.strandLength')}
+          values={strandLabels}
+          selectedValue={selected.strandLength}
+          onSelect={(value) => handleSelect('strandLength', value)}
+          divider={beadSizes.length > 0}
+        />
       </div>
     )
   }
 
   if (categorySlug === 'brаslety') {
     const attrs = product.attributes as BraceletAttributes
-    const wristSizes = getBraceletWristSizes(attrs)
+    const beadSizes = optionValues(product, 'beadSize', getBraceletBeadSizes(attrs))
+    const wristSizes = optionValues(product, 'wristSize', getBraceletWristSizes(attrs))
+
     return (
       <div className={styles.options}>
-        <div className={styles.optionGroup}>
-          <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
-          <div className={styles.lengthPills}>
-            {optionValues(product, 'wristSize', wristSizes).map((size) => {
-              const disabled = isOptionValueOutOfStock(product, 'wristSize', size)
-              return (
-              <button
-                key={size}
-                type="button"
-                className={[
-                  styles.lengthPill,
-                  selected.wristSize === size ? styles.lengthPillActive : '',
-                  disabled ? styles.optionDisabled : '',
-                ].filter(Boolean).join(' ')}
-                onClick={() => handleSelect('wristSize', size)}
-                disabled={disabled}
-              >
-                {formatWristSize(size, language)}
-              </button>
-              )
-            })}
-          </div>
-          {attrs.wristSize && (
-            <p className={styles.hint}>
-              {t('productOptions.availableWristSize', {
-                size: formatWristSize(attrs.wristSize, language),
-              })}
-            </p>
-          )}
-        </div>
+        <OptionGroup
+          product={product}
+          optionKey="beadSize"
+          label={t('productOptions.beadSize')}
+          values={beadSizes}
+          selectedValue={selected.beadSize}
+          onSelect={(value) => handleSelect('beadSize', value)}
+          appearance="chip"
+        />
+        <OptionGroup
+          product={product}
+          optionKey="wristSize"
+          label={t('productOptions.wristSize')}
+          values={wristSizes}
+          selectedValue={selected.wristSize}
+          onSelect={(value) => handleSelect('wristSize', value)}
+          renderValue={(value) => formatWristSize(value, language)}
+          divider={beadSizes.length > 0}
+          hint={
+            attrs.wristSize
+              ? t('productOptions.availableWristSize', {
+                  size: formatWristSize(attrs.wristSize, language),
+                })
+              : undefined
+          }
+        />
+      </div>
+    )
+  }
+
+  if (categorySlug === 'pahoshchi') {
+    const attrs = product.attributes as IncenseAttributes
+    const optionKey = getIncenseOptionKey(attrs)
+    const values = optionValues(product, optionKey, getIncenseWeights(attrs))
+
+    return (
+      <div className={styles.options}>
+        <OptionGroup
+          product={product}
+          optionKey={optionKey}
+          label={
+            optionKey === 'pieceWeight'
+              ? t('productOptions.pieceWeight')
+              : t('productOptions.packWeight')
+          }
+          values={values}
+          selectedValue={selected[optionKey]}
+          onSelect={(value) => handleSelect(optionKey, value)}
+          renderValue={(value) => translateAttrValue(value, language)}
+          hint={
+            optionKey === 'pieceWeight'
+              ? t('productOptions.saleModePieceHint')
+              : t('productOptions.saleModeWeightHint')
+          }
+        />
       </div>
     )
   }
@@ -363,6 +436,16 @@ export function ProductCharacteristics({
     return (
       <CharacteristicsPanel
         items={buildBraceletCharacteristics(attrs, t, language)}
+        characteristicsLabel={t('productOptions.characteristics')}
+      />
+    )
+  }
+
+  if (categorySlug === 'pahoshchi') {
+    const attrs = product.attributes as IncenseAttributes
+    return (
+      <CharacteristicsPanel
+        items={buildIncenseCharacteristics(attrs, t, language)}
         characteristicsLabel={t('productOptions.characteristics')}
       />
     )
@@ -438,10 +521,8 @@ export function ProductVariantPicker({
         {variants.map((variant) => {
           const active = variant.id === selectedId
           const out = variant.stock <= 0
-          const name =
-            variant.name?.trim() ||
-            Object.values(variant.options ?? {})[0] ||
-            product.name
+          const optionLabel = Object.values(variant.options ?? {}).join(' · ')
+          const name = variant.name?.trim() || optionLabel || product.name
           return (
             <li key={variant.id}>
               <button
@@ -532,12 +613,6 @@ function buildThreadCharacteristics(
   language: Language,
 ): CharacteristicItem[] {
   const items: CharacteristicItem[] = []
-  if (attrs.length && !attrs.lengths?.length) {
-    items.push({
-      label: t('productOptions.attrLength'),
-      value: translateAttrValue(attrs.length, language),
-    })
-  }
   if (attrs.diameter) {
     items.push({
       label: t('productOptions.attrDiameter'),
@@ -587,6 +662,40 @@ function buildBraceletCharacteristics(
     items.push({
       label: t('productOptions.attrSize'),
       value: formatWristSize(attrs.wristSize, language),
+    })
+  }
+  return items
+}
+
+function buildIncenseCharacteristics(
+  attrs: IncenseAttributes,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+  language: Language,
+): CharacteristicItem[] {
+  const items: CharacteristicItem[] = []
+  items.push({
+    label: t('productOptions.saleMode'),
+    value:
+      getIncenseSaleMode(attrs) === 'piece'
+        ? t('productOptions.saleModePiece')
+        : t('productOptions.saleModeWeight'),
+  })
+  if (attrs.scent) {
+    items.push({
+      label: t('productOptions.attrScent'),
+      value: translateAttrValue(attrs.scent, language),
+    })
+  }
+  if (attrs.burnTime) {
+    items.push({
+      label: t('productOptions.attrBurnTime'),
+      value: translateAttrValue(attrs.burnTime, language),
+    })
+  }
+  if (attrs.material) {
+    items.push({
+      label: t('productOptions.attrMaterial'),
+      value: translateAttrValue(attrs.material, language),
     })
   }
   return items

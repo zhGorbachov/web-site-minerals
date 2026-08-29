@@ -1,15 +1,29 @@
 import type { Product, ProductVariant, StrandLengthOption } from '@/types'
-
-const FALLBACK_WRIST_SIZES = Array.from({ length: 9 }, (_, i) => `${i + 14} см`)
+import {
+  DEFAULT_BEAD_SIZES,
+  DEFAULT_PACK_WEIGHTS,
+  DEFAULT_PIECE_WEIGHTS,
+  DEFAULT_STRAND_LENGTHS,
+  DEFAULT_WRIST_SIZES,
+} from './catalogDefaults'
 
 export const VARIANT_ID_OPTION_KEY = 'variantId'
 
-export type BindableOption = {
+/** One option axis a photo variant can be bound to, e.g. all wrist sizes. */
+export type BindableOptionGroup = {
   key: string
-  value: string
-  token: string
   groupLabel: string
-  label: string
+  values: { value: string; label: string }[]
+}
+
+export type BindableOptionLabels = {
+  wristSize: string
+  beadSize: string
+  beadCount: string
+  strandLength: string
+  length: string
+  packWeight: string
+  pieceWeight: string
 }
 
 export type CatalogPricing = {
@@ -35,16 +49,6 @@ function asStrandLengths(value: unknown): StrandLengthOption[] {
       return { label, value: val }
     })
     .filter((item): item is StrandLengthOption => item != null)
-}
-
-export function encodeBindToken(key: string, value: string) {
-  return `${key}::${value}`
-}
-
-export function decodeBindToken(token: string): { key: string; value: string } | null {
-  const index = token.indexOf('::')
-  if (index <= 0) return null
-  return { key: token.slice(0, index), value: token.slice(index + 2) }
 }
 
 export function createVariantId() {
@@ -126,39 +130,53 @@ export function isBoundVariant(variant: ProductVariant): boolean {
   return variant.stock > 0
 }
 
+/** 0 / empty is not a sale — the product is sold at the regular price. */
+export function normalizeDiscountPrice(value?: number | null): number | undefined {
+  if (value == null) return undefined
+  const amount = Number(value)
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined
+}
+
+function compareAtForSale(regular: number, sale?: number | null): number | undefined {
+  const amount = normalizeDiscountPrice(sale)
+  return amount != null && regular > amount ? regular : undefined
+}
+
 export function getVariantUnitPrice(
-  product: Pick<Product, 'price' | 'discountPrice'>,
+  product: { price: number; discountPrice?: number | null },
   variant?: ProductVariant | null,
 ): number {
-  if (!variant) return Number(product.discountPrice ?? product.price)
-  return Number(variant.discountPrice ?? variant.price ?? product.discountPrice ?? product.price)
+  const productSale = normalizeDiscountPrice(product.discountPrice)
+  if (!variant) return Number(productSale ?? product.price)
+  return Number(
+    normalizeDiscountPrice(variant.discountPrice) ?? variant.price ?? productSale ?? product.price,
+  )
 }
 
 export function getVariantCompareAtPrice(
-  product: Pick<Product, 'price' | 'discountPrice'>,
+  product: { price: number; discountPrice?: number | null },
   variant?: ProductVariant | null,
 ): number | undefined {
   if (!variant) {
-    return product.discountPrice != null ? product.price : undefined
+    return compareAtForSale(product.price, product.discountPrice)
   }
-  if (variant.discountPrice != null && variant.price != null && variant.price > variant.discountPrice) {
-    return variant.price
-  }
-  if (variant.discountPrice != null && product.price > variant.discountPrice) {
-    return product.price
-  }
+  const sale = normalizeDiscountPrice(variant.discountPrice)
+  if (sale == null) return undefined
+  if (variant.price != null && variant.price > sale) return variant.price
+  if (product.price > sale) return product.price
   return undefined
 }
 
 export function getCatalogPricing(product: Product): CatalogPricing {
   const variants = getProductVariants(product)
   if (!variants.length) {
-    const unit = Number(product.discountPrice ?? product.price)
+    const sale = normalizeDiscountPrice(product.discountPrice)
+    const unit = Number(sale ?? product.price)
     return {
       min: unit,
       max: unit,
       hasRange: false,
-      compareAt: product.discountPrice != null ? product.price : undefined,
+      compareAt: compareAtForSale(product.price, sale),
     }
   }
 
@@ -247,7 +265,13 @@ export function findBestMatchingVariant(
   if (!matches.length) {
     const currentId = currentVariantId ?? selectedOptions[VARIANT_ID_OPTION_KEY]
     if (!currentId) return undefined
-    return findVariantById(product, currentId)
+    const current = findVariantById(product, currentId)
+    if (!current) return undefined
+    // Keep the current piece only while it does not contradict the new selection.
+    const contradicts = Object.entries(current.options ?? {}).some(
+      ([key, value]) => selectedOptions[key] != null && selectedOptions[key] !== value,
+    )
+    return contradicts ? undefined : current
   }
 
   const current = matches.find((variant) => variant.id === currentVariantId)
@@ -272,10 +296,10 @@ export function getAvailableStock(
 }
 
 export function getCartUnitPrice(
-  product: Pick<Product, 'price' | 'discountPrice' | 'variants'>,
+  product: { price: number; discountPrice?: number | null; variants?: unknown },
   selectedOptions?: Record<string, string> | null,
 ): number {
-  const variant = getSelectedVariant(product, selectedOptions)
+  const variant = getSelectedVariant(product as Pick<Product, 'variants'>, selectedOptions)
   return getVariantUnitPrice(product, variant)
 }
 
@@ -307,47 +331,76 @@ export function isOptionValueOutOfStock(
   return matches.every((variant) => variant.stock <= 0)
 }
 
-export function getBindableOptions(
+/**
+ * Option axes a photo variant can be bound to. Categories whose price depends on
+ * a fixed set of criteria always expose them, even before the admin picks values.
+ */
+export function getBindableOptionGroups(
   categorySlug: string,
   attributes: Record<string, unknown>,
-  groupLabels: {
-    wristSize: string
-    beadSize: string
-    beadCount: string
-    strandLength: string
-    length: string
-  },
-): BindableOption[] {
-  const out: BindableOption[] = []
-  const add = (key: string, value: string, groupLabel: string, label = value) => {
-    out.push({
+  groupLabels: BindableOptionLabels,
+): BindableOptionGroup[] {
+  const groups: BindableOptionGroup[] = []
+  const add = (
+    key: string,
+    groupLabel: string,
+    values: string[],
+    formatLabel?: (value: string) => string,
+  ) => {
+    if (!values.length) return
+    groups.push({
       key,
-      value,
-      token: encodeBindToken(key, value),
       groupLabel,
-      label,
+      values: values.map((value) => ({
+        value,
+        label: formatLabel ? formatLabel(value) : value,
+      })),
     })
   }
 
+  const beadSizes = asStringArray(attributes.beadSizes)
   const wristSizes = asStringArray(attributes.wristSizes)
-  if (wristSizes.length) {
-    wristSizes.forEach((size) => add('wristSize', size, groupLabels.wristSize))
-  } else if (categorySlug === 'brаslety') {
-    FALLBACK_WRIST_SIZES.forEach((size) => add('wristSize', size, groupLabels.wristSize))
+  const strandLengths = asStrandLengths(attributes.strandLengths)
+  const beadSizeMm = (value: string) => `${value} мм`
+
+  if (categorySlug === 'brаslety') {
+    add('beadSize', groupLabels.beadSize, beadSizes.length ? beadSizes : DEFAULT_BEAD_SIZES, beadSizeMm)
+    add('wristSize', groupLabels.wristSize, wristSizes.length ? wristSizes : DEFAULT_WRIST_SIZES)
+    return groups
   }
 
-  asStringArray(attributes.beadSizes).forEach((size) =>
-    add('beadSize', size, groupLabels.beadSize, `${size} мм`),
-  )
-  asStringArray(attributes.beadCounts).forEach((count) =>
-    add('beadCount', count, groupLabels.beadCount),
-  )
-  asStrandLengths(attributes.strandLengths).forEach((length) =>
-    add('strandLength', length.label, groupLabels.strandLength),
-  )
-  asStringArray(attributes.lengths).forEach((length) => add('length', length, groupLabels.length))
+  if (categorySlug === 'nytky') {
+    add('beadSize', groupLabels.beadSize, beadSizes.length ? beadSizes : DEFAULT_BEAD_SIZES, beadSizeMm)
+    add(
+      'strandLength',
+      groupLabels.strandLength,
+      (strandLengths.length ? strandLengths : DEFAULT_STRAND_LENGTHS).map((length) => length.label),
+    )
+    return groups
+  }
 
-  return out
+  if (categorySlug === 'pahoshchi') {
+    if (attributes.saleMode === 'piece') {
+      const pieceWeights = asStringArray(attributes.pieceWeights)
+      add(
+        'pieceWeight',
+        groupLabels.pieceWeight,
+        pieceWeights.length ? pieceWeights : DEFAULT_PIECE_WEIGHTS,
+      )
+    } else {
+      const packWeights = asStringArray(attributes.packWeights)
+      add('packWeight', groupLabels.packWeight, packWeights.length ? packWeights : DEFAULT_PACK_WEIGHTS)
+    }
+    return groups
+  }
+
+  add('wristSize', groupLabels.wristSize, wristSizes)
+  add('beadSize', groupLabels.beadSize, beadSizes, beadSizeMm)
+  add('beadCount', groupLabels.beadCount, asStringArray(attributes.beadCounts))
+  add('strandLength', groupLabels.strandLength, strandLengths.map((length) => length.label))
+  add('length', groupLabels.length, asStringArray(attributes.lengths))
+
+  return groups
 }
 
 export function syncVariantsWithImages(

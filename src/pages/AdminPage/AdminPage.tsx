@@ -16,6 +16,7 @@ import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
   hasProductVariants,
+  normalizeDiscountPrice,
   parseVariants,
   toStoredVariants,
 } from '@/utils/productVariants'
@@ -467,7 +468,8 @@ export function AdminPage() {
       sku: product.sku,
       description: product.description,
       price: String(product.price),
-      discountPrice: product.discountPrice != null ? String(product.discountPrice) : '',
+      discountPrice:
+        normalizeDiscountPrice(product.discountPrice) != null ? String(product.discountPrice) : '',
       stock: String(product.stock),
       images: product.images,
       video: product.video ?? null,
@@ -513,7 +515,9 @@ export function AdminPage() {
       price: derived ? derived.price : Number(form.price),
       stock: derived ? derived.stock : Number(form.stock),
       shortDescription: deriveShortDescription(form.description),
-      discountPrice: form.discountPrice === '' ? null : Number(form.discountPrice),
+      discountPrice: normalizeDiscountPrice(
+        form.discountPrice.trim() === '' ? null : Number(form.discountPrice),
+      ) ?? null,
       video: form.video || null,
       slug: form.slug || undefined,
       sku: skuValue || undefined,
@@ -831,7 +835,7 @@ export function AdminPage() {
                         <p className={styles.productSku}>{product.sku}</p>
                         <p className={styles.productPrice}>
                           {product.price}
-                          {product.discountPrice != null && (
+                          {normalizeDiscountPrice(product.discountPrice) != null && (
                             <span className={styles.discount}> / {product.discountPrice}</span>
                           )}
                         </p>

@@ -1,5 +1,5 @@
-import type { MineralAttributes, Product, StrandLengthOption } from '@/types'
-import { getMineralStrandLengths } from './productOptions'
+import type { Product, StrandLengthOption, ThreadAttributes } from '@/types'
+import { getThreadStrandLengths } from './productOptions'
 
 export type StrandMergeCartItem = {
   id: string
@@ -52,8 +52,8 @@ export function findWholeStrandLabel(
 }
 
 function getStrandLengths(product: Product): StrandLengthOption[] {
-  if (product.categorySlug !== 'mineraly') return []
-  return getMineralStrandLengths(product.attributes as MineralAttributes)
+  if (product.categorySlug !== 'nytky') return []
+  return getThreadStrandLengths(product.attributes as ThreadAttributes)
 }
 
 function restOptionsKey(options?: Record<string, string>): string {

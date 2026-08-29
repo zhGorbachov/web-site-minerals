@@ -4,9 +4,7 @@ import { MediaUploader } from '@/components/MediaUploader'
 import { useTranslation } from '@/i18n/useTranslation'
 import type { ProductVariant } from '@/types'
 import {
-  decodeBindToken,
-  encodeBindToken,
-  getBindableOptions,
+  getBindableOptionGroups,
   isBoundVariant,
   syncVariantsWithImages,
   toStoredVariants,
@@ -26,13 +24,6 @@ type Props = {
   onVariantsChange: (variants: ProductVariant[]) => void
 }
 
-function bindTokenOf(variant?: ProductVariant) {
-  const entries = Object.entries(variant?.options ?? {})
-  if (!entries.length) return ''
-  const [key, value] = entries[0]
-  return encodeBindToken(key, value)
-}
-
 export function ProductVariantsEditor({
   images,
   video,
@@ -47,12 +38,14 @@ export function ProductVariantsEditor({
 }: Props) {
   const { t } = useTranslation()
   const [enabledImages, setEnabledImages] = useState<Set<string>>(() => new Set())
-  const bindable = getBindableOptions(categorySlug, attributes, {
+  const bindableGroups = getBindableOptionGroups(categorySlug, attributes, {
     wristSize: t('productOptions.wristSize'),
     beadSize: t('productOptions.beadSize'),
     beadCount: t('productOptions.beadCount'),
     strandLength: t('productOptions.strandLength'),
     length: t('productOptions.threadLength'),
+    packWeight: t('productOptions.packWeight'),
+    pieceWeight: t('productOptions.pieceWeight'),
   })
   const drafts = syncVariantsWithImages(images, variants)
 
@@ -73,6 +66,18 @@ export function ProductVariantsEditor({
         return typeof patch === 'function' ? patch(draft) : { ...draft, ...patch }
       }),
     )
+  }
+
+  const setOption = (draft: ProductVariant, key: string, value: string) => {
+    patchDraft(draft.image, (current) => {
+      const options = { ...(current.options ?? {}) }
+      if (value) options[key] = value
+      else delete options[key]
+      return {
+        ...current,
+        options: Object.keys(options).length ? options : undefined,
+      }
+    })
   }
 
   const toggleBound = (draft: ProductVariant, enabled: boolean) => {
@@ -112,7 +117,6 @@ export function ProductVariantsEditor({
           <ul className={styles.cards}>
             {drafts.map((draft, index) => {
               const enabled = enabledImages.has(draft.image) || isBoundVariant(draft)
-              const bindToken = bindTokenOf(draft)
               return (
                 <li key={draft.id} className={[styles.card, enabled ? styles.cardOn : ''].filter(Boolean).join(' ')}>
                   <div className={styles.cardTop}>
@@ -172,26 +176,25 @@ export function ProductVariantsEditor({
                           />
                         </label>
                       </div>
-                      {bindable.length > 0 && (
-                        <label className={styles.field}>
-                          <span>{t('admin.variantOption')}</span>
-                          <select
-                            value={bindToken}
-                            onChange={(e) => {
-                              const decoded = decodeBindToken(e.target.value)
-                              patchDraft(draft.image, {
-                                options: decoded ? { [decoded.key]: decoded.value } : undefined,
-                              })
-                            }}
-                          >
-                            <option value="">{t('admin.variantOptionNone')}</option>
-                            {bindable.map((option) => (
-                              <option key={option.token} value={option.token}>
-                                {option.groupLabel}: {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
+                      {bindableGroups.length > 0 && (
+                        <div className={styles.row}>
+                          {bindableGroups.map((group) => (
+                            <label key={group.key} className={styles.field}>
+                              <span>{group.groupLabel}</span>
+                              <select
+                                value={draft.options?.[group.key] ?? ''}
+                                onChange={(e) => setOption(draft, group.key, e.target.value)}
+                              >
+                                <option value="">{t('admin.variantOptionNone')}</option>
+                                {group.values.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          ))}
+                        </div>
                       )}
                       <div className={styles.row}>
                         <label className={styles.field}>

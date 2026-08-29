@@ -18,7 +18,8 @@ export function getUnitPrice(product: {
 }): number {
   const sale = product.discountPrice
   if (sale != null) {
-    return typeof sale === 'number' ? sale : Number(sale)
+    const amount = typeof sale === 'number' ? sale : Number(sale)
+    if (Number.isFinite(amount) && amount > 0) return amount
   }
   const price = product.price
   return typeof price === 'number' ? price : Number(price)

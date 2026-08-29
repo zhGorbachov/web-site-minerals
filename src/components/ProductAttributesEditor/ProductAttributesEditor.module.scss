@@ -1,6 +1,12 @@
 @use '@/styles/variables' as *;
 @use '@/styles/mixins' as *;
 
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
 .section {
   display: flex;
   flex-direction: column;
@@ -9,6 +15,44 @@
   border: 1.5px solid $color-border;
   border-radius: $radius-md;
   background: $color-surface;
+}
+
+.sectionParameters {
+  border-color: rgba(var(--color-primary-rgb), 0.4);
+  box-shadow: inset 3px 0 0 0 $color-primary;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 0.125rem $spacing-2;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+.badgeRequired {
+  background: rgba(var(--color-primary-rgb), 0.12);
+  color: $color-primary;
+}
+
+.badgeOptional {
+  background: $color-white;
+  border: 1px solid $color-border;
+  color: $color-text-muted;
 }
 
 .title {
@@ -154,17 +198,3 @@
   color: $color-text;
 }
 
-.optionalBlock {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-4;
-  padding-top: $spacing-4;
-  border-top: 1px dashed $color-border;
-}
-
-.optionalTitle {
-  margin: 0;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
-  color: $color-text;
-}

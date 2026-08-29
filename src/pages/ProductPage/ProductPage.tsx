@@ -93,7 +93,7 @@ export function ProductPage() {
     }
     const match = findBestMatchingVariant(product, next, selectedOptions.variantId)
     if (!match) {
-      setSelectedOptions(next)
+      setSelectedOptions(optionsWithoutVariantId(next))
       return
     }
     setSelectedOptions(buildVariantSelection(match, next))
