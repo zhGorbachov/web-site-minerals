@@ -9,6 +9,7 @@ import {
   deriveProductPricingFromVariants,
   parseVariants,
 } from '../lib/productVariants.js'
+import { categoryHasSubcategories } from '../lib/catalogDefaults.js'
 
 export const adminRouter = Router()
 
@@ -69,8 +70,47 @@ const productBodySchema = z.object({
   featured: z.boolean().optional(),
   popular: z.boolean().optional(),
   isNew: z.boolean().optional(),
-  subCategoryId: z.string().min(1),
+  subCategoryId: z.string().min(1).optional(),
+  categoryId: z.string().min(1).optional(),
 })
+
+/**
+ * Flat categories (incense) have no subcategories in the storefront, but a product row always
+ * needs one. Keep a single technical subcategory per flat category, named and slugged after it,
+ * so the admin can save a product with only a category selected.
+ */
+async function getFlatCategorySubCategory(categoryId: string) {
+  const category = await prisma.category.findUnique({ where: { id: categoryId } })
+  if (!category || categoryHasSubcategories(category.slug)) return null
+
+  const existing = await prisma.subCategory.findUnique({
+    where: { categorySlug_slug: { categorySlug: category.slug, slug: category.slug } },
+  })
+  if (existing) return existing
+
+  return prisma.subCategory.create({
+    data: {
+      id: `sub-${category.slug}`,
+      categoryId: category.id,
+      categorySlug: category.slug,
+      name: category.name,
+      slug: category.slug,
+      image: category.image,
+    },
+  })
+}
+
+async function resolveProductSubCategory(input: { subCategoryId?: string; categoryId?: string }) {
+  if (input.subCategoryId) {
+    return prisma.subCategory.findUnique({ where: { id: input.subCategoryId } })
+  }
+  if (!input.categoryId) return null
+  return getFlatCategorySubCategory(input.categoryId)
+}
+
+function skuSubCategoryToken(sub: { categorySlug: string; slug: string }) {
+  return categoryHasSubcategories(sub.categorySlug) ? sub.slug : ''
+}
 
 function resolveVariantPricing(
   data: { price: number; stock: number; variants?: z.infer<typeof variantSchema>[] },
@@ -115,7 +155,7 @@ adminRouter.post('/products', async (req, res) => {
     return
   }
 
-  const sub = await prisma.subCategory.findUnique({ where: { id: parsed.data.subCategoryId } })
+  const sub = await resolveProductSubCategory(parsed.data)
   if (!sub) {
     res.status(400).json({ error: 'Invalid subcategory' })
     return
@@ -132,7 +172,7 @@ adminRouter.post('/products', async (req, res) => {
     parsed.data.sku?.trim() ||
     buildProductSku({
       categorySlug: sub.categorySlug,
-      subCategorySlug: sub.slug,
+      subCategorySlug: skuSubCategoryToken(sub),
       name: parsed.data.name,
     })
   if (!skuBase) {
@@ -191,8 +231,8 @@ adminRouter.patch('/products/:id', async (req, res) => {
   let subCategorySlug = existing.subCategorySlug
   let categorySlug = existing.categorySlug
 
-  if (parsed.data.subCategoryId) {
-    const sub = await prisma.subCategory.findUnique({ where: { id: parsed.data.subCategoryId } })
+  if (parsed.data.subCategoryId || parsed.data.categoryId) {
+    const sub = await resolveProductSubCategory(parsed.data)
     if (!sub) {
       res.status(400).json({ error: 'Invalid subcategory' })
       return

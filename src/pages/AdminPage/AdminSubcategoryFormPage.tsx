@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { Button, Input } from '@/components/ui'
 import { MediaUploader } from '@/components/MediaUploader'
+import { categoryHasSubcategories } from '@/config/Catalog'
 import type { Category } from '@/types'
 import { AdminShell } from './AdminShell'
 import { adminTabPath, mapAdminError } from './adminShared'
@@ -54,13 +55,14 @@ export function AdminSubcategoryFormPage() {
         setCategories(cats)
 
         if (!id) {
+          const selectable = cats.filter((cat) => categoryHasSubcategories(cat.slug))
           const fromQuery =
-            preselectedCategoryId && cats.some((cat) => cat.id === preselectedCategoryId)
+            preselectedCategoryId && selectable.some((cat) => cat.id === preselectedCategoryId)
               ? preselectedCategoryId
               : ''
           setForm({
             ...emptySubForm,
-            categoryId: fromQuery || cats[0]?.id || '',
+            categoryId: fromQuery || selectable[0]?.id || '',
           })
           return
         }
@@ -154,11 +156,13 @@ export function AdminSubcategoryFormPage() {
               onChange={(e) => setForm((s) => ({ ...s, categoryId: e.target.value }))}
               required
             >
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
+              {categories
+                .filter((cat) => categoryHasSubcategories(cat.slug) || cat.id === form.categoryId)
+                .map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
             </select>
           </label>
           <div className={styles.formGrid}>

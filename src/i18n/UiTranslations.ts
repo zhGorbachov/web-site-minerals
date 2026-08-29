@@ -469,6 +469,7 @@ export type UiTranslationSchema = {
     subcategory: string
     subcategoryRequired: string
     noSubsInCategory: string
+    flatCategoryNote: string
     addSubcategoryNow: string
     featured: string
     popular: string
@@ -1021,6 +1022,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     subcategoryRequired: 'Оберіть підкатегорію',
     noSubsInCategory:
       'У категорії «{name}» ще немає підкатегорій. Товар додається в підкатегорію, не в категорію напряму.',
+    flatCategoryNote:
+      'Категорія «{name}» без підкатегорій — товар додається прямо в категорію.',
     addSubcategoryNow: 'Додати підкатегорію',
     featured: 'Рекомендований',
     popular: 'Популярний',
@@ -1582,6 +1585,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     subcategoryRequired: 'Select a subcategory',
     noSubsInCategory:
       'Category “{name}” has no subcategories yet. Products are added to a subcategory, not to the category itself.',
+    flatCategoryNote:
+      'Category “{name}” has no subcategories — the product goes straight into the category.',
     addSubcategoryNow: 'Add a subcategory',
     featured: 'Featured',
     popular: 'Popular',

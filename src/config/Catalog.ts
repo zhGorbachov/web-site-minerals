@@ -23,3 +23,12 @@ export const CATEGORIES_WITHOUT_SUBCATEGORIES = new Set(['pahoshchi'])
 export function categoryHasSubcategories(slug: string) {
   return !CATEGORIES_WITHOUT_SUBCATEGORIES.has(slug)
 }
+
+/**
+ * A flat category still needs one subcategory to hang its products on, because the product
+ * always belongs to a subcategory in the database. That technical row mirrors the category
+ * slug and must stay invisible in the storefront and in the admin subcategory list.
+ */
+export function isImplicitSubcategory(sub: { categorySlug: string; slug: string }) {
+  return !categoryHasSubcategories(sub.categorySlug) && sub.slug === sub.categorySlug
+}

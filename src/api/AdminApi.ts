@@ -43,7 +43,9 @@ export type AdminProductPayload = {
   featured?: boolean
   popular?: boolean
   isNew?: boolean
-  subCategoryId: string
+  /** Omitted for flat categories, where the server picks the technical subcategory itself. */
+  subCategoryId?: string
+  categoryId?: string
 }
 
 export type AdminSubcategoryPayload = {

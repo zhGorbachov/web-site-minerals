@@ -6,6 +6,13 @@ export type StrandLengthOption = {
 /** Низки — the only category sold as whole or half strands. */
 export const STRANDS_CATEGORY_SLUG = 'nytky'
 
+/** Incense is a flat category: products sit on the category, without subcategories. */
+export const CATEGORIES_WITHOUT_SUBCATEGORIES = new Set(['pahoshchi'])
+
+export function categoryHasSubcategories(slug: string) {
+  return !CATEGORIES_WITHOUT_SUBCATEGORIES.has(slug)
+}
+
 /** Wrist sizes offered for bracelets, 14–22 cm. */
 export const DEFAULT_WRIST_SIZES = Array.from({ length: 9 }, (_, i) => `${i + 14} см`)
 

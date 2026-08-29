@@ -12,6 +12,7 @@ import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
 import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, SubCategory } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
+import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
@@ -107,10 +108,14 @@ function deliveryMethodLabel(
   }
 }
 
-type ProductForm = Omit<AdminProductPayload, 'price' | 'discountPrice' | 'stock'> & {
+type ProductForm = Omit<
+  AdminProductPayload,
+  'price' | 'discountPrice' | 'stock' | 'subCategoryId' | 'categoryId'
+> & {
   price: string
   discountPrice: string
   stock: string
+  subCategoryId: string
   variants: ProductVariant[]
 }
 
@@ -211,8 +216,9 @@ export function AdminPage() {
       )
       setForm((f) => {
         if (f.subCategoryId) return f
-        const firstCatId = cats[0]?.id ?? ''
-        const firstSub = subs.find((sub) => sub.categoryId === firstCatId) ?? subs[0]
+        const firstCat = cats[0]
+        if (firstCat && !categoryHasSubcategories(firstCat.slug)) return f
+        const firstSub = subs.find((sub) => sub.categoryId === firstCat?.id) ?? subs[0]
         return firstSub ? { ...f, subCategoryId: firstSub.id } : f
       })
       setFormCategoryId((current) => {
@@ -285,10 +291,15 @@ export function AdminPage() {
     })
   }, [users, userSearch])
 
+  const listedSubcategories = useMemo(
+    () => subcategories.filter((sub) => !isImplicitSubcategory(sub)),
+    [subcategories],
+  )
+
   const filteredSubs = useMemo(() => {
     const q = subSearch.trim().toLowerCase()
-    if (!q) return subcategories
-    return subcategories.filter((sub) => {
+    if (!q) return listedSubcategories
+    return listedSubcategories.filter((sub) => {
       const categoryName =
         categories.find((cat) => cat.id === sub.categoryId)?.name ?? sub.categorySlug
       return (
@@ -297,7 +308,7 @@ export function AdminPage() {
         categoryName.toLowerCase().includes(q)
       )
     })
-  }, [subcategories, categories, subSearch])
+  }, [listedSubcategories, categories, subSearch])
 
   const subsTotalPages = Math.max(1, Math.ceil(filteredSubs.length / SUBCATEGORIES_PAGE_SIZE))
   const subsVisiblePages = getVisiblePageNumbers(subsPage, subsTotalPages)
@@ -341,21 +352,23 @@ export function AdminPage() {
     [subcategories, formCategoryId, language],
   )
   const formCategorySlug = selectedCategory?.slug ?? selectedSubcategory?.categorySlug ?? ''
+  const categoryIsFlat = Boolean(formCategorySlug) && !categoryHasSubcategories(formCategorySlug)
   const formBoundVariants = toStoredVariants(form.variants)
   const formDerived = formBoundVariants.length
     ? deriveProductPricingFromVariants(formBoundVariants, Number(form.price) || 0)
     : null
   const suggestedSku = useMemo(() => {
-    if (!selectedSubcategory) return ''
+    if (!formCategorySlug) return ''
+    if (!categoryIsFlat && !selectedSubcategory) return ''
     return uniqueSku(
       buildProductSku({
-        categorySlug: selectedSubcategory.categorySlug,
-        subCategorySlug: selectedSubcategory.slug,
+        categorySlug: formCategorySlug,
+        subCategorySlug: categoryIsFlat ? '' : (selectedSubcategory?.slug ?? ''),
         name: form.name,
       }),
       products.map((p) => p.sku),
     )
-  }, [selectedSubcategory, form.name, products])
+  }, [formCategorySlug, categoryIsFlat, selectedSubcategory, form.name, products])
   const skuValue = editingId || skuManual ? (form.sku ?? '') : suggestedSku
 
   const applyCategoryChange = (
@@ -378,10 +391,11 @@ export function AdminPage() {
       .sort((a, b) => a.name.localeCompare(b.name, language === 'uk' ? 'uk' : 'en'))
     const prevSlug = selectedCategory?.slug ?? selectedSubcategory?.categorySlug
     const nextSlug = categories.find((cat) => cat.id === categoryId)?.slug
+    const nextIsFlat = Boolean(nextSlug) && !categoryHasSubcategories(nextSlug!)
     setFormCategoryId(categoryId)
     setForm((f) =>
       applyCategoryChange(
-        { ...f, subCategoryId: nextSubs[0]?.id ?? '' },
+        { ...f, subCategoryId: nextIsFlat ? '' : (nextSubs[0]?.id ?? '') },
         nextSlug,
         prevSlug,
       ),
@@ -485,8 +499,12 @@ export function AdminPage() {
   const resetForm = () => {
     setEditingId(null)
     setSkuManual(false)
-    const firstCatId = categories[0]?.id ?? ''
-    const firstSub = subcategories.find((sub) => sub.categoryId === firstCatId)
+    const firstCat = categories[0]
+    const firstCatId = firstCat?.id ?? ''
+    const firstSub =
+      firstCat && !categoryHasSubcategories(firstCat.slug)
+        ? undefined
+        : subcategories.find((sub) => sub.categoryId === firstCatId)
     setFormCategoryId(firstCatId)
     setForm({
       ...emptyForm,
@@ -496,7 +514,7 @@ export function AdminPage() {
 
   const handleSaveProduct = async (e: FormEvent) => {
     e.preventDefault()
-    if (!form.subCategoryId) {
+    if (!form.subCategoryId && !categoryIsFlat) {
       setError(t('admin.subcategoryRequired'))
       return
     }
@@ -512,6 +530,8 @@ export function AdminPage() {
       : null
     const payload: AdminProductPayload = {
       ...form,
+      subCategoryId: form.subCategoryId || undefined,
+      categoryId: formCategoryId || undefined,
       price: derived ? derived.price : Number(form.price),
       stock: derived ? derived.stock : Number(form.stock),
       shortDescription: deriveShortDescription(form.description),
@@ -968,7 +988,13 @@ export function AdminPage() {
                     ))}
                   </select>
                 </label>
-                {categorySubs.length > 0 ? (
+                {categoryIsFlat ? (
+                  <div className={styles.fieldNote}>
+                    <span>
+                      {t('admin.flatCategoryNote', { name: selectedCategory?.name ?? '' })}
+                    </span>
+                  </div>
+                ) : categorySubs.length > 0 ? (
                   <label className={styles.selectLabel}>
                     {t('admin.subcategory')}
                     <select
@@ -1094,7 +1120,9 @@ export function AdminPage() {
               </div>
               {filteredSubs.length === 0 ? (
                 <p className={styles.muted}>
-                  {subcategories.length === 0 ? t('admin.subEmpty') : t('admin.subSearchEmpty')}
+                  {listedSubcategories.length === 0
+                    ? t('admin.subEmpty')
+                    : t('admin.subSearchEmpty')}
                 </p>
               ) : (
                 <>

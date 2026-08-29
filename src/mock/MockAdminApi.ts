@@ -10,6 +10,7 @@ import type {
 import { getAuthToken } from '@/api/client'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, slugify } from './MockDb'
+import { categoryHasSubcategories } from '@/config/Catalog'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
@@ -24,6 +25,47 @@ function requireAdmin() {
     throw new MockApiError(403, 'forbidden')
   }
   return user
+}
+
+/** Mirrors the server: a flat category keeps its products in one technical subcategory. */
+function getFlatCategorySubCategory(categoryId: string): SubCategory | null {
+  const category = MockDb.getCategories().find((cat) => cat.id === categoryId)
+  if (!category || categoryHasSubcategories(category.slug)) return null
+
+  const list = MockDb.getSubcategories()
+  const existing = list.find(
+    (sub) => sub.categorySlug === category.slug && sub.slug === category.slug,
+  )
+  if (existing) return existing
+
+  const now = new Date().toISOString()
+  const created: SubCategory = {
+    id: `sub-${category.slug}`,
+    categoryId: category.id,
+    categorySlug: category.slug,
+    name: category.name,
+    slug: category.slug,
+    image: category.image,
+    createdAt: now,
+    updatedAt: now,
+  }
+  MockDb.setSubcategories([...list, created])
+  return created
+}
+
+function resolveProductSubCategory(payload: {
+  subCategoryId?: string
+  categoryId?: string
+}): SubCategory | null {
+  if (payload.subCategoryId) {
+    return MockDb.getSubcategories().find((s) => s.id === payload.subCategoryId) ?? null
+  }
+  if (!payload.categoryId) return null
+  return getFlatCategorySubCategory(payload.categoryId)
+}
+
+function skuSubCategoryToken(sub: SubCategory) {
+  return categoryHasSubcategories(sub.categorySlug) ? sub.slug : ''
 }
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -45,7 +87,7 @@ export const MockAdminApi = {
 
   async createProduct(payload: AdminProductPayload): Promise<Product> {
     requireAdmin()
-    const sub = MockDb.getSubcategories().find((s) => s.id === payload.subCategoryId)
+    const sub = resolveProductSubCategory(payload)
     if (!sub) throw new MockApiError(400, 'Invalid subcategory')
 
     const slug = payload.slug?.trim() || slugify(payload.name)
@@ -56,7 +98,7 @@ export const MockAdminApi = {
       payload.sku?.trim() ||
       buildProductSku({
         categorySlug: sub.categorySlug,
-        subCategorySlug: sub.slug,
+        subCategorySlug: skuSubCategoryToken(sub),
         name: payload.name,
       })
     if (!skuBase) throw new MockApiError(400, 'Invalid payload')
@@ -110,8 +152,8 @@ export const MockAdminApi = {
     let subCategorySlug = current.subCategorySlug
     let categorySlug = current.categorySlug
 
-    if (payload.subCategoryId) {
-      const sub = MockDb.getSubcategories().find((s) => s.id === payload.subCategoryId)
+    if (payload.subCategoryId || payload.categoryId) {
+      const sub = resolveProductSubCategory(payload)
       if (!sub) throw new MockApiError(400, 'Invalid subcategory')
       subCategoryId = sub.id
       subCategorySlug = sub.slug

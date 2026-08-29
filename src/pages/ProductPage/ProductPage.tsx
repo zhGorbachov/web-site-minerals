@@ -15,6 +15,7 @@ import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation } from '@/i18n/useTranslation'
+import { categoryHasSubcategories } from '@/config/Catalog'
 import { formatPrice } from '@/utils'
 import {
   buildVariantSelection,
@@ -200,10 +201,14 @@ export function ProductPage() {
     { label: t('nav.home'), href: '/' },
     { label: t('nav.catalog'), href: '/catalog' },
     { label: product.categoryName ?? product.categorySlug, href: `/catalog/${product.categorySlug}` },
-    {
-      label: categoryLabel,
-      href: `/catalog/${product.categorySlug}/${product.subCategorySlug}`,
-    },
+    ...(categoryHasSubcategories(product.categorySlug)
+      ? [
+          {
+            label: categoryLabel,
+            href: `/catalog/${product.categorySlug}/${product.subCategorySlug}`,
+          },
+        ]
+      : []),
   ]
 
   return (
