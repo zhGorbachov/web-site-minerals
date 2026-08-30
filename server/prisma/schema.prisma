@@ -104,15 +104,17 @@ model SubCategory {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  products Product[]
+  category     Category             @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products     Product[]
+  productLinks ProductSubCategory[]
 
   @@unique([categorySlug, slug])
   @@index([categoryId])
 }
 
 model Product {
-  id              String   @id
+  id String @id
+  /// Main subcategory: mirrors the `ProductSubCategory` link with the lowest position.
   subCategoryId   String
   subCategorySlug String
   categorySlug    String
@@ -134,7 +136,8 @@ model Product {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  subCategory   SubCategory    @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategory   SubCategory          @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategories ProductSubCategory[]
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
   orderItems    OrderItem[]
@@ -144,6 +147,21 @@ model Product {
   @@index([featured])
   @@index([popular])
   @@index([isNew])
+}
+
+/// Every subcategory a product belongs to, including the main one (position 0).
+model ProductSubCategory {
+  productId       String
+  subCategoryId   String
+  subCategorySlug String
+  position        Int    @default(0)
+
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  subCategory SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, subCategoryId])
+  @@index([subCategorySlug])
+  @@index([subCategoryId])
 }
 
 model Cart {

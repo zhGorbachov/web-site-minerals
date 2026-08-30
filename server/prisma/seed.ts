@@ -12,6 +12,7 @@ async function main() {
   await prisma.cartItem.deleteMany()
   await prisma.cart.deleteMany()
   await prisma.wishlistItem.deleteMany()
+  await prisma.productSubCategory.deleteMany()
   await prisma.product.deleteMany()
   await prisma.subCategory.deleteMany()
   await prisma.category.deleteMany()
@@ -51,6 +52,13 @@ async function main() {
         id: product.id,
         subCategoryId: product.subCategoryId,
         subCategorySlug: product.subCategorySlug,
+        subCategories: {
+          create: {
+            subCategoryId: product.subCategoryId,
+            subCategorySlug: product.subCategorySlug,
+            position: 0,
+          },
+        },
         categorySlug: product.categorySlug,
         name: product.name,
         slug: product.slug,

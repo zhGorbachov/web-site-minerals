@@ -467,6 +467,8 @@ export type UiTranslationSchema = {
     stockFromVariants: string
     stockFromVariantsValue: string
     subcategory: string
+    subcategories: string
+    subcategoriesHint: string
     subcategoryRequired: string
     noSubsInCategory: string
     flatCategoryNote: string
@@ -1019,7 +1021,9 @@ export const uiTranslationsUk: UiTranslationSchema = {
     stockFromVariants: 'Залишок рахується з екземплярів нижче',
     stockFromVariantsValue: '{count} шт. (сума екземплярів)',
     subcategory: 'Підкатегорія',
-    subcategoryRequired: 'Оберіть підкатегорію',
+    subcategories: 'Підкатегорії',
+    subcategoriesHint: 'Можна вибрати кілька. Перша обрана буде основною.',
+    subcategoryRequired: 'Оберіть хоча б одну підкатегорію',
     noSubsInCategory:
       'У категорії «{name}» ще немає підкатегорій. Товар додається в підкатегорію, не в категорію напряму.',
     flatCategoryNote:
@@ -1047,7 +1051,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     successSubDeleted: 'Підкатегорію видалено',
     removeSubConfirm: 'Видалити цю підкатегорію?',
     removeSubConfirmWithProducts:
-      'У підкатегорії є товари. Видалити підкатегорію разом з усіма її товарами?',
+      'Деякі товари належать лише цій підкатегорії — вони будуть видалені разом з нею. Товари з іншими підкатегоріями залишаться. Видалити?',
     errorGeneric: 'Щось пішло не так',
     attributesTitle: 'Параметри товару',
     attributesThreadTitle: 'Параметри низки',
@@ -1582,7 +1586,9 @@ export const uiTranslationsEn: UiTranslationSchema = {
     stockFromVariants: 'Stock is the sum of the pieces below',
     stockFromVariantsValue: '{count} pcs (sum of pieces)',
     subcategory: 'Subcategory',
-    subcategoryRequired: 'Select a subcategory',
+    subcategories: 'Subcategories',
+    subcategoriesHint: 'You can pick several. The first one becomes the main subcategory.',
+    subcategoryRequired: 'Select at least one subcategory',
     noSubsInCategory:
       'Category “{name}” has no subcategories yet. Products are added to a subcategory, not to the category itself.',
     flatCategoryNote:
@@ -1610,7 +1616,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     successSubDeleted: 'Subcategory deleted',
     removeSubConfirm: 'Delete this subcategory?',
     removeSubConfirmWithProducts:
-      'This subcategory has products. Delete the subcategory and all of its products?',
+      'Some products belong only to this subcategory and will be deleted with it. Products that also sit in other subcategories are kept. Delete?',
     errorGeneric: 'Something went wrong',
     attributesTitle: 'Product options',
     attributesThreadTitle: 'Strand options',

@@ -17,7 +17,8 @@ adminRouter.use(requireAdmin)
 
 const productInclude = {
   subCategory: { include: { category: true } },
-} as const
+  subCategories: { include: { subCategory: true }, orderBy: { position: 'asc' } },
+} as const satisfies Prisma.ProductInclude
 
 function slugify(value: string) {
   return value
@@ -71,6 +72,7 @@ const productBodySchema = z.object({
   popular: z.boolean().optional(),
   isNew: z.boolean().optional(),
   subCategoryId: z.string().min(1).optional(),
+  subCategoryIds: z.array(z.string().min(1)).optional(),
   categoryId: z.string().min(1).optional(),
 })
 
@@ -100,12 +102,45 @@ async function getFlatCategorySubCategory(categoryId: string) {
   })
 }
 
-async function resolveProductSubCategory(input: { subCategoryId?: string; categoryId?: string }) {
-  if (input.subCategoryId) {
-    return prisma.subCategory.findUnique({ where: { id: input.subCategoryId } })
+type ProductSubCategoryInput = {
+  subCategoryId?: string
+  subCategoryIds?: string[]
+  categoryId?: string
+}
+
+function hasSubCategoryInput(input: ProductSubCategoryInput) {
+  return Boolean(input.subCategoryIds?.length || input.subCategoryId || input.categoryId)
+}
+
+/**
+ * A product can sit in several subcategories, but all of them must belong to the same category.
+ * The first one is the main subcategory kept on the product row itself.
+ */
+async function resolveProductSubCategories(input: ProductSubCategoryInput) {
+  const requestedIds = [...new Set([...(input.subCategoryIds ?? []), ...(input.subCategoryId ? [input.subCategoryId] : [])])]
+
+  if (requestedIds.length === 0) {
+    if (!input.categoryId) return null
+    const flat = await getFlatCategorySubCategory(input.categoryId)
+    return flat ? [flat] : null
   }
-  if (!input.categoryId) return null
-  return getFlatCategorySubCategory(input.categoryId)
+
+  const found = await prisma.subCategory.findMany({ where: { id: { in: requestedIds } } })
+  if (found.length !== requestedIds.length) return null
+
+  const byId = new Map(found.map((sub) => [sub.id, sub]))
+  const ordered = requestedIds.map((id) => byId.get(id)!)
+  if (ordered.some((sub) => sub.categoryId !== ordered[0].categoryId)) return null
+
+  return ordered
+}
+
+function subCategoryLinkData(subs: { id: string; slug: string }[]) {
+  return subs.map((sub, position) => ({
+    subCategoryId: sub.id,
+    subCategorySlug: sub.slug,
+    position,
+  }))
 }
 
 function skuSubCategoryToken(sub: { categorySlug: string; slug: string }) {
@@ -155,11 +190,12 @@ adminRouter.post('/products', async (req, res) => {
     return
   }
 
-  const sub = await resolveProductSubCategory(parsed.data)
-  if (!sub) {
+  const subs = await resolveProductSubCategories(parsed.data)
+  if (!subs?.length) {
     res.status(400).json({ error: 'Invalid subcategory' })
     return
   }
+  const sub = subs[0]
 
   const slug = parsed.data.slug?.trim() || slugify(parsed.data.name)
   const existingSlug = await prisma.product.findUnique({ where: { slug } })
@@ -207,6 +243,7 @@ adminRouter.post('/products', async (req, res) => {
       subCategoryId: sub.id,
       subCategorySlug: sub.slug,
       categorySlug: sub.categorySlug,
+      subCategories: { create: subCategoryLinkData(subs) },
     },
     include: productInclude,
   })
@@ -230,16 +267,18 @@ adminRouter.patch('/products/:id', async (req, res) => {
   let subCategoryId = existing.subCategoryId
   let subCategorySlug = existing.subCategorySlug
   let categorySlug = existing.categorySlug
+  let nextSubs: { id: string; slug: string }[] | undefined
 
-  if (parsed.data.subCategoryId || parsed.data.categoryId) {
-    const sub = await resolveProductSubCategory(parsed.data)
-    if (!sub) {
+  if (hasSubCategoryInput(parsed.data)) {
+    const subs = await resolveProductSubCategories(parsed.data)
+    if (!subs?.length) {
       res.status(400).json({ error: 'Invalid subcategory' })
       return
     }
-    subCategoryId = sub.id
-    subCategorySlug = sub.slug
-    categorySlug = sub.categorySlug
+    subCategoryId = subs[0].id
+    subCategorySlug = subs[0].slug
+    categorySlug = subs[0].categorySlug
+    nextSubs = subs
   }
 
   if (parsed.data.slug && parsed.data.slug !== existing.slug) {
@@ -273,38 +312,46 @@ adminRouter.patch('/products/:id', async (req, res) => {
     nextVariants = pricing.variants as Prisma.InputJsonValue
   }
 
-  const product = await prisma.product.update({
-    where: { id: existing.id },
-    data: {
-      name: parsed.data.name,
-      slug: parsed.data.slug,
-      sku: parsed.data.sku?.trim() || undefined,
-      shortDescription:
-        parsed.data.shortDescription !== undefined || parsed.data.description !== undefined
-          ? resolveShortDescription(
-              parsed.data.description ?? existing.description,
-              parsed.data.shortDescription,
-            )
-          : undefined,
-      description: parsed.data.description,
-      price: nextPrice,
-      discountPrice:
-        parsed.data.discountPrice === undefined
-          ? undefined
-          : toDiscountPrice(parsed.data.discountPrice),
-      stock: nextStock,
-      images: parsed.data.images,
-      video: parsed.data.video === undefined ? undefined : parsed.data.video,
-      attributes: parsed.data.attributes as Prisma.InputJsonValue | undefined,
-      variants: nextVariants,
-      featured: parsed.data.featured,
-      popular: parsed.data.popular,
-      isNew: parsed.data.isNew,
-      subCategoryId,
-      subCategorySlug,
-      categorySlug,
-    },
-    include: productInclude,
+  const product = await prisma.$transaction(async (tx) => {
+    // Links are replaced rather than merged, so the old ones must go before the new ones land.
+    if (nextSubs) {
+      await tx.productSubCategory.deleteMany({ where: { productId: existing.id } })
+    }
+
+    return tx.product.update({
+      where: { id: existing.id },
+      data: {
+        name: parsed.data.name,
+        slug: parsed.data.slug,
+        sku: parsed.data.sku?.trim() || undefined,
+        shortDescription:
+          parsed.data.shortDescription !== undefined || parsed.data.description !== undefined
+            ? resolveShortDescription(
+                parsed.data.description ?? existing.description,
+                parsed.data.shortDescription,
+              )
+            : undefined,
+        description: parsed.data.description,
+        price: nextPrice,
+        discountPrice:
+          parsed.data.discountPrice === undefined
+            ? undefined
+            : toDiscountPrice(parsed.data.discountPrice),
+        stock: nextStock,
+        images: parsed.data.images,
+        video: parsed.data.video === undefined ? undefined : parsed.data.video,
+        attributes: parsed.data.attributes as Prisma.InputJsonValue | undefined,
+        variants: nextVariants,
+        featured: parsed.data.featured,
+        popular: parsed.data.popular,
+        isNew: parsed.data.isNew,
+        subCategoryId,
+        subCategorySlug,
+        categorySlug,
+        subCategories: nextSubs ? { create: subCategoryLinkData(nextSubs) } : undefined,
+      },
+      include: productInclude,
+    })
   })
 
   res.json(serializeProduct(product))
@@ -437,13 +484,19 @@ adminRouter.patch('/subcategories/:id', async (req, res) => {
   })
 
   if (slug !== existing.slug || category.slug !== existing.categorySlug) {
-    await prisma.product.updateMany({
-      where: { subCategoryId: existing.id },
-      data: {
-        subCategorySlug: slug,
-        categorySlug: category.slug,
-      },
-    })
+    await prisma.$transaction([
+      prisma.product.updateMany({
+        where: { subCategoryId: existing.id },
+        data: {
+          subCategorySlug: slug,
+          categorySlug: category.slug,
+        },
+      }),
+      prisma.productSubCategory.updateMany({
+        where: { subCategoryId: existing.id },
+        data: { subCategorySlug: slug },
+      }),
+    ])
   }
 
   res.json(serializeSubCategory(sub))
@@ -457,29 +510,69 @@ adminRouter.delete('/subcategories/:id', async (req, res) => {
   }
 
   const products = await prisma.product.findMany({
-    where: { subCategoryId: existing.id },
-    select: { id: true },
+    where: {
+      OR: [
+        { subCategoryId: existing.id },
+        { subCategories: { some: { subCategoryId: existing.id } } },
+      ],
+    },
+    select: {
+      id: true,
+      subCategoryId: true,
+      subCategories: {
+        orderBy: { position: 'asc' },
+        select: {
+          subCategoryId: true,
+          subCategorySlug: true,
+          subCategory: { select: { categorySlug: true } },
+        },
+      },
+    },
   })
-  const productIds = products.map((product) => product.id)
 
-  if (productIds.length > 0) {
+  /** Products kept alive because they also sit in other subcategories. */
+  const kept = products.flatMap((product) => {
+    const remaining = product.subCategories.filter((link) => link.subCategoryId !== existing.id)
+    return remaining.length ? [{ product, next: remaining[0] }] : []
+  })
+  const orphanIds = products
+    .filter((product) => !kept.some((item) => item.product.id === product.id))
+    .map((product) => product.id)
+
+  if (orphanIds.length > 0) {
     const orderCount = await prisma.orderItem.count({
-      where: { productId: { in: productIds } },
+      where: { productId: { in: orphanIds } },
     })
     if (orderCount > 0) {
       res.status(409).json({ error: 'subcategory_has_products' })
       return
     }
-
-    await prisma.$transaction([
-      prisma.cartItem.deleteMany({ where: { productId: { in: productIds } } }),
-      prisma.wishlistItem.deleteMany({ where: { productId: { in: productIds } } }),
-      prisma.product.deleteMany({ where: { id: { in: productIds } } }),
-      prisma.subCategory.delete({ where: { id: existing.id } }),
-    ])
-  } else {
-    await prisma.subCategory.delete({ where: { id: existing.id } })
   }
+
+  // The product row keeps a main subcategory FK that cascade-deletes the product, so products
+  // that survive must be moved onto another of their subcategories before the row is removed.
+  await prisma.$transaction([
+    ...kept
+      .filter((item) => item.product.subCategoryId === existing.id)
+      .map((item) =>
+        prisma.product.update({
+          where: { id: item.product.id },
+          data: {
+            subCategoryId: item.next.subCategoryId,
+            subCategorySlug: item.next.subCategorySlug,
+            categorySlug: item.next.subCategory.categorySlug,
+          },
+        }),
+      ),
+    ...(orphanIds.length
+      ? [
+          prisma.cartItem.deleteMany({ where: { productId: { in: orphanIds } } }),
+          prisma.wishlistItem.deleteMany({ where: { productId: { in: orphanIds } } }),
+          prisma.product.deleteMany({ where: { id: { in: orphanIds } } }),
+        ]
+      : []),
+    prisma.subCategory.delete({ where: { id: existing.id } }),
+  ])
 
   res.status(204).send()
 })

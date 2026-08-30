@@ -90,7 +90,11 @@ export function CategoryPage() {
   const filteredProducts = useMemo(() => {
     if (selectedSlugs.length === 0) return products
     const selected = new Set(selectedSlugs)
-    return products.filter((product) => selected.has(product.subCategorySlug))
+    return products.filter((product) =>
+      (product.subCategorySlugs?.length ? product.subCategorySlugs : [product.subCategorySlug]).some(
+        (slug) => selected.has(slug),
+      ),
+    )
   }, [products, selectedSlugs])
 
   const sortedProducts = useMemo(

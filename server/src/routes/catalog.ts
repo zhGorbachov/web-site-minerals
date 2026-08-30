@@ -9,7 +9,18 @@ const productInclude = {
   subCategory: {
     include: { category: true },
   },
+  subCategories: { include: { subCategory: true }, orderBy: { position: 'asc' } },
 } satisfies Prisma.ProductInclude
+
+function parseSlugList(value: unknown): string[] {
+  const raw = Array.isArray(value) ? value : [value]
+  const slugs = raw
+    .filter((item): item is string => typeof item === 'string')
+    .flatMap((item) => item.split(','))
+    .map((item) => item.trim())
+    .filter(Boolean)
+  return [...new Set(slugs)]
+}
 
 catalogRouter.get('/categories', async (_req, res) => {
   const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } })
@@ -47,8 +58,7 @@ catalogRouter.get('/subcategories/:slug', async (req, res) => {
 
 catalogRouter.get('/products', async (req, res) => {
   const category = typeof req.query.category === 'string' ? req.query.category : undefined
-  const subcategory =
-    typeof req.query.subcategory === 'string' ? req.query.subcategory : undefined
+  const subcategories = parseSlugList(req.query.subcategory)
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : undefined
   const featured = req.query.featured === 'true'
   const popular = req.query.popular === 'true'
@@ -60,7 +70,9 @@ catalogRouter.get('/products', async (req, res) => {
 
   const where: Prisma.ProductWhereInput = {}
   if (category) where.categorySlug = category
-  if (subcategory) where.subCategorySlug = subcategory
+  if (subcategories.length) {
+    where.subCategories = { some: { subCategorySlug: { in: subcategories } } }
+  }
   if (featured) where.featured = true
   if (popular) where.popular = true
   if (isNew) where.isNew = true
@@ -95,16 +107,27 @@ catalogRouter.get('/products/:slug', async (req, res) => {
 })
 
 catalogRouter.get('/products/:slug/related', async (req, res) => {
-  const product = await prisma.product.findUnique({ where: { slug: req.params.slug } })
+  const product = await prisma.product.findUnique({
+    where: { slug: req.params.slug },
+    select: {
+      id: true,
+      subCategorySlug: true,
+      subCategories: { select: { subCategorySlug: true } },
+    },
+  })
   if (!product) {
     res.status(404).json({ error: 'Not found' })
     return
   }
 
+  const slugs = product.subCategories.length
+    ? product.subCategories.map((link) => link.subCategorySlug)
+    : [product.subCategorySlug]
+
   const limit = Math.min(Number(req.query.limit) || 4, 12)
   const related = await prisma.product.findMany({
     where: {
-      subCategorySlug: product.subCategorySlug,
+      subCategories: { some: { subCategorySlug: { in: slugs } } },
       id: { not: product.id },
     },
     include: productInclude,

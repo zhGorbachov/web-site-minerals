@@ -82,8 +82,12 @@ export interface ProductVariant {
 
 export interface Product {
   id: string
+  /** Main subcategory: the first entry of `subCategoryIds`. */
   subCategoryId: string
   subCategorySlug: string
+  subCategoryIds: string[]
+  subCategorySlugs: string[]
+  subCategoryNames?: string[]
   categorySlug: string
   categoryName?: string
   subCategoryName?: string

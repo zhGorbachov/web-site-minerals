@@ -1,11 +1,11 @@
-import type { Product } from '@/types'
 import { mockImages } from '@/assets/mock/Images'
+import type { StoredProduct } from './MockProduct'
 import {
   generateMockNewProducts,
   MOCK_EXTRA_NEW_PRODUCTS_COUNT,
 } from './GenerateNewProducts'
 
-const baseProducts: Product[] = [
+const baseProducts: StoredProduct[] = [
   // ── Мінерали / Агат ──────────────────────────────────────
   {
     id: 'prod-1',
@@ -819,7 +819,7 @@ const baseProducts: Product[] = [
   },
 ]
 
-export const products: Product[] = [
+export const products: StoredProduct[] = [
   ...baseProducts,
   ...generateMockNewProducts(MOCK_EXTRA_NEW_PRODUCTS_COUNT),
 ]

@@ -35,15 +35,36 @@ export function serializeSubCategory(sub: SubCategory) {
   }
 }
 
+type ProductSubCategoryLink = {
+  subCategoryId: string
+  subCategorySlug: string
+  position: number
+  subCategory?: { name: string } | null
+}
+
 export function serializeProduct(
   product: Product & {
     subCategory?: { name: string; category?: { name: string } | null } | null
+    subCategories?: ProductSubCategoryLink[]
   },
 ) {
+  const links = [...(product.subCategories ?? [])].sort((a, b) => a.position - b.position)
+
   return {
     id: product.id,
     subCategoryId: product.subCategoryId,
     subCategorySlug: product.subCategorySlug,
+    subCategoryIds: links.length
+      ? links.map((link) => link.subCategoryId)
+      : [product.subCategoryId],
+    subCategorySlugs: links.length
+      ? links.map((link) => link.subCategorySlug)
+      : [product.subCategorySlug],
+    subCategoryNames: links.length
+      ? links.map((link) => link.subCategory?.name ?? link.subCategorySlug)
+      : product.subCategory?.name
+        ? [product.subCategory.name]
+        : undefined,
     categorySlug: product.categorySlug,
     categoryName: product.subCategory?.category?.name,
     subCategoryName: product.subCategory?.name,

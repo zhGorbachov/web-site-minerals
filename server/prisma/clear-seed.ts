@@ -55,7 +55,7 @@ async function main() {
   }
 
   const emptySubs = await prisma.subCategory.findMany({
-    where: { products: { none: {} } },
+    where: { products: { none: {} }, productLinks: { none: {} } },
     select: { id: true },
   })
   if (emptySubs.length > 0) {

@@ -95,6 +95,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 The API entrypoint runs `prisma db push` on each start, then bootstraps:
 
 - the five storefront categories (Низки, Підвіски, Браслети, Пахощі, Мінерали) — always present, home page stays **2+3**
+- subcategory links for products saved before multi-subcategory support (idempotent, no-op afterwards)
 - the admin user from `ADMIN_*` env (defaults: phone `0668344322`, password `hMJ5Pz&B6*%*Efez33`)
 
 Subcategories are **not** created automatically — add them in admin as needed.

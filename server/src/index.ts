@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser'
 import { env } from './lib/env.js'
 import { ensureBootstrapAdmin } from './lib/bootstrapAdmin.js'
 import { ensureCoreCategories } from './lib/bootstrapCategories.js'
+import { backfillProductSubCategories } from './lib/backfillProductSubCategories.js'
 import { authRouter } from './routes/auth.js'
 import { catalogRouter } from './routes/catalog.js'
 import { cartRouter } from './routes/cart.js'
@@ -55,6 +56,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 
 async function main() {
   await ensureCoreCategories()
+  await backfillProductSubCategories()
   await ensureBootstrapAdmin()
   app.listen(env.port, () => {
     console.log(`API listening on http://localhost:${env.port}`)

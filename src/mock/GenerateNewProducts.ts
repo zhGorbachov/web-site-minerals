@@ -1,5 +1,5 @@
-import type { Product } from '@/types'
 import { mockImages } from '@/assets/mock/Images'
+import type { StoredProduct } from './MockProduct'
 
 const IMAGE_POOL = [
   mockImages.beadsAgate,
@@ -55,7 +55,7 @@ const SUBCATEGORIES = [
 ] as const
 
 /** Generates extra mock new products for pagination demos. */
-export function generateMockNewProducts(count: number): Product[] {
+export function generateMockNewProducts(count: number): StoredProduct[] {
   return Array.from({ length: count }, (_, index) => {
     const n = index + 1
     const sub = SUBCATEGORIES[index % SUBCATEGORIES.length]

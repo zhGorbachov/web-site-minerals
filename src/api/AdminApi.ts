@@ -45,6 +45,8 @@ export type AdminProductPayload = {
   isNew?: boolean
   /** Omitted for flat categories, where the server picks the technical subcategory itself. */
   subCategoryId?: string
+  /** All subcategories of the product; the first one becomes the main subcategory. */
+  subCategoryIds?: string[]
   categoryId?: string
 }
 

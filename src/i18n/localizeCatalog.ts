@@ -68,6 +68,15 @@ export function localizeProduct(product: Product, language: Language): Product {
     if (subName) localized = { ...localized, subCategoryName: subName }
   }
 
+  if (localized.subCategoryNames?.length) {
+    localized = {
+      ...localized,
+      subCategoryNames: localized.subCategoryNames.map(
+        (name, index) => subcategoryEn[localized.subCategorySlugs?.[index] ?? ''] ?? name,
+      ),
+    }
+  }
+
   const attrs = { ...localized.attributes } as Record<string, unknown>
 
   for (const [key, value] of Object.entries(attrs)) {

@@ -36,7 +36,10 @@ export const MockCatalogApi = {
     let list = MockDb.getProducts().map(enrichProduct)
 
     if (params?.category) list = list.filter((p) => p.categorySlug === params.category)
-    if (params?.subcategory) list = list.filter((p) => p.subCategorySlug === params.subcategory)
+    if (params?.subcategory) {
+      const wanted = new Set(params.subcategory.split(',').map((slug) => slug.trim()))
+      list = list.filter((p) => p.subCategorySlugs.some((slug) => wanted.has(slug)))
+    }
     if (params?.featured) list = list.filter((p) => p.featured)
     if (params?.popular) list = list.filter((p) => p.popular)
     if (params?.new) list = list.filter((p) => p.isNew)
@@ -69,9 +72,10 @@ export const MockCatalogApi = {
   async getRelated(slug: string, limit = 4): Promise<Product[]> {
     const product = MockDb.getProducts().find((p) => p.slug === slug)
     if (!product) throw new MockApiError(404, 'Not found')
+    const wanted = new Set(enrichProduct(product).subCategorySlugs)
     return MockDb.getProducts()
-      .filter((p) => p.id !== product.id && p.subCategorySlug === product.subCategorySlug)
-      .slice(0, limit)
       .map(enrichProduct)
+      .filter((p) => p.id !== product.id && p.subCategorySlugs.some((s) => wanted.has(s)))
+      .slice(0, limit)
   },
 }

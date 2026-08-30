@@ -3,9 +3,10 @@ import { isValidLocalPhone, normalizeLocalPhone } from '@/utils/phone'
 import { categories as seedCategories } from './categories'
 import { subcategories as seedSubcategories } from './subcategories'
 import { products as seedProducts } from './products'
+import { storedSubCategoryIds, type StoredProduct } from './MockProduct'
 
 const STORAGE_KEY = 'crystal-mock-db'
-const STORAGE_VERSION = 11
+const STORAGE_VERSION = 12
 
 export type MockUserRecord = {
   password: string
@@ -22,7 +23,7 @@ type MockDbState = {
   version: number
   categories: Category[]
   subcategories: SubCategory[]
-  products: Product[]
+  products: StoredProduct[]
   users: MockUserRecord[]
   carts: Record<string, MockCart>
   wishlists: Record<string, string[]>
@@ -192,7 +193,7 @@ export const MockDb = {
     return state.products
   },
 
-  setProducts(next: Product[]) {
+  setProducts(next: StoredProduct[]) {
     state.products = next
     persist()
   },
@@ -339,14 +340,23 @@ export function slugify(value: string) {
     .slice(0, 80)
 }
 
-export function enrichProduct(product: Product): Product {
-  const sub = state.subcategories.find((s) => s.id === product.subCategoryId)
-  const category = state.categories.find((c) => c.slug === product.categorySlug)
+export function enrichProduct(product: StoredProduct): Product {
+  const subs = storedSubCategoryIds(product)
+    .map((id) => state.subcategories.find((s) => s.id === id))
+    .filter((sub): sub is SubCategory => Boolean(sub))
+  const main = subs[0]
+  const categorySlug = main?.categorySlug ?? product.categorySlug
+  const category = state.categories.find((c) => c.slug === categorySlug)
+
   return {
     ...product,
-    subCategorySlug: sub?.slug ?? product.subCategorySlug,
-    categorySlug: sub?.categorySlug ?? product.categorySlug,
+    subCategoryId: main?.id ?? product.subCategoryId,
+    subCategorySlug: main?.slug ?? product.subCategorySlug,
+    subCategoryIds: subs.length ? subs.map((sub) => sub.id) : [product.subCategoryId],
+    subCategorySlugs: subs.length ? subs.map((sub) => sub.slug) : [product.subCategorySlug],
+    subCategoryNames: subs.length ? subs.map((sub) => sub.name) : undefined,
+    categorySlug,
     categoryName: category?.name,
-    subCategoryName: sub?.name,
+    subCategoryName: main?.name,
   }
 }

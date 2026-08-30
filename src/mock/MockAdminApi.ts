@@ -10,6 +10,7 @@ import type {
 import { getAuthToken } from '@/api/client'
 import { MockApiError } from './MockApiError'
 import { enrichProduct, MockDb, slugify } from './MockDb'
+import { storedSubCategoryIds, type StoredProduct } from './MockProduct'
 import { categoryHasSubcategories } from '@/config/Catalog'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
@@ -53,15 +54,38 @@ function getFlatCategorySubCategory(categoryId: string): SubCategory | null {
   return created
 }
 
-function resolveProductSubCategory(payload: {
+type ProductSubCategoryInput = {
   subCategoryId?: string
+  subCategoryIds?: string[]
   categoryId?: string
-}): SubCategory | null {
-  if (payload.subCategoryId) {
-    return MockDb.getSubcategories().find((s) => s.id === payload.subCategoryId) ?? null
+}
+
+function hasSubCategoryInput(payload: ProductSubCategoryInput) {
+  return Boolean(payload.subCategoryIds?.length || payload.subCategoryId || payload.categoryId)
+}
+
+/** Mirrors the server: several subcategories are allowed, but all within the same category. */
+function resolveProductSubCategories(payload: ProductSubCategoryInput): SubCategory[] | null {
+  const requestedIds = [
+    ...new Set([
+      ...(payload.subCategoryIds ?? []),
+      ...(payload.subCategoryId ? [payload.subCategoryId] : []),
+    ]),
+  ]
+
+  if (requestedIds.length === 0) {
+    if (!payload.categoryId) return null
+    const flat = getFlatCategorySubCategory(payload.categoryId)
+    return flat ? [flat] : null
   }
-  if (!payload.categoryId) return null
-  return getFlatCategorySubCategory(payload.categoryId)
+
+  const list = MockDb.getSubcategories()
+  const resolved = requestedIds.map((id) => list.find((s) => s.id === id))
+  if (resolved.some((sub) => !sub)) return null
+
+  const subs = resolved as SubCategory[]
+  if (subs.some((sub) => sub.categoryId !== subs[0].categoryId)) return null
+  return subs
 }
 
 function skuSubCategoryToken(sub: SubCategory) {
@@ -87,8 +111,9 @@ export const MockAdminApi = {
 
   async createProduct(payload: AdminProductPayload): Promise<Product> {
     requireAdmin()
-    const sub = resolveProductSubCategory(payload)
-    if (!sub) throw new MockApiError(400, 'Invalid subcategory')
+    const subs = resolveProductSubCategories(payload)
+    if (!subs?.length) throw new MockApiError(400, 'Invalid subcategory')
+    const sub = subs[0]
 
     const slug = payload.slug?.trim() || slugify(payload.name)
     if (MockDb.getProducts().some((p) => p.slug === slug)) {
@@ -112,7 +137,7 @@ export const MockAdminApi = {
     const derived = variants.length
       ? deriveProductPricingFromVariants(variants, payload.price)
       : { price: payload.price, stock: payload.stock }
-    const product: Product = {
+    const product: StoredProduct = {
       id: `prod-${Date.now()}`,
       name: payload.name,
       slug,
@@ -132,6 +157,7 @@ export const MockAdminApi = {
       isNew: payload.isNew ?? true,
       subCategoryId: sub.id,
       subCategorySlug: sub.slug,
+      subCategoryIds: subs.map((item) => item.id),
       categorySlug: sub.categorySlug,
       createdAt: now,
       updatedAt: now,
@@ -151,13 +177,15 @@ export const MockAdminApi = {
     let subCategoryId = current.subCategoryId
     let subCategorySlug = current.subCategorySlug
     let categorySlug = current.categorySlug
+    let subCategoryIds = storedSubCategoryIds(current)
 
-    if (payload.subCategoryId || payload.categoryId) {
-      const sub = resolveProductSubCategory(payload)
-      if (!sub) throw new MockApiError(400, 'Invalid subcategory')
-      subCategoryId = sub.id
-      subCategorySlug = sub.slug
-      categorySlug = sub.categorySlug
+    if (hasSubCategoryInput(payload)) {
+      const subs = resolveProductSubCategories(payload)
+      if (!subs?.length) throw new MockApiError(400, 'Invalid subcategory')
+      subCategoryId = subs[0].id
+      subCategorySlug = subs[0].slug
+      categorySlug = subs[0].categorySlug
+      subCategoryIds = subs.map((sub) => sub.id)
     }
 
     const slug = payload.slug?.trim() || current.slug
@@ -179,7 +207,7 @@ export const MockAdminApi = {
           )
         : null
 
-    const updated: Product = {
+    const updated: StoredProduct = {
       ...current,
       name: payload.name ?? current.name,
       slug,
@@ -207,6 +235,7 @@ export const MockAdminApi = {
       isNew: payload.isNew ?? current.isNew,
       subCategoryId,
       subCategorySlug,
+      subCategoryIds,
       categorySlug,
       updatedAt: new Date().toISOString(),
     }
@@ -310,7 +339,26 @@ export const MockAdminApi = {
     requireAdmin()
     const list = MockDb.getSubcategories()
     if (!list.some((s) => s.id === id)) throw new MockApiError(404, 'Not found')
-    MockDb.setProducts(MockDb.getProducts().filter((p) => p.subCategoryId !== id))
+
+    // A product survives as long as it still belongs to another subcategory.
+    const remaining = MockDb.getProducts().flatMap((product) => {
+      const ids = storedSubCategoryIds(product).filter((subId) => subId !== id)
+      if (ids.length === 0) return []
+      if (ids.length === storedSubCategoryIds(product).length) return [product]
+
+      const main = list.find((sub) => sub.id === ids[0])
+      return [
+        {
+          ...product,
+          subCategoryIds: ids,
+          subCategoryId: main?.id ?? ids[0],
+          subCategorySlug: main?.slug ?? product.subCategorySlug,
+          categorySlug: main?.categorySlug ?? product.categorySlug,
+        },
+      ]
+    })
+
+    MockDb.setProducts(remaining)
     MockDb.setSubcategories(list.filter((s) => s.id !== id))
   },
 
