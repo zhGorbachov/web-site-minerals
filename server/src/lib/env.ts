@@ -29,7 +29,7 @@ export const env = {
   apiUrl: process.env.API_URL?.trim() || `http://localhost:${process.env.PORT ?? 3001}`,
   novaPoshtaApiKey: process.env.NOVA_POSHTA_API_KEY?.trim() ?? '',
   turboSmsToken: process.env.TURBOSMS_TOKEN?.trim() ?? '',
-  turboSmsSender: process.env.TURBOSMS_SENDER?.trim() || 'lux_stones',
+  turboSmsSender: process.env.TURBOSMS_SENDER?.trim() || 'lux_.stones',
   otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES ?? 10),
   otpMaxAttempts: Number(process.env.OTP_MAX_ATTEMPTS ?? 5),
   otpResendCooldownSeconds: Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60),
