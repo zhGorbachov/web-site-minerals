@@ -324,6 +324,7 @@ export type UiTranslationSchema = {
     errorOauthNotConfigured: string
     errorOauthDenied: string
     errorOauthFailed: string
+    errorSmsSendFailed: string
   }
   profile: {
     title: string
@@ -876,6 +877,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
       'OAuth не налаштовано на сервері. Додайте GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET у server/.env',
     errorOauthDenied: 'Вхід скасовано. Спробуйте ще раз',
     errorOauthFailed: 'Не вдалося завершити вхід через провайдера. Спробуйте ще раз',
+    errorSmsSendFailed: 'Не вдалося надіслати SMS з кодом. Спробуйте пізніше або зверніться до підтримки',
   },
   profile: {
     title: 'Профіль',
@@ -1441,6 +1443,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
       'OAuth is not configured on the server. Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET to server/.env',
     errorOauthDenied: 'Sign-in was cancelled. Please try again',
     errorOauthFailed: 'Could not complete provider sign-in. Please try again',
+    errorSmsSendFailed: 'Could not send the SMS code. Please try later or contact support',
   },
   profile: {
     title: 'Profile',

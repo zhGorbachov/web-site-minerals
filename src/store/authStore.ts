@@ -21,6 +21,7 @@ export type AuthError =
   | 'code_expired'
   | 'too_many_attempts'
   | 'code_send_too_soon'
+  | 'sms_send_failed'
 
 interface RegisterPayload {
   firstName: string
@@ -57,6 +58,7 @@ function mapApiError(error: unknown): AuthError {
     if (code === 'code_expired') return 'code_expired'
     if (code === 'too_many_attempts') return 'too_many_attempts'
     if (code === 'code_send_too_soon') return 'code_send_too_soon'
+    if (code === 'sms_send_failed') return 'sms_send_failed'
   }
   return 'oauth_failed'
 }

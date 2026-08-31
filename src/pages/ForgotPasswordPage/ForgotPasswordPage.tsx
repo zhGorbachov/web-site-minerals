@@ -18,6 +18,8 @@ function errorText(error: AuthError) {
       return 'Новий код можна надіслати через хвилину.'
     case 'weak_password':
       return 'Пароль має містити щонайменше 6 символів.'
+    case 'sms_send_failed':
+      return 'Не вдалося надіслати SMS з кодом. Спробуйте пізніше або зверніться до підтримки.'
     default:
       return 'Не вдалося виконати дію. Спробуйте ще раз.'
   }

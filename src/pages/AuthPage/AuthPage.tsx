@@ -26,6 +26,7 @@ const ERROR_KEYS: Record<AuthError, TranslationKey> = {
   code_expired: 'auth.errorOauthFailed',
   too_many_attempts: 'auth.errorOauthFailed',
   code_send_too_soon: 'auth.errorOauthFailed',
+  sms_send_failed: 'auth.errorSmsSendFailed',
 }
 
 function GoogleIcon() {
