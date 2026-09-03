@@ -14,7 +14,8 @@ export type PaymentStatus = 'unpaid' | 'awaiting_payment' | 'paid' | 'failed'
 export interface OrderItem {
   id: string
   orderId: string
-  productId: string
+  /** Null when the catalog product was deleted after the order was placed. */
+  productId: string | null
   productName: string
   productImage: string
   quantity: number

@@ -1,4 +1,4 @@
-import type { Product, ProductAttributes, SubCategory } from '@/types'
+import type { Product, ProductAttributes, StoreReview, SubCategory } from '@/types'
 import type {
   AdminOrder,
   AdminOrderUpdatePayload,
@@ -466,6 +466,20 @@ export const MockAdminApi = {
             phone: user.phone,
           }
         : null,
+    }
+  },
+
+  async getReviews(): Promise<StoreReview[]> {
+    requireAdmin()
+    return [...MockDb.getReviews()].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+  },
+
+  async deleteReview(id: string): Promise<void> {
+    requireAdmin()
+    if (!MockDb.removeReview(id)) {
+      throw new MockApiError(404, 'Not found')
     }
   },
 }

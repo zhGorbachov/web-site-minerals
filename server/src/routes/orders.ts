@@ -54,7 +54,7 @@ function mapOrder(order: {
   items: Array<{
     id: string
     orderId: string
-    productId: string
+    productId: string | null
     productName: string
     productImage: string
     quantity: number

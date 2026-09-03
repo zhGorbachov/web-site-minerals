@@ -327,6 +327,14 @@ export const MockDb = {
     state.reviews = [review, ...state.reviews]
     persist()
   },
+
+  removeReview(id: string) {
+    const next = state.reviews.filter((review) => review.id !== id)
+    if (next.length === state.reviews.length) return false
+    state.reviews = next
+    persist()
+    return true
+  },
 }
 
 export function slugify(value: string) {

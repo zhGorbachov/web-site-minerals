@@ -383,12 +383,7 @@ adminRouter.delete('/products/:id', async (req, res) => {
     return
   }
 
-  const orderCount = await prisma.orderItem.count({ where: { productId: existing.id } })
-  if (orderCount > 0) {
-    res.status(409).json({ error: 'product_in_orders' })
-    return
-  }
-
+  // Cart/wishlist rows go away; order items keep name/image/price and drop the product FK.
   await prisma.$transaction([
     prisma.cartItem.deleteMany({ where: { productId: existing.id } }),
     prisma.wishlistItem.deleteMany({ where: { productId: existing.id } }),
@@ -539,16 +534,6 @@ adminRouter.delete('/subcategories/:id', async (req, res) => {
     .filter((product) => !kept.some((item) => item.product.id === product.id))
     .map((product) => product.id)
 
-  if (orphanIds.length > 0) {
-    const orderCount = await prisma.orderItem.count({
-      where: { productId: { in: orphanIds } },
-    })
-    if (orderCount > 0) {
-      res.status(409).json({ error: 'subcategory_has_products' })
-      return
-    }
-  }
-
   // The product row keeps a main subcategory FK that cascade-deletes the product, so products
   // that survive must be moved onto another of their subcategories before the row is removed.
   await prisma.$transaction([
@@ -685,7 +670,7 @@ function mapAdminOrder(order: {
   items: Array<{
     id: string
     orderId: string
-    productId: string
+    productId: string | null
     productName: string
     productImage: string
     quantity: number
@@ -752,6 +737,42 @@ adminRouter.get('/orders', async (req, res) => {
   })
 
   res.json(orders.map(mapAdminOrder))
+})
+
+function mapAdminReview(review: {
+  id: string
+  userId: string | null
+  authorName: string
+  rating: number
+  text: string
+  createdAt: Date
+}) {
+  return {
+    id: review.id,
+    userId: review.userId,
+    author: review.authorName,
+    rating: review.rating,
+    text: review.text,
+    createdAt: review.createdAt.toISOString(),
+  }
+}
+
+adminRouter.get('/reviews', async (_req, res) => {
+  const reviews = await prisma.storeReview.findMany({
+    orderBy: { createdAt: 'desc' },
+  })
+  res.json(reviews.map(mapAdminReview))
+})
+
+adminRouter.delete('/reviews/:id', async (req, res) => {
+  const existing = await prisma.storeReview.findUnique({ where: { id: req.params.id } })
+  if (!existing) {
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  await prisma.storeReview.delete({ where: { id: existing.id } })
+  res.status(204).send()
 })
 
 adminRouter.patch('/orders/:id', async (req, res) => {

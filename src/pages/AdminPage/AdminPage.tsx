@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Trash2, Plus } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Star, Trash2, Plus } from 'lucide-react'
 import { AdminApi, CatalogApi } from '@/api'
 import type { AdminOrder, AdminProductPayload, AdminUser } from '@/api'
 import { useAuthStore } from '@/store'
@@ -10,7 +10,7 @@ import { Button, Input, Select } from '@/components/ui'
 import type { SelectOption } from '@/components/ui'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
-import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, SubCategory } from '@/types'
+import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, StoreReview, SubCategory } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
@@ -60,6 +60,7 @@ const STATUS_TONES: Partial<Record<OrderStatus, SelectOption['tone']>> = {
 
 const ORDERS_PAGE_SIZE = 8
 const SUBCATEGORIES_PAGE_SIZE = 10
+const REVIEWS_PAGE_SIZE = 8
 const VISIBLE_PAGE_NUMBERS = 5
 
 function getVisiblePageNumbers(currentPage: number, totalPages: number): number[] {
@@ -149,7 +150,8 @@ export function AdminPage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const user = useAuthStore((s) => s.user)
-  const tab: AdminTab = isAdminTab(searchParams.get('tab')) ? searchParams.get('tab')! : 'orders'
+  const tabParam = searchParams.get('tab')
+  const tab: AdminTab = isAdminTab(tabParam) ? tabParam : 'orders'
 
   const setTab = (next: AdminTab) => {
     const params = new URLSearchParams(searchParams)
@@ -162,6 +164,7 @@ export function AdminPage() {
   const [subcategories, setSubcategories] = useState<SubCategory[]>([])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [orders, setOrders] = useState<AdminOrder[]>([])
+  const [reviews, setReviews] = useState<StoreReview[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -169,6 +172,8 @@ export function AdminPage() {
   const [orderSearch, setOrderSearch] = useState('')
   const [ordersPage, setOrdersPage] = useState(0)
   const [userSearch, setUserSearch] = useState('')
+  const [reviewSearch, setReviewSearch] = useState('')
+  const [reviewsPage, setReviewsPage] = useState(0)
   const [expandedOrderIds, setExpandedOrderIds] = useState<Set<string>>(new Set())
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null)
   const [discountDrafts, setDiscountDrafts] = useState<
@@ -190,18 +195,20 @@ export function AdminPage() {
     setLoading(true)
     setError(null)
     try {
-      const [prods, cats, subs, adminUsers, adminOrders] = await Promise.all([
+      const [prods, cats, subs, adminUsers, adminOrders, adminReviews] = await Promise.all([
         AdminApi.getProducts(),
         CatalogApi.getCategories(),
         CatalogApi.getSubcategories(),
         AdminApi.getUsers(),
         AdminApi.getOrders(),
+        AdminApi.getReviews(),
       ])
       setProducts(prods)
       setCategories(cats)
       setSubcategories(subs)
       setUsers(adminUsers)
       setOrders(adminOrders)
+      setReviews(adminReviews)
       setStockDrafts(Object.fromEntries(prods.map((p) => [p.id, p.stock])))
       setDiscountDrafts(
         Object.fromEntries(
@@ -290,6 +297,37 @@ export function AdminPage() {
       return hay.includes(q)
     })
   }, [users, userSearch])
+
+  const filteredReviews = useMemo(() => {
+    const q = reviewSearch.trim().toLowerCase()
+    if (!q) return reviews
+    return reviews.filter((review) => {
+      const hay = [review.author, review.text].join(' ').toLowerCase()
+      return hay.includes(q)
+    })
+  }, [reviews, reviewSearch])
+
+  const reviewsTotalPages = Math.max(1, Math.ceil(filteredReviews.length / REVIEWS_PAGE_SIZE))
+  const reviewsVisiblePages = getVisiblePageNumbers(reviewsPage, reviewsTotalPages)
+  const pagedReviews = useMemo(
+    () =>
+      filteredReviews.slice(reviewsPage * REVIEWS_PAGE_SIZE, (reviewsPage + 1) * REVIEWS_PAGE_SIZE),
+    [filteredReviews, reviewsPage],
+  )
+
+  useEffect(() => {
+    setReviewsPage(0)
+  }, [reviewSearch])
+
+  useEffect(() => {
+    if (reviewsPage > reviewsTotalPages - 1) {
+      setReviewsPage(Math.max(0, reviewsTotalPages - 1))
+    }
+  }, [reviewsPage, reviewsTotalPages])
+
+  const goToReviewsPage = (page: number) => {
+    setReviewsPage(Math.max(0, Math.min(page, reviewsTotalPages - 1)))
+  }
 
   const listedSubcategories = useMemo(
     () => subcategories.filter((sub) => !isImplicitSubcategory(sub)),
@@ -610,6 +648,17 @@ export function AdminPage() {
       await AdminApi.deleteSubcategory(id)
       flash(t('admin.successSubDeleted'))
       await load()
+    } catch (err) {
+      setError(t(mapAdminError(err)))
+    }
+  }
+
+  const handleDeleteReview = async (id: string) => {
+    if (!window.confirm(t('admin.removeReviewConfirm'))) return
+    try {
+      await AdminApi.deleteReview(id)
+      setReviews((list) => list.filter((review) => review.id !== id))
+      flash(t('admin.successReviewDeleted'))
     } catch (err) {
       setError(t(mapAdminError(err)))
     }
@@ -1249,7 +1298,7 @@ export function AdminPage() {
                 </>
               )}
             </div>
-          ) : (
+          ) : tab === 'users' ? (
             <div className={styles.panel}>
               <Input
                 label={t('admin.tabUsers')}
@@ -1319,6 +1368,120 @@ export function AdminPage() {
                     )
                   })}
                 </ul>
+              )}
+            </div>
+          ) : (
+            <div className={styles.panel}>
+              <Input
+                label={t('admin.tabReviews')}
+                placeholder={t('admin.reviewsSearch')}
+                value={reviewSearch}
+                onChange={(e) => setReviewSearch(e.target.value)}
+              />
+              {filteredReviews.length === 0 ? (
+                <p className={styles.muted}>{t('admin.reviewsEmpty')}</p>
+              ) : (
+                <>
+                  <ul className={styles.productList}>
+                    {pagedReviews.map((review) => (
+                      <li key={review.id} className={styles.productCard}>
+                        <div className={styles.reviewTop}>
+                          <div className={styles.productMeta}>
+                            <h3 className={styles.productName}>{review.author}</h3>
+                            <p className={styles.productSku}>
+                              {review.userId ? t('admin.reviewsAccount') : t('admin.reviewsGuest')}
+                              {' · '}
+                              {new Date(review.createdAt).toLocaleDateString(
+                                language === 'uk' ? 'uk-UA' : 'en-US',
+                              )}
+                            </p>
+                            <div
+                              className={styles.reviewStars}
+                              aria-label={t('about.reviewRating', { rating: review.rating })}
+                            >
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={14}
+                                  fill={i < review.rating ? 'currentColor' : 'none'}
+                                  className={i < review.rating ? undefined : styles.reviewStarEmpty}
+                                />
+                              ))}
+                            </div>
+                            <p className={styles.reviewText}>{review.text}</p>
+                          </div>
+                          <div className={styles.rowActions}>
+                            <button
+                              type="button"
+                              className={styles.iconActionDanger}
+                              aria-label={t('admin.remove')}
+                              onClick={() => void handleDeleteReview(review.id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  {reviewsTotalPages > 1 && (
+                    <nav className={styles.pagination} aria-label={t('admin.reviewsPaginationAria')}>
+                      <motion.button
+                        type="button"
+                        className={styles.paginationBtn}
+                        onClick={() => goToReviewsPage(reviewsPage - 1)}
+                        disabled={reviewsPage === 0}
+                        aria-label={t('common.paginationPrev')}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      >
+                        <ChevronLeft size={15} />
+                      </motion.button>
+                      <div className={styles.paginationNumbers}>
+                        {reviewsVisiblePages.map((pageIndex) => {
+                          const isActive = pageIndex === reviewsPage
+                          return (
+                            <motion.button
+                              key={pageIndex}
+                              type="button"
+                              className={[
+                                styles.paginationNumber,
+                                isActive ? styles.paginationNumberActive : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                              onClick={() => goToReviewsPage(pageIndex)}
+                              aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
+                              aria-current={isActive ? 'page' : undefined}
+                              whileTap={{ scale: 0.92 }}
+                              transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                            >
+                              {isActive && (
+                                <motion.span
+                                  layoutId="adminReviewsPaginationPill"
+                                  className={styles.paginationPill}
+                                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                                />
+                              )}
+                              <span className={styles.paginationNumberLabel}>{pageIndex + 1}</span>
+                            </motion.button>
+                          )
+                        })}
+                      </div>
+                      <motion.button
+                        type="button"
+                        className={styles.paginationBtn}
+                        onClick={() => goToReviewsPage(reviewsPage + 1)}
+                        disabled={reviewsPage >= reviewsTotalPages - 1}
+                        aria-label={t('common.paginationNext')}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      >
+                        <ChevronRight size={15} />
+                      </motion.button>
+                    </nav>
+                  )}
+                </>
               )}
             </div>
           )}

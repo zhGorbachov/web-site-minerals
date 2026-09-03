@@ -757,3 +757,30 @@
   color: $color-on-primary;
   font-weight: $font-weight-semibold;
 }
+
+.reviewTop {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: $spacing-3;
+  align-items: start;
+}
+
+.reviewStars {
+  display: flex;
+  gap: 2px;
+  margin-top: $spacing-1;
+  color: $color-primary;
+}
+
+.reviewStarEmpty {
+  color: $color-border;
+}
+
+.reviewText {
+  margin: $spacing-2 0 0;
+  font-size: $font-size-sm;
+  color: $color-text;
+  line-height: $line-height-relaxed;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

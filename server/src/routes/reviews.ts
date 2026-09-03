@@ -57,6 +57,19 @@ reviewsRouter.get('/mine', requireAuth, async (req, res) => {
   res.json({ review: review ? mapReview(review) : null })
 })
 
+reviewsRouter.delete('/mine', requireAuth, async (req, res) => {
+  const existing = await prisma.storeReview.findUnique({
+    where: { userId: req.userId! },
+  })
+  if (!existing) {
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  await prisma.storeReview.delete({ where: { id: existing.id } })
+  res.status(204).send()
+})
+
 reviewsRouter.post('/', optionalAuth, async (req, res) => {
   const parsed = createReviewSchema.safeParse(req.body)
   if (!parsed.success) {

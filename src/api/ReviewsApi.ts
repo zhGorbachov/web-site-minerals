@@ -30,4 +30,8 @@ export const ReviewsApi = {
     })
     return data
   },
+
+  async deleteMine() {
+    await api.delete('/reviews/mine')
+  },
 }

@@ -64,6 +64,7 @@ export function ProfilePage() {
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewText, setReviewText] = useState('')
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [reviewDeleting, setReviewDeleting] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [reviewJustSubmitted, setReviewJustSubmitted] = useState(false)
 
@@ -161,6 +162,22 @@ export function ProfilePage() {
       }
     } finally {
       setReviewSubmitting(false)
+    }
+  }
+
+  const handleDeleteReview = async () => {
+    if (!myReview) return
+    if (!window.confirm(t('profile.reviewDeleteConfirm'))) return
+    setReviewError(null)
+    setReviewDeleting(true)
+    try {
+      await ReviewsApi.deleteMine()
+      setMyReview(null)
+      setReviewJustSubmitted(false)
+    } catch {
+      setReviewError(t('profile.reviewDeleteError'))
+    } finally {
+      setReviewDeleting(false)
     }
   }
 
@@ -398,6 +415,18 @@ export function ProfilePage() {
                 <time className={styles.myReviewDate} dateTime={myReview.createdAt}>
                   {new Date(myReview.createdAt).toLocaleDateString(language === 'uk' ? 'uk-UA' : 'en-US')}
                 </time>
+                {reviewError && <p className={styles.reviewError}>{reviewError}</p>}
+                <div className={styles.myReviewActions}>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    loading={reviewDeleting}
+                    onClick={() => void handleDeleteReview()}
+                  >
+                    {t('profile.reviewDelete')}
+                  </Button>
+                </div>
               </div>
             ) : orders.length === 0 ? (
               <p className={styles.emptyText}>{t('profile.reviewNeedPurchase')}</p>

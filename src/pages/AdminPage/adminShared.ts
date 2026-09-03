@@ -1,7 +1,7 @@
 import { isAxiosError } from 'axios'
 import type { TranslationKey } from '@/i18n/useTranslation'
 
-export type AdminTab = 'orders' | 'products' | 'create' | 'subcategories' | 'users'
+export type AdminTab = 'orders' | 'products' | 'create' | 'subcategories' | 'users' | 'reviews'
 
 export const ADMIN_TABS: AdminTab[] = [
   'orders',
@@ -9,6 +9,7 @@ export const ADMIN_TABS: AdminTab[] = [
   'create',
   'subcategories',
   'users',
+  'reviews',
 ]
 
 export const ADMIN_TAB_LABELS: Record<AdminTab, TranslationKey> = {
@@ -17,6 +18,7 @@ export const ADMIN_TAB_LABELS: Record<AdminTab, TranslationKey> = {
   create: 'admin.tabAddProduct',
   subcategories: 'admin.tabSubcategories',
   users: 'admin.tabUsers',
+  reviews: 'admin.tabReviews',
 }
 
 export function isAdminTab(value: string | null): value is AdminTab {
@@ -25,7 +27,8 @@ export function isAdminTab(value: string | null): value is AdminTab {
     value === 'products' ||
     value === 'create' ||
     value === 'subcategories' ||
-    value === 'users'
+    value === 'users' ||
+    value === 'reviews'
   )
 }
 

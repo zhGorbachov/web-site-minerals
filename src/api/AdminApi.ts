@@ -1,4 +1,13 @@
-import type { Order, OrderStatus, PaymentStatus, Product, ProductVariant, SubCategory, User } from '@/types'
+import type {
+  Order,
+  OrderStatus,
+  PaymentStatus,
+  Product,
+  ProductVariant,
+  StoreReview,
+  SubCategory,
+  User,
+} from '@/types'
 import { api, mediaUrl, withMediaUrls } from './client'
 
 export type AdminOrderCustomer = {
@@ -146,5 +155,14 @@ export const AdminApi = {
   async updateOrder(id: string, payload: AdminOrderUpdatePayload) {
     const { data } = await api.patch<AdminOrder>(`/admin/orders/${id}`, payload)
     return withOrderMedia(data)
+  },
+
+  async getReviews() {
+    const { data } = await api.get<StoreReview[]>('/admin/reviews')
+    return data
+  },
+
+  async deleteReview(id: string) {
+    await api.delete(`/admin/reviews/${encodeURIComponent(id)}`)
   },
 }

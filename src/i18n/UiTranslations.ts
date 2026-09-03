@@ -368,6 +368,9 @@ export type UiTranslationSchema = {
     reviewNeedPurchase: string
     reviewRatingLabel: string
     reviewError: string
+    reviewDelete: string
+    reviewDeleteConfirm: string
+    reviewDeleteError: string
   }
   storeReviews: {
     sortByDate: string
@@ -390,6 +393,7 @@ export type UiTranslationSchema = {
     tabEditSubcategory: string
     tabUsers: string
     tabOrders: string
+    tabReviews: string
     forbidden: string
     loading: string
     usersSearch: string
@@ -400,6 +404,11 @@ export type UiTranslationSchema = {
     usersSaved: string
     usersEmpty: string
     usersContact: string
+    reviewsSearch: string
+    reviewsEmpty: string
+    reviewsGuest: string
+    reviewsAccount: string
+    reviewsPaginationAria: string
     searchPlaceholder: string
     ordersSearch: string
     ordersEmpty: string
@@ -491,11 +500,13 @@ export type UiTranslationSchema = {
     successSaved: string
     successCreated: string
     successDeleted: string
+    successReviewDeleted: string
     successSubCreated: string
     successSubSaved: string
     successSubDeleted: string
     removeSubConfirm: string
     removeSubConfirmWithProducts: string
+    removeReviewConfirm: string
     errorGeneric: string
     attributesTitle: string
     attributesThreadTitle: string
@@ -921,6 +932,9 @@ export const uiTranslationsUk: UiTranslationSchema = {
     reviewNeedPurchase: 'Відгук можна залишити після першого замовлення.',
     reviewRatingLabel: 'Ваша оцінка',
     reviewError: 'Не вдалося надіслати відгук. Спробуйте ще раз.',
+    reviewDelete: 'Видалити відгук',
+    reviewDeleteConfirm: 'Видалити ваш відгук? Після цього можна буде залишити новий.',
+    reviewDeleteError: 'Не вдалося видалити відгук. Спробуйте ще раз.',
   },
   storeReviews: {
     sortByDate: 'За датою',
@@ -935,7 +949,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
   },
   admin: {
     title: 'Адмін-панель',
-    subtitle: 'Керування товарами, замовленнями, залишками та знижками клієнтів',
+    subtitle: 'Керування товарами, замовленнями, відгуками, залишками та знижками клієнтів',
     tabProducts: 'Товари',
     tabAddProduct: 'Новий товар',
     tabSubcategories: 'Підкатегорії',
@@ -943,6 +957,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     tabEditSubcategory: 'Редагувати підкатегорію',
     tabUsers: 'Клієнти',
     tabOrders: 'Замовлення',
+    tabReviews: 'Відгуки',
     forbidden: 'Доступ лише для адміністратора',
     loading: 'Завантаження...',
     usersSearch: 'Пошук за телефоном, email або імʼям',
@@ -953,6 +968,11 @@ export const uiTranslationsUk: UiTranslationSchema = {
     usersSaved: 'Знижку збережено',
     usersEmpty: 'Клієнтів не знайдено',
     usersContact: 'Контакти',
+    reviewsSearch: 'Пошук за автором або текстом',
+    reviewsEmpty: 'Відгуків не знайдено',
+    reviewsGuest: 'Гість',
+    reviewsAccount: 'Акаунт',
+    reviewsPaginationAria: 'Сторінки відгуків',
     searchPlaceholder: 'Пошук за назвою або SKU...',
     ordersSearch: 'Пошук за ID замовлення (порожньо — всі)',
     ordersEmpty: 'Замовлень не знайдено',
@@ -1048,12 +1068,14 @@ export const uiTranslationsUk: UiTranslationSchema = {
     successSaved: 'Збережено',
     successCreated: 'Товар створено',
     successDeleted: 'Товар видалено',
+    successReviewDeleted: 'Відгук видалено',
     successSubCreated: 'Підкатегорію створено',
     successSubSaved: 'Підкатегорію збережено',
     successSubDeleted: 'Підкатегорію видалено',
     removeSubConfirm: 'Видалити цю підкатегорію?',
     removeSubConfirmWithProducts:
       'Деякі товари належать лише цій підкатегорії — вони будуть видалені разом з нею. Товари з іншими підкатегоріями залишаться. Видалити?',
+    removeReviewConfirm: 'Видалити цей відгук?',
     errorGeneric: 'Щось пішло не так',
     attributesTitle: 'Параметри товару',
     attributesThreadTitle: 'Параметри низки',
@@ -1487,6 +1509,9 @@ export const uiTranslationsEn: UiTranslationSchema = {
     reviewNeedPurchase: 'You can leave a review after your first order.',
     reviewRatingLabel: 'Your rating',
     reviewError: 'Could not submit the review. Please try again.',
+    reviewDelete: 'Delete review',
+    reviewDeleteConfirm: 'Delete your review? You will be able to leave a new one afterwards.',
+    reviewDeleteError: 'Could not delete the review. Please try again.',
   },
   storeReviews: {
     sortByDate: 'By date',
@@ -1501,7 +1526,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
   },
   admin: {
     title: 'Admin panel',
-    subtitle: 'Manage products, orders, stock and customer discounts',
+    subtitle: 'Manage products, orders, reviews, stock and customer discounts',
     tabProducts: 'Products',
     tabAddProduct: 'New product',
     tabSubcategories: 'Subcategories',
@@ -1509,6 +1534,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     tabEditSubcategory: 'Edit subcategory',
     tabUsers: 'Customers',
     tabOrders: 'Orders',
+    tabReviews: 'Reviews',
     forbidden: 'Admin access only',
     loading: 'Loading...',
     usersSearch: 'Search by phone, email or name',
@@ -1519,6 +1545,11 @@ export const uiTranslationsEn: UiTranslationSchema = {
     usersSaved: 'Discount saved',
     usersEmpty: 'No customers found',
     usersContact: 'Contacts',
+    reviewsSearch: 'Search by author or text',
+    reviewsEmpty: 'No reviews found',
+    reviewsGuest: 'Guest',
+    reviewsAccount: 'Account',
+    reviewsPaginationAria: 'Review pages',
     searchPlaceholder: 'Search by name or SKU...',
     ordersSearch: 'Search by order ID (empty — all)',
     ordersEmpty: 'No orders found',
@@ -1614,12 +1645,14 @@ export const uiTranslationsEn: UiTranslationSchema = {
     successSaved: 'Saved',
     successCreated: 'Product created',
     successDeleted: 'Product deleted',
+    successReviewDeleted: 'Review deleted',
     successSubCreated: 'Subcategory created',
     successSubSaved: 'Subcategory saved',
     successSubDeleted: 'Subcategory deleted',
     removeSubConfirm: 'Delete this subcategory?',
     removeSubConfirmWithProducts:
       'Some products belong only to this subcategory and will be deleted with it. Products that also sit in other subcategories are kept. Delete?',
+    removeReviewConfirm: 'Delete this review?',
     errorGeneric: 'Something went wrong',
     attributesTitle: 'Product options',
     attributesThreadTitle: 'Strand options',

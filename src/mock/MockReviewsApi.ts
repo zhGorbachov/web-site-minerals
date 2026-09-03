@@ -70,4 +70,12 @@ export const MockReviewsApi = {
     MockDb.addReview(review)
     return review
   },
+
+  async deleteMine(): Promise<void> {
+    const user = MockDb.resolveSession(getAuthToken())
+    if (!user) throw new MockApiError(401, 'unauthorized')
+    const review = MockDb.getReviews().find((item) => item.userId === user.id)
+    if (!review) throw new MockApiError(404, 'Not found')
+    MockDb.removeReview(review.id)
+  },
 }
