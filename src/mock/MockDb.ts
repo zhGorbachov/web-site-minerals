@@ -19,6 +19,12 @@ export type MockCart = {
   createdAt: string
 }
 
+export type MockWishlistEntry = {
+  id: string
+  productId: string
+  selectedOptions?: Record<string, string>
+}
+
 type MockDbState = {
   version: number
   categories: Category[]
@@ -26,7 +32,7 @@ type MockDbState = {
   products: StoredProduct[]
   users: MockUserRecord[]
   carts: Record<string, MockCart>
-  wishlists: Record<string, string[]>
+  wishlists: Record<string, MockWishlistEntry[]>
   orders: Record<string, Order[]>
   reviews: StoreReview[]
   sessions: Record<string, string>
@@ -129,6 +135,33 @@ function createDemoOrders(): Order[] {
   })
 }
 
+function normalizeWishlist(raw: unknown): MockWishlistEntry[] {
+  if (!Array.isArray(raw)) return []
+  return raw.flatMap((entry) => {
+    if (typeof entry === 'string' && entry) {
+      return [{ id: `wish-${entry}`, productId: entry }]
+    }
+    if (!entry || typeof entry !== 'object') return []
+    const record = entry as Record<string, unknown>
+    const productId = String(record.productId ?? '')
+    if (!productId) return []
+    let selectedOptions: Record<string, string> | undefined
+    if (record.selectedOptions && typeof record.selectedOptions === 'object' && !Array.isArray(record.selectedOptions)) {
+      selectedOptions = {}
+      for (const [key, value] of Object.entries(record.selectedOptions as Record<string, unknown>)) {
+        if (value == null || value === '') continue
+        selectedOptions[key] = String(value)
+      }
+      if (!Object.keys(selectedOptions).length) selectedOptions = undefined
+    }
+    return [{
+      id: String(record.id ?? `wish-${productId}`),
+      productId,
+      selectedOptions,
+    }]
+  })
+}
+
 function createSeedState(): MockDbState {
   return {
     version: STORAGE_VERSION,
@@ -141,7 +174,10 @@ function createSeedState(): MockDbState {
     ],
     carts: {},
     wishlists: {
-      [DEMO_CUSTOMER.id]: [seedProducts[0]?.id, seedProducts[2]?.id].filter(Boolean) as string[],
+      [DEMO_CUSTOMER.id]: [seedProducts[0]?.id, seedProducts[2]?.id].filter(Boolean).map((productId) => ({
+        id: `wish-${productId}`,
+        productId,
+      })),
     },
     orders: {
       [DEMO_CUSTOMER.id]: createDemoOrders(),
@@ -157,6 +193,9 @@ function loadState(): MockDbState {
     if (!raw) return createSeedState()
     const parsed = JSON.parse(raw) as MockDbState
     if (parsed.version !== STORAGE_VERSION) return createSeedState()
+    parsed.wishlists = Object.fromEntries(
+      Object.entries(parsed.wishlists ?? {}).map(([userId, list]) => [userId, normalizeWishlist(list)]),
+    )
     return parsed
   } catch {
     return createSeedState()
@@ -281,8 +320,8 @@ export const MockDb = {
     return state.wishlists[userId]
   },
 
-  setWishlist(userId: string, productIds: string[]) {
-    state.wishlists[userId] = productIds
+  setWishlist(userId: string, items: MockWishlistEntry[]) {
+    state.wishlists[userId] = items
     persist()
   },
 

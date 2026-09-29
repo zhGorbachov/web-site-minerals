@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { isAxiosError } from 'axios'
@@ -51,7 +51,11 @@ export function ProfilePage() {
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
-  const wishlistIds = useWishlistStore((s) => s.productIds)
+  const wishlistItems = useWishlistStore((s) => s.items)
+  const wishlistIds = useMemo(
+    () => [...new Set(wishlistItems.map((item) => item.productId))],
+    [wishlistItems],
+  )
   const cartCount = useCartStore((s) => s.items.reduce((sum, item) => sum + item.quantity, 0))
 
   const [orders, setOrders] = useState<Order[]>([])

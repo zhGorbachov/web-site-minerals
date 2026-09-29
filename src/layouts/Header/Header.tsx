@@ -137,7 +137,7 @@ export function Header() {
   const { t } = useTranslation()
   const { isBurgerOpen, toggleBurger, closeBurger, isSearchOpen, toggleSearch, closeSearch, openCatalog } = useUIStore()
   const totalItems = useCartStore((s) => s.totalItems())
-  const wishlistCount = useWishlistStore((s) => s.productIds.length)
+  const wishlistCount = useWishlistStore((s) => s.items.length)
   const user = useAuthStore((s) => s.user)
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)

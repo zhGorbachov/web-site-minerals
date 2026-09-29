@@ -267,6 +267,20 @@
   letter-spacing: 0.03em;
 }
 
+.itemOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-1;
+}
+
+.optionChip {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  background: $color-surface;
+  padding: 3px $spacing-2;
+  border-radius: $radius-sm;
+}
+
 .itemFooter {
   display: flex;
   align-items: center;

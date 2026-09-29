@@ -1,16 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { WishlistItem } from '@/types'
 import { WishlistApi } from '@/api'
 import { getAuthToken } from '@/api/client'
+import { sameSelection } from '@/utils/productVariants'
 
 interface WishlistState {
-  productIds: string[]
+  items: WishlistItem[]
   syncing: boolean
-  addToWishlist: (productId: string) => Promise<void>
-  removeFromWishlist: (productId: string) => Promise<void>
-  removeManyFromWishlist: (productIds: string[]) => Promise<void>
-  toggleWishlist: (productId: string) => Promise<void>
-  isInWishlist: (productId: string) => boolean
+  addToWishlist: (productId: string, selectedOptions?: Record<string, string>) => Promise<void>
+  removeFromWishlist: (itemId: string) => Promise<void>
+  removeManyFromWishlist: (itemIds: string[]) => Promise<void>
+  toggleWishlist: (productId: string, selectedOptions?: Record<string, string>) => Promise<void>
+  isInWishlist: (productId: string, selectedOptions?: Record<string, string>) => boolean
   clearWishlist: () => Promise<void>
   pullFromServer: () => Promise<void>
   mergeGuestWishlistToServer: () => Promise<void>
@@ -20,35 +22,60 @@ function isLoggedIn() {
   return Boolean(getAuthToken())
 }
 
+function findItem(
+  items: WishlistItem[],
+  productId: string,
+  selectedOptions?: Record<string, string>,
+) {
+  return items.find(
+    (item) => item.productId === productId && sameSelection(item.selectedOptions, selectedOptions),
+  )
+}
+
+function withOptions(selectedOptions?: Record<string, string>) {
+  if (!selectedOptions || Object.keys(selectedOptions).length === 0) return undefined
+  return selectedOptions
+}
+
 export const useWishlistStore = create<WishlistState>()(
   persist(
     (set, get) => ({
-      productIds: [],
+      items: [],
       syncing: false,
 
-      addToWishlist: async (productId) => {
+      addToWishlist: async (productId, selectedOptions) => {
+        const options = withOptions(selectedOptions)
+
         if (isLoggedIn()) {
           try {
-            const productIds = await WishlistApi.add(productId)
-            set({ productIds })
+            const items = await WishlistApi.add(productId, options)
+            set({ items })
             return
           } catch {
             // fall through
           }
         }
 
-        set((state) => ({
-          productIds: state.productIds.includes(productId)
-            ? state.productIds
-            : [...state.productIds, productId],
-        }))
+        set((state) => {
+          if (findItem(state.items, productId, options)) return state
+          return {
+            items: [
+              ...state.items,
+              {
+                id: `wish-${productId}-${Date.now()}`,
+                productId,
+                selectedOptions: options,
+              },
+            ],
+          }
+        })
       },
 
-      removeFromWishlist: async (productId) => {
+      removeFromWishlist: async (itemId) => {
         if (isLoggedIn()) {
           try {
-            const productIds = await WishlistApi.remove(productId)
-            set({ productIds })
+            const items = await WishlistApi.remove(itemId)
+            set({ items })
             return
           } catch {
             // fall through
@@ -56,7 +83,7 @@ export const useWishlistStore = create<WishlistState>()(
         }
 
         set((state) => ({
-          productIds: state.productIds.filter((id) => id !== productId),
+          items: state.items.filter((item) => item.id !== itemId),
         }))
       },
 
@@ -66,11 +93,11 @@ export const useWishlistStore = create<WishlistState>()(
 
         if (isLoggedIn()) {
           try {
-            let productIds = await WishlistApi.remove(uniqueIds[0])
+            let items = await WishlistApi.remove(uniqueIds[0])
             for (let i = 1; i < uniqueIds.length; i++) {
-              productIds = await WishlistApi.remove(uniqueIds[i])
+              items = await WishlistApi.remove(uniqueIds[i])
             }
-            set({ productIds })
+            set({ items })
             return
           } catch {
             // fall through
@@ -79,39 +106,42 @@ export const useWishlistStore = create<WishlistState>()(
 
         const idSet = new Set(uniqueIds)
         set((state) => ({
-          productIds: state.productIds.filter((id) => !idSet.has(id)),
+          items: state.items.filter((item) => !idSet.has(item.id)),
         }))
       },
 
-      toggleWishlist: async (productId) => {
-        if (get().isInWishlist(productId)) {
-          await get().removeFromWishlist(productId)
+      toggleWishlist: async (productId, selectedOptions) => {
+        const options = withOptions(selectedOptions)
+        const existing = findItem(get().items, productId, options)
+        if (existing) {
+          await get().removeFromWishlist(existing.id)
         } else {
-          await get().addToWishlist(productId)
+          await get().addToWishlist(productId, options)
         }
       },
 
-      isInWishlist: (productId) => get().productIds.includes(productId),
+      isInWishlist: (productId, selectedOptions) =>
+        Boolean(findItem(get().items, productId, withOptions(selectedOptions))),
 
       clearWishlist: async () => {
         if (isLoggedIn()) {
           try {
-            const productIds = await WishlistApi.clear()
-            set({ productIds })
+            const items = await WishlistApi.clear()
+            set({ items })
             return
           } catch {
             // fall through
           }
         }
-        set({ productIds: [] })
+        set({ items: [] })
       },
 
       pullFromServer: async () => {
         if (!isLoggedIn()) return
         set({ syncing: true })
         try {
-          const productIds = await WishlistApi.get()
-          set({ productIds })
+          const items = await WishlistApi.get()
+          set({ items })
         } finally {
           set({ syncing: false })
         }
@@ -119,12 +149,17 @@ export const useWishlistStore = create<WishlistState>()(
 
       mergeGuestWishlistToServer: async () => {
         if (!isLoggedIn()) return
-        const guestIds = get().productIds
+        const guestItems = get().items
         set({ syncing: true })
         try {
-          if (guestIds.length) {
-            const productIds = await WishlistApi.merge(guestIds)
-            set({ productIds })
+          if (guestItems.length) {
+            const items = await WishlistApi.merge(
+              guestItems.map((item) => ({
+                productId: item.productId,
+                selectedOptions: item.selectedOptions,
+              })),
+            )
+            set({ items })
           } else {
             await get().pullFromServer()
           }
@@ -135,7 +170,27 @@ export const useWishlistStore = create<WishlistState>()(
     }),
     {
       name: 'crystal-wishlist',
-      version: 2,
+      version: 3,
+      migrate: (persisted, version) => {
+        const state = persisted as {
+          productIds?: string[]
+          items?: WishlistItem[]
+        }
+        if (version < 3) {
+          const productIds = Array.isArray(state.productIds) ? state.productIds : []
+          return {
+            items: productIds.map((productId) => ({
+              id: `wish-${productId}`,
+              productId,
+            })),
+            syncing: false,
+          }
+        }
+        return {
+          items: Array.isArray(state.items) ? state.items : [],
+          syncing: false,
+        }
+      },
     },
   ),
 )

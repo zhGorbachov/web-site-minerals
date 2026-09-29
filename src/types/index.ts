@@ -15,7 +15,7 @@ export type { CartItem, Cart } from './cart'
 export type { Order, OrderItem, OrderStatus, PaymentStatus, CreateOrderResult } from './order'
 export type { StoreReview, StoreReviewSort, CreateStoreReviewPayload } from './review'
 export type { User, UserRole, AuthProvider } from './user'
-export type { Wishlist } from './wishlist'
+export type { Wishlist, WishlistItem } from './wishlist'
 export type {
   DeliveryMethod,
   NovaPoshtaType,
