@@ -423,9 +423,7 @@ export function CheckoutPage() {
               <Check size={32} strokeWidth={2.5} />
             </div>
             <h1 className={styles.successTitle}>{t('checkout.successTitle')}</h1>
-            <p className={styles.successDescription}>
-              {user ? t('checkout.successDescription') : t('checkout.successGuestDescription')}
-            </p>
+            <p className={styles.successDescription}>{t('checkout.successDescription')}</p>
             {user ? (
               <div className={styles.successActions}>
                 <Button as={Link} to="/profile" size="lg">
