@@ -5,11 +5,7 @@ import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lu
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { ProductGallery } from '@/components/ProductGallery'
-import {
-  ProductSelections,
-  ProductCharacteristics,
-  ProductVariantPicker,
-} from '@/components/ProductOptions'
+import { ProductSelections, ProductCharacteristics } from '@/components/ProductOptions'
 import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
@@ -25,7 +21,6 @@ import {
   getAvailableStock,
   getCatalogPricing,
   getProductGalleryImages,
-  getProductVariants,
   getSelectedVariant,
   getVariantCompareAtPrice,
   getVariantDisplayName,
@@ -110,19 +105,6 @@ export function ProductPage() {
     syncGalleryToVariant(product, match.image)
   }
 
-  const handleVariantPick = (variantId: string | null) => {
-    if (!product) return
-    if (!variantId) {
-      setSelectedOptions(optionsWithoutVariantId(selectedOptions))
-      setGalleryIndex(0)
-      return
-    }
-    const variant = findVariantById(product, variantId)
-    if (!variant) return
-    setSelectedOptions(buildVariantSelection(variant, selectedOptions))
-    syncGalleryToVariant(product, variant.image)
-  }
-
   const handleGalleryIndex = (index: number) => {
     setGalleryIndex(index)
     if (!product) return
@@ -205,7 +187,6 @@ export function ProductPage() {
   const photoInWishlist = isInWishlist(product.id, photoOptions)
   const productInWishlist = isInWishlist(product.id)
   const categoryLabel = product.subCategoryName ?? product.subCategorySlug
-  const variants = getProductVariants(product)
   const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock > 0
   const displayName = getVariantDisplayName(product, selectedVariant)
 
@@ -293,16 +274,6 @@ export function ProductPage() {
                 </span>
               </div>
             </div>
-
-            {variants.length > 0 && (
-              <div className={styles.optionsBlock}>
-                <ProductVariantPicker
-                  product={product}
-                  selectedId={selectedVariant?.id}
-                  onSelect={handleVariantPick}
-                />
-              </div>
-            )}
 
             <div className={styles.optionsBlock}>
               <ProductSelections
