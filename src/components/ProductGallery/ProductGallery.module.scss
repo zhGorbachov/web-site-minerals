@@ -75,6 +75,38 @@
   }
 }
 
+.wishlistBtn {
+  position: absolute;
+  top: $spacing-3;
+  right: $spacing-3;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-circle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($color-white, 0.92);
+  color: $color-text-muted;
+  box-shadow: $shadow-md;
+  cursor: pointer;
+  transition: color $transition-base, background $transition-base, transform $transition-base;
+
+  &:hover {
+    color: $color-error;
+    background: $color-white;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.wishlistActive {
+  color: $color-error;
+  background: $color-white;
+}
+
 .navPrev {
   left: $spacing-3;
 }

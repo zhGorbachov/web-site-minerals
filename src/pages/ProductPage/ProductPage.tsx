@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lucide-react'
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { ProductGallery } from '@/components/ProductGallery'
-import {
-  ProductSelections,
-  ProductCharacteristics,
-  ProductVariantPicker,
-} from '@/components/ProductOptions'
+import { ProductSelections, ProductCharacteristics } from '@/components/ProductOptions'
 import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
@@ -25,7 +21,6 @@ import {
   getAvailableStock,
   getCatalogPricing,
   getProductGalleryImages,
-  getProductVariants,
   getSelectedVariant,
   getVariantCompareAtPrice,
   getVariantDisplayName,
@@ -37,6 +32,8 @@ import styles from './ProductPage.module.scss'
 
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>()
+  const [searchParams] = useSearchParams()
+  const variantFromQuery = searchParams.get('variant')
   const { t, language } = useTranslation()
   const [product, setProduct] = useState<Product | undefined>()
   const [related, setRelated] = useState<Product[]>([])
@@ -67,13 +64,20 @@ export function ProductPage() {
         const rel = await ProductService.getRelated(prod)
         setProduct(prod)
         setRelated(rel)
+        const variant = findVariantById(prod, variantFromQuery)
+        if (variant) {
+          setSelectedOptions(buildVariantSelection(variant))
+          const images = getProductGalleryImages(prod)
+          const index = images.indexOf(variant.image)
+          if (index >= 0) setGalleryIndex(index)
+        }
       } else {
         setProduct(undefined)
         setRelated([])
       }
       setLoading(false)
     })
-  }, [slug, language])
+  }, [slug, language, variantFromQuery])
 
   const maxSelectable = product ? Math.max(0, getAvailableStock(product, selectedOptions) - cartQuantity) : 0
   const availableStock = product ? getAvailableStock(product, selectedOptions) : 0
@@ -99,19 +103,6 @@ export function ProductPage() {
     }
     setSelectedOptions(buildVariantSelection(match, next))
     syncGalleryToVariant(product, match.image)
-  }
-
-  const handleVariantPick = (variantId: string | null) => {
-    if (!product) return
-    if (!variantId) {
-      setSelectedOptions(optionsWithoutVariantId(selectedOptions))
-      setGalleryIndex(0)
-      return
-    }
-    const variant = findVariantById(product, variantId)
-    if (!variant) return
-    setSelectedOptions(buildVariantSelection(variant, selectedOptions))
-    syncGalleryToVariant(product, variant.image)
   }
 
   const handleGalleryIndex = (index: number) => {
@@ -191,9 +182,11 @@ export function ProductPage() {
   const compareAt = selectedVariant
     ? getVariantCompareAtPrice(product, selectedVariant)
     : catalogPricing.compareAt
-  const inWishlist = isInWishlist(product.id)
+  const visibleVariant = findVariantByImage(product, galleryImages[galleryIndex])
+  const photoOptions = visibleVariant ? buildVariantSelection(visibleVariant) : undefined
+  const photoInWishlist = isInWishlist(product.id, photoOptions)
+  const productInWishlist = isInWishlist(product.id)
   const categoryLabel = product.subCategoryName ?? product.subCategorySlug
-  const variants = getProductVariants(product)
   const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock > 0
   const displayName = getVariantDisplayName(product, selectedVariant)
 
@@ -228,6 +221,11 @@ export function ProductPage() {
               productName={displayName}
               activeIndex={galleryIndex}
               onActiveIndexChange={handleGalleryIndex}
+              inWishlist={photoInWishlist}
+              wishlistLabel={photoInWishlist ? t('wishlist.remove') : t('wishlist.add')}
+              onWishlistToggle={
+                visibleVariant ? () => toggleWishlist(product.id, photoOptions) : undefined
+              }
               captions={galleryImages.map((src) => {
                 const variant = findVariantByImage(product, src)
                 if (!variant) return undefined
@@ -276,16 +274,6 @@ export function ProductPage() {
                 </span>
               </div>
             </div>
-
-            {variants.length > 0 && (
-              <div className={styles.optionsBlock}>
-                <ProductVariantPicker
-                  product={product}
-                  selectedId={selectedVariant?.id}
-                  onSelect={handleVariantPick}
-                />
-              </div>
-            )}
 
             <div className={styles.optionsBlock}>
               <ProductSelections
@@ -378,11 +366,14 @@ export function ProductPage() {
 
               <button
                 type="button"
-                className={[styles.wishlistBtn, inWishlist ? styles.wishlistActive : ''].filter(Boolean).join(' ')}
+                className={[styles.wishlistBtn, productInWishlist ? styles.wishlistActive : '']
+                  .filter(Boolean)
+                  .join(' ')}
                 onClick={() => toggleWishlist(product.id)}
-                aria-label={inWishlist ? t('wishlist.remove') : t('wishlist.add')}
+                aria-label={productInWishlist ? t('wishlist.remove') : t('wishlist.add')}
+                aria-pressed={productInWishlist}
               >
-                <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
+                <Heart size={18} fill={productInWishlist ? 'currentColor' : 'none'} />
               </button>
             </div>
 

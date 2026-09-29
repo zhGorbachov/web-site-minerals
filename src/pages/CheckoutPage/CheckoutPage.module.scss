@@ -705,7 +705,7 @@
 }
 
 .successCard {
-  max-width: 480px;
+  max-width: 560px;
   margin: $spacing-8 auto 0;
   padding: $spacing-8 $spacing-6;
   text-align: center;
@@ -748,8 +748,8 @@
 }
 
 .successDescription {
-  font-size: $font-size-sm;
-  color: $color-text-muted;
+  font-size: $font-size-base;
+  color: $color-text;
   line-height: $line-height-normal;
   margin-bottom: $spacing-6;
 }

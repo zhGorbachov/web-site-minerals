@@ -1,21 +1,41 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Trash2, ShoppingCart, Home } from 'lucide-react'
-import type { Product } from '@/types'
+import type { Product, WishlistItem } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
-import { useTranslation } from '@/i18n/useTranslation'
+import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
+import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice, getCatalogPricing, productRequiresOptions } from '@/utils'
+import { formatPrice, productRequiresOptions } from '@/utils'
+import {
+  getAvailableStock,
+  getCartUnitPrice,
+  getSelectedVariant,
+  getVariantCompareAtPrice,
+  getVariantDisplayName,
+  optionsWithoutVariantId,
+} from '@/utils/productVariants'
 import { EmptyState } from '@/components/ui'
 import styles from './WishlistPage.module.scss'
+
+const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
+  beadSize: 'productOptions.beadSize',
+  beadCount: 'productOptions.beadCount',
+  strandLength: 'productOptions.strandLength',
+  length: 'productOptions.threadLength',
+  color: 'productOptions.color',
+  wristSize: 'productOptions.wristSize',
+  packWeight: 'productOptions.packWeight',
+  pieceWeight: 'productOptions.pieceWeight',
+}
 
 export function WishlistPage() {
   const { t, tp, language } = useTranslation()
   const navigate = useNavigate()
-  const productIds = useWishlistStore((s) => s.productIds)
+  const wishlistItems = useWishlistStore((s) => s.items)
   const removeFromWishlist = useWishlistStore((s) => s.removeFromWishlist)
   const removeManyFromWishlist = useWishlistStore((s) => s.removeManyFromWishlist)
   const addItem = useCartStore((s) => s.addItem)
@@ -24,7 +44,11 @@ export function WishlistPage() {
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const count = productIds.length
+  const count = wishlistItems.length
+  const productKey = useMemo(
+    () => [...new Set(wishlistItems.map((item) => item.productId))].join(','),
+    [wishlistItems],
+  )
 
   useEffect(() => {
     if (count === 0) {
@@ -33,22 +57,29 @@ export function WishlistPage() {
       return
     }
 
+    const ids = productKey ? productKey.split(',') : []
     setLoading(true)
-    void ProductService.getByIds(productIds).then((prods) => {
+    void ProductService.getByIds(ids).then((prods) => {
       setProducts(prods)
       setLoading(false)
     })
-  }, [productIds, count, language])
+  }, [productKey, count, language])
 
   useEffect(() => {
-    const validIds = new Set(productIds)
+    const validIds = new Set(wishlistItems.map((item) => item.id))
     setSelectedIds((prev) => {
       const next = new Set([...prev].filter((id) => validIds.has(id)))
       return next.size === prev.size ? prev : next
     })
-  }, [productIds])
+  }, [wishlistItems])
 
-  const allSelected = products.length > 0 && selectedIds.size === products.length
+  const rows = wishlistItems.flatMap((entry) => {
+    const raw = products.find((product) => product.id === entry.productId)
+    if (!raw) return []
+    return [{ entry, product: localizeProduct(raw, language) }]
+  })
+
+  const allSelected = rows.length > 0 && rows.every((row) => selectedIds.has(row.entry.id))
   const someSelected = selectedIds.size > 0
 
   const toggleSelectAll = () => {
@@ -56,14 +87,14 @@ export function WishlistPage() {
       setSelectedIds(new Set())
       return
     }
-    setSelectedIds(new Set(products.map((product) => product.id)))
+    setSelectedIds(new Set(rows.map((row) => row.entry.id)))
   }
 
-  const toggleItem = (productId: string) => {
+  const toggleItem = (itemId: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev)
-      if (next.has(productId)) next.delete(productId)
-      else next.add(productId)
+      if (next.has(itemId)) next.delete(itemId)
+      else next.add(itemId)
       return next
     })
   }
@@ -74,13 +105,25 @@ export function WishlistPage() {
     setSelectedIds(new Set())
   }
 
-  const handleAddToCart = (product: Product) => {
-    if (product.stock === 0) return
-    if (productRequiresOptions(product)) {
+  const handleAddToCart = (product: Product, entry: WishlistItem) => {
+    if (getAvailableStock(product, entry.selectedOptions) === 0) return
+    if (!entry.selectedOptions && productRequiresOptions(product)) {
       navigate(`/product/${product.slug}`)
       return
     }
-    void addItem(product)
+    void addItem(product, entry.selectedOptions)
+  }
+
+  const formatOptionValue = (key: string, value: string) => {
+    if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
+    if (key === 'beadCount') return t('productOptions.beadCountValue', { value })
+    if (language === 'en') {
+      if (key === 'strandLength') {
+        return strandLengthEn[value] ?? value.replace(/\s*см/gi, ' cm')
+      }
+      return attributeValueEn[value] ?? value.replace(/\s*см/gi, ' cm')
+    }
+    return value
   }
 
   if (count === 0 && !loading) {
@@ -118,7 +161,7 @@ export function WishlistPage() {
           </motion.h1>
         </div>
 
-        {!loading && products.length > 0 && (
+        {!loading && rows.length > 0 && (
           <div className={styles.selectionBar}>
             <label className={styles.selectAll}>
               <input
@@ -162,17 +205,23 @@ export function WishlistPage() {
         ) : (
           <div className={styles.itemsList}>
             <AnimatePresence initial={false}>
-              {products.map((rawProduct) => {
-                const product = localizeProduct(rawProduct, language)
-                const catalog = getCatalogPricing(product)
-                const displayPrice = catalog.min
-                const hasDiscount =
-                  catalog.compareAt != null && !catalog.hasRange && catalog.compareAt > displayPrice
-                const isSelected = selectedIds.has(product.id)
+              {rows.map(({ entry, product }) => {
+                const variant = getSelectedVariant(product, entry.selectedOptions)
+                const displayPrice = getCartUnitPrice(product, entry.selectedOptions)
+                const compareAt = variant ? getVariantCompareAtPrice(product, variant) : undefined
+                const hasDiscount = compareAt != null && compareAt > displayPrice
+                const isSelected = selectedIds.has(entry.id)
+                const lineName = getVariantDisplayName(product, variant)
+                const lineImage = variant?.image ?? product.images[0]
+                const visibleOptions = optionsWithoutVariantId(entry.selectedOptions)
+                const productUrl = variant
+                  ? `/product/${product.slug}?variant=${variant.id}`
+                  : `/product/${product.slug}`
+                const outOfStock = getAvailableStock(product, entry.selectedOptions) === 0
 
                 return (
                   <motion.article
-                    key={product.id}
+                    key={entry.id}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8, height: 0, marginBottom: 0 }}
@@ -186,13 +235,13 @@ export function WishlistPage() {
                         type="checkbox"
                         className={styles.checkbox}
                         checked={isSelected}
-                        onChange={() => toggleItem(product.id)}
-                        aria-label={product.name}
+                        onChange={() => toggleItem(entry.id)}
+                        aria-label={lineName}
                       />
                     </label>
 
-                    <Link to={`/product/${product.slug}`} className={styles.itemImage}>
-                      <img src={product.images[0]} alt={product.name} />
+                    <Link to={productUrl} className={styles.itemImage}>
+                      <img src={lineImage} alt={lineName} />
                       {product.isNew && (
                         <span className={styles.badgeNew}>{t('product.badgeNew')}</span>
                       )}
@@ -200,13 +249,13 @@ export function WishlistPage() {
 
                     <div className={styles.itemBody}>
                       <div className={styles.itemHeader}>
-                        <Link to={`/product/${product.slug}`} className={styles.itemName}>
-                          {product.name}
+                        <Link to={productUrl} className={styles.itemName}>
+                          {lineName}
                         </Link>
                         <button
                           type="button"
                           className={styles.removeBtn}
-                          onClick={() => removeFromWishlist(product.id)}
+                          onClick={() => removeFromWishlist(entry.id)}
                           aria-label={t('wishlist.remove')}
                         >
                           <Trash2 size={16} />
@@ -215,6 +264,17 @@ export function WishlistPage() {
 
                       {product.subCategoryName && (
                         <span className={styles.itemCategory}>{product.subCategoryName}</span>
+                      )}
+
+                      {Object.keys(visibleOptions).length > 0 && (
+                        <div className={styles.itemOptions}>
+                          {Object.entries(visibleOptions).map(([key, value]) => (
+                            <span key={key} className={styles.optionChip}>
+                              {OPTION_LABEL_KEYS[key] ? t(OPTION_LABEL_KEYS[key]) : key}:{' '}
+                              {formatOptionValue(key, value)}
+                            </span>
+                          ))}
+                        </div>
                       )}
 
                       <div className={styles.itemFooter}>
@@ -229,18 +289,16 @@ export function WishlistPage() {
                           >
                             {formatPrice(displayPrice, language)}
                           </span>
-                          {hasDiscount && catalog.compareAt != null && (
-                            <span className={styles.oldPrice}>
-                              {formatPrice(catalog.compareAt, language)}
-                            </span>
+                          {hasDiscount && compareAt != null && (
+                            <span className={styles.oldPrice}>{formatPrice(compareAt, language)}</span>
                           )}
                         </div>
 
                         <button
                           type="button"
                           className={styles.cartBtn}
-                          onClick={() => handleAddToCart(product)}
-                          disabled={product.stock === 0}
+                          onClick={() => handleAddToCart(product, entry)}
+                          disabled={outOfStock}
                           aria-label={t('cart.addToCartAria')}
                         >
                           <ShoppingCart size={16} />

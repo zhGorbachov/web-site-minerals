@@ -52,9 +52,9 @@ export const EMAIL_CONTACTS: EmailContact[] = [
   { display: 'glusenkoilla3@gmail.com', href: 'mailto:glusenkoilla3@gmail.com' },
 ]
 
-export const LOCATION_LINK = 'https://maps.app.goo.gl/cyBTd7qZrkzKvHPp8?g_st=it'
+export const LOCATION_LINK = 'https://maps.app.goo.gl/KoGKH7p1AnW8zNku6?g_st=ic'
 
 export const LOCATION_ADDRESS =
-  'вулиця Комарова, 7, Кропивницький, Кіровоградська область, 25000'
+  'вулиця Шульгиних, 10, Кропивницький, Кіровоградська область, 25006'
 
 export const LOCATION_EMBED_URL = `https://maps.google.com/maps?q=${encodeURIComponent(LOCATION_ADDRESS)}&hl=uk&z=16&output=embed`

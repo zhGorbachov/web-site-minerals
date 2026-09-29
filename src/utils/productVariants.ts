@@ -244,6 +244,21 @@ export function buildVariantSelection(
   }
 }
 
+/** Stable identity for a cart/wishlist selection, independent of key order. */
+export function selectionKey(options?: Record<string, string> | null): string {
+  const entries = Object.entries(options ?? {})
+    .filter(([, value]) => value != null && String(value) !== '')
+    .sort(([a], [b]) => a.localeCompare(b))
+  return JSON.stringify(entries)
+}
+
+export function sameSelection(
+  a?: Record<string, string> | null,
+  b?: Record<string, string> | null,
+) {
+  return selectionKey(a) === selectionKey(b)
+}
+
 function variantMatchesOptions(
   variant: ProductVariant,
   selected: Record<string, string>,

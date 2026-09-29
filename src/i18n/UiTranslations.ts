@@ -162,7 +162,6 @@ export type UiTranslationSchema = {
     loginRequired: string
     successTitle: string
     successDescription: string
-    successGuestDescription: string
     goToOrders: string
     errorRequired: string
     errorPhone: string
@@ -688,7 +687,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ukrposhtaIndexHint: '5-значний індекс відділення Укрпошти',
     selfPickup: 'Самовивіз',
     selfPickupHint: 'Забрати самостійно з магазину',
-    selfPickupAddress: 'вул. Короленка, 32А, Кропивницький',
+    selfPickupAddress: 'вул. Шульгиних, 10, Кропивницький',
     city: 'Місто',
     cityPlaceholder: 'Почніть вводити назву міста або села',
     cityHint: 'Оберіть зі списку підказок',
@@ -728,9 +727,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     placeOrder: 'Оформити замовлення',
     emptyCart: 'Кошик порожній — додайте товари, щоб оформити замовлення',
     loginRequired: 'Увійдіть, щоб оформити замовлення',
-    successTitle: 'Замовлення оформлено!',
-    successDescription: 'Ми зберегли ваше замовлення. Статус можна переглянути в профілі.',
-    successGuestDescription: 'Дякуємо за замовлення! Ми звʼяжемося з вами для підтвердження.',
+    successTitle: 'Дякуємо за довіру та ваше замовлення!🥰',
+    successDescription: 'Бажаємо гарного дня, гармонії та мирного неба! 🩵\u00A0💛',
     goToOrders: 'До замовлень',
     errorRequired: 'Заповніть обовʼязкові поля',
     errorPhone: 'Введіть коректний номер телефону',
@@ -1271,7 +1269,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ukrposhtaIndexHint: '5-digit Ukrposhta branch index',
     selfPickup: 'Self-pickup',
     selfPickupHint: 'Pick up from the store',
-    selfPickupAddress: 'Korolenka St., 32A, Kropyvnytskyi',
+    selfPickupAddress: 'Shulhynykh St., 10, Kropyvnytskyi',
     city: 'City',
     cityPlaceholder: 'Start typing a city or village',
     cityHint: 'Pick a suggestion from the list',
@@ -1311,9 +1309,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     placeOrder: 'Place order',
     emptyCart: 'Your cart is empty — add products to place an order',
     loginRequired: 'Sign in to place an order',
-    successTitle: 'Order placed!',
-    successDescription: 'Your order has been saved. You can track its status in your profile.',
-    successGuestDescription: 'Thank you for your order! We will contact you to confirm.',
+    successTitle: 'Thank you for your trust and your order!🥰',
+    successDescription: 'We wish you a good day, harmony, and peaceful skies! 🩵\u00A0💛',
     goToOrders: 'View orders',
     errorRequired: 'Please fill in the required fields',
     errorPhone: 'Enter a valid phone number',

@@ -206,7 +206,7 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           title: 'Самовивіз',
-          text: 'Забирайте замовлення самостійно з нашого магазину за адресою: вул. Короленка, 32А, Кропивницький.',
+          text: 'Забирайте замовлення самостійно з нашого магазину за адресою: вул. Шульгиних, 10, Кропивницький.',
         },
         {
           title: 'Оплата',
@@ -380,7 +380,7 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           title: 'Self-pickup',
-          text: 'Pick up your order from our store at Korolenka St., 32A, Kropyvnytskyi.',
+          text: 'Pick up your order from our store at Shulhynykh St., 10, Kropyvnytskyi.',
         },
         {
           title: 'Payment',

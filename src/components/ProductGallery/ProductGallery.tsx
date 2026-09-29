@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Heart } from 'lucide-react'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ProductGallery.module.scss'
 
@@ -10,6 +10,9 @@ interface ProductGalleryProps {
   activeIndex?: number
   onActiveIndexChange?: (index: number) => void
   captions?: Array<{ title?: string; price?: string; outOfStock?: boolean } | undefined>
+  inWishlist?: boolean
+  wishlistLabel?: string
+  onWishlistToggle?: () => void
 }
 
 const SWIPE_THRESHOLD = 48
@@ -20,6 +23,9 @@ export function ProductGallery({
   activeIndex: activeIndexProp,
   onActiveIndexChange,
   captions,
+  inWishlist = false,
+  wishlistLabel,
+  onWishlistToggle,
 }: ProductGalleryProps) {
   const { t } = useTranslation()
   const [internalIndex, setInternalIndex] = useState(0)
@@ -110,6 +116,22 @@ export function ProductGallery({
             draggable={false}
           />
         </AnimatePresence>
+
+        {onWishlistToggle && (
+          <button
+            type="button"
+            className={[styles.wishlistBtn, inWishlist ? styles.wishlistActive : ''].filter(Boolean).join(' ')}
+            onClick={(event) => {
+              event.stopPropagation()
+              onWishlistToggle()
+            }}
+            onTouchStart={(event) => event.stopPropagation()}
+            aria-label={wishlistLabel}
+            aria-pressed={inWishlist}
+          >
+            <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} />
+          </button>
+        )}
 
         {hasMultiple && (
           <>
