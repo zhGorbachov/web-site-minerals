@@ -2,15 +2,17 @@
 
 .layout {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
 .main {
   flex: 1;
-  padding-top: $header-height-mobile;
+  padding-top: calc(#{$header-height-mobile} + env(safe-area-inset-top));
+  padding-bottom: env(safe-area-inset-bottom);
 
   @media (min-width: $bp-md) {
-    padding-top: $header-height;
+    padding-top: calc(#{$header-height} + env(safe-area-inset-top));
   }
 }

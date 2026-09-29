@@ -142,6 +142,7 @@ export function Header() {
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const mobileMenuRef = useRef<HTMLElement>(null)
   const mobileSearchInputRef = useRef<HTMLInputElement>(null)
   const desktopSearchInputRef = useRef<HTMLInputElement>(null)
   const isMobile = useIsMobile()
@@ -423,15 +424,21 @@ export function Header() {
               aria-hidden="true"
             />
             <motion.nav
+              ref={mobileMenuRef}
               initial={{ x: '-100%', opacity: 0.55 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-104%', opacity: 0.4 }}
               transition={DRAWER_SPRING}
+              onAnimationComplete={() => {
+                if (!isBurgerOpen || !mobileMenuRef.current) return
+                mobileMenuRef.current.style.transform = 'none'
+              }}
               className={styles.mobileDrawer}
               aria-label={t('header.mobileMenu')}
             >
               <div className={styles.mobileDrawerHeader}>
                 <button
+                  type="button"
                   className={styles.burgerBtn}
                   onClick={closeBurger}
                   aria-label={t('header.closeMenu')}

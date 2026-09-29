@@ -390,10 +390,13 @@ export function ProductPage() {
               <ProductCharacteristics product={product} variant={selectedVariant} />
             </div>
 
-            <div className={styles.descriptionBlock}>
-              <h2 className={styles.descTitle}>{t('product.description')}</h2>
-              <p className={styles.description}>{product.description}</p>
-            </div>
+            {/* Products may be created without a description. */}
+            {product.description.trim() && (
+              <div className={styles.descriptionBlock}>
+                <h2 className={styles.descTitle}>{t('product.description')}</h2>
+                <p className={styles.description}>{product.description}</p>
+              </div>
+            )}
           </div>
         </motion.div>
 

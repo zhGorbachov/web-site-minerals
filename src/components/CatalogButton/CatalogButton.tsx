@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes } from 'react'
 import { motion } from 'framer-motion'
 import { LayoutGrid } from 'lucide-react'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CatalogButton.module.scss'
 
@@ -15,12 +16,13 @@ interface CatalogButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const CatalogButton = forwardRef<HTMLButtonElement, CatalogButtonProps>(
   ({ label, variant = 'outline', className, ...props }, ref) => {
     const { t } = useTranslation()
+    const canHover = useCanHover()
 
     return (
       <motion.button
         ref={ref}
         type="button"
-        whileTap={props.disabled ? undefined : { scale: 0.97 }}
+        whileTap={props.disabled || !canHover ? undefined : { scale: 0.97 }}
         className={[styles.button, styles[variant], className ?? ''].filter(Boolean).join(' ')}
         {...props}
       >

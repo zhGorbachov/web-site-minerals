@@ -65,7 +65,10 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: $spacing-3 $spacing-4 $spacing-4;
+  padding-bottom: max($spacing-4, env(safe-area-inset-bottom));
 }
 
 .categoryItem {
@@ -106,6 +109,21 @@
 
   &:hover {
     color: $color-primary;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .closeBtn,
+  .expandBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .primaryLink,
+  .subLink {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
   }
 }
 

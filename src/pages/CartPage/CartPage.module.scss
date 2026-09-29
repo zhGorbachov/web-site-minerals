@@ -453,6 +453,7 @@
   left: 0;
   right: 0;
   padding: $spacing-3 $spacing-4;
+  padding-bottom: max($spacing-3, env(safe-area-inset-bottom));
   background: $color-white;
   border-top: 1px solid $color-border;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);

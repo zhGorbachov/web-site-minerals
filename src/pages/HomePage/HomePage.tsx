@@ -21,7 +21,7 @@ import { ProductCard } from '@/components/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui'
 import { Button } from '@/components/ui'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
-import { useIsMobile } from '@/hooks/useMediaQuery'
+import { useCanHover, useIsMobile } from '@/hooks/useMediaQuery'
 import { SITE_NAME } from '@/config/Site'
 import { HOME_PAGE_CATEGORIES, type HomeCategorySize } from '@/config/Catalog'
 import { SiteLogo } from '@/components/SiteLogo'
@@ -69,6 +69,7 @@ export function HomePage() {
   const { t, language } = useTranslation()
   const openCatalog = useOpenCatalog()
   const isMobile = useIsMobile()
+  const canHover = useCanHover()
   const [categories, setCategories] = useState<HomeCategory[]>(() =>
     buildHomeCategories([], language),
   )
@@ -272,7 +273,7 @@ export function HomePage() {
                 onClick={() => goToNewProductsPage(newProductsPage - 1)}
                 disabled={newProductsPage === 0}
                 aria-label={t('common.paginationPrev')}
-                whileTap={{ scale: 0.9 }}
+                whileTap={canHover ? { scale: 0.9 } : undefined}
                 transition={{ type: 'spring', stiffness: 500, damping: 28 }}
               >
                 <ChevronLeft size={15} />
@@ -293,7 +294,7 @@ export function HomePage() {
                       onClick={() => goToNewProductsPage(pageIndex)}
                       aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
                       aria-current={isActive ? 'page' : undefined}
-                      whileTap={{ scale: 0.92 }}
+                      whileTap={canHover ? { scale: 0.92 } : undefined}
                       transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                     >
                       {isActive && (
@@ -314,7 +315,7 @@ export function HomePage() {
                 onClick={() => goToNewProductsPage(newProductsPage + 1)}
                 disabled={newProductsPage >= newTotalPages - 1}
                 aria-label={t('common.paginationNext')}
-                whileTap={{ scale: 0.9 }}
+                whileTap={canHover ? { scale: 0.9 } : undefined}
                 transition={{ type: 'spring', stiffness: 500, damping: 28 }}
               >
                 <ChevronRight size={15} />

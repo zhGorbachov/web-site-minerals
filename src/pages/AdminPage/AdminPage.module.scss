@@ -253,9 +253,10 @@
 
 .iconAction,
 .iconActionDanger {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
+  touch-action: manipulation;
   align-items: center;
   justify-content: center;
   border: none;
@@ -298,6 +299,24 @@
   color: $color-text;
 }
 
+.labelWithBadge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-2;
+}
+
+.optionalBadge {
+  flex-shrink: 0;
+  padding: 0.125rem $spacing-2;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  background: $color-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+}
+
 .fieldNote {
   display: flex;
   flex-direction: column;
@@ -334,8 +353,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-2;
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: $spacing-3;
   border: 1.5px solid $color-border;
   border-radius: $radius-md;
@@ -346,7 +367,9 @@
   display: flex;
   align-items: center;
   gap: $spacing-2;
-  padding: $spacing-1 $spacing-3;
+  min-height: 44px;
+  padding: $spacing-2 $spacing-3;
+  touch-action: manipulation;
   border: 1px solid $color-border;
   border-radius: $radius-full;
   font-size: $font-size-sm;

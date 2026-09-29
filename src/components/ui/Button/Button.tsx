@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes, ElementType, ReactNode } from 'react'
 import { motion } from 'framer-motion'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import styles from './Button.module.scss'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
@@ -34,13 +35,14 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(
     },
     ref,
   ) => {
+    const canHover = useCanHover()
     const Component = as ? motion.create(as) : motion.button
     const isDisabled = disabled || loading
 
     return (
       <Component
         ref={ref}
-        whileTap={isDisabled ? undefined : { scale: 0.97 }}
+        whileTap={isDisabled || !canHover ? undefined : { scale: 0.97 }}
         className={[
           styles.button,
           styles[variant],

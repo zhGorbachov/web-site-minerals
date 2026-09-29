@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Category } from '@/types'
 import { ArrowRight } from 'lucide-react'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CategoryCard.module.scss'
 
@@ -11,6 +12,7 @@ interface CategoryCardProps {
 
 export function CategoryCard({ category }: CategoryCardProps) {
   const { t } = useTranslation()
+  const canHover = useCanHover()
 
   return (
     <motion.div
@@ -19,7 +21,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.4 }}
-      whileHover={{ y: -6 }}
+      whileHover={canHover ? { y: -6 } : undefined}
     >
       <Link to={`/catalog/${category.slug}`} className={styles.link}>
         <div className={styles.imageWrapper}>

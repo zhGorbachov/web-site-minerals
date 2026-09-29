@@ -19,3 +19,4 @@ export function useMediaQuery(query: string): boolean {
 export const useIsDesktop = () => useMediaQuery('(min-width: 1280px)')
 export const useIsTablet = () => useMediaQuery('(min-width: 768px)')
 export const useIsMobile = () => useMediaQuery('(max-width: 767px)')
+export const useCanHover = () => useMediaQuery('(hover: hover) and (pointer: fine)')

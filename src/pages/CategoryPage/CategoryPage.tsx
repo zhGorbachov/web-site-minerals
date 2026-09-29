@@ -14,6 +14,7 @@ import { Breadcrumbs, EmptyState } from '@/components/ui'
 import { sortProducts, type ProductSortOption } from '@/utils'
 import { parseSelectedSubcategories } from '@/utils/catalogFilters'
 import { categoryHasSubcategories } from '@/config/Catalog'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CategoryPage.module.scss'
 
@@ -36,6 +37,7 @@ function getVisiblePageNumbers(currentPage: number, totalPages: number): number[
 
 export function CategoryPage() {
   const { t, language } = useTranslation()
+  const canHover = useCanHover()
   const { category: categorySlug, subcategory: subcategorySlug } = useParams<{
     category: string
     subcategory?: string
@@ -218,7 +220,7 @@ export function CategoryPage() {
                       onClick={() => goToProductsPage(productsPage - 1)}
                       disabled={productsPage === 0}
                       aria-label={t('common.paginationPrev')}
-                      whileTap={{ scale: 0.9 }}
+                      whileTap={canHover ? { scale: 0.9 } : undefined}
                       transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                     >
                       <ChevronLeft size={15} />
@@ -239,7 +241,7 @@ export function CategoryPage() {
                             onClick={() => goToProductsPage(pageIndex)}
                             aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
                             aria-current={isActive ? 'page' : undefined}
-                            whileTap={{ scale: 0.92 }}
+                            whileTap={canHover ? { scale: 0.92 } : undefined}
                             transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                           >
                             {isActive && (
@@ -260,7 +262,7 @@ export function CategoryPage() {
                       onClick={() => goToProductsPage(productsPage + 1)}
                       disabled={productsPage >= totalPages - 1}
                       aria-label={t('common.paginationNext')}
-                      whileTap={{ scale: 0.9 }}
+                      whileTap={canHover ? { scale: 0.9 } : undefined}
                       transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                     >
                       <ChevronRight size={15} />

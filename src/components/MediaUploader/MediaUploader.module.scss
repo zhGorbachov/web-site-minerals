@@ -106,6 +106,13 @@
   letter-spacing: 0.04em;
 }
 
+.previewHint {
+  margin: 0;
+  font-size: $font-size-xs;
+  line-height: $line-height-normal;
+  color: $color-text-muted;
+}
+
 .previewGrid {
   list-style: none;
   margin: 0;
@@ -119,7 +126,11 @@
   }
 }
 
-.previewItem,
+.previewItem {
+  position: relative;
+  min-width: 0;
+}
+
 .videoPreview {
   position: relative;
   border-radius: $radius-sm;
@@ -128,14 +139,99 @@
   border: 1px solid $color-border;
 }
 
-.previewItem {
+.previewItemMain .previewFrame {
+  border-color: $color-primary;
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.28);
+}
+
+.previewItemDrop .previewFrame {
+  outline: 2px dashed $color-primary;
+  outline-offset: 2px;
+}
+
+.mainToggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-height: 28px;
+  margin: 0 0 $spacing-1;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: $color-primary;
+    cursor: pointer;
+  }
+
+  &:has(input:checked) {
+    color: $color-primary;
+  }
+}
+
+.previewFrame {
+  position: relative;
   aspect-ratio: 1;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  background: $color-surface;
+  border: 1px solid $color-border;
+}
+
+.previewDrag {
+  position: absolute;
+  inset: 0;
+
+  &[draggable='true'] {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    pointer-events: none;
+  }
+}
+
+.moveBar {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.moveBtn {
+  pointer-events: auto;
+  touch-action: manipulation;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: $radius-circle;
+  background: rgba($color-black, 0.65);
+  color: $color-white;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 }
 
@@ -152,8 +248,10 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 28px;
-  height: 28px;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  touch-action: manipulation;
   display: inline-flex;
   align-items: center;
   justify-content: center;

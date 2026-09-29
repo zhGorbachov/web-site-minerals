@@ -3,7 +3,7 @@
 
 .backdrop {
   position: fixed;
-  top: $header-height-mobile;
+  top: calc(#{$header-height-mobile} + env(safe-area-inset-top));
   left: 0;
   right: 0;
   bottom: 0;
@@ -11,24 +11,27 @@
   z-index: $z-modal-backdrop;
 
   @include tablet-up {
-    top: $header-height;
+    top: calc(#{$header-height} + env(safe-area-inset-top));
   }
 }
 
 .drawer {
   position: fixed;
-  top: $header-height-mobile;
+  top: calc(#{$header-height-mobile} + env(safe-area-inset-top));
   left: 0;
-  bottom: 0;
   width: min(350px, 85vw);
+  height: calc(100vh - #{$header-height-mobile} - env(safe-area-inset-top));
+  height: calc(100dvh - #{$header-height-mobile} - env(safe-area-inset-top));
   background: $color-white;
   z-index: $z-modal;
   display: flex;
   flex-direction: column;
   box-shadow: $shadow-xl;
-  overflow-y: auto;
+  overflow: hidden;
 
   @include tablet-up {
-    top: $header-height;
+    top: calc(#{$header-height} + env(safe-area-inset-top));
+    height: calc(100vh - #{$header-height} - env(safe-area-inset-top));
+    height: calc(100dvh - #{$header-height} - env(safe-area-inset-top));
   }
 }

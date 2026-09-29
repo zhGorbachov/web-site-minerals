@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/store'
@@ -34,6 +34,7 @@ export function AdminShell({
   const user = useAuthStore((s) => s.user)
   const hydrated = useAuthStore((s) => s.hydrated)
   const isAdmin = user?.role === 'admin' || user?.role === 'manager'
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (hydrated && !user) {
@@ -82,9 +83,14 @@ export function AdminShell({
         <Breadcrumbs items={crumbs} />
 
         <motion.div
+          ref={contentRef}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
+          onAnimationComplete={() => {
+            // A leftover translate breaks tap targets inside this block on iOS Safari.
+            if (contentRef.current) contentRef.current.style.transform = 'none'
+          }}
         >
           <h1 className={styles.title}>{title ?? t('admin.title')}</h1>
           {subtitle !== null && (

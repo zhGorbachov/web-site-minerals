@@ -24,7 +24,7 @@ import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils/formatPrice'
 import { formatPhoneDisplay } from '@/utils/phone'
 import { scrollToHashTarget } from '@/utils/hashNav'
-import { Button, Breadcrumbs, Loader } from '@/components/ui'
+import { Button, Breadcrumbs, ConfirmDialog, Loader } from '@/components/ui'
 import { ProductGrid } from '@/components/ProductGrid'
 import styles from './ProfilePage.module.scss'
 
@@ -65,6 +65,7 @@ export function ProfilePage() {
   const [reviewText, setReviewText] = useState('')
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [reviewDeleting, setReviewDeleting] = useState(false)
+  const [reviewDeleteOpen, setReviewDeleteOpen] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [reviewJustSubmitted, setReviewJustSubmitted] = useState(false)
 
@@ -167,7 +168,6 @@ export function ProfilePage() {
 
   const handleDeleteReview = async () => {
     if (!myReview) return
-    if (!window.confirm(t('profile.reviewDeleteConfirm'))) return
     setReviewError(null)
     setReviewDeleting(true)
     try {
@@ -178,6 +178,7 @@ export function ProfilePage() {
       setReviewError(t('profile.reviewDeleteError'))
     } finally {
       setReviewDeleting(false)
+      setReviewDeleteOpen(false)
     }
   }
 
@@ -422,7 +423,7 @@ export function ProfilePage() {
                     variant="danger"
                     size="sm"
                     loading={reviewDeleting}
-                    onClick={() => void handleDeleteReview()}
+                    onClick={() => setReviewDeleteOpen(true)}
                   >
                     {t('profile.reviewDelete')}
                   </Button>
@@ -494,6 +495,20 @@ export function ProfilePage() {
           </section>
         </motion.div>
       </div>
+      <ConfirmDialog
+        open={reviewDeleteOpen}
+        message={t('profile.reviewDeleteConfirm')}
+        confirmLabel={t('profile.reviewDelete')}
+        cancelLabel={t('common.cancel')}
+        busy={reviewDeleting}
+        onCancel={() => {
+          if (!reviewDeleting) setReviewDeleteOpen(false)
+        }}
+        onConfirm={() => {
+          if (reviewDeleting) return
+          void handleDeleteReview()
+        }}
+      />
     </div>
   )
 }

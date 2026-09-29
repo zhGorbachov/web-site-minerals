@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Category, SubCategory } from '@/types'
 import { CategoryService } from '@/services/CategoryService'
@@ -7,6 +7,7 @@ import { CatalogMenu } from '@/components/CatalogMenu'
 import { categoryHasSubcategories } from '@/config/Catalog'
 import { useUIStore } from '@/store'
 import { useScrollLock } from '@/hooks/useScrollLock'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './CatalogDrawer.module.scss'
 
@@ -16,19 +17,21 @@ export function CatalogDrawer() {
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, SubCategory[]>>({})
   const [loading, setLoading] = useState(false)
+  const drawerRef = useRef<HTMLElement>(null)
+  const finePointer = useCanHover()
   const [canHover, setCanHover] = useState(false)
 
   useScrollLock(isCatalogOpen)
 
   useEffect(() => {
-    if (!isCatalogOpen) {
+    if (!isCatalogOpen || !finePointer) {
       setCanHover(false)
       return
     }
 
     const timer = window.setTimeout(() => setCanHover(true), 480)
     return () => window.clearTimeout(timer)
-  }, [isCatalogOpen])
+  }, [isCatalogOpen, finePointer])
 
   useEffect(() => {
     if (!isCatalogOpen) return
@@ -73,9 +76,14 @@ export function CatalogDrawer() {
             aria-hidden="true"
           />
           <motion.aside
+            ref={drawerRef}
             initial={{ x: '-100%', opacity: 0.55 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-104%', opacity: 0.4 }}
+            onAnimationComplete={() => {
+              if (!isCatalogOpen || !drawerRef.current) return
+              drawerRef.current.style.transform = 'none'
+            }}
             transition={{
               type: 'spring',
               damping: 22,

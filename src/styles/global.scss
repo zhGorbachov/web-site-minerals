@@ -36,5 +36,15 @@
 // Page wrapper
 .page {
   min-height: calc(100vh - $header-height);
+  min-height: calc(100dvh - $header-height);
   padding-top: $header-height;
+}
+
+// iOS Safari zooms the whole page when a focused field is smaller than 16px.
+@media (hover: none) and (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }

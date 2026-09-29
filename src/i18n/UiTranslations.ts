@@ -19,6 +19,7 @@ export type UiTranslationSchema = {
     removeSelected: string
     removeSelectedAria: string
     selectedCount: string
+    cancel: string
   }
   home: {
     heroTitle: string
@@ -463,6 +464,10 @@ export type UiTranslationSchema = {
     uploading: string
     uploadError: string
     removeMedia: string
+    mainImage: string
+    mainImageHint: string
+    moveImageEarlier: string
+    moveImageLater: string
     imagesRequired: string
     variantsTitle: string
     variantsHint: string
@@ -577,6 +582,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     removeSelected: 'Видалити',
     removeSelectedAria: 'Видалити обрані',
     selectedCount: 'Обрано {count}',
+    cancel: 'Скасувати',
   },
   home: {
     heroTitle: 'Ласкаво просимо до',
@@ -1015,7 +1021,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     discountPrice: 'Ціна зі знижкою',
     shortDescription: 'Короткий опис',
     description: 'Опис',
-    images: 'Зображення (URL через кому)',
+    images: 'Фото',
     imagesHint: 'Наприклад: /media/BeadsAgate.jpg',
     media: 'Медіа',
     mediaDropTitle: 'Вставте, перетягніть або оберіть файли',
@@ -1028,6 +1034,11 @@ export const uiTranslationsUk: UiTranslationSchema = {
     uploading: 'Завантаження...',
     uploadError: 'Не вдалося завантажити файл',
     removeMedia: 'Видалити',
+    mainImage: 'Основне',
+    mainImageHint:
+      'Перетягніть фото або натисніть стрілки, щоб змінити порядок. Галочка «Основне» — це фото на картці товару, воно стає першим.',
+    moveImageEarlier: 'Перемістити ліворуч',
+    moveImageLater: 'Перемістити праворуч',
     imagesRequired: 'Додайте хоча б одне зображення',
     variantsTitle: 'Привʼязка фото до екземплярів',
     variantsHint:
@@ -1154,6 +1165,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     removeSelected: 'Delete',
     removeSelectedAria: 'Remove selected',
     selectedCount: 'Selected {count}',
+    cancel: 'Cancel',
   },
   home: {
     heroTitle: 'Welcome to',
@@ -1592,7 +1604,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     discountPrice: 'Discount price',
     shortDescription: 'Short description',
     description: 'Description',
-    images: 'Images (comma-separated URLs)',
+    images: 'Photos',
     imagesHint: 'Example: /media/BeadsAgate.jpg',
     media: 'Media',
     mediaDropTitle: 'Paste, drop or choose files',
@@ -1605,6 +1617,11 @@ export const uiTranslationsEn: UiTranslationSchema = {
     uploading: 'Uploading...',
     uploadError: 'Could not upload file',
     removeMedia: 'Remove',
+    mainImage: 'Main',
+    mainImageHint:
+      'Drag photos or use the arrows to change the order. The checked “Main” photo is the product cover and moves to the front.',
+    moveImageEarlier: 'Move left',
+    moveImageLater: 'Move right',
     imagesRequired: 'Add at least one image',
     variantsTitle: 'Link photos to pieces',
     variantsHint:

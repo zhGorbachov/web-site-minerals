@@ -14,11 +14,14 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   background-color: $color-background;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -35,6 +38,18 @@ button {
   border: none;
   background: none;
   font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+}
+
+a,
+label,
+summary,
+[role='button'] {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 input,

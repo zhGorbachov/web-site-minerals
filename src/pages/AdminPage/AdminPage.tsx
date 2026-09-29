@@ -6,7 +6,8 @@ import { AdminApi, CatalogApi } from '@/api'
 import type { AdminOrder, AdminProductPayload, AdminUser } from '@/api'
 import { useAuthStore } from '@/store'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
-import { Button, Input, Select } from '@/components/ui'
+import { Button, ConfirmDialog, Input, Select } from '@/components/ui'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import type { SelectOption } from '@/components/ui'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
@@ -146,6 +147,12 @@ function deriveShortDescription(description: string): string {
 
 export function AdminPage() {
   const { t, language } = useTranslation()
+  const canHover = useCanHover()
+  const [confirmRequest, setConfirmRequest] = useState<{
+    message: string
+    run: () => Promise<void>
+  } | null>(null)
+  const [confirmBusy, setConfirmBusy] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -445,15 +452,6 @@ export function AdminPage() {
     )
   }
 
-  const toggleSubcategory = (subCategoryId: string) => {
-    setForm((f) => ({
-      ...f,
-      subCategoryIds: f.subCategoryIds.includes(subCategoryId)
-        ? f.subCategoryIds.filter((id) => id !== subCategoryId)
-        : [...f.subCategoryIds, subCategoryId],
-    }))
-  }
-
   const flash = (text: string) => {
     setMessage(text)
     setError(null)
@@ -623,7 +621,6 @@ export function AdminPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t('admin.removeConfirm'))) return
     try {
       await AdminApi.deleteProduct(id)
       flash(t('admin.successDeleted'))
@@ -634,16 +631,6 @@ export function AdminPage() {
   }
 
   const handleDeleteSub = async (id: string) => {
-    // Products that also sit in other subcategories survive; only the exclusive ones are lost.
-    const exclusiveCount = products.filter((p) =>
-      (p.subCategoryIds?.length ? p.subCategoryIds : [p.subCategoryId]).every(
-        (subId) => subId === id,
-      ),
-    ).length
-    const confirmed = window.confirm(
-      exclusiveCount > 0 ? t('admin.removeSubConfirmWithProducts') : t('admin.removeSubConfirm'),
-    )
-    if (!confirmed) return
     try {
       await AdminApi.deleteSubcategory(id)
       flash(t('admin.successSubDeleted'))
@@ -654,7 +641,6 @@ export function AdminPage() {
   }
 
   const handleDeleteReview = async (id: string) => {
-    if (!window.confirm(t('admin.removeReviewConfirm'))) return
     try {
       await AdminApi.deleteReview(id)
       setReviews((list) => list.filter((review) => review.id !== id))
@@ -849,7 +835,7 @@ export function AdminPage() {
                       onClick={() => goToOrdersPage(ordersPage - 1)}
                       disabled={ordersPage === 0}
                       aria-label={t('common.paginationPrev')}
-                      whileTap={{ scale: 0.9 }}
+                      whileTap={canHover ? { scale: 0.9 } : undefined}
                       transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                     >
                       <ChevronLeft size={15} />
@@ -870,7 +856,7 @@ export function AdminPage() {
                             onClick={() => goToOrdersPage(pageIndex)}
                             aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
                             aria-current={isActive ? 'page' : undefined}
-                            whileTap={{ scale: 0.92 }}
+                            whileTap={canHover ? { scale: 0.92 } : undefined}
                             transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                           >
                             {isActive && (
@@ -891,7 +877,7 @@ export function AdminPage() {
                       onClick={() => goToOrdersPage(ordersPage + 1)}
                       disabled={ordersPage >= ordersTotalPages - 1}
                       aria-label={t('common.paginationNext')}
-                      whileTap={{ scale: 0.9 }}
+                      whileTap={canHover ? { scale: 0.9 } : undefined}
                       transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                     >
                       <ChevronRight size={15} />
@@ -942,7 +928,12 @@ export function AdminPage() {
                           type="button"
                           className={styles.iconActionDanger}
                           aria-label={t('admin.remove')}
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() =>
+                            setConfirmRequest({
+                              message: t('admin.removeConfirm'),
+                              run: () => handleDelete(product.id),
+                            })
+                          }
                         >
                           <Trash2 size={16} />
                         </button>
@@ -1075,7 +1066,17 @@ export function AdminPage() {
                           <input
                             type="checkbox"
                             checked={form.subCategoryIds.includes(sub.id)}
-                            onChange={() => toggleSubcategory(sub.id)}
+                            onChange={(event) => {
+                              const selected = event.target.checked
+                              setForm((current) => ({
+                                ...current,
+                                subCategoryIds: selected
+                                  ? current.subCategoryIds.includes(sub.id)
+                                    ? current.subCategoryIds
+                                    : [...current.subCategoryIds, sub.id]
+                                  : current.subCategoryIds.filter((id) => id !== sub.id),
+                              }))
+                            }}
                           />
                           <span>{sub.name}</span>
                         </label>
@@ -1105,14 +1106,17 @@ export function AdminPage() {
                 onChange={(attributes) => setForm((f) => ({ ...f, attributes }))}
               />
 
+              {/* Description is optional: the form can be saved with this field left empty. */}
               <label className={styles.selectLabel}>
-                {t('admin.description')}
+                <span className={styles.labelWithBadge}>
+                  {t('admin.description')}
+                  <span className={styles.optionalBadge}>{t('admin.badgeOptional')}</span>
+                </span>
                 <textarea
                   className={styles.textarea}
                   rows={4}
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  required
                 />
               </label>
 
@@ -1228,7 +1232,21 @@ export function AdminPage() {
                                 type="button"
                                 className={styles.iconActionDanger}
                                 aria-label={t('admin.remove')}
-                                onClick={() => void handleDeleteSub(sub.id)}
+                                onClick={() => {
+                                  const exclusiveCount = products.filter((product) =>
+                                    (product.subCategoryIds?.length
+                                      ? product.subCategoryIds
+                                      : [product.subCategoryId]
+                                    ).every((subId) => subId === sub.id),
+                                  ).length
+                                  setConfirmRequest({
+                                    message:
+                                      exclusiveCount > 0
+                                        ? t('admin.removeSubConfirmWithProducts')
+                                        : t('admin.removeSubConfirm'),
+                                    run: () => handleDeleteSub(sub.id),
+                                  })
+                                }}
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -1246,7 +1264,7 @@ export function AdminPage() {
                         onClick={() => goToSubsPage(subsPage - 1)}
                         disabled={subsPage === 0}
                         aria-label={t('common.paginationPrev')}
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={canHover ? { scale: 0.9 } : undefined}
                         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                       >
                         <ChevronLeft size={15} />
@@ -1267,7 +1285,7 @@ export function AdminPage() {
                               onClick={() => goToSubsPage(pageIndex)}
                               aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
                               aria-current={isActive ? 'page' : undefined}
-                              whileTap={{ scale: 0.92 }}
+                              whileTap={canHover ? { scale: 0.92 } : undefined}
                               transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                             >
                               {isActive && (
@@ -1288,7 +1306,7 @@ export function AdminPage() {
                         onClick={() => goToSubsPage(subsPage + 1)}
                         disabled={subsPage >= subsTotalPages - 1}
                         aria-label={t('common.paginationNext')}
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={canHover ? { scale: 0.9 } : undefined}
                         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                       >
                         <ChevronRight size={15} />
@@ -1415,7 +1433,12 @@ export function AdminPage() {
                               type="button"
                               className={styles.iconActionDanger}
                               aria-label={t('admin.remove')}
-                              onClick={() => void handleDeleteReview(review.id)}
+                              onClick={() =>
+                                setConfirmRequest({
+                                  message: t('admin.removeReviewConfirm'),
+                                  run: () => handleDeleteReview(review.id),
+                                })
+                              }
                             >
                               <Trash2 size={16} />
                             </button>
@@ -1432,7 +1455,7 @@ export function AdminPage() {
                         onClick={() => goToReviewsPage(reviewsPage - 1)}
                         disabled={reviewsPage === 0}
                         aria-label={t('common.paginationPrev')}
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={canHover ? { scale: 0.9 } : undefined}
                         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                       >
                         <ChevronLeft size={15} />
@@ -1453,7 +1476,7 @@ export function AdminPage() {
                               onClick={() => goToReviewsPage(pageIndex)}
                               aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
                               aria-current={isActive ? 'page' : undefined}
-                              whileTap={{ scale: 0.92 }}
+                              whileTap={canHover ? { scale: 0.92 } : undefined}
                               transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                             >
                               {isActive && (
@@ -1474,7 +1497,7 @@ export function AdminPage() {
                         onClick={() => goToReviewsPage(reviewsPage + 1)}
                         disabled={reviewsPage >= reviewsTotalPages - 1}
                         aria-label={t('common.paginationNext')}
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={canHover ? { scale: 0.9 } : undefined}
                         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                       >
                         <ChevronRight size={15} />
@@ -1485,6 +1508,25 @@ export function AdminPage() {
               )}
             </div>
           )}
+      <ConfirmDialog
+        open={confirmRequest != null}
+        message={confirmRequest?.message ?? ''}
+        confirmLabel={t('admin.remove')}
+        cancelLabel={t('common.cancel')}
+        busy={confirmBusy}
+        onCancel={() => {
+          if (!confirmBusy) setConfirmRequest(null)
+        }}
+        onConfirm={() => {
+          const request = confirmRequest
+          if (!request || confirmBusy) return
+          setConfirmBusy(true)
+          void request.run().finally(() => {
+            setConfirmBusy(false)
+            setConfirmRequest(null)
+          })
+        }}
+      />
     </AdminShell>
   )
 }

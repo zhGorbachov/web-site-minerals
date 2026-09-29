@@ -7,6 +7,7 @@
   left: 0;
   right: 0;
   z-index: $z-sticky;
+  padding-top: env(safe-area-inset-top);
   background: rgba(var(--color-header-rgb), 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -414,14 +415,17 @@
   position: fixed;
   top: 0;
   left: 0;
-  bottom: 0;
   width: min(350px, 90vw);
+  height: 100vh;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top);
   background: $color-white;
   z-index: $z-modal;
   display: flex;
   flex-direction: column;
   box-shadow: $shadow-xl;
-  overflow-y: auto;
+  overflow: hidden;
+  overscroll-behavior: contain;
 
   @include tablet-up {
     display: none;
@@ -445,7 +449,11 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobileMenuItemDivided {
@@ -544,6 +552,7 @@
 .mobileDrawerFooter {
   margin-top: auto;
   padding: $spacing-5;
+  padding-bottom: max($spacing-5, env(safe-area-inset-bottom));
   border-top: 1px solid $color-border;
   display: flex;
   justify-content: center;

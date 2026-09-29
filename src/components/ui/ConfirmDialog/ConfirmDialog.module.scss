@@ -1,0 +1,67 @@
+@use '@/styles/variables' as *;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-dialog;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: $spacing-4;
+  padding-bottom: max($spacing-4, env(safe-area-inset-bottom));
+  background: rgba($color-black, 0.45);
+
+  @media (min-width: $bp-md) {
+    align-items: center;
+  }
+}
+
+.dialog {
+  width: min(100%, 420px);
+  padding: $spacing-5;
+  border-radius: $radius-md;
+  background: $color-white;
+  box-shadow: $shadow-xl;
+}
+
+.message {
+  margin: 0 0 $spacing-5;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $color-text;
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-3;
+}
+
+.cancel,
+.confirm {
+  flex: 1;
+  min-height: 48px;
+  padding: $spacing-3 $spacing-4;
+  border: none;
+  border-radius: $radius-button;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+}
+
+.cancel {
+  background: $color-surface;
+  color: $color-text;
+}
+
+.confirm {
+  background: $color-error;
+  color: $color-white;
+}

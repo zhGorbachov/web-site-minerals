@@ -60,7 +60,8 @@ const productBodySchema = z.object({
   slug: z.string().trim().min(1).optional(),
   sku: z.string().trim().optional(),
   shortDescription: z.string().trim().optional(),
-  description: z.string().trim().min(1),
+  // Optional on create and edit. Empty text is stored as ""; the short description falls back to "—".
+  description: z.string().trim(),
   price: z.number().positive(),
   discountPrice: z.number().min(0).nullable().optional(),
   stock: z.number().int().min(0),

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { SubCategory } from '@/types'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import styles from './SubcategoryCard.module.scss'
 
 interface SubcategoryCardProps {
@@ -9,6 +10,8 @@ interface SubcategoryCardProps {
 }
 
 export function SubcategoryCard({ subcategory, categorySlug }: SubcategoryCardProps) {
+  const canHover = useCanHover()
+
   return (
     <motion.div
       className={styles.card}
@@ -16,7 +19,7 @@ export function SubcategoryCard({ subcategory, categorySlug }: SubcategoryCardPr
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.35 }}
-      whileHover={{ y: -4 }}
+      whileHover={canHover ? { y: -4 } : undefined}
     >
       <Link
         to={`/catalog/${categorySlug}/${subcategory.slug}`}

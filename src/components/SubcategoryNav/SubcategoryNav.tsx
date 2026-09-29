@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { SubCategory } from '@/types'
 import { catalogCategoryPath, toggleSubcategorySelection } from '@/utils/catalogFilters'
+import { useCanHover } from '@/hooks/useMediaQuery'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './SubcategoryNav.module.scss'
 
@@ -13,6 +14,7 @@ interface SubcategoryNavProps {
 
 export function SubcategoryNav({ subcategories, selectedSlugs, categorySlug }: SubcategoryNavProps) {
   const { t } = useTranslation()
+  const canHover = useCanHover()
 
   if (subcategories.length === 0) return null
 
@@ -67,7 +69,7 @@ export function SubcategoryNav({ subcategories, selectedSlugs, categorySlug }: S
             const selected = selectedSlugs.includes(sub.slug)
             return (
               <li key={sub.id}>
-                <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.15 }}>
+                <motion.div whileHover={canHover ? { x: 4 } : undefined} transition={{ duration: 0.15 }}>
                   <Link
                     to={catalogCategoryPath(
                       categorySlug,
