@@ -299,12 +299,12 @@
 .itemPrice {
   font-size: $font-size-base;
   font-weight: $font-weight-bold;
-  color: $color-text;
+  color: $color-primary-dark;
   white-space: nowrap;
 }
 
 .priceDiscounted {
-  color: $color-success;
+  color: $color-primary-dark;
 }
 
 .oldPrice {

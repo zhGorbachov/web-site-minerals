@@ -278,11 +278,11 @@
 .price {
   font-size: $font-size-base;
   font-weight: $font-weight-bold;
-  color: #1F9D55;
+  color: $color-primary-dark;
 }
 
 .priceDiscounted {
-  color: #15803D;
+  color: $color-primary-dark;
 }
 
 .oldPrice {
