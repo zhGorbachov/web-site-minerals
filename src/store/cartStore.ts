@@ -73,18 +73,26 @@ export const useCartStore = create<CartState>()(
 
         let nextItems: CartItem[]
 
-        if (existing) {
-          const nextQuantity = Math.min(
-            existing.quantity + quantity,
-            getAvailableStock(product, options),
+        const otherLines = get()
+          .items.filter(
+            (item) =>
+              item.product.id === product.id && !optionsMatch(item.selectedOptions, options),
           )
+          .map((item) => ({
+            quantity: item.quantity,
+            selectedOptions: item.selectedOptions,
+          }))
+        const cap = getAvailableStock(product, options, otherLines)
+
+        if (existing) {
+          const nextQuantity = Math.min(existing.quantity + quantity, cap)
           if (nextQuantity === existing.quantity) return
 
           nextItems = get().items.map((item) =>
             item.id === existing.id ? { ...item, quantity: nextQuantity } : item,
           )
         } else {
-          const cappedQuantity = Math.min(quantity, getAvailableStock(product, options))
+          const cappedQuantity = Math.min(quantity, cap)
           if (cappedQuantity <= 0) return
 
           const newItem: CartItem = {
@@ -158,9 +166,15 @@ export const useCartStore = create<CartState>()(
         const item = get().items.find((i) => i.id === itemId)
         if (!item) return
 
+        const otherLines = get()
+          .items.filter((line) => line.product.id === item.product.id && line.id !== itemId)
+          .map((line) => ({
+            quantity: line.quantity,
+            selectedOptions: line.selectedOptions,
+          }))
         const cappedQuantity = Math.min(
           quantity,
-          getAvailableStock(item.product, item.selectedOptions),
+          getAvailableStock(item.product, item.selectedOptions, otherLines),
         )
         const nextItems = get().items.map((i) =>
           i.id === itemId ? { ...i, quantity: cappedQuantity } : i,
@@ -234,7 +248,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'crystal-cart',
-      version: 3,
+      version: 4,
       migrate: (persisted) => {
         const state = persisted as { items?: CartItem[]; syncing?: boolean }
         const items = Array.isArray(state.items) ? state.items : []

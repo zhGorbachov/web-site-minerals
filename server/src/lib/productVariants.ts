@@ -1,3 +1,13 @@
+import {
+  consumedWholeStrands,
+  halfPrice,
+  isHalfStrandSelection,
+  productSellsWholeStrands,
+  strandPoolQuantity,
+  variantHasOwnPrice,
+  type StrandStockLine,
+} from './strandPool.js'
+
 export const VARIANT_ID_OPTION_KEY = 'variantId'
 
 export type ProductVariant = {
@@ -93,22 +103,37 @@ export function getCartUnitPrice(
     price: { toNumber?: () => number } | number
     discountPrice?: { toNumber?: () => number } | number | null
     variants?: unknown
+    categorySlug?: string
   },
   selectedOptions?: Record<string, string> | null,
 ): number {
   const variants = parseVariants(product.variants)
   const variant = getSelectedVariant(variants, selectedOptions)
-  return getVariantUnitPrice(product, variant)
+  const base = getVariantUnitPrice(product, variant)
+  if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions) || variantHasOwnPrice(variant)) {
+    return base
+  }
+  return halfPrice(base)
 }
 
 export function getAvailableStock(
-  product: { stock: number; variants?: unknown },
+  product: {
+    stock: number
+    variants?: unknown
+    categorySlug?: string
+    attributes?: unknown
+  },
   selectedOptions?: Record<string, string> | null,
+  otherLines: StrandStockLine[] = [],
 ): number {
   const variants = parseVariants(product.variants)
-  if (!variants.length) return Math.max(0, product.stock)
-  const variant = getSelectedVariant(variants, selectedOptions)
-  return variant ? Math.max(0, variant.stock) : 0
+  if (variants.length) {
+    const variant = getSelectedVariant(variants, selectedOptions)
+    return variant ? Math.max(0, variant.stock) : 0
+  }
+  const stock = Math.max(0, product.stock)
+  if (!productSellsWholeStrands(product)) return stock
+  return strandPoolQuantity(stock, isHalfStrandSelection(selectedOptions), otherLines)
 }
 
 export function getVariantDisplayName(
@@ -132,17 +157,51 @@ export function deriveProductPricingFromVariants(
   }
 }
 
+export function applyLinesStock(
+  product: {
+    stock: number
+    variants?: unknown
+    categorySlug?: string
+    attributes?: unknown
+  },
+  lines: StrandStockLine[],
+): { stock: number; variants?: ProductVariant[] } {
+  const variants = parseVariants(product.variants)
+  if (variants.length) {
+    let current: { stock: number; variants?: unknown } = {
+      stock: product.stock,
+      variants: product.variants,
+    }
+    for (const line of lines) {
+      const next = applyVariantStockChange(current, line.selectedOptions, line.quantity)
+      current = { stock: next.stock, variants: next.variants }
+    }
+    return {
+      stock: current.stock,
+      variants: current.variants as ProductVariant[] | undefined,
+    }
+  }
+
+  const consume = productSellsWholeStrands(product)
+    ? consumedWholeStrands(lines)
+    : lines.reduce((sum, line) => sum + line.quantity, 0)
+  if (product.stock < consume) throw new Error('Insufficient stock')
+  return { stock: product.stock - consume }
+}
+
 export function applyVariantStockChange(
-  product: { stock: number; variants?: unknown },
+  product: {
+    stock: number
+    variants?: unknown
+    categorySlug?: string
+    attributes?: unknown
+  },
   selectedOptions: Record<string, string> | null | undefined,
   quantity: number,
 ): { stock: number; variants?: ProductVariant[] } {
   const variants = parseVariants(product.variants).map((variant) => ({ ...variant }))
   if (!variants.length) {
-    if (product.stock < quantity) {
-      throw new Error('Insufficient stock')
-    }
-    return { stock: product.stock - quantity }
+    return applyLinesStock(product, [{ quantity, selectedOptions }])
   }
 
   const variantId = selectedOptions?.[VARIANT_ID_OPTION_KEY]

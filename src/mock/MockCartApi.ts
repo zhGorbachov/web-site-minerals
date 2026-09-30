@@ -64,14 +64,24 @@ export const MockCartApi = {
         item.product.id === productId && optionsMatch(item.selectedOptions, selectedOptions),
     )
 
+    const otherLines = cart.items
+      .filter(
+        (item) =>
+          item.product.id === productId && !optionsMatch(item.selectedOptions, selectedOptions),
+      )
+      .map((item) => ({
+        quantity: item.quantity,
+        selectedOptions: item.selectedOptions,
+      }))
+
     if (existing) {
       existing.quantity = Math.min(
         existing.quantity + quantity,
-        getAvailableStock(product, selectedOptions),
+        getAvailableStock(product, selectedOptions, otherLines),
       )
       existing.product = product
     } else {
-      const capped = Math.min(quantity, getAvailableStock(product, selectedOptions))
+      const capped = Math.min(quantity, getAvailableStock(product, selectedOptions, otherLines))
       if (capped > 0) {
         cart.items.push({
           id: `item-${productId}-${Date.now()}`,
@@ -99,9 +109,15 @@ export const MockCartApi = {
       return toCart(cart)
     }
 
+    const otherLines = cart.items
+      .filter((line) => line.product.id === item.product.id && line.id !== itemId)
+      .map((line) => ({
+        quantity: line.quantity,
+        selectedOptions: line.selectedOptions,
+      }))
     item.quantity = Math.min(
       quantity,
-      getAvailableStock(item.product, item.selectedOptions),
+      getAvailableStock(item.product, item.selectedOptions, otherLines),
     )
     const { cart: mergedCart, mergedPairs } = applyStrandMerge(cart)
     MockDb.setCart(userId, mergedCart)
@@ -141,16 +157,27 @@ export const MockCartApi = {
           item.product.id === incoming.productId &&
           optionsMatch(item.selectedOptions, incoming.selectedOptions),
       )
+      const otherLines = cart.items
+        .filter(
+          (item) =>
+            item.product.id === incoming.productId &&
+            !optionsMatch(item.selectedOptions, incoming.selectedOptions),
+        )
+        .map((item) => ({
+          quantity: item.quantity,
+          selectedOptions: item.selectedOptions,
+        }))
+
       if (existing) {
         existing.quantity = Math.min(
           existing.quantity + incoming.quantity,
-          getAvailableStock(product, incoming.selectedOptions),
+          getAvailableStock(product, incoming.selectedOptions, otherLines),
         )
         existing.product = product
       } else {
         const capped = Math.min(
           incoming.quantity,
-          getAvailableStock(product, incoming.selectedOptions),
+          getAvailableStock(product, incoming.selectedOptions, otherLines),
         )
         if (capped > 0) {
           cart.items.push({

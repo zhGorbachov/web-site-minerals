@@ -148,7 +148,13 @@ export function CartPage() {
                 const variant = getSelectedVariant(product, item.selectedOptions)
                 const unitPrice = getCartUnitPrice(product, item.selectedOptions)
                 const isSelected = selectedIds.has(item.id)
-                const maxQty = getAvailableStock(product, item.selectedOptions)
+                const otherLines = items
+                  .filter((line) => line.product.id === product.id && line.id !== item.id)
+                  .map((line) => ({
+                    quantity: line.quantity,
+                    selectedOptions: line.selectedOptions,
+                  }))
+                const maxQty = getAvailableStock(product, item.selectedOptions, otherLines)
                 const visibleOptions = optionsWithoutVariantId(item.selectedOptions)
                 const lineName = getVariantDisplayName(product, variant)
                 const lineImage = variant?.image ?? product.images[0]

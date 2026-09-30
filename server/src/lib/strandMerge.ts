@@ -1,4 +1,5 @@
 import { DEFAULT_STRAND_LENGTHS, STRANDS_CATEGORY_SLUG, type StrandLengthOption } from './catalogDefaults.js'
+import { isHalfStrandLabel } from './strandPool.js'
 
 export type StrandMergeCartItem = {
   id: string
@@ -13,15 +14,7 @@ export type StrandMergeCartItem = {
   selectedOptions?: Record<string, string> | null
 }
 
-export function isHalfStrandLabel(label: string): boolean {
-  const normalized = label.trim().toLowerCase()
-  return (
-    normalized.includes('пів низк') ||
-    normalized.includes('half strand') ||
-    /(^|\s)half(\s|$)/.test(normalized) ||
-    /(^|\s)пів(\s|$)/.test(normalized)
-  )
-}
+export { isHalfStrandLabel }
 
 function parseCm(text: string): number | null {
   const match = text.replace(',', '.').match(/(\d+(?:\.\d+)?)/)

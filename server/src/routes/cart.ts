@@ -160,10 +160,17 @@ cartRouter.post('/items', async (req, res) => {
       JSON.stringify(item.selectedOptions ?? {}) === optionsKey,
   )
 
+  const otherLines = cart.items
+    .filter((item) => item.productId === product.id && item.id !== existing?.id)
+    .map((item) => ({
+      quantity: item.quantity,
+      selectedOptions: (item.selectedOptions as Record<string, string> | null) ?? undefined,
+    }))
+
   if (existing) {
     const nextQty = Math.min(
       existing.quantity + parsed.data.quantity,
-      getAvailableStock(product, parsed.data.selectedOptions),
+      getAvailableStock(product, parsed.data.selectedOptions, otherLines),
     )
     await prisma.cartItem.update({
       where: { id: existing.id },
@@ -172,7 +179,7 @@ cartRouter.post('/items', async (req, res) => {
   } else {
     const qty = Math.min(
       parsed.data.quantity,
-      getAvailableStock(product, parsed.data.selectedOptions),
+      getAvailableStock(product, parsed.data.selectedOptions, otherLines),
     )
     if (qty <= 0) {
       res.status(400).json({ error: 'Out of stock' })
@@ -210,9 +217,19 @@ cartRouter.patch('/items/:itemId', async (req, res) => {
     return
   }
 
+  const otherLines = cart.items
+    .filter((line) => line.productId === item.productId && line.id !== item.id)
+    .map((line) => ({
+      quantity: line.quantity,
+      selectedOptions: (line.selectedOptions as Record<string, string> | null) ?? undefined,
+    }))
   const quantity = Math.min(
     parsed.data.quantity,
-    getAvailableStock(item.product, item.selectedOptions as Record<string, string> | null),
+    getAvailableStock(
+      item.product,
+      item.selectedOptions as Record<string, string> | null,
+      otherLines,
+    ),
   )
   await prisma.cartItem.update({
     where: { id: item.id },
@@ -272,18 +289,28 @@ cartRouter.post('/merge', async (req, res) => {
         JSON.stringify(ci.selectedOptions ?? {}) === optionsKey,
     )
 
+    const otherLines = cart.items
+      .filter((line) => line.productId === product.id && line.id !== existing?.id)
+      .map((line) => ({
+        quantity: line.quantity,
+        selectedOptions: (line.selectedOptions as Record<string, string> | null) ?? undefined,
+      }))
+
     if (existing) {
       await prisma.cartItem.update({
         where: { id: existing.id },
         data: {
           quantity: Math.min(
             existing.quantity + item.quantity,
-            getAvailableStock(product, item.selectedOptions),
+            getAvailableStock(product, item.selectedOptions, otherLines),
           ),
         },
       })
     } else {
-      const qty = Math.min(item.quantity, getAvailableStock(product, item.selectedOptions))
+      const qty = Math.min(
+        item.quantity,
+        getAvailableStock(product, item.selectedOptions, otherLines),
+      )
       if (qty > 0) {
         await prisma.cartItem.create({
           data: {

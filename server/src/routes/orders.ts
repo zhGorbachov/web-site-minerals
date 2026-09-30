@@ -8,7 +8,7 @@ import {
   getDiscountedUnitPrice,
 } from '../lib/pricing.js'
 import {
-  applyVariantStockChange,
+  applyLinesStock,
   getCartUnitPrice,
   getSelectedVariant,
   getVariantDisplayName,
@@ -166,11 +166,23 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           include: { items: true },
         })
 
+        const stockGroups = new Map<string, typeof cart.items>()
         for (const item of cart.items) {
-          const options = (item.selectedOptions as Record<string, string> | null) ?? undefined
-          const next = applyVariantStockChange(item.product, options, item.quantity)
+          const group = stockGroups.get(item.productId) ?? []
+          group.push(item)
+          stockGroups.set(item.productId, group)
+        }
+
+        for (const [productId, lines] of stockGroups) {
+          const next = applyLinesStock(
+            lines[0].product,
+            lines.map((line) => ({
+              quantity: line.quantity,
+              selectedOptions: (line.selectedOptions as Record<string, string> | null) ?? undefined,
+            })),
+          )
           await tx.product.update({
-            where: { id: item.productId },
+            where: { id: productId },
             data: {
               stock: next.stock,
               ...(next.variants
@@ -209,10 +221,27 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
 
   let resolvedItems
   try {
+    const guestGroups = new Map<string, typeof guestItems>()
+    for (const item of guestItems) {
+      const group = guestGroups.get(item.productId) ?? []
+      group.push(item)
+      guestGroups.set(item.productId, group)
+    }
+    for (const [productId, lines] of guestGroups) {
+      const product = productById.get(productId)
+      if (!product) throw new Error('Product not found')
+      applyLinesStock(
+        product,
+        lines.map((line) => ({
+          quantity: line.quantity,
+          selectedOptions: line.selectedOptions,
+        })),
+      )
+    }
+
     resolvedItems = guestItems.map((item) => {
       const product = productById.get(item.productId)
       if (!product) throw new Error('Product not found')
-      applyVariantStockChange(product, item.selectedOptions, item.quantity)
       const variants = parseVariants(product.variants)
       const variant = getSelectedVariant(variants, item.selectedOptions)
       return {
@@ -278,14 +307,23 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         include: { items: true },
       })
 
+      const stockGroups = new Map<string, typeof resolvedItems>()
       for (const item of resolvedItems) {
-        const next = applyVariantStockChange(
-          item.product,
-          item.selectedOptions,
-          item.quantity,
+        const group = stockGroups.get(item.product.id) ?? []
+        group.push(item)
+        stockGroups.set(item.product.id, group)
+      }
+
+      for (const [productId, lines] of stockGroups) {
+        const next = applyLinesStock(
+          lines[0].product,
+          lines.map((line) => ({
+            quantity: line.quantity,
+            selectedOptions: line.selectedOptions,
+          })),
         )
         await tx.product.update({
-          where: { id: item.product.id },
+          where: { id: productId },
           data: {
             stock: next.stock,
             ...(next.variants

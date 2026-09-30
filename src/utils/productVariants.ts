@@ -6,6 +6,15 @@ import {
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_WRIST_SIZES,
 } from './catalogDefaults'
+import {
+  consumedWholeStrands,
+  halfPrice,
+  isHalfStrandSelection,
+  productSellsWholeStrands,
+  strandPoolQuantity,
+  variantHasOwnPrice,
+  type StrandStockLine,
+} from './strandPool'
 
 export const VARIANT_ID_OPTION_KEY = 'variantId'
 
@@ -301,21 +310,60 @@ export function pickDefaultVariant(product: Pick<Product, 'variants'>): ProductV
 }
 
 export function getAvailableStock(
-  product: Pick<Product, 'stock' | 'variants'>,
+  product: Pick<Product, 'stock' | 'variants'> & {
+    categorySlug?: string
+    attributes?: unknown
+  },
   selectedOptions?: Record<string, string> | null,
+  otherLines: StrandStockLine[] = [],
 ): number {
   const variants = getProductVariants(product)
-  if (!variants.length) return Math.max(0, product.stock)
-  const variant = getSelectedVariant(product, selectedOptions)
-  return variant ? Math.max(0, variant.stock) : 0
+  if (variants.length) {
+    const variant = getSelectedVariant(product, selectedOptions)
+    return variant ? Math.max(0, variant.stock) : 0
+  }
+  const stock = Math.max(0, product.stock)
+  if (!productSellsWholeStrands(product)) return stock
+  return strandPoolQuantity(stock, isHalfStrandSelection(selectedOptions), otherLines)
 }
 
 export function getCartUnitPrice(
-  product: { price: number; discountPrice?: number | null; variants?: unknown },
+  product: {
+    price: number
+    discountPrice?: number | null
+    variants?: unknown
+    categorySlug?: string
+  },
   selectedOptions?: Record<string, string> | null,
 ): number {
   const variant = getSelectedVariant(product as Pick<Product, 'variants'>, selectedOptions)
-  return getVariantUnitPrice(product, variant)
+  const base = getVariantUnitPrice(product, variant)
+  if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions) || variantHasOwnPrice(variant)) {
+    return base
+  }
+  return halfPrice(base)
+}
+
+/** Struck-through price for the current strand length. Photo prices stay as entered. */
+export function getSelectionCompareAtPrice(
+  product: {
+    price: number
+    discountPrice?: number | null
+    variants?: unknown
+    categorySlug?: string
+  },
+  selectedOptions?: Record<string, string> | null,
+): number | undefined {
+  const variant = getSelectedVariant(product as Pick<Product, 'variants'>, selectedOptions)
+  const compare = variant
+    ? getVariantCompareAtPrice(product, variant)
+    : compareAtForSale(product.price, product.discountPrice)
+  if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions) || variantHasOwnPrice(variant)) {
+    return compare
+  }
+  if (compare == null) return undefined
+  const halved = halfPrice(compare)
+  return halved > getCartUnitPrice(product, selectedOptions) ? halved : undefined
 }
 
 export function getVariantDisplayName(product: Pick<Product, 'name'>, variant?: ProductVariant | null) {
@@ -467,17 +515,47 @@ export function deriveProductPricingFromVariants(
   }
 }
 
+export function applyLinesStock(
+  product: Pick<Product, 'stock' | 'variants'> & {
+    categorySlug?: string
+    attributes?: unknown
+  },
+  lines: StrandStockLine[],
+): { stock: number; variants?: ProductVariant[] } {
+  const variants = getProductVariants(product)
+  if (variants.length) {
+    let current: { stock: number; variants?: unknown } = {
+      stock: product.stock,
+      variants: product.variants,
+    }
+    for (const line of lines) {
+      const next = applyVariantStockChange(current, line.selectedOptions, line.quantity)
+      current = { stock: next.stock, variants: next.variants }
+    }
+    return {
+      stock: current.stock,
+      variants: current.variants as ProductVariant[] | undefined,
+    }
+  }
+
+  const consume = productSellsWholeStrands(product)
+    ? consumedWholeStrands(lines)
+    : lines.reduce((sum, line) => sum + line.quantity, 0)
+  if (product.stock < consume) throw new Error('Insufficient stock')
+  return { stock: product.stock - consume }
+}
+
 export function applyVariantStockChange(
-  product: Pick<Product, 'stock' | 'variants'>,
+  product: Pick<Product, 'stock' | 'variants'> & {
+    categorySlug?: string
+    attributes?: unknown
+  },
   selectedOptions: Record<string, string> | null | undefined,
   quantity: number,
 ): { stock: number; variants?: ProductVariant[] } {
   const variants = getProductVariants(product).map((variant) => ({ ...variant }))
   if (!variants.length) {
-    if (product.stock < quantity) {
-      throw new Error('Insufficient stock')
-    }
-    return { stock: product.stock - quantity }
+    return applyLinesStock(product, [{ quantity, selectedOptions }])
   }
 
   const variantId = selectedOptions?.[VARIANT_ID_OPTION_KEY]

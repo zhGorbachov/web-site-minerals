@@ -7,7 +7,7 @@ import {
   toPricingItems,
 } from '@/utils/pricing'
 import {
-  applyVariantStockChange,
+  applyLinesStock,
   getCartUnitPrice,
   getSelectedVariant,
   getVariantDisplayName,
@@ -20,16 +20,18 @@ function applyOrderStock(items: CartItem[]) {
   const next = products.map((product) => {
     const related = items.filter((item) => item.product.id === product.id)
     if (!related.length) return product
-    let updated = product
-    for (const item of related) {
-      const change = applyVariantStockChange(updated, item.selectedOptions, item.quantity)
-      updated = {
-        ...updated,
-        stock: change.stock,
-        variants: change.variants ?? updated.variants,
-      }
+    const change = applyLinesStock(
+      product,
+      related.map((item) => ({
+        quantity: item.quantity,
+        selectedOptions: item.selectedOptions,
+      })),
+    )
+    return {
+      ...product,
+      stock: change.stock,
+      variants: change.variants ?? product.variants,
     }
-    return updated
   })
   MockDb.setProducts(next)
 }

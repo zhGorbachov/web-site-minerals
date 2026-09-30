@@ -14,10 +14,12 @@ import {
   getAvailableStock,
   getCartUnitPrice,
   getSelectedVariant,
+  getSelectionCompareAtPrice,
   getVariantCompareAtPrice,
   getVariantDisplayName,
   optionsWithoutVariantId,
 } from '@/utils/productVariants'
+import { isHalfStrandSelection } from '@/utils/strandPool'
 import { EmptyState } from '@/components/ui'
 import styles from './WishlistPage.module.scss'
 
@@ -208,7 +210,12 @@ export function WishlistPage() {
               {rows.map(({ entry, product }) => {
                 const variant = getSelectedVariant(product, entry.selectedOptions)
                 const displayPrice = getCartUnitPrice(product, entry.selectedOptions)
-                const compareAt = variant ? getVariantCompareAtPrice(product, variant) : undefined
+                const compareAt =
+                  product.categorySlug === 'nytky' && isHalfStrandSelection(entry.selectedOptions)
+                  ? getSelectionCompareAtPrice(product, entry.selectedOptions)
+                  : variant
+                    ? getVariantCompareAtPrice(product, variant)
+                    : undefined
                 const hasDiscount = compareAt != null && compareAt > displayPrice
                 const isSelected = selectedIds.has(entry.id)
                 const lineName = getVariantDisplayName(product, variant)

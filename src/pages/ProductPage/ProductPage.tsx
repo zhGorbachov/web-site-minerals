@@ -27,7 +27,9 @@ import {
   getVariantUnitPrice,
   hasProductVariants,
   optionsWithoutVariantId,
+  sameSelection,
 } from '@/utils/productVariants'
+import { halfPrice, isHalfStrandSelection, variantHasOwnPrice } from '@/utils/strandPool'
 import styles from './ProductPage.module.scss'
 
 export function ProductPage() {
@@ -46,6 +48,7 @@ export function ProductPage() {
   const addedResetRef = useRef<number | null>(null)
 
   const addItem = useCartStore((s) => s.addItem)
+  const cartItems = useCartStore((s) => s.items)
   const cartQuantity = useCartStore((s) =>
     product ? s.getCartQuantity(product.id, selectedOptions) : 0,
   )
@@ -79,8 +82,21 @@ export function ProductPage() {
     })
   }, [slug, language, variantFromQuery])
 
-  const maxSelectable = product ? Math.max(0, getAvailableStock(product, selectedOptions) - cartQuantity) : 0
-  const availableStock = product ? getAvailableStock(product, selectedOptions) : 0
+  const otherStrandLines = product
+    ? cartItems
+        .filter(
+          (item) =>
+            item.product.id === product.id && !sameSelection(item.selectedOptions, selectedOptions),
+        )
+        .map((item) => ({
+          quantity: item.quantity,
+          selectedOptions: item.selectedOptions,
+        }))
+    : []
+  const availableStock = product
+    ? getAvailableStock(product, selectedOptions, otherStrandLines)
+    : 0
+  const maxSelectable = Math.max(0, availableStock - cartQuantity)
   const atMaxInCart = availableStock > 0 && maxSelectable === 0
 
   const galleryImages = product ? getProductGalleryImages(product) : []
@@ -176,12 +192,23 @@ export function ProductPage() {
 
   const selectedVariant = getSelectedVariant(product, selectedOptions)
   const catalogPricing = getCatalogPricing(product)
-  const displayPrice = selectedVariant
+  const halfSelected =
+    product.categorySlug === 'nytky' &&
+    isHalfStrandSelection(selectedOptions) &&
+    !variantHasOwnPrice(selectedVariant)
+  const basePrice = selectedVariant
     ? getVariantUnitPrice(product, selectedVariant)
     : catalogPricing.min
-  const compareAt = selectedVariant
+  const baseCompare = selectedVariant
     ? getVariantCompareAtPrice(product, selectedVariant)
     : catalogPricing.compareAt
+  const displayPrice = halfSelected ? halfPrice(basePrice) : basePrice
+  const halvedCompare = baseCompare != null ? halfPrice(baseCompare) : undefined
+  const compareAt = halfSelected
+    ? halvedCompare != null && halvedCompare > displayPrice
+      ? halvedCompare
+      : undefined
+    : baseCompare
   const visibleVariant = findVariantByImage(product, galleryImages[galleryIndex])
   const photoOptions = visibleVariant ? buildVariantSelection(visibleVariant) : undefined
   const photoInWishlist = isInWishlist(product.id, photoOptions)
@@ -268,7 +295,7 @@ export function ProductPage() {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {!selectedVariant && catalogPricing?.hasRange
+                  {!selectedVariant && catalogPricing?.hasRange && !halfSelected
                     ? t('product.fromPrice', { price: formatPrice(displayPrice, language) })
                     : formatPrice(displayPrice, language)}
                 </span>

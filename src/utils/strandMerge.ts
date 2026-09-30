@@ -1,5 +1,6 @@
 import type { Product, StrandLengthOption, ThreadAttributes } from '@/types'
 import { getThreadStrandLengths } from './productOptions'
+import { isHalfStrandLabel } from './strandPool'
 
 export type StrandMergeCartItem = {
   id: string
@@ -8,15 +9,7 @@ export type StrandMergeCartItem = {
   selectedOptions?: Record<string, string>
 }
 
-export function isHalfStrandLabel(label: string): boolean {
-  const normalized = label.trim().toLowerCase()
-  return (
-    normalized.includes('пів низк') ||
-    normalized.includes('half strand') ||
-    /(^|\s)half(\s|$)/.test(normalized) ||
-    /(^|\s)пів(\s|$)/.test(normalized)
-  )
-}
+export { isHalfStrandLabel }
 
 function parseCm(text: string): number | null {
   const match = text.replace(',', '.').match(/(\d+(?:\.\d+)?)/)
