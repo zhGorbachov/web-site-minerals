@@ -432,7 +432,10 @@ export function toStoredVariants(variants: ProductVariant[]): ProductVariant[] {
   return variants.filter(isBoundVariant).map((variant) => ({
     id: variant.id || createVariantId(),
     image: variant.image,
-    name: variant.name?.trim() || undefined,
+    // Keep the raw name, including a trailing space. This runs on every keystroke
+    // in the photo-binding editor; trimming here would swallow the space before
+    // the next word. Edges are trimmed when the product is parsed on save.
+    name: variant.name && variant.name.trim() ? variant.name : undefined,
     price: variant.price != null && variant.price > 0 ? variant.price : undefined,
     discountPrice:
       variant.discountPrice != null && variant.discountPrice > 0
