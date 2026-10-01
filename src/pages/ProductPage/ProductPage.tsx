@@ -29,7 +29,6 @@ import {
   optionsWithoutVariantId,
   sameSelection,
 } from '@/utils/productVariants'
-import { isHalfStrandSelection } from '@/utils/strandPool'
 import styles from './ProductPage.module.scss'
 
 export function ProductPage() {
@@ -192,13 +191,13 @@ export function ProductPage() {
 
   const selectedVariant = getSelectedVariant(product, selectedOptions)
   const catalogPricing = getCatalogPricing(product)
-  const halfSelected = product.categorySlug === 'nytky' && isHalfStrandSelection(selectedOptions)
+  const strandChosen = product.categorySlug === 'nytky' && Boolean(selectedOptions.strandLength)
   const displayPrice =
-    selectedVariant || halfSelected
+    selectedVariant || strandChosen
       ? getCartUnitPrice(product, selectedOptions)
       : catalogPricing.min
   const compareAt =
-    selectedVariant || halfSelected
+    selectedVariant || strandChosen
       ? getSelectionCompareAtPrice(product, selectedOptions)
       : catalogPricing.compareAt
   const visibleVariant = findVariantByImage(product, galleryImages[galleryIndex])
@@ -287,7 +286,7 @@ export function ProductPage() {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {!selectedVariant && catalogPricing?.hasRange && !halfSelected
+                  {!selectedVariant && catalogPricing?.hasRange && !strandChosen
                     ? t('product.fromPrice', { price: formatPrice(displayPrice, language) })
                     : formatPrice(displayPrice, language)}
                 </span>

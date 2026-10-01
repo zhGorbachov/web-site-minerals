@@ -86,6 +86,8 @@ function useProductOptionState(
 }
 
 function optionValues(product: Product, key: string, fallback: string[]): string[] {
+  // A photo may be tied to one length. The buyer still chooses whole or half from the product list.
+  if (product.categorySlug === 'nytky' && key === 'strandLength') return fallback
   const fromVariants = getVariantOptionValues(product, key)
   return fromVariants.length ? fromVariants : fallback
 }

@@ -184,11 +184,29 @@ export function getVariantCompareAtPrice(
   return undefined
 }
 
+export function readProductHalfStrandPrice(product: { attributes?: unknown }): number | undefined {
+  if (!product.attributes || typeof product.attributes !== 'object' || Array.isArray(product.attributes)) {
+    return undefined
+  }
+  const raw = (product.attributes as Record<string, unknown>).halfStrandPrice
+  const amount = typeof raw === 'number' ? raw : raw == null || raw === '' ? Number.NaN : Number(raw)
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined
+}
+
 export function getCatalogPricing(product: Product): CatalogPricing {
   const variants = getProductVariants(product)
   if (!variants.length) {
     const sale = normalizeDiscountPrice(product.discountPrice)
     const unit = Number(sale ?? product.price)
+    const half = productSellsWholeStrands(product) ? readProductHalfStrandPrice(product) : undefined
+    if (half != null && half !== unit) {
+      return {
+        min: Math.min(unit, half),
+        max: Math.max(unit, half),
+        hasRange: true,
+        compareAt: undefined,
+      }
+    }
     return {
       min: unit,
       max: unit,
@@ -340,7 +358,7 @@ export function getAvailableStock(
  * On strands, a custom half price is its own amount: whole 300, half 170.
  */
 export function lowestListedPrice(
-  product: { price: number; discountPrice?: number | null; categorySlug?: string },
+  product: { price: number; discountPrice?: number | null; categorySlug?: string; attributes?: unknown },
   variants: ProductVariant[],
 ): number | undefined {
   const prices = variants.flatMap((variant) => listedUnitPrices(product, variant))
@@ -348,36 +366,39 @@ export function lowestListedPrice(
   return Math.min(...prices)
 }
 
+function customHalfStrandPrice(
+  product: { attributes?: unknown },
+  variant: ProductVariant | null | undefined,
+): number | undefined {
+  if (variant?.halfStrandPrice != null && variant.halfStrandPrice > 0) return variant.halfStrandPrice
+  return readProductHalfStrandPrice(product)
+}
+
 function listedUnitPrices(
-  product: { price: number; discountPrice?: number | null; categorySlug?: string },
+  product: { price: number; discountPrice?: number | null; categorySlug?: string; attributes?: unknown },
   variant: ProductVariant,
 ): number[] {
   const whole = getVariantUnitPrice(product, variant)
-  if (
-    productSellsWholeStrands(product) &&
-    !isHalfStrandSelection(variant.options) &&
-    variant.halfStrandPrice != null &&
-    variant.halfStrandPrice > 0
-  ) {
-    return [whole, variant.halfStrandPrice]
-  }
-  return [whole]
+  if (!productSellsWholeStrands(product) || isHalfStrandSelection(variant.options)) return [whole]
+  const half = customHalfStrandPrice(product, variant)
+  return half != null ? [whole, half] : [whole]
 }
 
 /**
- * Whole photo price stays as entered. Half strand uses `halfStrandPrice`
- * when the admin set one; otherwise it is half of the whole price.
+ * Whole price stays as entered. Half strand uses the photo price when set,
+ * otherwise the product half price, otherwise half of the whole price.
  * A photo already bound to the half length keeps its own price.
  */
 function priceForStrandSelection(
-  product: { categorySlug?: string },
+  product: { categorySlug?: string; attributes?: unknown },
   variant: ProductVariant | null | undefined,
   selectedOptions: Record<string, string> | null | undefined,
   base: number,
 ): number {
   if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions)) return base
   if (variant && isHalfStrandSelection(variant.options)) return base
-  if (variant?.halfStrandPrice != null && variant.halfStrandPrice > 0) return variant.halfStrandPrice
+  const custom = customHalfStrandPrice(product, variant)
+  if (custom != null) return custom
   return halfPrice(base)
 }
 
@@ -387,6 +408,7 @@ export function getCartUnitPrice(
     discountPrice?: number | null
     variants?: unknown
     categorySlug?: string
+    attributes?: unknown
   },
   selectedOptions?: Record<string, string> | null,
 ): number {
@@ -406,6 +428,7 @@ export function getSelectionCompareAtPrice(
     discountPrice?: number | null
     variants?: unknown
     categorySlug?: string
+    attributes?: unknown
   },
   selectedOptions?: Record<string, string> | null,
 ): number | undefined {
@@ -415,7 +438,7 @@ export function getSelectionCompareAtPrice(
     : compareAtForSale(product.price, product.discountPrice)
   if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions)) return compare
   if (variant && isHalfStrandSelection(variant.options)) return compare
-  if (variant?.halfStrandPrice != null && variant.halfStrandPrice > 0) return undefined
+  if (customHalfStrandPrice(product, variant) != null) return undefined
   if (compare == null) return undefined
   const halved = halfPrice(compare)
   return halved > getCartUnitPrice(product, selectedOptions) ? halved : undefined
@@ -567,7 +590,15 @@ export function deriveProductPricingFromVariants(
   if (!bound.length) {
     return { price: fallbackPrice, stock: 0 }
   }
-  const units = bound.map((variant) => Number(variant.discountPrice ?? variant.price ?? fallbackPrice))
+  const units = bound
+    .map((variant) => Number(variant.discountPrice ?? variant.price ?? Number.NaN))
+    .filter((amount) => Number.isFinite(amount) && amount > 0)
+  if (!units.length) {
+    return {
+      price: fallbackPrice,
+      stock: bound.reduce((sum, variant) => sum + variant.stock, 0),
+    }
+  }
   return {
     price: Math.min(...units),
     stock: bound.reduce((sum, variant) => sum + variant.stock, 0),

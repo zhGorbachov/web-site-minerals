@@ -106,20 +106,38 @@ export function getSelectedVariant(
   return variants.find((variant) => variant.id === id)
 }
 
+function readProductHalfStrandPrice(product: { attributes?: unknown }): number | undefined {
+  if (!product.attributes || typeof product.attributes !== 'object' || Array.isArray(product.attributes)) {
+    return undefined
+  }
+  const raw = (product.attributes as Record<string, unknown>).halfStrandPrice
+  const amount = typeof raw === 'number' ? raw : raw == null || raw === '' ? Number.NaN : Number(raw)
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined
+}
+
+function customHalfStrandPrice(
+  product: { attributes?: unknown },
+  variant: ProductVariant | null | undefined,
+): number | undefined {
+  if (variant?.halfStrandPrice != null && variant.halfStrandPrice > 0) return variant.halfStrandPrice
+  return readProductHalfStrandPrice(product)
+}
+
 /**
- * Whole photo price stays as entered. Half strand uses `halfStrandPrice`
- * when the admin set one; otherwise it is half of the whole price.
+ * Whole price stays as entered. Half strand uses the photo price when set,
+ * otherwise the product half price, otherwise half of the whole price.
  * A photo already bound to the half length keeps its own price.
  */
 function priceForStrandSelection(
-  product: { categorySlug?: string },
+  product: { categorySlug?: string; attributes?: unknown },
   variant: ProductVariant | null | undefined,
   selectedOptions: Record<string, string> | null | undefined,
   base: number,
 ): number {
   if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions)) return base
   if (variant && isHalfStrandSelection(variant.options)) return base
-  if (variant?.halfStrandPrice != null && variant.halfStrandPrice > 0) return variant.halfStrandPrice
+  const custom = customHalfStrandPrice(product, variant)
+  if (custom != null) return custom
   return halfPrice(base)
 }
 
@@ -129,6 +147,7 @@ export function getCartUnitPrice(
     discountPrice?: { toNumber?: () => number } | number | null
     variants?: unknown
     categorySlug?: string
+    attributes?: unknown
   },
   selectedOptions?: Record<string, string> | null,
 ): number {
@@ -176,9 +195,11 @@ export function deriveProductPricingFromVariants(
   fallbackPrice: number,
 ): { price: number; stock: number } {
   if (!variants.length) return { price: fallbackPrice, stock: 0 }
-  const units = variants.map((variant) => Number(variant.discountPrice ?? variant.price ?? fallbackPrice))
+  const units = variants
+    .map((variant) => Number(variant.discountPrice ?? variant.price ?? Number.NaN))
+    .filter((amount) => Number.isFinite(amount) && amount > 0)
   return {
-    price: Math.min(...units),
+    price: units.length ? Math.min(...units) : fallbackPrice,
     stock: variants.reduce((sum, variant) => sum + variant.stock, 0),
   }
 }

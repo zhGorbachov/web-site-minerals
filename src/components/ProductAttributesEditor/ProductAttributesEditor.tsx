@@ -380,11 +380,7 @@ export function ProductAttributesEditor({
             addPlaceholder={t('admin.attrAddCustom')}
           />
           <StrandLengthsEditor
-            values={
-              asStrandLengths(attributes.strandLengths).length
-                ? asStrandLengths(attributes.strandLengths)
-                : DEFAULT_STRAND_LENGTHS
-            }
+            values={asStrandLengths(attributes.strandLengths)}
             onChange={(strandLengths) =>
               onChange(patchAttr(attributes, 'strandLengths', strandLengths))
             }

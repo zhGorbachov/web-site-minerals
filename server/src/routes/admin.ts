@@ -49,7 +49,7 @@ const variantSchema = z.object({
   name: z.string().trim().optional(),
   image: z.string().min(1),
   price: z.number().positive().optional(),
-  halfStrandPrice: z.number().positive().optional(),
+  halfStrandPrice: z.number().positive().nullable().optional(),
   discountPrice: z.number().min(0).nullable().optional(),
   stock: z.number().int().min(0),
   options: z.record(z.string()).optional(),

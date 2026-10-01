@@ -14,6 +14,7 @@ import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
 import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, StoreReview, SubCategory } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
+import { DEFAULT_STRAND_LENGTHS } from '@/utils/catalogDefaults'
 import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
@@ -118,8 +119,41 @@ type ProductForm = Omit<
   price: string
   discountPrice: string
   stock: string
+  halfStrandPrice: string
   subCategoryIds: string[]
   variants: ProductVariant[]
+}
+
+function positiveAmount(value: string): number | undefined {
+  const amount = Number(value)
+  return value.trim() !== '' && Number.isFinite(amount) && amount > 0 ? amount : undefined
+}
+
+function halfStrandPriceFromAttributes(attributes: unknown): string {
+  if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) return ''
+  const raw = (attributes as Record<string, unknown>).halfStrandPrice
+  const amount = typeof raw === 'number' ? raw : Number(raw)
+  return Number.isFinite(amount) && amount > 0 ? String(amount) : ''
+}
+
+/** Низки always store whole + half lengths, plus an optional product-level half price. */
+function attributesForSave(
+  categorySlug: string,
+  attributes: Record<string, unknown> | undefined,
+  halfStrandPrice: string,
+): Record<string, unknown> {
+  const next = { ...(attributes ?? {}) }
+  if (categorySlug !== 'nytky') {
+    delete next.halfStrandPrice
+    return next
+  }
+  if (!Array.isArray(next.strandLengths) || next.strandLengths.length === 0) {
+    next.strandLengths = DEFAULT_STRAND_LENGTHS
+  }
+  const half = positiveAmount(halfStrandPrice)
+  if (half != null) next.halfStrandPrice = half
+  else delete next.halfStrandPrice
+  return next
 }
 
 const emptyForm: ProductForm = {
@@ -130,6 +164,7 @@ const emptyForm: ProductForm = {
   price: '',
   discountPrice: '',
   stock: '',
+  halfStrandPrice: '',
   images: [],
   video: null,
   subCategoryIds: [],
@@ -416,6 +451,7 @@ export function AdminPage() {
             form.discountPrice.trim() === '' ? null : Number(form.discountPrice),
           ),
           categorySlug: formCategorySlug,
+          attributes: attributesForSave(formCategorySlug, form.attributes, form.halfStrandPrice),
         },
         formBoundVariants,
       )
@@ -456,13 +492,19 @@ export function AdminPage() {
     const nextSlug = categories.find((cat) => cat.id === categoryId)?.slug
     const nextIsFlat = Boolean(nextSlug) && !categoryHasSubcategories(nextSlug!)
     setFormCategoryId(categoryId)
-    setForm((f) =>
-      applyCategoryChange(
+    setForm((f) => {
+      const next = applyCategoryChange(
         { ...f, subCategoryIds: nextIsFlat || !nextSubs[0] ? [] : [nextSubs[0].id] },
         nextSlug,
         prevSlug,
-      ),
-    )
+      )
+      if (nextSlug !== 'nytky') return next
+      const attributes = { ...(next.attributes ?? {}) }
+      if (!Array.isArray(attributes.strandLengths) || attributes.strandLengths.length === 0) {
+        attributes.strandLengths = DEFAULT_STRAND_LENGTHS
+      }
+      return { ...next, attributes }
+    })
   }
 
   const flash = (text: string) => {
@@ -542,6 +584,7 @@ export function AdminPage() {
       discountPrice:
         normalizeDiscountPrice(product.discountPrice) != null ? String(product.discountPrice) : '',
       stock: String(product.stock),
+      halfStrandPrice: halfStrandPriceFromAttributes(product.attributes),
       images: product.images,
       video: product.video ?? null,
       subCategoryIds: product.subCategoryIds?.length
@@ -550,7 +593,16 @@ export function AdminPage() {
       featured: product.featured,
       popular: product.popular,
       isNew: product.isNew,
-      attributes: (product.attributes as Record<string, unknown>) ?? {},
+      attributes: (() => {
+        const attributes = { ...((product.attributes as Record<string, unknown>) ?? {}) }
+        if (
+          product.categorySlug === 'nytky' &&
+          (!Array.isArray(attributes.strandLengths) || attributes.strandLengths.length === 0)
+        ) {
+          attributes.strandLengths = DEFAULT_STRAND_LENGTHS
+        }
+        return attributes
+      })(),
       variants: parseVariants(product.variants),
     })
   }
@@ -581,17 +633,25 @@ export function AdminPage() {
       setError(t('admin.imagesRequired'))
       return
     }
-    setSaving(true)
-    setError(null)
     const storedVariants = toStoredVariants(form.variants)
     const derived = storedVariants.length
       ? deriveProductPricingFromVariants(storedVariants, Number(form.price) || 0)
       : null
+    const price = derived && derived.price > 0 ? derived.price : Number(form.price)
+    if (!Number.isFinite(price) || price <= 0) {
+      setError(t('admin.priceRequired'))
+      return
+    }
+    setSaving(true)
+    setError(null)
+    const { halfStrandPrice: _productHalfPrice, ...formFields } = form
+    void _productHalfPrice
     const payload: AdminProductPayload = {
-      ...form,
+      ...formFields,
+      attributes: attributesForSave(formCategorySlug, form.attributes, form.halfStrandPrice),
       subCategoryIds: form.subCategoryIds.length ? form.subCategoryIds : undefined,
       categoryId: formCategoryId || undefined,
-      price: derived ? derived.price : Number(form.price),
+      price,
       stock: derived ? derived.stock : Number(form.stock),
       shortDescription: deriveShortDescription(form.description),
       discountPrice: normalizeDiscountPrice(
@@ -1016,7 +1076,7 @@ export function AdminPage() {
                   onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
                 />
                 <Input
-                  label={t('admin.price')}
+                  label={formCategorySlug === 'nytky' ? t('admin.variantWholePrice') : t('admin.price')}
                   type="number"
                   min={0}
                   step="0.01"
@@ -1025,6 +1085,18 @@ export function AdminPage() {
                   required={!formDerived}
                   hint={listedFrom != null ? t('admin.priceFromVariants', { price: String(listedFrom) }) : undefined}
                 />
+                {formCategorySlug === 'nytky' && (
+                  <Input
+                    label={t('admin.variantHalfPrice')}
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.halfStrandPrice}
+                    onChange={(e) => setForm((f) => ({ ...f, halfStrandPrice: e.target.value }))}
+                    hint={t('admin.productHalfPriceHint')}
+                    placeholder="170"
+                  />
+                )}
                 <Input
                   label={t('admin.discountPrice')}
                   type="number"

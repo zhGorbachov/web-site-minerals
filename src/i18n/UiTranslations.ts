@@ -477,6 +477,7 @@ export type UiTranslationSchema = {
     variantWholePrice: string
     variantHalfPrice: string
     variantHalfPriceHint: string
+    productHalfPriceHint: string
     variantOption: string
     variantOptionNone: string
     variantPiece: string
@@ -515,6 +516,7 @@ export type UiTranslationSchema = {
     removeSubConfirmWithProducts: string
     removeReviewConfirm: string
     errorGeneric: string
+    priceRequired: string
     attributesTitle: string
     attributesThreadTitle: string
     attributesBraceletTitle: string
@@ -1050,7 +1052,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     variantPrice: 'Ціна цього фото',
     variantWholePrice: 'Ціна цілої низки',
     variantHalfPrice: 'Ціна половини низки',
-    variantHalfPriceHint: 'Порожнє — половина ціни цілої',
+    variantHalfPriceHint: 'Порожнє — ціна половини товару',
+    productHalfPriceHint: 'Для всього товару. У окремого фото можна вказати свою.',
     variantOption: 'Привʼязати до характеристики',
     variantOptionNone: 'Без привʼязки',
     variantPiece: 'Екземпляр',
@@ -1092,6 +1095,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
       'Деякі товари належать лише цій підкатегорії — вони будуть видалені разом з нею. Товари з іншими підкатегоріями залишаться. Видалити?',
     removeReviewConfirm: 'Видалити цей відгук?',
     errorGeneric: 'Щось пішло не так',
+    priceRequired: 'Вкажіть ціну, більшу за нуль',
     attributesTitle: 'Параметри товару',
     attributesThreadTitle: 'Параметри низки',
     attributesBraceletTitle: 'Параметри браслета',
@@ -1635,7 +1639,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     variantPrice: 'Price for this photo',
     variantWholePrice: 'Whole strand price',
     variantHalfPrice: 'Half strand price',
-    variantHalfPriceHint: 'Empty uses half of the whole price',
+    variantHalfPriceHint: 'Empty uses the product half price',
+    productHalfPriceHint: 'For the whole product. A photo can set its own.',
     variantOption: 'Link to an option',
     variantOptionNone: 'No link',
     variantPiece: 'Piece',
@@ -1677,6 +1682,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
       'Some products belong only to this subcategory and will be deleted with it. Products that also sit in other subcategories are kept. Delete?',
     removeReviewConfirm: 'Delete this review?',
     errorGeneric: 'Something went wrong',
+    priceRequired: 'Enter a price greater than zero',
     attributesTitle: 'Product options',
     attributesThreadTitle: 'Strand options',
     attributesBraceletTitle: 'Bracelet options',
