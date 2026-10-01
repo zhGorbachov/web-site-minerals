@@ -4,7 +4,6 @@ import {
   isHalfStrandSelection,
   productSellsWholeStrands,
   strandPoolQuantity,
-  variantHasOwnPrice,
   type StrandStockLine,
 } from './strandPool.js'
 
@@ -15,6 +14,7 @@ export type ProductVariant = {
   name?: string
   image: string
   price?: number
+  halfStrandPrice?: number
   discountPrice?: number
   stock: number
   options?: Record<string, string>
@@ -45,6 +45,10 @@ export function parseVariants(raw: unknown): ProductVariant[] {
     const image = String(item.image ?? '').trim()
     if (!id || !image) continue
     const price = item.price == null || item.price === '' ? undefined : Number(item.price)
+    const halfStrandPrice =
+      item.halfStrandPrice == null || item.halfStrandPrice === ''
+        ? undefined
+        : Number(item.halfStrandPrice)
     const discountPrice =
       item.discountPrice == null || item.discountPrice === ''
         ? undefined
@@ -55,6 +59,10 @@ export function parseVariants(raw: unknown): ProductVariant[] {
       image,
       name: String(item.name ?? '').trim() || undefined,
       price: Number.isFinite(price) && (price as number) > 0 ? price : undefined,
+      halfStrandPrice:
+        Number.isFinite(halfStrandPrice) && (halfStrandPrice as number) > 0
+          ? halfStrandPrice
+          : undefined,
       discountPrice:
         Number.isFinite(discountPrice) && (discountPrice as number) > 0
           ? discountPrice
@@ -98,6 +106,23 @@ export function getSelectedVariant(
   return variants.find((variant) => variant.id === id)
 }
 
+/**
+ * Whole photo price stays as entered. Half strand uses `halfStrandPrice`
+ * when the admin set one; otherwise it is half of the whole price.
+ * A photo already bound to the half length keeps its own price.
+ */
+function priceForStrandSelection(
+  product: { categorySlug?: string },
+  variant: ProductVariant | null | undefined,
+  selectedOptions: Record<string, string> | null | undefined,
+  base: number,
+): number {
+  if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions)) return base
+  if (variant && isHalfStrandSelection(variant.options)) return base
+  if (variant?.halfStrandPrice != null && variant.halfStrandPrice > 0) return variant.halfStrandPrice
+  return halfPrice(base)
+}
+
 export function getCartUnitPrice(
   product: {
     price: { toNumber?: () => number } | number
@@ -109,11 +134,12 @@ export function getCartUnitPrice(
 ): number {
   const variants = parseVariants(product.variants)
   const variant = getSelectedVariant(variants, selectedOptions)
-  const base = getVariantUnitPrice(product, variant)
-  if (!productSellsWholeStrands(product) || !isHalfStrandSelection(selectedOptions) || variantHasOwnPrice(variant)) {
-    return base
-  }
-  return halfPrice(base)
+  return priceForStrandSelection(
+    product,
+    variant,
+    selectedOptions,
+    getVariantUnitPrice(product, variant),
+  )
 }
 
 export function getAvailableStock(

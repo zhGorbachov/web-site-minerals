@@ -474,6 +474,9 @@ export type UiTranslationSchema = {
     variantName: string
     variantNameOther: string
     variantPrice: string
+    variantWholePrice: string
+    variantHalfPrice: string
+    variantHalfPriceHint: string
     variantOption: string
     variantOptionNone: string
     variantPiece: string
@@ -1045,6 +1048,9 @@ export const uiTranslationsUk: UiTranslationSchema = {
     variantName: 'Назва екземпляра',
     variantNameOther: 'Назва цього каменя, якщо відрізняється',
     variantPrice: 'Ціна цього фото',
+    variantWholePrice: 'Ціна цілої низки',
+    variantHalfPrice: 'Ціна половини низки',
+    variantHalfPriceHint: 'Порожнє — половина ціни цілої',
     variantOption: 'Привʼязати до характеристики',
     variantOptionNone: 'Без привʼязки',
     variantPiece: 'Екземпляр',
@@ -1627,6 +1633,9 @@ export const uiTranslationsEn: UiTranslationSchema = {
     variantName: 'Piece name',
     variantNameOther: 'Name of this stone, if it is different',
     variantPrice: 'Price for this photo',
+    variantWholePrice: 'Whole strand price',
+    variantHalfPrice: 'Half strand price',
+    variantHalfPriceHint: 'Empty uses half of the whole price',
     variantOption: 'Link to an option',
     variantOptionNone: 'No link',
     variantPiece: 'Piece',

@@ -98,6 +98,12 @@
   }
 }
 
+.rowStrands {
+  @include tablet-up {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
 .field {
   display: flex;
   flex-direction: column;

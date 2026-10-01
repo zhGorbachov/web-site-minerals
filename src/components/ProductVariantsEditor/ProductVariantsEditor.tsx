@@ -9,6 +9,7 @@ import {
   syncVariantsWithImages,
   toStoredVariants,
 } from '@/utils/productVariants'
+import { productSellsWholeStrands } from '@/utils/strandPool'
 import styles from './ProductVariantsEditor.module.scss'
 
 type Props = {
@@ -48,6 +49,7 @@ export function ProductVariantsEditor({
     pieceWeight: t('productOptions.pieceWeight'),
   })
   const drafts = syncVariantsWithImages(images, variants)
+  const sellsStrands = productSellsWholeStrands({ categorySlug })
 
   const emit = (nextDrafts: ProductVariant[]) => {
     onVariantsChange(toStoredVariants(nextDrafts))
@@ -91,6 +93,7 @@ export function ProductVariantsEditor({
       patchDraft(draft.image, {
         name: undefined,
         price: undefined,
+        halfStrandPrice: undefined,
         discountPrice: undefined,
         stock: 0,
         options: undefined,
@@ -145,9 +148,9 @@ export function ProductVariantsEditor({
                           }
                         />
                       </label>
-                      <div className={styles.row}>
+                      <div className={[styles.row, sellsStrands ? styles.rowStrands : ''].filter(Boolean).join(' ')}>
                         <label className={styles.field}>
-                          <span>{t('admin.variantPrice')}</span>
+                          <span>{sellsStrands ? t('admin.variantWholePrice') : t('admin.variantPrice')}</span>
                           <input
                             type="number"
                             min={0}
@@ -161,6 +164,24 @@ export function ProductVariantsEditor({
                             placeholder={defaultPrice || t('admin.price')}
                           />
                         </label>
+                        {sellsStrands && (
+                          <label className={styles.field}>
+                            <span>{t('admin.variantHalfPrice')}</span>
+                            <input
+                              type="number"
+                              min={0}
+                              step="0.01"
+                              value={draft.halfStrandPrice ?? ''}
+                              onChange={(e) =>
+                                patchDraft(draft.image, {
+                                  halfStrandPrice:
+                                    e.target.value === '' ? undefined : Number(e.target.value),
+                                })
+                              }
+                              placeholder={t('admin.variantHalfPriceHint')}
+                            />
+                          </label>
+                        )}
                         <label className={styles.field}>
                           <span>{t('admin.stock')}</span>
                           <input

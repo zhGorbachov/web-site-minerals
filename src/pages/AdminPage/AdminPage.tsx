@@ -18,6 +18,7 @@ import { buildProductSku, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
   hasProductVariants,
+  lowestListedPrice,
   normalizeDiscountPrice,
   parseVariants,
   toStoredVariants,
@@ -407,6 +408,18 @@ export function AdminPage() {
   const formDerived = formBoundVariants.length
     ? deriveProductPricingFromVariants(formBoundVariants, Number(form.price) || 0)
     : null
+  const listedFrom = formBoundVariants.length
+    ? lowestListedPrice(
+        {
+          price: Number(form.price) || 0,
+          discountPrice: normalizeDiscountPrice(
+            form.discountPrice.trim() === '' ? null : Number(form.discountPrice),
+          ),
+          categorySlug: formCategorySlug,
+        },
+        formBoundVariants,
+      )
+    : undefined
   const suggestedSku = useMemo(() => {
     if (!formCategorySlug) return ''
     if (!categoryIsFlat && !mainSubcategory) return ''
@@ -1010,7 +1023,7 @@ export function AdminPage() {
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                   required={!formDerived}
-                  hint={formDerived ? t('admin.priceFromVariants', { price: String(formDerived.price) }) : undefined}
+                  hint={listedFrom != null ? t('admin.priceFromVariants', { price: String(listedFrom) }) : undefined}
                 />
                 <Input
                   label={t('admin.discountPrice')}

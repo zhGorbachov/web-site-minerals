@@ -32,16 +32,6 @@ export function productSellsWholeStrands(product: { categorySlug?: string }): bo
   return product.categorySlug === 'nytky'
 }
 
-export function variantHasOwnPrice(
-  variant?: { price?: number; discountPrice?: number | null } | null,
-): boolean {
-  if (!variant) return false
-  return (
-    (variant.price != null && variant.price > 0) ||
-    (variant.discountPrice != null && variant.discountPrice > 0)
-  )
-}
-
 export function halfPrice(amount: number): number {
   return Math.round(amount / 2)
 }

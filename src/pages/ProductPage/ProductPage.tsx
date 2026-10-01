@@ -19,17 +19,17 @@ import {
   findVariantById,
   findVariantByImage,
   getAvailableStock,
+  getCartUnitPrice,
   getCatalogPricing,
   getProductGalleryImages,
   getSelectedVariant,
-  getVariantCompareAtPrice,
+  getSelectionCompareAtPrice,
   getVariantDisplayName,
-  getVariantUnitPrice,
   hasProductVariants,
   optionsWithoutVariantId,
   sameSelection,
 } from '@/utils/productVariants'
-import { halfPrice, isHalfStrandSelection, variantHasOwnPrice } from '@/utils/strandPool'
+import { isHalfStrandSelection } from '@/utils/strandPool'
 import styles from './ProductPage.module.scss'
 
 export function ProductPage() {
@@ -192,23 +192,15 @@ export function ProductPage() {
 
   const selectedVariant = getSelectedVariant(product, selectedOptions)
   const catalogPricing = getCatalogPricing(product)
-  const halfSelected =
-    product.categorySlug === 'nytky' &&
-    isHalfStrandSelection(selectedOptions) &&
-    !variantHasOwnPrice(selectedVariant)
-  const basePrice = selectedVariant
-    ? getVariantUnitPrice(product, selectedVariant)
-    : catalogPricing.min
-  const baseCompare = selectedVariant
-    ? getVariantCompareAtPrice(product, selectedVariant)
-    : catalogPricing.compareAt
-  const displayPrice = halfSelected ? halfPrice(basePrice) : basePrice
-  const halvedCompare = baseCompare != null ? halfPrice(baseCompare) : undefined
-  const compareAt = halfSelected
-    ? halvedCompare != null && halvedCompare > displayPrice
-      ? halvedCompare
-      : undefined
-    : baseCompare
+  const halfSelected = product.categorySlug === 'nytky' && isHalfStrandSelection(selectedOptions)
+  const displayPrice =
+    selectedVariant || halfSelected
+      ? getCartUnitPrice(product, selectedOptions)
+      : catalogPricing.min
+  const compareAt =
+    selectedVariant || halfSelected
+      ? getSelectionCompareAtPrice(product, selectedOptions)
+      : catalogPricing.compareAt
   const visibleVariant = findVariantByImage(product, galleryImages[galleryIndex])
   const photoOptions = visibleVariant ? buildVariantSelection(visibleVariant) : undefined
   const photoInWishlist = isInWishlist(product.id, photoOptions)

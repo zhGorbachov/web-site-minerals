@@ -71,7 +71,10 @@ export interface ProductVariant {
   id: string
   name?: string
   image: string
+  /** Whole-strand price when this photo is a bead size. */
   price?: number
+  /** Half-strand price for the same photo. Independent of `price`. */
+  halfStrandPrice?: number
   discountPrice?: number
   stock: number
   /** Buyer option this photo belongs to, e.g. { wristSize: '16 см' } */
