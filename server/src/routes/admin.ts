@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { requireAdmin } from '../lib/auth.js'
 import { serializeProduct, serializeSubCategory } from '../lib/serialize.js'
-import { buildProductSku, uniqueSku } from '../lib/sku.js'
+import { buildProductSku, slugify, uniqueSku } from '../lib/sku.js'
 import {
   deriveProductPricingFromVariants,
   parseVariants,
@@ -19,17 +19,6 @@ const productInclude = {
   subCategory: { include: { category: true } },
   subCategories: { include: { subCategory: true }, orderBy: { position: 'asc' } },
 } as const satisfies Prisma.ProductInclude
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9а-яіїєґ]+/gi, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80)
-}
 
 function toDiscountPrice(value: number | null | undefined): number | null {
   if (value == null || !Number.isFinite(value) || value <= 0) return null
@@ -199,12 +188,16 @@ adminRouter.post('/products', async (req, res) => {
   }
   const sub = subs[0]
 
-  const slug = parsed.data.slug?.trim() || slugify(parsed.data.name)
-  const existingSlug = await prisma.product.findUnique({ where: { slug } })
-  if (existingSlug) {
-    res.status(409).json({ error: 'slug_taken' })
+  const slugBase = slugify(parsed.data.name)
+  if (!slugBase) {
+    res.status(400).json({ error: 'Invalid payload' })
     return
   }
+  const takenSlugs = await prisma.product.findMany({ select: { slug: true } })
+  const slug = uniqueSku(
+    slugBase,
+    takenSlugs.map((item) => item.slug),
+  )
 
   const skuBase =
     parsed.data.sku?.trim() ||

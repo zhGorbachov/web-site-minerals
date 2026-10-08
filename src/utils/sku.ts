@@ -74,3 +74,13 @@ export function uniqueSku(base: string, taken: Iterable<string>): string {
   while (existing.has(`${base}-${n}`)) n += 1
   return `${base}-${n}`
 }
+
+/** Address from the product name. Cyrillic stays, so «грань» and «гладенький» do not collapse. */
+export function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яіїєґё]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+}

@@ -446,6 +446,8 @@ export type UiTranslationSchema = {
     sku: string
     skuHint: string
     skuPlaceholder: string
+    slugHint: string
+    slugPlaceholder: string
     price: string
     discountPrice: string
     shortDescription: string
@@ -1020,6 +1022,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     sku: 'SKU',
     skuHint: 'Заповнюється автоматично з категорії, підкатегорії та назви. Можна змінити вручну.',
     skuPlaceholder: 'З’явиться після назви',
+    slugHint: 'Підставляється з назви. Якщо така адреса вже є — додається цифра.',
+    slugPlaceholder: 'З’явиться після назви',
     price: 'Ціна',
     discountPrice: 'Ціна зі знижкою',
     shortDescription: 'Короткий опис',
@@ -1607,6 +1611,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     sku: 'SKU',
     skuHint: 'Filled automatically from category, subcategory and name. You can edit it.',
     skuPlaceholder: 'Appears after you enter a name',
+    slugHint: 'Filled in from the name. If that address is already used, a number is added.',
+    slugPlaceholder: 'Appears after you enter a name',
     price: 'Price',
     discountPrice: 'Discount price',
     shortDescription: 'Short description',

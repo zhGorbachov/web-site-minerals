@@ -115,10 +115,12 @@ export const MockAdminApi = {
     if (!subs?.length) throw new MockApiError(400, 'Invalid subcategory')
     const sub = subs[0]
 
-    const slug = payload.slug?.trim() || slugify(payload.name)
-    if (MockDb.getProducts().some((p) => p.slug === slug)) {
-      throw new MockApiError(409, 'slug_taken')
-    }
+    const slugBase = slugify(payload.name)
+    if (!slugBase) throw new MockApiError(400, 'Invalid payload')
+    const slug = uniqueSku(
+      slugBase,
+      MockDb.getProducts().map((p) => p.slug),
+    )
     const skuBase =
       payload.sku?.trim() ||
       buildProductSku({

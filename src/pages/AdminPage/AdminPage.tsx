@@ -15,7 +15,7 @@ import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, Sto
 import { formatPrice } from '@/utils/formatPrice'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
 import { DEFAULT_STRAND_LENGTHS } from '@/utils/catalogDefaults'
-import { buildProductSku, uniqueSku } from '@/utils/sku'
+import { buildProductSku, slugify, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
   hasProductVariants,
@@ -469,6 +469,13 @@ export function AdminPage() {
     )
   }, [formCategorySlug, categoryIsFlat, mainSubcategory, form.name, products])
   const skuValue = editingId || skuManual ? (form.sku ?? '') : suggestedSku
+  const suggestedSlug = useMemo(() => {
+    if (editingId) return form.slug?.trim() || ''
+    return uniqueSku(
+      slugify(form.name),
+      products.map((product) => product.slug),
+    )
+  }, [editingId, form.slug, form.name, products])
 
   const applyCategoryChange = (
     next: ProductForm,
@@ -658,7 +665,7 @@ export function AdminPage() {
         form.discountPrice.trim() === '' ? null : Number(form.discountPrice),
       ) ?? null,
       video: form.video || null,
-      slug: form.slug || undefined,
+      slug: editingId ? form.slug || undefined : undefined,
       sku: skuValue || undefined,
       variants: storedVariants,
     }
@@ -1072,8 +1079,10 @@ export function AdminPage() {
                 />
                 <Input
                   label={t('admin.slug')}
-                  value={form.slug ?? ''}
-                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+                  value={suggestedSlug}
+                  readOnly
+                  hint={t('admin.slugHint')}
+                  placeholder={t('admin.slugPlaceholder')}
                 />
                 <Input
                   label={formCategorySlug === 'nytky' ? t('admin.variantWholePrice') : t('admin.price')}

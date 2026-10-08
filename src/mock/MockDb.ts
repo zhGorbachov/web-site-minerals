@@ -376,16 +376,7 @@ export const MockDb = {
   },
 }
 
-export function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9а-яіїєґ]+/gi, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80)
-}
+export { slugify } from '@/utils/sku'
 
 export function enrichProduct(product: StoredProduct): Product {
   const subs = storedSubCategoryIds(product)
