@@ -1,23 +1,23 @@
 export const categoryEn: Record<string, { name: string; description: string }> = {
   mineraly: {
     name: 'Minerals',
-    description: 'Natural minerals and crystals for meditation, décor, and jewelry making',
+    description: 'Natural minerals and stones from around the world',
   },
   nytky: {
     name: 'Threads',
-    description: 'Threads for bracelet weaving: waxed, elastic, cotton, and silk',
+    description: 'Beads of natural stones',
   },
   'brаslety': {
     name: 'Bracelets',
-    description: 'Handmade bracelets from natural minerals for men, women, and children',
+    description: 'Bracelets of natural stones — distinctive details of your look',
   },
   pahoshchi: {
     name: 'Incense',
-    description: 'Natural incense for meditation, relaxation, and a cozy atmosphere',
+    description: 'Natural incense for meditation, cleansing, relaxation, and a cozy atmosphere',
   },
   pidvisky: {
     name: 'Pendants',
-    description: 'Handmade pendants and charms from natural minerals',
+    description: 'Pendants of natural stone — a distinctive detail of the look',
   },
 }
 

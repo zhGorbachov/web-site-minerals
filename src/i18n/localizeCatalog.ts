@@ -19,8 +19,22 @@ function translateStrandLabel(label: string, language: Language): string {
   return strandLengthEn[label] ?? label
 }
 
+/** Storefront copy. Ukrainian descriptions are shown as-is, over API text. */
+const categoryDescriptionUk: Record<string, string> = {
+  mineraly: 'Натуральні мінерали та камені з різних куточків світу',
+  nytky: 'Намистини з натуральних каменів',
+  'brаslety': 'Браслети з натуральних каменів — особливі деталі вашого образу',
+  pahoshchi:
+    'Натуральні пахощі для медитації, очищення, релаксу та створення затишної атмосфери',
+  pidvisky: 'Підвіски з натурального каменю — особлива деталь образу',
+}
+
 export function localizeCategory(category: Category, language: Language): Category {
-  if (language === 'uk') return category
+  if (language === 'uk') {
+    const description = categoryDescriptionUk[category.slug]
+    if (!description) return category
+    return { ...category, description }
+  }
   const en = categoryEn[category.slug]
   if (!en) return category
   return { ...category, name: en.name, description: en.description }
