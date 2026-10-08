@@ -2,6 +2,9 @@
 @use '@/styles/mixins' as *;
 
 .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border-radius: $radius-lg;
   overflow: hidden;
   background: $color-white;
@@ -61,7 +64,7 @@
   font-size: $font-size-sm;
   color: $color-text-muted;
   line-height: $line-height-relaxed;
-  @include text-clamp(2);
+  overflow-wrap: break-word;
   flex: 1;
 }
 

@@ -42,6 +42,7 @@
 .subcategoryGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  align-items: stretch;
   gap: $spacing-3;
   margin-bottom: $spacing-8;
 
@@ -82,10 +83,19 @@
   color: $color-text;
 }
 
-.featuredPhoto {
+.aboutCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: $color-white;
   border-radius: $radius-lg;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
+  box-shadow: $shadow-card;
+}
+
+.featuredPhoto {
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
   background: $color-surface;
 
   @include tablet-up {
@@ -100,9 +110,12 @@
 }
 
 .bottomDescription {
+  margin: 0;
+  padding: $spacing-4 $spacing-5 $spacing-5;
   font-size: $font-size-base;
-  color: $color-text-muted;
+  color: $color-text;
   line-height: $line-height-relaxed;
+  overflow-wrap: break-word;
 }
 
 .layout {

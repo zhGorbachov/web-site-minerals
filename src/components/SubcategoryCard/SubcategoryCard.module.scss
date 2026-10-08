@@ -3,6 +3,9 @@
 
 .card {
   @include card;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   transition: box-shadow $transition-base;
 
   &:hover {
@@ -13,7 +16,8 @@
 .link {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   text-decoration: none;
   color: $color-text;
   @include focus-ring;
@@ -46,11 +50,12 @@
 
 .title {
   display: block;
+  flex: 1 0 auto;
   padding: $spacing-3 $spacing-4;
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
   line-height: $line-height-tight;
-  @include text-clamp(2);
+  overflow-wrap: break-word;
 
   @include tablet-up {
     padding: $spacing-4 $spacing-5;

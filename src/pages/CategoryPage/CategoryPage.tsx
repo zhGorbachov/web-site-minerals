@@ -284,12 +284,14 @@ export function CategoryPage() {
             aria-label={t('category.aboutSection')}
           >
             <h2 className={styles.bottomTitle}>{t('category.aboutSection')}</h2>
-            <div className={styles.featuredPhoto}>
-              <img src={category.image} alt={category.name} className={styles.featuredImage} />
+            <div className={styles.aboutCard}>
+              <div className={styles.featuredPhoto}>
+                <img src={category.image} alt={category.name} className={styles.featuredImage} />
+              </div>
+              {category.description && (
+                <p className={styles.bottomDescription}>{category.description}</p>
+              )}
             </div>
-            {category.description && (
-              <p className={styles.bottomDescription}>{category.description}</p>
-            )}
           </motion.section>
         )}
       </div>

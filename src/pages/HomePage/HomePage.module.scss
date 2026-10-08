@@ -415,6 +415,7 @@
 .categoryGridTop {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  align-items: stretch;
   gap: $spacing-6;
 
   @include desktop-up {
@@ -425,6 +426,7 @@
 .categoryGridBottom {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
   gap: $spacing-6;
 
   @include desktop-up {
