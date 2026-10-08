@@ -9,7 +9,7 @@ import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice, productRequiresOptions } from '@/utils'
+import { formatPrice, getMissingRequiredOptionKeys, productRequiresOptions } from '@/utils'
 import {
   getAvailableStock,
   getCartUnitPrice,
@@ -108,11 +108,14 @@ export function WishlistPage() {
   }
 
   const handleAddToCart = (product: Product, entry: WishlistItem) => {
-    if (getAvailableStock(product, entry.selectedOptions) === 0) return
-    if (!entry.selectedOptions && productRequiresOptions(product)) {
+    if (
+      getMissingRequiredOptionKeys(product, entry.selectedOptions).length > 0 ||
+      (!entry.selectedOptions && productRequiresOptions(product))
+    ) {
       navigate(`/product/${product.slug}`)
       return
     }
+    if (getAvailableStock(product, entry.selectedOptions) === 0) return
     void addItem(product, entry.selectedOptions)
   }
 

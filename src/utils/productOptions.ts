@@ -7,7 +7,7 @@ import type {
   StrandLengthOption,
   ThreadAttributes,
 } from '@/types'
-import { hasProductVariants } from './productVariants'
+import { getVariantOptionValues, hasProductVariants } from './productVariants'
 import {
   DEFAULT_BEAD_SIZES,
   DEFAULT_INCENSE_SALE_MODE,
@@ -80,21 +80,63 @@ export function getIncenseWeights(attrs: IncenseAttributes): string[] {
   return attrs.packWeights?.length ? attrs.packWeights : DEFAULT_PACK_WEIGHTS
 }
 
-export function productRequiresOptions(product: Product): boolean {
-  if (hasProductVariants(product)) return true
+/** Same values the product page offers for this option. */
+function listedOptionValues(product: Product, key: string, fallback: string[]): string[] {
+  if (product.categorySlug === 'nytky' && key === 'strandLength') return fallback
+  const fromVariants = getVariantOptionValues(product, key)
+  return fromVariants.length ? fromVariants : fallback
+}
+
+/**
+ * Choices the buyer must make before the item can go into the cart.
+ * Mirrors the option groups rendered on the product page.
+ */
+export function getRequiredOptionKeys(product: Product): string[] {
+  const keys: string[] = []
+  const add = (key: string, fallback: string[]) => {
+    if (listedOptionValues(product, key, fallback).length) keys.push(key)
+  }
+
   if (product.categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
-    return Boolean(
-      attrs.beadSizes?.length ||
-        attrs.beadCounts?.length ||
-        attrs.wristSizes?.length ||
-        getMineralStrandLengths(attrs).length,
-    )
+    if (attrs.beadSizes?.length) add('beadSize', attrs.beadSizes)
+    if (attrs.wristSizes?.length) add('wristSize', attrs.wristSizes)
+    if (attrs.beadCounts?.length) add('beadCount', attrs.beadCounts)
+    const strandLengths = getMineralStrandLengths(attrs)
+    if (strandLengths.length) add('strandLength', strandLengths.map((length) => length.label))
+    return keys
   }
-  // Strands, bracelets and incense always ask for a size / weight first.
-  return (
-    product.categorySlug === 'nytky' ||
-    product.categorySlug === 'brаslety' ||
-    product.categorySlug === 'pahoshchi'
-  )
+
+  if (product.categorySlug === 'nytky') {
+    const attrs = product.attributes as ThreadAttributes
+    add('beadSize', getThreadBeadSizes(attrs))
+    add('strandLength', getThreadStrandLengths(attrs).map((length) => length.label))
+    return keys
+  }
+
+  if (product.categorySlug === 'brаslety') {
+    const attrs = product.attributes as BraceletAttributes
+    add('beadSize', getBraceletBeadSizes(attrs))
+    add('wristSize', getBraceletWristSizes(attrs))
+    return keys
+  }
+
+  if (product.categorySlug === 'pahoshchi') {
+    const attrs = product.attributes as IncenseAttributes
+    add(getIncenseOptionKey(attrs), getIncenseWeights(attrs))
+  }
+
+  return keys
+}
+
+export function getMissingRequiredOptionKeys(
+  product: Product,
+  selected?: Record<string, string> | null,
+): string[] {
+  return getRequiredOptionKeys(product).filter((key) => !selected?.[key]?.trim())
+}
+
+export function productRequiresOptions(product: Product): boolean {
+  if (hasProductVariants(product)) return true
+  return getRequiredOptionKeys(product).length > 0
 }

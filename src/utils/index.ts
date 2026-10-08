@@ -45,6 +45,8 @@ export {
   getThreadBeadSizes,
   getThreadStrandLengths,
   productRequiresOptions,
+  getRequiredOptionKeys,
+  getMissingRequiredOptionKeys,
   getBraceletWristSizes,
   getBraceletBeadSizes,
   getIncenseSaleMode,

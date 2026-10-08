@@ -133,6 +133,14 @@
   padding-top: $spacing-1;
 }
 
+.selectionRequired {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-error;
+  line-height: $line-height-normal;
+}
+
 .characteristicsBlock {
   padding-top: $spacing-2;
 }

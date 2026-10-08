@@ -38,6 +38,10 @@ interface ProductOptionsProps {
   product: Product
   selectedOptions?: Record<string, string>
   onOptionsChange: (options: Record<string, string>) => void
+  /** Option keys the buyer tried to skip. Those groups are marked until chosen. */
+  invalidKeys?: string[]
+  /** Bumps so a repeated add-to-cart click draws attention again. */
+  attentionKey?: number
 }
 
 type CharacteristicItem = {
@@ -104,6 +108,9 @@ function OptionGroup({
   renderValue,
   divider,
   hint,
+  invalid = false,
+  requiredHint,
+  attentionKey = 0,
 }: {
   product: Product
   optionKey: string
@@ -115,16 +122,33 @@ function OptionGroup({
   renderValue?: (value: string) => string
   divider?: boolean
   hint?: string
+  invalid?: boolean
+  requiredHint?: string
+  attentionKey?: number
 }) {
   if (!values.length) return null
   const listClass = appearance === 'chip' ? styles.sizeGrid : styles.lengthPills
   const itemClass = appearance === 'chip' ? styles.sizeChip : styles.lengthPill
   const activeClass = appearance === 'chip' ? styles.sizeChipActive : styles.lengthPillActive
+  const showRequired = Boolean(requiredHint) && !selectedValue
 
   return (
-    <div className={styles.optionGroup}>
+    <div
+      key={invalid ? `alert-${attentionKey}` : 'idle'}
+      className={[styles.optionGroup, invalid ? styles.optionGroupInvalid : ''].filter(Boolean).join(' ')}
+      role="group"
+      aria-invalid={invalid || undefined}
+    >
       {divider ? <span className={styles.sectionDivider} /> : null}
       <span className={styles.optionLabel}>{label}</span>
+      {showRequired ? (
+        <p
+          className={[styles.requiredHint, invalid ? styles.requiredHintInvalid : ''].filter(Boolean).join(' ')}
+          role={invalid ? 'alert' : undefined}
+        >
+          {requiredHint}
+        </p>
+      ) : null}
       <div className={listClass}>
         {values.map((value) => {
           const disabled = isOptionValueOutOfStock(product, optionKey, value)
@@ -152,10 +176,18 @@ function OptionGroup({
   )
 }
 
-export function ProductSelections({ product, selectedOptions, onOptionsChange }: ProductOptionsProps) {
+export function ProductSelections({
+  product,
+  selectedOptions,
+  onOptionsChange,
+  invalidKeys = [],
+  attentionKey = 0,
+}: ProductOptionsProps) {
   const { t, language } = useTranslation()
   const { selected, handleSelect } = useProductOptionState(onOptionsChange, selectedOptions)
   const { categorySlug } = product
+  const requiredHint = t('productOptions.requiredChoice')
+  const isInvalid = (key: string) => invalidKeys.includes(key)
 
   if (categorySlug === 'mineraly') {
     const attrs = product.attributes as MineralAttributes
@@ -171,120 +203,69 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
     return (
       <div className={styles.options}>
         {hasBeadSizes && (
-          <div className={styles.optionGroup}>
-            <span className={styles.optionLabel}>{t('productOptions.beadSize')}</span>
-            <div className={styles.sizeGrid}>
-              {optionValues(product, 'beadSize', attrs.beadSizes!).map((size) => {
-                const disabled = isOptionValueOutOfStock(product, 'beadSize', size)
-                return (
-                <button
-                  key={size}
-                  type="button"
-                  className={[
-                    styles.sizeChip,
-                    selected.beadSize === size ? styles.sizeChipActive : '',
-                    disabled ? styles.optionDisabled : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleSelect('beadSize', size)}
-                  disabled={disabled}
-                >
-                  {size}
-                </button>
-                )
-              })}
-            </div>
-          </div>
+          <OptionGroup
+            product={product}
+            optionKey="beadSize"
+            label={t('productOptions.beadSize')}
+            values={optionValues(product, 'beadSize', attrs.beadSizes!)}
+            selectedValue={selected.beadSize}
+            onSelect={(value) => handleSelect('beadSize', value)}
+            appearance="chip"
+            invalid={isInvalid('beadSize')}
+            requiredHint={requiredHint}
+            attentionKey={attentionKey}
+          />
         )}
 
         {hasWristSizes && (
-          <div className={styles.optionGroup}>
-            {hasBeadSizes ? <span className={styles.sectionDivider} /> : null}
-            <span className={styles.optionLabel}>{t('productOptions.wristSize')}</span>
-            <div className={styles.lengthPills}>
-              {optionValues(product, 'wristSize', attrs.wristSizes!).map((size) => {
-                const disabled = isOptionValueOutOfStock(product, 'wristSize', size)
-                return (
-                <button
-                  key={size}
-                  type="button"
-                  className={[
-                    styles.lengthPill,
-                    selected.wristSize === size ? styles.lengthPillActive : '',
-                    disabled ? styles.optionDisabled : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleSelect('wristSize', size)}
-                  disabled={disabled}
-                >
-                  {formatWristSize(size, language)}
-                </button>
-                )
-              })}
-            </div>
-          </div>
+          <OptionGroup
+            product={product}
+            optionKey="wristSize"
+            label={t('productOptions.wristSize')}
+            values={optionValues(product, 'wristSize', attrs.wristSizes!)}
+            selectedValue={selected.wristSize}
+            onSelect={(value) => handleSelect('wristSize', value)}
+            renderValue={(value) => formatWristSize(value, language)}
+            divider={hasBeadSizes}
+            invalid={isInvalid('wristSize')}
+            requiredHint={requiredHint}
+            attentionKey={attentionKey}
+          />
         )}
 
         {hasBeadCounts && (
-          <div className={styles.optionGroup}>
-            {hasBeadSizes || hasWristSizes ? <span className={styles.sectionDivider} /> : null}
-            <span className={styles.optionLabel}>{t('productOptions.beadCount')}</span>
-            <div className={styles.lengthPills}>
-              {optionValues(product, 'beadCount', attrs.beadCounts!).map((count) => {
-                const disabled = isOptionValueOutOfStock(product, 'beadCount', count)
-                return (
-                <button
-                  key={count}
-                  type="button"
-                  className={[
-                    styles.lengthPill,
-                    selected.beadCount === count ? styles.lengthPillActive : '',
-                    disabled ? styles.optionDisabled : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleSelect('beadCount', count)}
-                  disabled={disabled}
-                >
-                  {t('productOptions.beadCountValue', { value: count })}
-                </button>
-                )
-              })}
-            </div>
-          </div>
+          <OptionGroup
+            product={product}
+            optionKey="beadCount"
+            label={t('productOptions.beadCount')}
+            values={optionValues(product, 'beadCount', attrs.beadCounts!)}
+            selectedValue={selected.beadCount}
+            onSelect={(value) => handleSelect('beadCount', value)}
+            renderValue={(value) => t('productOptions.beadCountValue', { value })}
+            divider={hasBeadSizes || hasWristSizes}
+            invalid={isInvalid('beadCount')}
+            requiredHint={requiredHint}
+            attentionKey={attentionKey}
+          />
         )}
 
         {strandLengths.length > 0 && (
-          <div className={styles.optionGroup}>
-            {hasBeadSizes || hasWristSizes || hasBeadCounts ? (
-              <span className={styles.sectionDivider} />
-            ) : null}
-            <span className={styles.optionLabel}>{t('productOptions.strandLength')}</span>
-            <div className={styles.lengthPills}>
-              {optionValues(
-                product,
-                'strandLength',
-                strandLengths.map((length) => length.label),
-              ).map((label) => {
-                const length = strandLengths.find((item) => item.label === label) ?? {
-                  label,
-                  value: label,
-                }
-                const disabled = isOptionValueOutOfStock(product, 'strandLength', length.label)
-                return (
-                <button
-                  key={length.value}
-                  type="button"
-                  className={[
-                    styles.lengthPill,
-                    selected.strandLength === length.label ? styles.lengthPillActive : '',
-                    disabled ? styles.optionDisabled : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleSelect('strandLength', length.label)}
-                  disabled={disabled}
-                >
-                  {length.label}
-                </button>
-                )
-              })}
-            </div>
-          </div>
+          <OptionGroup
+            product={product}
+            optionKey="strandLength"
+            label={t('productOptions.strandLength')}
+            values={optionValues(
+              product,
+              'strandLength',
+              strandLengths.map((length) => length.label),
+            )}
+            selectedValue={selected.strandLength}
+            onSelect={(value) => handleSelect('strandLength', value)}
+            divider={hasBeadSizes || hasWristSizes || hasBeadCounts}
+            invalid={isInvalid('strandLength')}
+            requiredHint={requiredHint}
+            attentionKey={attentionKey}
+          />
         )}
       </div>
     )
@@ -310,6 +291,9 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
           selectedValue={selected.beadSize}
           onSelect={(value) => handleSelect('beadSize', value)}
           appearance="chip"
+          invalid={isInvalid('beadSize')}
+          requiredHint={requiredHint}
+          attentionKey={attentionKey}
         />
         <OptionGroup
           product={product}
@@ -319,6 +303,9 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
           selectedValue={selected.strandLength}
           onSelect={(value) => handleSelect('strandLength', value)}
           divider={beadSizes.length > 0}
+          invalid={isInvalid('strandLength')}
+          requiredHint={requiredHint}
+          attentionKey={attentionKey}
         />
       </div>
     )
@@ -339,6 +326,9 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
           selectedValue={selected.beadSize}
           onSelect={(value) => handleSelect('beadSize', value)}
           appearance="chip"
+          invalid={isInvalid('beadSize')}
+          requiredHint={requiredHint}
+          attentionKey={attentionKey}
         />
         <OptionGroup
           product={product}
@@ -349,6 +339,9 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
           onSelect={(value) => handleSelect('wristSize', value)}
           renderValue={(value) => formatWristSize(value, language)}
           divider={beadSizes.length > 0}
+          invalid={isInvalid('wristSize')}
+          requiredHint={requiredHint}
+          attentionKey={attentionKey}
           hint={
             attrs.wristSize
               ? t('productOptions.availableWristSize', {
@@ -380,6 +373,9 @@ export function ProductSelections({ product, selectedOptions, onOptionsChange }:
           selectedValue={selected[optionKey]}
           onSelect={(value) => handleSelect(optionKey, value)}
           renderValue={(value) => translateAttrValue(value, language)}
+          invalid={isInvalid(optionKey)}
+          requiredHint={requiredHint}
+          attentionKey={attentionKey}
           hint={
             optionKey === 'pieceWeight'
               ? t('productOptions.saleModePieceHint')
@@ -464,13 +460,21 @@ export function ProductCharacteristics({
   )
 }
 
-export function ProductOptions({ product, selectedOptions, onOptionsChange }: ProductOptionsProps) {
+export function ProductOptions({
+  product,
+  selectedOptions,
+  onOptionsChange,
+  invalidKeys,
+  attentionKey,
+}: ProductOptionsProps) {
   return (
     <>
       <ProductSelections
         product={product}
         selectedOptions={selectedOptions}
         onOptionsChange={onOptionsChange}
+        invalidKeys={invalidKeys}
+        attentionKey={attentionKey}
       />
       <ProductCharacteristics product={product} />
     </>

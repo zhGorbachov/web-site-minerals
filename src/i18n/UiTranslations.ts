@@ -228,6 +228,8 @@ export type UiTranslationSchema = {
     beadCount: string
     beadCountValue: string
     strandLength: string
+    requiredChoice: string
+    selectToAdd: string
     threadLength: string
     color: string
     wristSize: string
@@ -802,6 +804,8 @@ export const uiTranslationsUk: UiTranslationSchema = {
     beadCount: 'Кількість бусин',
     beadCountValue: '{value} шт.',
     strandLength: 'Довжина низки',
+    requiredChoice: "Обов'язково оберіть один варіант",
+    selectToAdd: 'Щоб додати в кошик, оберіть: {options}',
     threadLength: 'Довжина низки',
     color: 'Колір',
     wristSize: "Розмір зап'ястя",
@@ -1391,6 +1395,8 @@ export const uiTranslationsEn: UiTranslationSchema = {
     beadCount: 'Bead count',
     beadCountValue: '{value} pcs',
     strandLength: 'Strand length',
+    requiredChoice: 'Choose one option',
+    selectToAdd: 'To add to cart, choose: {options}',
     threadLength: 'Cord length',
     color: 'Color',
     wristSize: 'Wrist size',

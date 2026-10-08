@@ -195,6 +195,46 @@
   font-style: italic;
 }
 
+.requiredHint {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-primary-dark;
+  line-height: $line-height-normal;
+}
+
+.requiredHintInvalid {
+  color: $color-error;
+}
+
+.optionGroupInvalid {
+  animation: requiredNudge 0.4s ease;
+
+  .optionLabel {
+    color: $color-error;
+  }
+
+  .sizeChip:not(:disabled):not(.sizeChipActive),
+  .lengthPill:not(:disabled):not(.lengthPillActive) {
+    border-color: $color-error;
+  }
+}
+
+@keyframes requiredNudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-3px);
+  }
+
+  75% {
+    transform: translateX(3px);
+  }
+}
+
 .optionDisabled {
   opacity: 0.4;
   cursor: not-allowed;

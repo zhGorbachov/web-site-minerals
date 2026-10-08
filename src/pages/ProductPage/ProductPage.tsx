@@ -11,9 +11,9 @@ import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
 import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
-import { useTranslation } from '@/i18n/useTranslation'
+import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { categoryHasSubcategories } from '@/config/Catalog'
-import { formatPrice } from '@/utils'
+import { formatPrice, getMissingRequiredOptionKeys } from '@/utils'
 import {
   buildVariantSelection,
   findBestMatchingVariant,
@@ -32,6 +32,15 @@ import {
 } from '@/utils/productVariants'
 import styles from './ProductPage.module.scss'
 
+const REQUIRED_OPTION_LABELS: Record<string, TranslationKey> = {
+  beadSize: 'productOptions.beadSize',
+  beadCount: 'productOptions.beadCount',
+  strandLength: 'productOptions.strandLength',
+  wristSize: 'productOptions.wristSize',
+  packWeight: 'productOptions.packWeight',
+  pieceWeight: 'productOptions.pieceWeight',
+}
+
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>()
   const [searchParams] = useSearchParams()
@@ -45,6 +54,9 @@ export function ProductPage() {
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
   const [addAnimKey, setAddAnimKey] = useState(0)
+  const [selectionPrompted, setSelectionPrompted] = useState(false)
+  const [attentionKey, setAttentionKey] = useState(0)
+  const optionsRef = useRef<HTMLDivElement>(null)
   const addedResetRef = useRef<number | null>(null)
 
   const addItem = useCartStore((s) => s.addItem)
@@ -61,6 +73,8 @@ export function ProductPage() {
     setAddedToCart(false)
     setQuantity(1)
     setSelectedOptions({})
+    setSelectionPrompted(false)
+    setAttentionKey(0)
     setGalleryIndex(0)
     void ProductService.getBySlug(slug).then(async (prod) => {
       if (prod) {
@@ -138,7 +152,14 @@ export function ProductPage() {
   }, [product?.id, product?.stock, maxSelectable, selectedOptions])
 
   const handleAddToCart = () => {
-    if (!product || maxSelectable <= 0) return
+    if (!product) return
+    if (getMissingRequiredOptionKeys(product, selectedOptions).length > 0) {
+      setSelectionPrompted(true)
+      setAttentionKey((key) => key + 1)
+      optionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
+    if (maxSelectable <= 0) return
     addItem(product, selectedOptions, Math.min(quantity, maxSelectable))
     setAddedToCart(true)
     setAddAnimKey((key) => key + 1)
@@ -208,6 +229,13 @@ export function ProductPage() {
   const categoryLabel = product.subCategoryName ?? product.subCategorySlug
   const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock > 0
   const displayName = getVariantDisplayName(product, selectedVariant)
+  const missingKeys = getMissingRequiredOptionKeys(product, selectedOptions)
+  const invalidKeys = selectionPrompted ? missingKeys : []
+  const missingOptionLabels = missingKeys
+    .map((key) => REQUIRED_OPTION_LABELS[key])
+    .filter((key): key is TranslationKey => Boolean(key))
+    .map((key) => t(key))
+    .join(', ')
 
   const breadcrumbs = [
     { label: t('nav.home'), href: '/' },
@@ -286,13 +314,21 @@ export function ProductPage() {
               </div>
             </div>
 
-            <div className={styles.optionsBlock}>
+            <div className={styles.optionsBlock} ref={optionsRef}>
               <ProductSelections
                 product={product}
                 selectedOptions={selectedOptions}
                 onOptionsChange={handleOptionsChange}
+                invalidKeys={invalidKeys}
+                attentionKey={attentionKey}
               />
             </div>
+
+            {selectionPrompted && missingKeys.length > 0 && (
+              <p className={styles.selectionRequired} id="product-selection-required" role="alert">
+                {t('productOptions.selectToAdd', { options: missingOptionLabels })}
+              </p>
+            )}
 
             <div className={styles.purchaseRow}>
               <div className={styles.qtyStepper}>
@@ -332,6 +368,11 @@ export function ProductPage() {
                 <Button
                   onClick={handleAddToCart}
                   size="md"
+                  aria-describedby={
+                    selectionPrompted && missingKeys.length > 0
+                      ? 'product-selection-required'
+                      : undefined
+                  }
                   className={[
                     styles.addToCartBtn,
                     addedToCart ? styles.addToCartBtnAdded : '',

@@ -5,6 +5,7 @@ import { CartApi } from '@/api'
 import { getAuthToken } from '@/api/client'
 import { calculateCartPricing, toPricingItems, type CartPricing } from '@/utils/pricing'
 import { mergeHalfStrands } from '@/utils/strandMerge'
+import { getMissingRequiredOptionKeys } from '@/utils/productOptions'
 import { getAvailableStock } from '@/utils/productVariants'
 import { useUIStore } from './uiStore'
 
@@ -55,6 +56,8 @@ export const useCartStore = create<CartState>()(
       syncing: false,
 
       addItem: async (product, options, quantity = 1) => {
+        if (getMissingRequiredOptionKeys(product, options).length > 0) return
+
         if (isLoggedIn()) {
           try {
             const cart = await CartApi.addItem(product.id, quantity, options)
