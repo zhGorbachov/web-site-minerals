@@ -22,6 +22,7 @@ import {
   getMineralStrandLengths,
   getThreadBeadSizes,
   getThreadStrandLengths,
+  wristSizeNumber,
 } from '@/utils/productOptions'
 import {
   getCatalogPricing,
@@ -225,7 +226,7 @@ export function ProductSelections({
             values={optionValues(product, 'wristSize', attrs.wristSizes!)}
             selectedValue={selected.wristSize}
             onSelect={(value) => handleSelect('wristSize', value)}
-            renderValue={(value) => formatWristSize(value, language)}
+            renderValue={wristSizeNumber}
             divider={hasBeadSizes}
             invalid={isInvalid('wristSize')}
             requiredHint={requiredHint}
@@ -337,7 +338,7 @@ export function ProductSelections({
           values={wristSizes}
           selectedValue={selected.wristSize}
           onSelect={(value) => handleSelect('wristSize', value)}
-          renderValue={(value) => formatWristSize(value, language)}
+          renderValue={wristSizeNumber}
           divider={beadSizes.length > 0}
           invalid={isInvalid('wristSize')}
           requiredHint={requiredHint}

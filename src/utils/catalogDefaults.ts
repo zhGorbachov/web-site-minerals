@@ -3,6 +3,11 @@ import type { IncenseSaleMode, StrandLengthOption } from '@/types'
 /** Wrist sizes offered for bracelets, 14–22 cm. */
 export const DEFAULT_WRIST_SIZES = Array.from({ length: 9 }, (_, i) => `${i + 14} см`)
 
+/** Drops a trailing cm unit so it can live once in the option title. */
+export function wristSizeNumber(size: string): string {
+  return size.replace(/\s*(?:см|cm)\s*$/i, '').trim()
+}
+
 /** Bead diameters in mm offered for bracelets and strands. */
 export const DEFAULT_BEAD_SIZES = ['2', '3', '4', '6', '8', '10', '12']
 

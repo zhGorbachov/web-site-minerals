@@ -35,6 +35,7 @@ export {
 export { getDiscountLabel } from './discountLabel'
 export {
   DEFAULT_WRIST_SIZES,
+  wristSizeNumber,
   DEFAULT_BEAD_SIZES,
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_PACK_WEIGHTS,

@@ -5,6 +5,7 @@ import {
   DEFAULT_PIECE_WEIGHTS,
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_WRIST_SIZES,
+  wristSizeNumber,
 } from './catalogDefaults'
 import {
   consumedWholeStrands,
@@ -502,16 +503,15 @@ export function getBindableOptionGroups(
   const beadSizes = asStringArray(attributes.beadSizes)
   const wristSizes = asStringArray(attributes.wristSizes)
   const strandLengths = asStrandLengths(attributes.strandLengths)
-  const beadSizeMm = (value: string) => `${value} мм`
 
   if (categorySlug === 'brаslety') {
-    add('beadSize', groupLabels.beadSize, beadSizes.length ? beadSizes : DEFAULT_BEAD_SIZES, beadSizeMm)
-    add('wristSize', groupLabels.wristSize, wristSizes.length ? wristSizes : DEFAULT_WRIST_SIZES)
+    add('beadSize', groupLabels.beadSize, beadSizes.length ? beadSizes : DEFAULT_BEAD_SIZES)
+    add('wristSize', groupLabels.wristSize, wristSizes.length ? wristSizes : DEFAULT_WRIST_SIZES, wristSizeNumber)
     return groups
   }
 
   if (categorySlug === 'nytky') {
-    add('beadSize', groupLabels.beadSize, beadSizes.length ? beadSizes : DEFAULT_BEAD_SIZES, beadSizeMm)
+    add('beadSize', groupLabels.beadSize, beadSizes.length ? beadSizes : DEFAULT_BEAD_SIZES)
     add(
       'strandLength',
       groupLabels.strandLength,
@@ -535,8 +535,8 @@ export function getBindableOptionGroups(
     return groups
   }
 
-  add('wristSize', groupLabels.wristSize, wristSizes)
-  add('beadSize', groupLabels.beadSize, beadSizes, beadSizeMm)
+  add('wristSize', groupLabels.wristSize, wristSizes, wristSizeNumber)
+  add('beadSize', groupLabels.beadSize, beadSizes)
   add('beadCount', groupLabels.beadCount, asStringArray(attributes.beadCounts))
   add('strandLength', groupLabels.strandLength, strandLengths.map((length) => length.label))
   add('length', groupLabels.length, asStringArray(attributes.lengths))

@@ -7,7 +7,7 @@ import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice, getDiscountLabel } from '@/utils'
+import { formatPrice, getDiscountLabel, wristSizeNumber } from '@/utils'
 import {
   getAvailableStock,
   getCartUnitPrice,
@@ -161,6 +161,7 @@ export function CartPage() {
 
                 const formatOptionValue = (key: string, value: string) => {
                   if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
+                  if (key === 'wristSize') return wristSizeNumber(value)
                   if (key === 'beadCount') return t('productOptions.beadCountValue', { value })
                   if (language === 'en') {
                     if (key === 'strandLength') {

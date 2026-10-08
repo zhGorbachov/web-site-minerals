@@ -8,6 +8,7 @@ import {
   DEFAULT_PIECE_WEIGHTS,
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_WRIST_SIZES,
+  wristSizeNumber,
 } from '@/utils/productOptions'
 import styles from './ProductAttributesEditor.module.scss'
 
@@ -58,6 +59,7 @@ function ChipMultiSelect({
   onChange,
   addPlaceholder,
   normalize,
+  formatOption,
 }: {
   label: string
   hint?: string
@@ -66,6 +68,7 @@ function ChipMultiSelect({
   onChange: (next: string[]) => void
   addPlaceholder: string
   normalize?: (value: string) => string
+  formatOption?: (value: string) => string
 }) {
   const [draft, setDraft] = useState('')
   const extras = values.filter((v) => !presets.includes(v))
@@ -100,7 +103,7 @@ function ChipMultiSelect({
               onClick={() => onChange(toggleValue(values, option))}
               aria-pressed={active}
             >
-              {option}
+              {formatOption ? formatOption(option) : option}
             </button>
           )
         })}
@@ -436,6 +439,7 @@ export function ProductAttributesEditor({
             onChange={(wristSizes) => onChange(patchAttr(attributes, 'wristSizes', wristSizes))}
             addPlaceholder={t('admin.attrAddCustom')}
             normalize={normalizeWristSize}
+            formatOption={wristSizeNumber}
           />
         </AttributesSection>
 

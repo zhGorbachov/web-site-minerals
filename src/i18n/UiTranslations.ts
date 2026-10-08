@@ -800,7 +800,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     maxInCart: 'Максимальна кількість уже в кошику',
   },
   productOptions: {
-    beadSize: 'Розмір намистини',
+    beadSize: 'Розмір намистини мм',
     beadCount: 'Кількість бусин',
     beadCountValue: '{value} шт.',
     strandLength: 'Довжина низки',
@@ -808,7 +808,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     selectToAdd: 'Щоб додати в кошик, оберіть: {options}',
     threadLength: 'Довжина низки',
     color: 'Колір',
-    wristSize: "Розмір зап'ястя",
+    wristSize: "Розмір зап'ястя см",
     availableWristSize: 'Доступний розмір: {size}',
     packWeight: 'Вага',
     pieceWeight: 'Вага штуки',
@@ -1128,7 +1128,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
       'Ціла та пів низки. Якщо порожньо — для низок підставляються 39 см і 19.5 см.',
     attrStrandLabel: 'Підпис (напр. Низка 39 см)',
     attrStrandValue: 'Значення (напр. 39 см)',
-    attrWristSizes: "Розмір зап'ястя",
+    attrWristSizes: "Розмір зап'ястя см",
     attrWristSizesHint:
       "Стандарт 14–22 см. Можна додати свій варіант. Якщо нічого не обрати — для браслетів показуються всі стандартні розміри.",
     attrWristRange: "Діапазон розміру (підказка)",
@@ -1391,7 +1391,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     maxInCart: 'Maximum quantity already in cart',
   },
   productOptions: {
-    beadSize: 'Bead size',
+    beadSize: 'Bead size mm',
     beadCount: 'Bead count',
     beadCountValue: '{value} pcs',
     strandLength: 'Strand length',
@@ -1399,7 +1399,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     selectToAdd: 'To add to cart, choose: {options}',
     threadLength: 'Cord length',
     color: 'Color',
-    wristSize: 'Wrist size',
+    wristSize: 'Wrist size cm',
     availableWristSize: 'Available size: {size}',
     packWeight: 'Weight',
     pieceWeight: 'Piece weight',
@@ -1719,7 +1719,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
       'Whole and half strand. If empty, strand products get 39 cm and 19.5 cm by default.',
     attrStrandLabel: 'Label (e.g. Strand 39 cm)',
     attrStrandValue: 'Value (e.g. 39 cm)',
-    attrWristSizes: 'Wrist size',
+    attrWristSizes: 'Wrist size cm',
     attrWristSizesHint:
       'Defaults are 14–22 cm. You can add a custom size. If none are selected, bracelets show all standard sizes.',
     attrWristRange: 'Size range hint',

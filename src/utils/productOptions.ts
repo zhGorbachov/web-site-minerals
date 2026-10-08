@@ -15,6 +15,7 @@ import {
   DEFAULT_PIECE_WEIGHTS,
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_WRIST_SIZES,
+  wristSizeNumber,
 } from './catalogDefaults'
 
 export {
@@ -24,7 +25,8 @@ export {
   DEFAULT_PIECE_WEIGHTS,
   DEFAULT_STRAND_LENGTHS,
   DEFAULT_WRIST_SIZES,
-}
+  wristSizeNumber,
+} from './catalogDefaults'
 
 export function isMineralStrandAttributes(attrs: MineralAttributes): boolean {
   return Boolean(
