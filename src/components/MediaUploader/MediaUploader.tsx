@@ -1,9 +1,31 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ImagePlus, Film, X, Upload, ChevronLeft, ChevronRight } from 'lucide-react'
 import { AdminApi } from '@/api'
 import { mediaUrl } from '@/api/client'
+import { ProductVideo } from '@/components/ProductVideo/ProductVideo'
+import { uploadSiblingUrl } from '@/utils/uploadMedia'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './MediaUploader.module.scss'
+
+function AdminPreviewImage({ src }: { src: string }) {
+  const thumb = uploadSiblingUrl(src, 'thumb')
+  const [current, setCurrent] = useState(thumb ?? src)
+
+  useEffect(() => {
+    setCurrent(thumb ?? src)
+  }, [src, thumb])
+
+  return (
+    <img
+      src={current}
+      alt=""
+      draggable={false}
+      onError={() => {
+        if (current !== src) setCurrent(src)
+      }}
+    />
+  )
+}
 
 type Props = {
   images: string[]
@@ -251,7 +273,7 @@ export function MediaUploader({
                     }}
                     onDragEnd={finishReorder}
                   >
-                    <img src={mediaUrl(src)} alt="" draggable={false} />
+                    <AdminPreviewImage src={mediaUrl(src)} />
                   </div>
                   <button
                     type="button"
@@ -295,13 +317,13 @@ export function MediaUploader({
         <div className={styles.previewBlock}>
           <span className={styles.previewLabel}>{t('admin.video')}</span>
           <div className={styles.videoPreview}>
-            <video src={mediaUrl(video)} controls playsInline preload="metadata" />
+            <ProductVideo src={mediaUrl(video)} />
             <button
               type="button"
               className={styles.removeBtn}
               aria-label={t('admin.removeMedia')}
               onPointerDown={(event) => event.stopPropagation()}
-              onClick={() => onVideoChange(null)}
+              onClick={() => onVideoChange?.(null)}
             >
               <X size={14} />
             </button>

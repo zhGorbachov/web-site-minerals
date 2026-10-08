@@ -24,7 +24,7 @@ RUN npx prisma generate && npm run build
 # --- API runtime ---
 FROM node:20-alpine AS api
 WORKDIR /app
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl ffmpeg
 ENV NODE_ENV=production
 ENV PORT=3001
 

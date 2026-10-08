@@ -238,9 +238,11 @@
 .videoPreview {
   video {
     width: 100%;
+    min-height: 160px;
     max-height: 240px;
     display: block;
     background: #111;
+    object-fit: contain;
   }
 }
 

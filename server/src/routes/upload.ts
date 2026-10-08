@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { Router } from 'express'
 import multer from 'multer'
 import { requireAdmin } from '../lib/auth.js'
+import { processNewUpload } from '../lib/mediaProcess.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export const uploadsDir = path.resolve(__dirname, '../../uploads')
@@ -34,19 +35,23 @@ const upload = multer({
 
 export const uploadRouter = Router()
 
-uploadRouter.post('/', requireAdmin, upload.array('files', 12), (req, res) => {
+uploadRouter.post('/', requireAdmin, upload.array('files', 12), async (req, res) => {
   const files = req.files as Express.Multer.File[] | undefined
   if (!files?.length) {
     res.status(400).json({ error: 'No files uploaded' })
     return
   }
 
-  res.status(201).json({
-    files: files.map((file) => ({
-      url: `/uploads/${file.filename}`,
-      type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+  const stored = []
+  for (const file of files) {
+    const result = await processNewUpload(file.path, file.mimetype)
+    stored.push({
+      url: `/uploads/${path.basename(result.filePath)}`,
+      type: result.type,
       name: file.originalname,
-      size: file.size,
-    })),
-  })
+      size: result.size,
+    })
+  }
+
+  res.status(201).json({ files: stored })
 })

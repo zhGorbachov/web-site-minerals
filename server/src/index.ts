@@ -14,6 +14,7 @@ import { cartRouter } from './routes/cart.js'
 import { wishlistRouter } from './routes/wishlist.js'
 import { ordersRouter } from './routes/orders.js'
 import { adminRouter } from './routes/admin.js'
+import { cacheControlForUpload, optimizeUploadsDir } from './lib/mediaProcess.js'
 import { uploadRouter, uploadsDir } from './routes/upload.js'
 import { novaPoshtaRouter } from './routes/novaPoshta.js'
 import { reviewsRouter } from './routes/reviews.js'
@@ -33,7 +34,15 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use('/media', express.static(mediaDir))
-app.use('/uploads', express.static(uploadsDir))
+app.use(
+  '/uploads',
+  express.static(uploadsDir, {
+    setHeaders(res, filePath) {
+      const cacheControl = cacheControlForUpload(filePath)
+      if (cacheControl) res.setHeader('Cache-Control', cacheControl)
+    },
+  }),
+)
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
@@ -60,6 +69,15 @@ async function main() {
   await ensureBootstrapAdmin()
   app.listen(env.port, () => {
     console.log(`API listening on http://localhost:${env.port}`)
+    void optimizeUploadsDir(uploadsDir)
+      .then((stats) => {
+        console.log(
+          `[media] ready, optimized ${stats.images} images and ${stats.videos} videos, skipped ${stats.skipped}, failed ${stats.failed}`,
+        )
+      })
+      .catch((error) => {
+        console.error('[media] background optimize failed', error)
+      })
   })
 }
 

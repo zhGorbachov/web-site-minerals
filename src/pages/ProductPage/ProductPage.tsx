@@ -5,6 +5,7 @@ import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lu
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { ProductGallery } from '@/components/ProductGallery'
+import { ProductVideo } from '@/components/ProductVideo/ProductVideo'
 import { ProductSelections, ProductCharacteristics } from '@/components/ProductOptions'
 import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
@@ -253,15 +254,7 @@ export function ProductPage() {
                 }
               })}
             />
-            {product.video && (
-              <video
-                className={styles.productVideo}
-                src={product.video}
-                controls
-                playsInline
-                preload="metadata"
-              />
-            )}
+            {product.video && <ProductVideo src={product.video} className={styles.productVideo} />}
           </div>
 
           <div className={styles.infoCol}>

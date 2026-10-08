@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react'
+import { uploadSiblingUrl } from '@/utils/uploadMedia'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ProductGallery.module.scss'
 
@@ -16,6 +17,28 @@ interface ProductGalleryProps {
 }
 
 const SWIPE_THRESHOLD = 48
+
+function ThumbImage({ src, alt }: { src: string; alt: string }) {
+  const thumb = uploadSiblingUrl(src, 'thumb')
+  const [current, setCurrent] = useState(thumb ?? src)
+
+  useEffect(() => {
+    setCurrent(thumb ?? src)
+  }, [src, thumb])
+
+  return (
+    <img
+      src={current}
+      alt={alt}
+      draggable={false}
+      loading="lazy"
+      decoding="async"
+      onError={() => {
+        if (current !== src) setCurrent(src)
+      }}
+    />
+  )
+}
 
 export function ProductGallery({
   images,
@@ -114,6 +137,7 @@ export function ProductGallery({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             draggable={false}
+            fetchPriority="high"
           />
         </AnimatePresence>
 
@@ -184,10 +208,9 @@ export function ProductGallery({
                 aria-label={t('productGallery.photo', { n: index + 1 })}
                 aria-current={activeIndex === index}
               >
-                <img
+                <ThumbImage
                   src={src}
                   alt={t('productGallery.thumbnailAlt', { name: productName, n: index + 1 })}
-                  draggable={false}
                 />
                 {captions?.[index]?.title && (
                   <span className={styles.thumbCaption}>{captions[index]?.title}</span>

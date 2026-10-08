@@ -50,9 +50,11 @@
 
 .productVideo {
   width: 100%;
+  min-height: 200px;
+  max-height: 360px;
   border-radius: $radius-md;
   background: #111;
-  max-height: 360px;
+  object-fit: contain;
 }
 
 .infoCol {
