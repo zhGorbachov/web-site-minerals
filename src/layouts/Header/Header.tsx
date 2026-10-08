@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, Search, User, Heart, ShoppingCart, X, Building2, Truck, RefreshCw, Percent, Star, HelpCircle, Phone, Clock, type LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore, useUIStore, useWishlistStore, useAuthStore } from '@/store'
@@ -140,6 +140,7 @@ export function Header() {
   const wishlistCount = useWishlistStore((s) => s.items.length)
   const user = useAuthStore((s) => s.user)
   const location = useLocation()
+  const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const mobileMenuRef = useRef<HTMLElement>(null)
@@ -178,6 +179,23 @@ export function Header() {
     setSearchQuery('')
   }
 
+  const handleToggleSearch = () => {
+    if (!isSearchOpen && location.pathname === '/search') {
+      const current = new URLSearchParams(location.search).get('q') ?? ''
+      if (current) setSearchQuery(current)
+    }
+    toggleSearch()
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const query = searchQuery.trim()
+    if (!query) return
+    navigate(`/search?q=${encodeURIComponent(query)}`)
+    handleCloseSearch()
+    closeBurger()
+  }
+
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       handleCloseSearch()
@@ -212,14 +230,19 @@ export function Header() {
                   className={styles.mobileSearchField}
                   variants={mobileSearchFieldVariants}
                 >
-                  <motion.div
+                  <motion.form
                     className={styles.mobileSearchFieldInner}
                     variants={mobileSearchContentVariants}
+                    role="search"
+                    onSubmit={handleSearchSubmit}
                   >
-                    <Search size={18} className={styles.searchFieldIcon} aria-hidden="true" />
+                    <button type="submit" className={styles.searchSubmit} aria-label={t('header.search')}>
+                      <Search size={18} />
+                    </button>
                     <input
                       ref={mobileSearchInputRef}
                       type="search"
+                      enterKeyHint="search"
                       placeholder={t('header.searchPlaceholderMobile')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -243,7 +266,7 @@ export function Header() {
                         </motion.button>
                       )}
                     </AnimatePresence>
-                  </motion.div>
+                  </motion.form>
                 </motion.div>
               </motion.div>
             )}
@@ -325,18 +348,23 @@ export function Header() {
               <div className={styles.desktopSearch}>
                 <AnimatePresence>
                   {isSearchOpen && (
-                    <motion.div
+                    <motion.form
                       key="desktop-search"
                       initial={{ width: 0, opacity: 0 }}
                       animate={{ width: DESKTOP_SEARCH_WIDTH, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={SEARCH_TRANSITION}
                       className={styles.desktopSearchField}
+                      role="search"
+                      onSubmit={handleSearchSubmit}
                     >
-                      <Search size={16} className={styles.searchFieldIcon} aria-hidden="true" />
+                      <button type="submit" className={styles.searchSubmit} aria-label={t('header.search')}>
+                        <Search size={16} />
+                      </button>
                       <input
                         ref={desktopSearchInputRef}
                         type="search"
+                        enterKeyHint="search"
                         placeholder={t('header.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -354,13 +382,13 @@ export function Header() {
                           <X size={14} />
                         </button>
                       )}
-                    </motion.div>
+                    </motion.form>
                   )}
                 </AnimatePresence>
 
                 <button
                   className={styles.iconBtn}
-                  onClick={toggleSearch}
+                  onClick={handleToggleSearch}
                   aria-label={isSearchOpen ? t('header.closeSearch') : t('header.search')}
                   aria-expanded={isSearchOpen}
                 >
@@ -370,7 +398,7 @@ export function Header() {
 
               <button
                 className={`${styles.iconBtn} ${styles.mobileSearchBtn}`}
-                onClick={toggleSearch}
+                onClick={handleToggleSearch}
                 aria-label={isSearchOpen ? t('header.closeSearch') : t('header.search')}
                 aria-expanded={isSearchOpen}
               >

@@ -7,6 +7,18 @@ function getLanguage() {
   return useLanguageStore.getState().language
 }
 
+function productMatchesQuery(product: Product, query: string): boolean {
+  const fields = [
+    product.name,
+    product.shortDescription,
+    product.description,
+    product.sku,
+    ...(product.variants ?? []).map((variant) => variant.name),
+  ]
+
+  return fields.some((value) => value?.toLowerCase().includes(query))
+}
+
 export const ProductService = {
   async getAll(): Promise<Product[]> {
     const products = await CatalogApi.getProducts()
@@ -53,8 +65,11 @@ export const ProductService = {
   },
 
   async search(query: string): Promise<Product[]> {
-    const products = await CatalogApi.getProducts({ search: query })
-    return localizeProducts(products, getLanguage())
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+
+    const products = localizeProducts(await CatalogApi.getProducts(), getLanguage())
+    return products.filter((product) => productMatchesQuery(product, q))
   },
 
   async getByIds(ids: string[]): Promise<Product[]> {

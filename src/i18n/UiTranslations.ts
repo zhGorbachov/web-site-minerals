@@ -50,6 +50,15 @@ export type UiTranslationSchema = {
     emptyTitle: string
     emptyDescription: string
   }
+  searchPage: {
+    title: string
+    titleQuery: string
+    emptyTitle: string
+    emptyDescription: string
+    promptTitle: string
+    promptDescription: string
+    paginationAria: string
+  }
   product: {
     notFoundTitle: string
     notFoundDescription: string
@@ -622,6 +631,15 @@ export const uiTranslationsUk: UiTranslationSchema = {
     aboutSection: 'Про категорію',
     emptyTitle: 'Товарів ще нема',
     emptyDescription: 'Асортимент постійно поповнюється — загляньте пізніше',
+  },
+  searchPage: {
+    title: 'Пошук',
+    titleQuery: 'Результати за «{query}»',
+    emptyTitle: 'Нічого не знайдено',
+    emptyDescription: 'За запитом «{query}» немає товарів. Спробуйте іншу назву або артикул',
+    promptTitle: 'Знайдіть товар',
+    promptDescription: 'Введіть назву або артикул у полі пошуку',
+    paginationAria: 'Сторінки результатів пошуку',
   },
   product: {
     notFoundTitle: 'Товар не знайдено',
@@ -1213,6 +1231,15 @@ export const uiTranslationsEn: UiTranslationSchema = {
     aboutSection: 'About category',
     emptyTitle: 'There are no products yet',
     emptyDescription: 'The assortment is updated regularly — check back later',
+  },
+  searchPage: {
+    title: 'Search',
+    titleQuery: 'Results for “{query}”',
+    emptyTitle: 'Nothing found',
+    emptyDescription: 'No products match “{query}”. Try another name or SKU',
+    promptTitle: 'Find a product',
+    promptDescription: 'Enter a name or SKU in the search field',
+    paginationAria: 'Search result pages',
   },
   product: {
     notFoundTitle: 'Product not found',

@@ -6,6 +6,7 @@ import { ErrorPage } from '@/pages/ErrorPage'
 
 const HomePage       = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })))
 const CatalogPage    = lazy(() => import('@/pages/CatalogPage').then((m) => ({ default: m.CatalogPage })))
+const SearchPage     = lazy(() => import('@/pages/SearchPage').then((m) => ({ default: m.SearchPage })))
 const CategoryPage   = lazy(() => import('@/pages/CategoryPage').then((m) => ({ default: m.CategoryPage })))
 const ProductPage    = lazy(() => import('@/pages/ProductPage').then((m) => ({ default: m.ProductPage })))
 const CartPage       = lazy(() => import('@/pages/CartPage').then((m) => ({ default: m.CartPage })))
@@ -57,6 +58,14 @@ const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageFallback />}>
                 <HomePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'search',
+            element: (
+              <Suspense fallback={<PageFallback />}>
+                <SearchPage />
               </Suspense>
             ),
           },
