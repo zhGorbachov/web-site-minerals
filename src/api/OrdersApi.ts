@@ -1,12 +1,23 @@
 import type { Order, CartItem, CreateOrderResult } from '@/types'
 import { api, mediaUrl, getAuthToken } from './client'
 
+export type CreateOrderContact = {
+  firstName: string
+  lastName: string
+  phone: string
+  email?: string
+}
+
 export type CreateOrderPayload = {
   paymentMethod?: string
   deliveryMethod?: string
   language?: 'uk' | 'en'
   /** Required for bank_transfer — full name of the payer as on the bank statement. */
   payerFullName?: string
+  /** Contact details collected on the checkout page, snapshotted onto the order. */
+  contact?: CreateOrderContact
+  /** Human-readable delivery summary (address / branch / postal index), snapshotted onto the order. */
+  deliveryAddress?: string
   items?: CartItem[]
 }
 
@@ -43,6 +54,14 @@ export const OrdersApi = {
 
     if (payload?.payerFullName?.trim()) {
       body.payerFullName = payload.payerFullName.trim()
+    }
+
+    if (payload?.contact) {
+      body.contact = payload.contact
+    }
+
+    if (payload?.deliveryAddress?.trim()) {
+      body.deliveryAddress = payload.deliveryAddress.trim()
     }
 
     if (!getAuthToken() && payload?.items?.length) {

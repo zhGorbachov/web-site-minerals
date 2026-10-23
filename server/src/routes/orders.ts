@@ -23,12 +23,21 @@ const guestOrderItemSchema = z.object({
   selectedOptions: z.record(z.string()).optional(),
 })
 
+const contactSchema = z.object({
+  firstName: z.string().trim().min(1),
+  lastName: z.string().trim().min(1),
+  phone: z.string().trim().min(1),
+  email: z.string().trim().optional(),
+})
+
 const createOrderSchema = z
   .object({
     paymentMethod: z.enum(['bank_transfer', 'pickup', 'cod']).default('pickup'),
     deliveryMethod: z.string().min(1).default('nova_poshta'),
     language: z.enum(['uk', 'en']).optional(),
     payerFullName: z.string().trim().optional(),
+    contact: contactSchema.optional(),
+    deliveryAddress: z.string().trim().optional(),
     items: z.array(guestOrderItemSchema).optional(),
   })
   .superRefine((data, ctx) => {
@@ -50,6 +59,11 @@ function mapOrder(order: {
   paymentMethod: string
   deliveryMethod: string
   payerFullName?: string | null
+  contactFirstName?: string | null
+  contactLastName?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  deliveryAddress?: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -59,6 +73,7 @@ function mapOrder(order: {
     productImage: string
     quantity: number
     price: { toNumber?: () => number } | number
+    selectedOptions?: unknown
   }>
 }) {
   return {
@@ -70,6 +85,11 @@ function mapOrder(order: {
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
     payerFullName: order.payerFullName ?? null,
+    contactFirstName: order.contactFirstName ?? null,
+    contactLastName: order.contactLastName ?? null,
+    contactPhone: order.contactPhone ?? null,
+    contactEmail: order.contactEmail ?? null,
+    deliveryAddress: order.deliveryAddress ?? null,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,
@@ -79,6 +99,7 @@ function mapOrder(order: {
       productImage: item.productImage,
       quantity: item.quantity,
       price: Number(item.price),
+      selectedOptions: (item.selectedOptions as Record<string, string> | null) ?? null,
     })),
   }
 }
@@ -140,6 +161,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         productImage: variant?.image ?? item.product.images[0] ?? '',
         quantity: item.quantity,
         price: getDiscountedUnitPrice(item.product.categorySlug, unit, pricing),
+        selectedOptions: options ?? Prisma.JsonNull,
       }
     })
     const totalPrice = pricedLines.reduce(
@@ -159,6 +181,11 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
             deliveryMethod: parsed.data.deliveryMethod,
             payerFullName:
               paymentMethod === 'bank_transfer' ? parsed.data.payerFullName! : null,
+            contactFirstName: parsed.data.contact?.firstName ?? null,
+            contactLastName: parsed.data.contact?.lastName ?? null,
+            contactPhone: parsed.data.contact?.phone ?? null,
+            contactEmail: parsed.data.contact?.email ?? null,
+            deliveryAddress: parsed.data.deliveryAddress ?? null,
             items: {
               create: pricedLines,
             },
@@ -294,6 +321,11 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           deliveryMethod: parsed.data.deliveryMethod,
           payerFullName:
             paymentMethod === 'bank_transfer' ? parsed.data.payerFullName! : null,
+          contactFirstName: parsed.data.contact?.firstName ?? null,
+          contactLastName: parsed.data.contact?.lastName ?? null,
+          contactPhone: parsed.data.contact?.phone ?? null,
+          contactEmail: parsed.data.contact?.email ?? null,
+          deliveryAddress: parsed.data.deliveryAddress ?? null,
           items: {
             create: pricedLines.map((item) => ({
               productId: item.product.id,
@@ -301,6 +333,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
               productImage: item.productImage,
               quantity: item.quantity,
               price: item.price,
+              selectedOptions: item.selectedOptions ?? Prisma.JsonNull,
             })),
           },
         },

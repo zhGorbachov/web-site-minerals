@@ -20,6 +20,7 @@ export interface OrderItem {
   productImage: string
   quantity: number
   price: number
+  selectedOptions?: Record<string, string> | null
 }
 
 export interface Order {
@@ -32,6 +33,13 @@ export interface Order {
   deliveryMethod: string
   /** Full name of the bank-transfer payer (as on the card statement). */
   payerFullName?: string | null
+  /** Contact details entered at checkout, snapshotted onto the order. */
+  contactFirstName?: string | null
+  contactLastName?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  /** Human-readable delivery summary (address / branch / postal index), snapshotted onto the order. */
+  deliveryAddress?: string | null
   items: OrderItem[]
   createdAt: string
 }

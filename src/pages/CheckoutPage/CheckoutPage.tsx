@@ -11,6 +11,7 @@ import {
   Truck,
   CreditCard,
   MessageSquare,
+  Clock,
 } from 'lucide-react'
 import type {
   CheckoutContact,
@@ -693,6 +694,13 @@ export function CheckoutPage() {
         paymentMethod,
         deliveryMethod: location.deliveryMethod,
         language: language === 'en' ? 'en' : 'uk',
+        contact: {
+          firstName: contact.firstName.trim(),
+          lastName: contact.lastName.trim(),
+          phone: normalizeLocalPhone(contact.phone),
+          email: contact.email.trim(),
+        },
+        deliveryAddress: locationSummary,
         ...(paymentMethod === 'bank_transfer'
           ? { payerFullName: payerFullName.trim() }
           : {}),
@@ -1063,6 +1071,10 @@ export function CheckoutPage() {
                         <div className={styles.pickupAddress}>
                           <Truck size={18} />
                           <span>{t('checkout.selfPickupAddress')}</span>
+                        </div>
+                        <div className={styles.pickupSchedule}>
+                          <Clock size={18} />
+                          <span>{t('checkout.selfPickupSchedule')}</span>
                         </div>
                       </div>
                     )}

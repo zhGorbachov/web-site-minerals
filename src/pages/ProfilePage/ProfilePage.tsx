@@ -23,6 +23,7 @@ import { useAuthStore, useCartStore, useWishlistStore } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice } from '@/utils/formatPrice'
 import { formatPhoneDisplay } from '@/utils/phone'
+import { formatOrderItemQuantity, orderItemUnitLabel } from '@/utils/orderItemDisplay'
 import { scrollToHashTarget } from '@/utils/hashNav'
 import { Button, Breadcrumbs, ConfirmDialog, Loader } from '@/components/ui'
 import { ProductGrid } from '@/components/ProductGrid'
@@ -370,9 +371,12 @@ export function ProfilePage() {
                                     <div className={styles.orderProductBody}>
                                       <span className={styles.orderProductName}>{item.productName}</span>
                                       <span className={styles.orderProductMeta}>
-                                        {t('profile.orderItemQty', { count: item.quantity })}
+                                        {t('profile.orderItemQty', {
+                                          count: formatOrderItemQuantity(item, language),
+                                        })}
                                         {' · '}
-                                        {formatPrice(item.price, language)} {t('cart.perUnit')}
+                                        {formatPrice(item.price, language)} /{' '}
+                                        {orderItemUnitLabel(item, language)}
                                       </span>
                                     </div>
                                     <span className={styles.orderProductTotal}>

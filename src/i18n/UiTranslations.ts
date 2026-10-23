@@ -131,6 +131,7 @@ export type UiTranslationSchema = {
     selfPickup: string
     selfPickupHint: string
     selfPickupAddress: string
+    selfPickupSchedule: string
     city: string
     cityPlaceholder: string
     cityHint: string
@@ -434,6 +435,7 @@ export type UiTranslationSchema = {
     ordersItemQty: string
     ordersItemPrice: string
     ordersDelivery: string
+    ordersAddress: string
     ordersPaymentMethod: string
     ordersPayerFullName: string
     ordersCodHint: string
@@ -715,6 +717,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     selfPickup: 'Самовивіз',
     selfPickupHint: 'Забрати самостійно з магазину',
     selfPickupAddress: 'вул. Шульгиних, 10, Кропивницький',
+    selfPickupSchedule: 'Пн–Пт: 9:00 – 17:00',
     city: 'Місто',
     cityPlaceholder: 'Почніть вводити назву міста або села',
     cityHint: 'Оберіть зі списку підказок',
@@ -1020,6 +1023,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ordersItemQty: '{count} шт.',
     ordersItemPrice: 'ціна',
     ordersDelivery: 'Доставка',
+    ordersAddress: 'Адреса',
     ordersPaymentMethod: 'Спосіб оплати',
     ordersPayerFullName: 'ПІБ платника',
     ordersCodHint:
@@ -1315,6 +1319,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     selfPickup: 'Self-pickup',
     selfPickupHint: 'Pick up from the store',
     selfPickupAddress: 'Shulhynykh St., 10, Kropyvnytskyi',
+    selfPickupSchedule: 'Mon–Fri: 9:00 AM – 5:00 PM',
     city: 'City',
     cityPlaceholder: 'Start typing a city or village',
     cityHint: 'Pick a suggestion from the list',
@@ -1620,6 +1625,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ordersItemQty: '{count} pcs',
     ordersItemPrice: 'price',
     ordersDelivery: 'Delivery',
+    ordersAddress: 'Address',
     ordersPaymentMethod: 'Payment method',
     ordersPayerFullName: 'Payer full name',
     ordersCodHint:

@@ -1,6 +1,7 @@
-import type { Product, ProductAttributes, StoreReview, SubCategory } from '@/types'
+import type { Order, Product, ProductAttributes, StoreReview, SubCategory } from '@/types'
 import type {
   AdminOrder,
+  AdminOrderCustomer,
   AdminOrderUpdatePayload,
   AdminProductPayload,
   AdminSubcategoryPayload,
@@ -18,6 +19,27 @@ import {
   normalizeDiscountPrice,
   parseVariants,
 } from '@/utils/productVariants'
+
+function buildOrderCustomer(
+  order: Order,
+  user?: { firstName: string; lastName: string; email?: string | null; phone?: string | null },
+): AdminOrderCustomer | null {
+  if (order.contactFirstName || order.contactLastName) {
+    return {
+      firstName: order.contactFirstName ?? '',
+      lastName: order.contactLastName ?? '',
+      email: order.contactEmail ?? undefined,
+      phone: order.contactPhone ?? undefined,
+    }
+  }
+  if (!user) return null
+  return {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email ?? undefined,
+    phone: user.phone ?? undefined,
+  }
+}
 
 function requireAdmin() {
   const user = MockDb.resolveSession(getAuthToken())
@@ -433,14 +455,7 @@ export const MockAdminApi = {
           : undefined
       return {
         ...order,
-        customer: user
-          ? {
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              phone: user.phone,
-            }
-          : null,
+        customer: buildOrderCustomer(order, user),
       }
     })
   },
@@ -460,14 +475,7 @@ export const MockAdminApi = {
 
     return {
       ...updated,
-      customer: user
-        ? {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            phone: user.phone,
-          }
-        : null,
+      customer: buildOrderCustomer(updated, user),
     }
   },
 

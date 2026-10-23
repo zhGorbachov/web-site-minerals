@@ -214,6 +214,13 @@ model Order {
   deliveryMethod String
   /** Full name of the bank-transfer payer (as on the card statement), for matching payments. */
   payerFullName  String?
+  /** Contact details entered at checkout, snapshotted at order time (survives guest checkout / profile edits). */
+  contactFirstName String?
+  contactLastName  String?
+  contactPhone     String?
+  contactEmail     String?
+  /** Human-readable delivery summary (address / branch / postal index), snapshotted at order time. */
+  deliveryAddress  String?
   liqpayOrderId  String?       @unique
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -233,6 +240,8 @@ model OrderItem {
   productImage String
   quantity     Int
   price        Decimal @db.Decimal(10, 2)
+  /** Variant / strand-length choice made at purchase time, e.g. { strandLength: "Пів низки 19.5 см" }. */
+  selectedOptions Json?
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)

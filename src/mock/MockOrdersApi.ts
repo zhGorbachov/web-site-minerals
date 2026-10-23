@@ -73,6 +73,7 @@ function buildOrder(
       productImage: variant?.image ?? product.images[0] ?? '',
       quantity: item.quantity,
       price: getDiscountedUnitPrice(product.categorySlug, unit, pricing),
+      selectedOptions: item.selectedOptions ?? null,
     }
   })
 
@@ -90,6 +91,11 @@ function buildOrder(
     deliveryMethod: payload?.deliveryMethod ?? 'nova_poshta',
     payerFullName:
       paymentMethod === 'bank_transfer' ? payload?.payerFullName?.trim() || null : null,
+    contactFirstName: payload?.contact?.firstName ?? null,
+    contactLastName: payload?.contact?.lastName ?? null,
+    contactPhone: payload?.contact?.phone ?? null,
+    contactEmail: payload?.contact?.email ?? null,
+    deliveryAddress: payload?.deliveryAddress ?? null,
     createdAt: new Date().toISOString(),
     items,
   }

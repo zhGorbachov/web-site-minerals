@@ -370,6 +370,26 @@
   }
 }
 
+.pickupSchedule {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-white;
+  font-size: $font-size-sm;
+  color: $color-text;
+  line-height: $line-height-normal;
+  margin-top: $spacing-2;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: $color-primary-dark;
+  }
+}
+
 .paymentCard {
   display: flex;
   flex-direction: column;

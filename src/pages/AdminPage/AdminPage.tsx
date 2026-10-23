@@ -15,6 +15,7 @@ import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, Sto
 import { formatPrice } from '@/utils/formatPrice'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
 import { DEFAULT_STRAND_LENGTHS } from '@/utils/catalogDefaults'
+import { formatOrderItemQuantity, orderItemUnitLabel } from '@/utils/orderItemDisplay'
 import { buildProductSku, slugify, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
@@ -824,6 +825,12 @@ export function AdminPage() {
                         <p className={styles.orderMethods}>
                           {t('admin.ordersDelivery')}:{' '}
                           {deliveryMethodLabel(order.deliveryMethod, t)}
+                          {order.deliveryAddress && (
+                            <>
+                              <br />
+                              {t('admin.ordersAddress')}: <span>{order.deliveryAddress}</span>
+                            </>
+                          )}
                         </p>
                         <p className={styles.orderPayer}>
                           {t('admin.ordersPaymentMethod')}:{' '}
@@ -888,9 +895,12 @@ export function AdminPage() {
                                           {item.productName}
                                         </span>
                                         <span className={styles.orderProductMeta}>
-                                          {t('admin.ordersItemQty', { count: item.quantity })}
+                                          {t('admin.ordersItemQty', {
+                                            count: formatOrderItemQuantity(item, language),
+                                          })}
                                           {' · '}
-                                          {formatPrice(item.price, language)} {t('cart.perUnit')}
+                                          {formatPrice(item.price, language)} /{' '}
+                                          {orderItemUnitLabel(item, language)}
                                         </span>
                                       </div>
                                       <span className={styles.orderProductTotal}>

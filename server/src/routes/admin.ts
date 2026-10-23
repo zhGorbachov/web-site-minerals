@@ -661,6 +661,11 @@ function mapAdminOrder(order: {
   paymentMethod: string
   deliveryMethod: string
   payerFullName?: string | null
+  contactFirstName?: string | null
+  contactLastName?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  deliveryAddress?: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -670,6 +675,7 @@ function mapAdminOrder(order: {
     productImage: string
     quantity: number
     price: { toNumber?: () => number } | number
+    selectedOptions?: unknown
   }>
   user: {
     firstName: string
@@ -678,6 +684,23 @@ function mapAdminOrder(order: {
     phone: string | null
   } | null
 }) {
+  const customer =
+    order.contactFirstName || order.contactLastName
+      ? {
+          firstName: order.contactFirstName ?? '',
+          lastName: order.contactLastName ?? '',
+          email: order.contactEmail ?? undefined,
+          phone: order.contactPhone ?? undefined,
+        }
+      : order.user
+        ? {
+            firstName: order.user.firstName,
+            lastName: order.user.lastName,
+            email: order.user.email ?? undefined,
+            phone: order.user.phone ?? undefined,
+          }
+        : null
+
   return {
     id: order.id,
     userId: order.userId,
@@ -687,6 +710,7 @@ function mapAdminOrder(order: {
     paymentMethod: order.paymentMethod,
     deliveryMethod: order.deliveryMethod,
     payerFullName: order.payerFullName ?? null,
+    deliveryAddress: order.deliveryAddress ?? null,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,
@@ -696,15 +720,9 @@ function mapAdminOrder(order: {
       productImage: item.productImage,
       quantity: item.quantity,
       price: Number(item.price),
+      selectedOptions: (item.selectedOptions as Record<string, string> | null) ?? null,
     })),
-    customer: order.user
-      ? {
-          firstName: order.user.firstName,
-          lastName: order.user.lastName,
-          email: order.user.email ?? undefined,
-          phone: order.user.phone ?? undefined,
-        }
-      : null,
+    customer,
   }
 }
 

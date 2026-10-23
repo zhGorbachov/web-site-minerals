@@ -72,7 +72,7 @@
 
 .contentRow {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: $spacing-3;
 }
 
@@ -89,7 +89,6 @@
   font-weight: $font-weight-semibold;
   color: $color-text;
   line-height: $line-height-tight;
-  @include text-clamp(2);
   transition: color $transition-base;
   margin: 0;
   text-decoration: none;
@@ -116,14 +115,16 @@
 
 .actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
   gap: $spacing-2;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .actionBtn {
   width: 44px;
   height: 44px;
+  flex-shrink: 0;
   border: none;
   border-radius: $radius-circle;
   display: flex;
@@ -164,6 +165,11 @@
 
 .cartWrap {
   position: relative;
+  flex: 1;
+
+  .cartBtn {
+    width: 100%;
+  }
 }
 
 .cartMenu {
