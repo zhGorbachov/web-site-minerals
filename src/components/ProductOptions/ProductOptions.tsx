@@ -33,6 +33,12 @@ import {
   isOptionValueOutOfStock,
 } from '@/utils/productVariants'
 import { formatPrice } from '@/utils/formatPrice'
+import {
+  BEAD_SALE_UNIT,
+  SALE_UNIT_OPTION_KEY,
+  getBeadSaleSizes,
+  isBeadSelection,
+} from '@/utils/beadSale'
 import styles from './ProductOptions.module.scss'
 
 interface ProductOptionsProps {
@@ -81,14 +87,20 @@ function useProductOptionState(
   const [internal, setInternal] = useState<Record<string, string>>({})
   const selected = selectedOptions ?? internal
 
-  const handleSelect = (key: string, value: string) => {
-    const updated = { ...selected, [key]: value }
+  const replaceSelection = (updated: Record<string, string>) => {
     if (selectedOptions == null) setInternal(updated)
     onOptionsChange(updated)
   }
 
-  return { selected, handleSelect }
+  const handleSelect = (key: string, value: string) => {
+    replaceSelection({ ...selected, [key]: value })
+  }
+
+  return { selected, handleSelect, replaceSelection }
 }
+
+/** Value of the «Поштучно» button inside the strand length group. Never stored in a selection. */
+const BEAD_CHOICE = '__bead__'
 
 function optionValues(product: Product, key: string, fallback: string[]): string[] {
   // A photo may be tied to one length. The buyer still chooses whole or half from the product list.
@@ -112,6 +124,7 @@ function OptionGroup({
   invalid = false,
   requiredHint,
   attentionKey = 0,
+  isValueDisabled,
 }: {
   product: Product
   optionKey: string
@@ -126,6 +139,7 @@ function OptionGroup({
   invalid?: boolean
   requiredHint?: string
   attentionKey?: number
+  isValueDisabled?: (value: string) => boolean
 }) {
   if (!values.length) return null
   const listClass = appearance === 'chip' ? styles.sizeGrid : styles.lengthPills
@@ -152,7 +166,8 @@ function OptionGroup({
       ) : null}
       <div className={listClass}>
         {values.map((value) => {
-          const disabled = isOptionValueOutOfStock(product, optionKey, value)
+          const disabled =
+            isValueDisabled?.(value) ?? isOptionValueOutOfStock(product, optionKey, value)
           return (
             <button
               key={value}
@@ -185,7 +200,10 @@ export function ProductSelections({
   attentionKey = 0,
 }: ProductOptionsProps) {
   const { t, language } = useTranslation()
-  const { selected, handleSelect } = useProductOptionState(onOptionsChange, selectedOptions)
+  const { selected, handleSelect, replaceSelection } = useProductOptionState(
+    onOptionsChange,
+    selectedOptions,
+  )
   const { categorySlug } = product
   const requiredHint = t('productOptions.requiredChoice')
   const isInvalid = (key: string) => invalidKeys.includes(key)
@@ -281,6 +299,28 @@ export function ProductSelections({
       'strandLength',
       strandLengths.map((length) => length.label),
     )
+    const beadSales = getBeadSaleSizes(product)
+    const sellsBeads = Object.keys(beadSales).length > 0
+    const beadChosen = isBeadSelection(selected)
+    const beadSizeInStock = (size: string) => (beadSales[size]?.stock ?? 0) > 0
+    // «Поштучно» needs the chosen size to be sold one by one; before a size is chosen, any size will do.
+    const beadUnavailable =
+      sellsBeads &&
+      (selected.beadSize
+        ? !beadSizeInStock(selected.beadSize)
+        : !Object.keys(beadSales).some(beadSizeInStock))
+    // A strand length and loose beads exclude each other.
+    const selectStrandOrBead = (value: string) => {
+      const next = { ...selected }
+      if (value === BEAD_CHOICE) {
+        delete next.strandLength
+        next[SALE_UNIT_OPTION_KEY] = BEAD_SALE_UNIT
+      } else {
+        delete next[SALE_UNIT_OPTION_KEY]
+        next.strandLength = value
+      }
+      replaceSelection(next)
+    }
 
     return (
       <div className={styles.options}>
@@ -292,6 +332,7 @@ export function ProductSelections({
           selectedValue={selected.beadSize}
           onSelect={(value) => handleSelect('beadSize', value)}
           appearance="chip"
+          isValueDisabled={beadChosen ? (value) => !beadSizeInStock(value) : undefined}
           invalid={isInvalid('beadSize')}
           requiredHint={requiredHint}
           attentionKey={attentionKey}
@@ -300,9 +341,24 @@ export function ProductSelections({
           product={product}
           optionKey="strandLength"
           label={t('productOptions.strandLength')}
-          values={strandLabels}
-          selectedValue={selected.strandLength}
-          onSelect={(value) => handleSelect('strandLength', value)}
+          values={sellsBeads ? [...strandLabels, BEAD_CHOICE] : strandLabels}
+          selectedValue={beadChosen ? BEAD_CHOICE : selected.strandLength}
+          onSelect={selectStrandOrBead}
+          renderValue={(value) => (value === BEAD_CHOICE ? t('productOptions.byTheBead') : value)}
+          isValueDisabled={(value) =>
+            value === BEAD_CHOICE
+              ? beadUnavailable
+              : isOptionValueOutOfStock(product, 'strandLength', value)
+          }
+          hint={
+            beadUnavailable
+              ? selected.beadSize
+                ? t('productOptions.beadSizeOutOfStock')
+                : t('productOptions.beadOutOfStock')
+              : beadChosen
+                ? t('productOptions.beadSaleHint')
+                : undefined
+          }
           divider={beadSizes.length > 0}
           invalid={isInvalid('strandLength')}
           requiredHint={requiredHint}

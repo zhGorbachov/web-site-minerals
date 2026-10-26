@@ -31,6 +31,7 @@ function applyOrderStock(items: CartItem[]) {
       ...product,
       stock: change.stock,
       variants: change.variants ?? product.variants,
+      attributes: change.attributes ?? product.attributes,
     }
   })
   MockDb.setProducts(next)

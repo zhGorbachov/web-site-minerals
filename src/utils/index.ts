@@ -77,6 +77,15 @@ export {
   type CatalogPricing,
 } from './productVariants'
 export {
+  BEAD_SALE_UNIT,
+  SALE_UNIT_OPTION_KEY,
+  getBeadSale,
+  getBeadSaleSizes,
+  productSellsBeads,
+  isBeadSelection,
+  type BeadSale,
+} from './beadSale'
+export {
   isHalfStrandLabel,
   findWholeStrandLabel,
   mergeHalfStrands,

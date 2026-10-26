@@ -6,7 +6,7 @@ import { products as seedProducts } from './products'
 import { storedSubCategoryIds, type StoredProduct } from './MockProduct'
 
 const STORAGE_KEY = 'crystal-mock-db'
-const STORAGE_VERSION = 12
+const STORAGE_VERSION = 14
 
 export type MockUserRecord = {
   password: string

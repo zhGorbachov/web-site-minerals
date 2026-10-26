@@ -281,7 +281,18 @@ const baseProducts: StoredProduct[] = [
     images: [
       mockImages.waxThread,
     ],
-    attributes: { color: 'Чорний', beadSizes: ['4', '6', '8'], diameter: '1 мм', material: 'Вощений поліестер' },
+    attributes: {
+      color: 'Чорний',
+      beadSizes: ['4', '6', '8'],
+      diameter: '1 мм',
+      material: 'Вощений поліестер',
+      // Bead sale is on, but every loose bead is sold out.
+      beadSaleEnabled: true,
+      beadSaleBySize: {
+        '4': { price: 3, stock: 0 },
+        '6': { price: 4, stock: 0 },
+      },
+    },
     featured: false,
     popular: true,
     isNew: false,
@@ -357,6 +368,13 @@ const baseProducts: StoredProduct[] = [
       ],
       diameter: '1 мм',
       material: 'Кристальний еластик',
+      // 6 and 8 mm are in stock, 10 mm is sold out, 12 mm is not sold by the bead.
+      beadSaleEnabled: true,
+      beadSaleBySize: {
+        '6': { price: 4, stock: 200 },
+        '8': { price: 6, stock: 120 },
+        '10': { price: 9, stock: 0 },
+      },
     },
     featured: false,
     popular: false,

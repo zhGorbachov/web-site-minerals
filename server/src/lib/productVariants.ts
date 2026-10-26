@@ -6,6 +6,7 @@ import {
   strandPoolQuantity,
   type StrandStockLine,
 } from './strandPool.js'
+import { applyBeadLines, beadPoolQuantity, getBeadSale, isBeadSelection } from './beadSale.js'
 
 export const VARIANT_ID_OPTION_KEY = 'variantId'
 
@@ -151,6 +152,10 @@ export function getCartUnitPrice(
   },
   selectedOptions?: Record<string, string> | null,
 ): number {
+  // Loose beads are priced by bead size; 0 once the admin stops selling that size.
+  if (isBeadSelection(selectedOptions)) {
+    return getBeadSale(product, selectedOptions?.beadSize)?.price ?? 0
+  }
   const variants = parseVariants(product.variants)
   const variant = getSelectedVariant(variants, selectedOptions)
   return priceForStrandSelection(
@@ -171,6 +176,7 @@ export function getAvailableStock(
   selectedOptions?: Record<string, string> | null,
   otherLines: StrandStockLine[] = [],
 ): number {
+  if (isBeadSelection(selectedOptions)) return beadPoolQuantity(product, selectedOptions, otherLines)
   const variants = parseVariants(product.variants)
   if (variants.length) {
     const variant = getSelectedVariant(variants, selectedOptions)
@@ -212,28 +218,33 @@ export function applyLinesStock(
     attributes?: unknown
   },
   lines: StrandStockLine[],
-): { stock: number; variants?: ProductVariant[] } {
+): { stock: number; variants?: ProductVariant[]; attributes?: Record<string, unknown> } {
+  const beadLines = lines.filter((line) => isBeadSelection(line.selectedOptions))
+  const attributes = beadLines.length ? applyBeadLines(product, beadLines) : undefined
+  const strandLines = lines.filter((line) => !isBeadSelection(line.selectedOptions))
+
   const variants = parseVariants(product.variants)
   if (variants.length) {
     let current: { stock: number; variants?: unknown } = {
       stock: product.stock,
       variants: product.variants,
     }
-    for (const line of lines) {
+    for (const line of strandLines) {
       const next = applyVariantStockChange(current, line.selectedOptions, line.quantity)
       current = { stock: next.stock, variants: next.variants }
     }
     return {
       stock: current.stock,
       variants: current.variants as ProductVariant[] | undefined,
+      attributes,
     }
   }
 
   const consume = productSellsWholeStrands(product)
-    ? consumedWholeStrands(lines)
-    : lines.reduce((sum, line) => sum + line.quantity, 0)
+    ? consumedWholeStrands(strandLines)
+    : strandLines.reduce((sum, line) => sum + line.quantity, 0)
   if (product.stock < consume) throw new Error('Insufficient stock')
-  return { stock: product.stock - consume }
+  return { stock: product.stock - consume, attributes }
 }
 
 export function applyVariantStockChange(

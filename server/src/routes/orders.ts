@@ -215,6 +215,9 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
               ...(next.variants
                 ? { variants: next.variants as Prisma.InputJsonValue }
                 : {}),
+              ...(next.attributes
+                ? { attributes: next.attributes as Prisma.InputJsonValue }
+                : {}),
             },
           })
         }
@@ -361,6 +364,9 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
             stock: next.stock,
             ...(next.variants
               ? { variants: next.variants as Prisma.InputJsonValue }
+              : {}),
+            ...(next.attributes
+              ? { attributes: next.attributes as Prisma.InputJsonValue }
               : {}),
           },
         })

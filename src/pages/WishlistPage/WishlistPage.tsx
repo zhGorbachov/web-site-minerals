@@ -9,7 +9,13 @@ import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { formatPrice, getMissingRequiredOptionKeys, productRequiresOptions, wristSizeNumber } from '@/utils'
+import {
+  SALE_UNIT_OPTION_KEY,
+  formatPrice,
+  getMissingRequiredOptionKeys,
+  productRequiresOptions,
+  wristSizeNumber,
+} from '@/utils'
 import {
   getAvailableStock,
   getCartUnitPrice,
@@ -27,6 +33,8 @@ const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
   beadSize: 'productOptions.beadSize',
   beadCount: 'productOptions.beadCount',
   strandLength: 'productOptions.strandLength',
+  // Loose beads are chosen in the strand length group, so they read as one of its values.
+  saleUnit: 'productOptions.strandLength',
   length: 'productOptions.threadLength',
   color: 'productOptions.color',
   wristSize: 'productOptions.wristSize',
@@ -123,6 +131,7 @@ export function WishlistPage() {
     if (key === 'beadSize') return t('productOptions.beadSizeMm', { value })
     if (key === 'wristSize') return wristSizeNumber(value)
     if (key === 'beadCount') return t('productOptions.beadCountValue', { value })
+    if (key === SALE_UNIT_OPTION_KEY) return t('productOptions.byTheBead')
     if (language === 'en') {
       if (key === 'strandLength') {
         return strandLengthEn[value] ?? value.replace(/\s*см/gi, ' cm')

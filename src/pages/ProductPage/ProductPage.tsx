@@ -30,6 +30,7 @@ import {
   optionsWithoutVariantId,
   sameSelection,
 } from '@/utils/productVariants'
+import { getBeadSaleSizes, isBeadSelection } from '@/utils/beadSale'
 import styles from './ProductPage.module.scss'
 
 const REQUIRED_OPTION_LABELS: Record<string, TranslationKey> = {
@@ -213,11 +214,23 @@ export function ProductPage() {
 
   const selectedVariant = getSelectedVariant(product, selectedOptions)
   const catalogPricing = getCatalogPricing(product)
-  const strandChosen = product.categorySlug === 'nytky' && Boolean(selectedOptions.strandLength)
+  const beadChosen = isBeadSelection(selectedOptions)
+  const beadSales = Object.values(getBeadSaleSizes(product))
+  const chosenBeadSale = selectedOptions.beadSize
+    ? getBeadSaleSizes(product)[selectedOptions.beadSize]
+    : undefined
+  // Loose beads before a size is picked: the cheapest bead, shown as «від X грн / шт.».
+  const beadPriceFrom =
+    beadChosen && !chosenBeadSale && beadSales.length
+      ? Math.min(...beadSales.map((sale) => sale.price))
+      : undefined
+  const strandChosen =
+    product.categorySlug === 'nytky' && (Boolean(selectedOptions.strandLength) || beadChosen)
   const displayPrice =
-    selectedVariant || strandChosen
+    beadPriceFrom ??
+    (selectedVariant || strandChosen
       ? getCartUnitPrice(product, selectedOptions)
-      : catalogPricing.min
+      : catalogPricing.min)
   const compareAt =
     selectedVariant || strandChosen
       ? getSelectionCompareAtPrice(product, selectedOptions)
@@ -227,7 +240,13 @@ export function ProductPage() {
   const photoInWishlist = isInWishlist(product.id, photoOptions)
   const productInWishlist = isInWishlist(product.id)
   const categoryLabel = product.subCategoryName ?? product.subCategorySlug
-  const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock > 0
+  const inStock = beadChosen
+    ? chosenBeadSale
+      ? chosenBeadSale.stock > 0
+      : beadSales.some((sale) => sale.stock > 0)
+    : selectedVariant
+      ? selectedVariant.stock > 0
+      : product.stock > 0
   const displayName = getVariantDisplayName(product, selectedVariant)
   const missingKeys = getMissingRequiredOptionKeys(product, selectedOptions)
   const invalidKeys = selectionPrompted ? missingKeys : []
@@ -309,7 +328,11 @@ export function ProductPage() {
                 >
                   {!selectedVariant && catalogPricing?.hasRange && !strandChosen
                     ? t('product.fromPrice', { price: formatPrice(displayPrice, language) })
-                    : formatPrice(displayPrice, language)}
+                    : beadPriceFrom != null
+                      ? `${t('product.fromPrice', { price: formatPrice(displayPrice, language) })} ${t('cart.perUnit')}`
+                      : beadChosen
+                        ? `${formatPrice(displayPrice, language)} ${t('cart.perUnit')}`
+                        : formatPrice(displayPrice, language)}
                 </span>
               </div>
             </div>

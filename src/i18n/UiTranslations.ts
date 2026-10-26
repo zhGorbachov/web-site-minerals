@@ -251,6 +251,10 @@ export type UiTranslationSchema = {
     saleModePiece: string
     saleModeWeightHint: string
     saleModePieceHint: string
+    byTheBead: string
+    beadSaleHint: string
+    beadOutOfStock: string
+    beadSizeOutOfStock: string
     characteristics: string
     choosePiece: string
     overview: string
@@ -491,6 +495,13 @@ export type UiTranslationSchema = {
     variantPrice: string
     variantWholePrice: string
     variantHalfPrice: string
+    beadSale: string
+    beadSaleEnabled: string
+    beadSaleHint: string
+    beadSaleSize: string
+    beadPrice: string
+    beadStock: string
+    beadSaleRowsHint: string
     variantHalfPriceHint: string
     productHalfPriceHint: string
     variantOption: string
@@ -532,6 +543,7 @@ export type UiTranslationSchema = {
     removeReviewConfirm: string
     errorGeneric: string
     priceRequired: string
+    beadPriceRequired: string
     attributesTitle: string
     attributesThreadTitle: string
     attributesBraceletTitle: string
@@ -838,6 +850,10 @@ export const uiTranslationsUk: UiTranslationSchema = {
     saleModePiece: 'Поштучно',
     saleModeWeightHint: 'Цей товар продається на вагу',
     saleModePieceHint: 'Цей товар продається поштучно — оберіть вагу однієї штуки',
+    byTheBead: 'Поштучно',
+    beadSaleHint: 'Ціна за 1 намистину — оберіть потрібну кількість',
+    beadOutOfStock: 'Поштучно: немає в наявності',
+    beadSizeOutOfStock: 'Поштучно: цього розміру немає в наявності',
     characteristics: 'Характеристики',
     choosePiece: 'Оберіть екземпляр',
     overview: 'Загальний вигляд',
@@ -1082,6 +1098,13 @@ export const uiTranslationsUk: UiTranslationSchema = {
     variantPrice: 'Ціна цього фото',
     variantWholePrice: 'Ціна цілої низки',
     variantHalfPrice: 'Ціна половини низки',
+    beadSale: 'Продаж поштучно',
+    beadSaleEnabled: 'Продавати намистини поштучно',
+    beadSaleHint: 'Низка і пів низки продаються як завжди. Ціну і залишок намистин задайте для кожного розміру — вони окремі від низок.',
+    beadSaleSize: 'Розмір',
+    beadPrice: 'Ціна за 1 шт., грн',
+    beadStock: 'Залишок, шт.',
+    beadSaleRowsHint: 'Порожня ціна — цей розмір поштучно не продається.',
     variantHalfPriceHint: 'Порожнє — ціна половини товару',
     productHalfPriceHint: 'Для всього товару. У окремого фото можна вказати свою.',
     variantOption: 'Привʼязати до характеристики',
@@ -1126,6 +1149,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     removeReviewConfirm: 'Видалити цей відгук?',
     errorGeneric: 'Щось пішло не так',
     priceRequired: 'Вкажіть ціну, більшу за нуль',
+    beadPriceRequired: 'Вкажіть ціну за намистину хоча б для одного розміру',
     attributesTitle: 'Параметри товару',
     attributesThreadTitle: 'Параметри низки',
     attributesBraceletTitle: 'Параметри браслета',
@@ -1440,6 +1464,10 @@ export const uiTranslationsEn: UiTranslationSchema = {
     saleModePiece: 'By the piece',
     saleModeWeightHint: 'This product is sold by weight',
     saleModePieceHint: 'This product is sold by the piece — pick a single piece weight',
+    byTheBead: 'By the bead',
+    beadSaleHint: 'Price per bead — choose how many you need',
+    beadOutOfStock: 'By the bead: out of stock',
+    beadSizeOutOfStock: 'By the bead: this size is out of stock',
     characteristics: 'Specifications',
     choosePiece: 'Choose a piece',
     overview: 'Overview',
@@ -1684,6 +1712,13 @@ export const uiTranslationsEn: UiTranslationSchema = {
     variantPrice: 'Price for this photo',
     variantWholePrice: 'Whole strand price',
     variantHalfPrice: 'Half strand price',
+    beadSale: 'Sale by the bead',
+    beadSaleEnabled: 'Sell loose beads one by one',
+    beadSaleHint: 'Whole and half strands stay on sale. Set a bead price and stock for each size — they are kept apart from strands.',
+    beadSaleSize: 'Size',
+    beadPrice: 'Price per bead, UAH',
+    beadStock: 'In stock, pcs',
+    beadSaleRowsHint: 'Leave the price empty if a size is not sold by the bead.',
     variantHalfPriceHint: 'Empty uses the product half price',
     productHalfPriceHint: 'For the whole product. A photo can set its own.',
     variantOption: 'Link to an option',
@@ -1728,6 +1763,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     removeReviewConfirm: 'Delete this review?',
     errorGeneric: 'Something went wrong',
     priceRequired: 'Enter a price greater than zero',
+    beadPriceRequired: 'Enter a bead price for at least one size',
     attributesTitle: 'Product options',
     attributesThreadTitle: 'Strand options',
     attributesBraceletTitle: 'Bracelet options',

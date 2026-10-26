@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Star, Trash2, Plus } from 'lucide-react'
@@ -11,10 +11,11 @@ import { useCanHover } from '@/hooks/useMediaQuery'
 import type { SelectOption } from '@/components/ui'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
-import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, StoreReview, SubCategory } from '@/types'
+import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, StoreReview, SubCategory, ThreadAttributes } from '@/types'
 import { formatPrice } from '@/utils/formatPrice'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
 import { DEFAULT_STRAND_LENGTHS } from '@/utils/catalogDefaults'
+import { getThreadBeadSizes } from '@/utils/productOptions'
 import { formatOrderItemQuantity, orderItemUnitLabel } from '@/utils/orderItemDisplay'
 import { buildProductSku, slugify, uniqueSku } from '@/utils/sku'
 import {
@@ -121,9 +122,19 @@ type ProductForm = Omit<
   discountPrice: string
   stock: string
   halfStrandPrice: string
+  beadSaleEnabled: boolean
+  /** Loose-bead price and stock per bead size, as typed in the form */
+  beadSaleBySize: Record<string, BeadSaleRow>
   subCategoryIds: string[]
   variants: ProductVariant[]
 }
+
+/** Form-only strand fields that `attributesForSave` folds into the product attributes. */
+type StrandFormFields = Pick<ProductForm, 'halfStrandPrice' | 'beadSaleEnabled' | 'beadSaleBySize'>
+
+type BeadSaleRow = { price: string; stock: string }
+
+const EMPTY_BEAD_SALE_ROW: BeadSaleRow = { price: '', stock: '' }
 
 function positiveAmount(value: string): number | undefined {
   const amount = Number(value)
@@ -137,23 +148,73 @@ function halfStrandPriceFromAttributes(attributes: unknown): string {
   return Number.isFinite(amount) && amount > 0 ? String(amount) : ''
 }
 
-/** Низки always store whole + half lengths, plus an optional product-level half price. */
+function beadFieldsFromAttributes(
+  attributes: unknown,
+): Pick<StrandFormFields, 'beadSaleEnabled' | 'beadSaleBySize'> {
+  const record =
+    attributes && typeof attributes === 'object' && !Array.isArray(attributes)
+      ? (attributes as Record<string, unknown>)
+      : {}
+  const stored =
+    record.beadSaleBySize && typeof record.beadSaleBySize === 'object'
+      ? (record.beadSaleBySize as Record<string, { price?: unknown; stock?: unknown }>)
+      : {}
+  const beadSaleBySize: Record<string, BeadSaleRow> = {}
+  for (const [size, entry] of Object.entries(stored)) {
+    const price = Number(entry?.price)
+    const stock = Number(entry?.stock)
+    beadSaleBySize[size] = {
+      price: Number.isFinite(price) && price > 0 ? String(price) : '',
+      stock: Number.isFinite(stock) && stock > 0 ? String(Math.floor(stock)) : '',
+    }
+  }
+  return { beadSaleEnabled: record.beadSaleEnabled === true, beadSaleBySize }
+}
+
+/** Sizes from the bead table that will actually be sold: listed on the product and priced. */
+function beadSaleForSave(
+  attributes: Record<string, unknown>,
+  rows: Record<string, BeadSaleRow>,
+): Record<string, { price: number; stock: number }> {
+  const result: Record<string, { price: number; stock: number }> = {}
+  for (const size of getThreadBeadSizes(attributes as ThreadAttributes)) {
+    const row = rows[size]
+    const price = row ? positiveAmount(row.price) : undefined
+    if (price == null) continue
+    const stock = Math.floor(Number(row.stock))
+    result[size] = { price, stock: Number.isFinite(stock) && stock > 0 ? stock : 0 }
+  }
+  return result
+}
+
+/**
+ * Низки always store whole + half lengths, plus an optional product-level half price
+ * and optional loose-bead sale. Turning bead sale off keeps its price and stock for later.
+ */
 function attributesForSave(
   categorySlug: string,
   attributes: Record<string, unknown> | undefined,
-  halfStrandPrice: string,
+  fields: StrandFormFields,
 ): Record<string, unknown> {
   const next = { ...(attributes ?? {}) }
   if (categorySlug !== 'nytky') {
     delete next.halfStrandPrice
+    delete next.beadSaleEnabled
+    delete next.beadSaleBySize
     return next
   }
   if (!Array.isArray(next.strandLengths) || next.strandLengths.length === 0) {
     next.strandLengths = DEFAULT_STRAND_LENGTHS
   }
-  const half = positiveAmount(halfStrandPrice)
+  const half = positiveAmount(fields.halfStrandPrice)
   if (half != null) next.halfStrandPrice = half
   else delete next.halfStrandPrice
+
+  if (fields.beadSaleEnabled) next.beadSaleEnabled = true
+  else delete next.beadSaleEnabled
+  const beadSaleBySize = beadSaleForSave(next, fields.beadSaleBySize)
+  if (Object.keys(beadSaleBySize).length) next.beadSaleBySize = beadSaleBySize
+  else delete next.beadSaleBySize
   return next
 }
 
@@ -166,6 +227,8 @@ const emptyForm: ProductForm = {
   discountPrice: '',
   stock: '',
   halfStrandPrice: '',
+  beadSaleEnabled: false,
+  beadSaleBySize: {},
   images: [],
   video: null,
   subCategoryIds: [],
@@ -452,7 +515,7 @@ export function AdminPage() {
             form.discountPrice.trim() === '' ? null : Number(form.discountPrice),
           ),
           categorySlug: formCategorySlug,
-          attributes: attributesForSave(formCategorySlug, form.attributes, form.halfStrandPrice),
+          attributes: attributesForSave(formCategorySlug, form.attributes, form),
         },
         formBoundVariants,
       )
@@ -593,6 +656,7 @@ export function AdminPage() {
         normalizeDiscountPrice(product.discountPrice) != null ? String(product.discountPrice) : '',
       stock: String(product.stock),
       halfStrandPrice: halfStrandPriceFromAttributes(product.attributes),
+      ...beadFieldsFromAttributes(product.attributes),
       images: product.images,
       video: product.video ?? null,
       subCategoryIds: product.subCategoryIds?.length
@@ -650,13 +714,28 @@ export function AdminPage() {
       setError(t('admin.priceRequired'))
       return
     }
+    if (
+      formCategorySlug === 'nytky' &&
+      form.beadSaleEnabled &&
+      Object.keys(beadSaleForSave(form.attributes ?? {}, form.beadSaleBySize)).length === 0
+    ) {
+      setError(t('admin.beadPriceRequired'))
+      return
+    }
     setSaving(true)
     setError(null)
-    const { halfStrandPrice: _productHalfPrice, ...formFields } = form
+    const {
+      halfStrandPrice: _productHalfPrice,
+      beadSaleEnabled: _beadSaleEnabled,
+      beadSaleBySize: _beadSaleBySize,
+      ...formFields
+    } = form
     void _productHalfPrice
+    void _beadSaleEnabled
+    void _beadSaleBySize
     const payload: AdminProductPayload = {
       ...formFields,
-      attributes: attributesForSave(formCategorySlug, form.attributes, form.halfStrandPrice),
+      attributes: attributesForSave(formCategorySlug, form.attributes, form),
       subCategoryIds: form.subCategoryIds.length ? form.subCategoryIds : undefined,
       categoryId: formCategoryId || undefined,
       price,
@@ -1135,6 +1214,68 @@ export function AdminPage() {
                   hint={formDerived ? t('admin.stockFromVariants') : undefined}
                 />
               </div>
+
+              {formCategorySlug === 'nytky' && (
+                <fieldset className={styles.subcategoryPicker}>
+                  <legend className={styles.subcategoryLegend}>{t('admin.beadSale')}</legend>
+                  <div className={styles.checks}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={form.beadSaleEnabled}
+                        onChange={(e) => setForm((f) => ({ ...f, beadSaleEnabled: e.target.checked }))}
+                      />
+                      {t('admin.beadSaleEnabled')}
+                    </label>
+                  </div>
+                  <p className={styles.subcategoryHint}>{t('admin.beadSaleHint')}</p>
+                  {form.beadSaleEnabled && (
+                    <>
+                      <div className={styles.beadSaleTable}>
+                        <span className={styles.beadSaleHead}>{t('admin.beadSaleSize')}</span>
+                        <span className={styles.beadSaleHead}>{t('admin.beadPrice')}</span>
+                        <span className={styles.beadSaleHead}>{t('admin.beadStock')}</span>
+                        {getThreadBeadSizes((form.attributes ?? {}) as ThreadAttributes).map((size) => {
+                          const row = form.beadSaleBySize[size] ?? EMPTY_BEAD_SALE_ROW
+                          const sizeLabel = t('productOptions.beadSizeMm', { value: size })
+                          const setRow = (patch: Partial<BeadSaleRow>) =>
+                            setForm((f) => ({
+                              ...f,
+                              beadSaleBySize: {
+                                ...f.beadSaleBySize,
+                                [size]: { ...(f.beadSaleBySize[size] ?? EMPTY_BEAD_SALE_ROW), ...patch },
+                              },
+                            }))
+                          return (
+                            <Fragment key={size}>
+                              <span className={styles.beadSaleSize}>{sizeLabel}</span>
+                              <Input
+                                aria-label={`${sizeLabel}: ${t('admin.beadPrice')}`}
+                                type="number"
+                                min={0}
+                                step="0.01"
+                                value={row.price}
+                                onChange={(e) => setRow({ price: e.target.value })}
+                                placeholder="—"
+                              />
+                              <Input
+                                aria-label={`${sizeLabel}: ${t('admin.beadStock')}`}
+                                type="number"
+                                min={0}
+                                step="1"
+                                value={row.stock}
+                                onChange={(e) => setRow({ stock: e.target.value })}
+                                placeholder="0"
+                              />
+                            </Fragment>
+                          )
+                        })}
+                      </div>
+                      <p className={styles.subcategoryHint}>{t('admin.beadSaleRowsHint')}</p>
+                    </>
+                  )}
+                </fieldset>
+              )}
 
               <div className={styles.formGrid}>
                 <label className={styles.selectLabel}>

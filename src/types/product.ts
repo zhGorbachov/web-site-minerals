@@ -31,6 +31,13 @@ export interface ThreadAttributes {
   strandLengths?: StrandLengthOption[]
   diameter?: string
   material?: string
+  /** Loose beads are also sold one by one; strands stay on sale either way. */
+  beadSaleEnabled?: boolean
+  /**
+   * Loose beads by bead size: price of one bead (UAH) and beads in stock,
+   * counted apart from whole strands, e.g. { '6': { price: 4, stock: 200 } }
+   */
+  beadSaleBySize?: Record<string, { price: number; stock: number }>
 }
 
 export interface BraceletAttributes {

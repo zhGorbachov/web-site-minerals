@@ -349,6 +349,26 @@
   color: $color-text-muted;
 }
 
+/* Loose beads: one row per bead size — size, price of one bead, beads in stock. */
+.beadSaleTable {
+  display: grid;
+  grid-template-columns: minmax(56px, auto) minmax(0, 1fr) minmax(0, 1fr);
+  gap: $spacing-2 $spacing-3;
+  align-items: center;
+  max-width: 480px;
+}
+
+.beadSaleHead {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.beadSaleSize {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+}
+
 .subcategoryOptions {
   display: flex;
   flex-wrap: wrap;

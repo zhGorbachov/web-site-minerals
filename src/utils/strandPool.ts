@@ -5,6 +5,8 @@
  * half is added later as its own photo variant.
  */
 
+import { isBeadSelection } from './beadSale'
+
 export type StrandStockLine = {
   quantity: number
   selectedOptions?: Record<string, string> | null
@@ -41,6 +43,8 @@ export function consumedWholeStrands(lines: StrandStockLine[]): number {
   let pieces = 0
   let halves = 0
   for (const line of lines) {
+    // Loose beads have their own stock and never draw from the strand pool.
+    if (isBeadSelection(line.selectedOptions)) continue
     if (isHalfStrandSelection(line.selectedOptions)) halves += line.quantity
     else pieces += line.quantity
   }

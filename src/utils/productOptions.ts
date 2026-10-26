@@ -8,6 +8,7 @@ import type {
   ThreadAttributes,
 } from '@/types'
 import { getVariantOptionValues, hasProductVariants } from './productVariants'
+import { isBeadSelection } from './beadSale'
 import {
   DEFAULT_BEAD_SIZES,
   DEFAULT_INCENSE_SALE_MODE,
@@ -135,7 +136,11 @@ export function getMissingRequiredOptionKeys(
   product: Product,
   selected?: Record<string, string> | null,
 ): string[] {
-  return getRequiredOptionKeys(product).filter((key) => !selected?.[key]?.trim())
+  return getRequiredOptionKeys(product).filter((key) => {
+    // Loose beads are picked in the strand length group instead of a length.
+    if (key === 'strandLength' && isBeadSelection(selected)) return false
+    return !selected?.[key]?.trim()
+  })
 }
 
 export function productRequiresOptions(product: Product): boolean {
