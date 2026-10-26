@@ -74,7 +74,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: $spacing-3;
+  gap: $spacing-1;
 }
 
 .info {
@@ -108,6 +108,7 @@
 }
 
 .priceGroup {
+  margin-top: auto;
   display: flex;
   align-items: baseline;
   gap: $spacing-2;
@@ -116,20 +117,21 @@
 
 .actions {
   display: flex;
-  gap: $spacing-2;
+  justify-content: space-between;
   margin-top: auto;
 }
 
 .actionBtn {
-  flex: 1;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   border: none;
-  border-radius: $radius-button;
+  border-radius: $radius-circle;
   display: flex;
   align-items: center;
   justify-content: center;
   color: $color-text-muted;
-  background: $color-surface;
+  background: transparent;
   transition: color $transition-base, background $transition-base;
   cursor: pointer;
 
@@ -163,8 +165,6 @@
 
 .cartWrap {
   position: relative;
-  flex: 1;
-  display: flex;
 }
 
 .cartMenu {
