@@ -17,9 +17,7 @@
 }
 
 .cardLink {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  display: block;
   color: inherit;
   text-decoration: none;
 }
@@ -68,9 +66,12 @@
 .body {
   padding: $spacing-4;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .contentRow {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: $spacing-3;
@@ -115,23 +116,20 @@
 
 .actions {
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
   gap: $spacing-2;
-  width: 100%;
+  margin-top: auto;
 }
 
 .actionBtn {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
+  flex: 1;
+  height: 40px;
   border: none;
-  border-radius: $radius-circle;
+  border-radius: $radius-button;
   display: flex;
   align-items: center;
   justify-content: center;
   color: $color-text-muted;
-  background: transparent;
+  background: $color-surface;
   transition: color $transition-base, background $transition-base;
   cursor: pointer;
 
@@ -166,10 +164,7 @@
 .cartWrap {
   position: relative;
   flex: 1;
-
-  .cartBtn {
-    width: 100%;
-  }
+  display: flex;
 }
 
 .cartMenu {
