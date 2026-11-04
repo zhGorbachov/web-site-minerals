@@ -5,7 +5,6 @@ import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lu
 import type { Product } from '@/types'
 import { ProductService } from '@/services/ProductService'
 import { ProductGallery } from '@/components/ProductGallery'
-import { ProductVideo } from '@/components/ProductVideo/ProductVideo'
 import { ProductSelections, ProductCharacteristics } from '@/components/ProductOptions'
 import { ProductGrid } from '@/components/ProductGrid'
 import { Breadcrumbs, Button, EmptyState } from '@/components/ui'
@@ -138,7 +137,7 @@ export function ProductPage() {
 
   const handleGalleryIndex = (index: number) => {
     setGalleryIndex(index)
-    if (!product) return
+    if (!product || index >= galleryImages.length) return
     const variant = findVariantByImage(product, galleryImages[index])
     if (variant) {
       setSelectedOptions(buildVariantSelection(variant, selectedOptions))
@@ -284,6 +283,7 @@ export function ProductPage() {
           <div className={styles.galleryCol}>
             <ProductGallery
               images={galleryImages}
+              video={product.video || undefined}
               productName={displayName}
               activeIndex={galleryIndex}
               onActiveIndexChange={handleGalleryIndex}
@@ -301,7 +301,6 @@ export function ProductPage() {
                 }
               })}
             />
-            {product.video && <ProductVideo src={product.video} className={styles.productVideo} />}
           </div>
 
           <div className={styles.infoCol}>

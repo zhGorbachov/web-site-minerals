@@ -290,6 +290,7 @@ export type UiTranslationSchema = {
     tabsAria: string
     photo: string
     thumbnailAlt: string
+    video: string
   }
   subcategoryNav: {
     title: string
@@ -889,6 +890,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     tabsAria: 'Фото товару',
     photo: 'Фото {n}',
     thumbnailAlt: '{name} мініатюра {n}',
+    video: 'Відео',
   },
   subcategoryNav: {
     title: 'Підкатегорії',
@@ -1503,6 +1505,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     tabsAria: 'Product photos',
     photo: 'Photo {n}',
     thumbnailAlt: '{name} thumbnail {n}',
+    video: 'Video',
   },
   subcategoryNav: {
     title: 'Subcategories',

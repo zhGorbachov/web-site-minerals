@@ -11,7 +11,15 @@ const execFileAsync = promisify(execFile)
 const DISPLAY_EDGE = 1600
 /** Longest side of the gallery/admin thumbnail sibling. */
 const THUMB_EDGE = 320
-const VIDEO_EDGE = 1280
+/**
+ * Longest side of a stored video. The video plays inside the square product gallery,
+ * so 960 is sharp on a phone and keeps the file small enough to start quickly on mobile data.
+ * Videos already on disk above this edge are re-encoded once on the next server start.
+ */
+const VIDEO_EDGE = 960
+/** Caps the bitrate so a busy, shaky clip cannot balloon the file. */
+const VIDEO_MAXRATE = '1500k'
+const VIDEO_BUFSIZE = '3000k'
 
 /**
  * Filenames already include a unique timestamp, and optimized bytes are not rewritten.
@@ -23,9 +31,9 @@ export const IMMUTABLE_UPLOAD_CACHE = 'public, max-age=31536000, immutable'
 const IN_PLACE_IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif'])
 const VIDEO_EXT = new Set(['.mp4', '.mov', '.m4v'])
 
-/** Caps the long edge at 1280 without upscaling. Commas stay literal: execFile does not use a shell. */
+/** Caps the long edge at VIDEO_EDGE without upscaling. Commas stay literal: execFile does not use a shell. */
 const VIDEO_SCALE =
-  "scale=w='if(gte(iw,ih),min(1280,iw),-2)':h='if(gte(iw,ih),-2,min(1280,ih))'"
+  `scale=w='if(gte(iw,ih),min(${VIDEO_EDGE},iw),-2)':h='if(gte(iw,ih),-2,min(${VIDEO_EDGE},ih))'`
 
 export type StoredUpload = {
   filePath: string
@@ -405,15 +413,19 @@ async function transcodeVideo(source: string, dest: string) {
     '-pix_fmt',
     'yuv420p',
     '-preset',
-    'veryfast',
+    'medium',
     '-crf',
-    '23',
+    '26',
+    '-maxrate',
+    VIDEO_MAXRATE,
+    '-bufsize',
+    VIDEO_BUFSIZE,
     '-vf',
     VIDEO_SCALE,
     '-c:a',
     'aac',
     '-b:a',
-    '128k',
+    '96k',
     '-movflags',
     '+faststart',
     '-f',

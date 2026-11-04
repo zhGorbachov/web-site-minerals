@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Heart } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Heart, Play } from 'lucide-react'
 import { uploadSiblingUrl } from '@/utils/uploadMedia'
 import { useTranslation } from '@/i18n/useTranslation'
 import styles from './ProductGallery.module.scss'
 
 interface ProductGalleryProps {
   images: string[]
+  /** Shown as the last slide, after the photos. */
+  video?: string
   productName: string
   activeIndex?: number
   onActiveIndexChange?: (index: number) => void
@@ -40,8 +42,25 @@ function ThumbImage({ src, alt }: { src: string; alt: string }) {
   )
 }
 
+function VideoThumb({ src }: { src: string }) {
+  const poster = uploadSiblingUrl(src, 'poster')
+  return (
+    <>
+      {poster ? (
+        <img src={poster} alt="" draggable={false} loading="lazy" decoding="async" />
+      ) : (
+        <span className={styles.videoThumbFallback} />
+      )}
+      <span className={styles.playBadge} aria-hidden="true">
+        <Play size={16} fill="currentColor" />
+      </span>
+    </>
+  )
+}
+
 export function ProductGallery({
   images,
+  video,
   productName,
   activeIndex: activeIndexProp,
   onActiveIndexChange,
@@ -57,10 +76,13 @@ export function ProductGallery({
   const touchStartY = useRef(0)
   const isSwiping = useRef(false)
 
-  const hasMultiple = images.length > 1
-  const lastIndex = Math.max(0, images.length - 1)
+  const slideCount = images.length + (video ? 1 : 0)
+  const videoIndex = video ? images.length : -1
+  const hasMultiple = slideCount > 1
+  const lastIndex = Math.max(0, slideCount - 1)
   const isControlled = activeIndexProp != null
   const activeIndex = Math.max(0, Math.min(isControlled ? activeIndexProp : internalIndex, lastIndex))
+  const showingVideo = activeIndex === videoIndex
 
   const goTo = useCallback((index: number) => {
     const next = Math.max(0, Math.min(index, lastIndex))
@@ -127,21 +149,37 @@ export function ProductGallery({
         onTouchEnd={hasMultiple ? handleTouchEnd : undefined}
       >
         <AnimatePresence mode="wait" initial={false}>
-          <motion.img
-            key={images[activeIndex]}
-            src={images[activeIndex]}
-            alt={t('productGallery.photoAlt', { name: productName, n: activeIndex + 1 })}
-            className={styles.mainImage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            draggable={false}
-            fetchPriority="high"
-          />
+          {showingVideo && video ? (
+            <motion.video
+              key={video}
+              src={video}
+              poster={uploadSiblingUrl(video, 'poster') ?? undefined}
+              className={styles.mainVideo}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              controls
+              playsInline
+              preload="auto"
+            />
+          ) : (
+            <motion.img
+              key={images[activeIndex]}
+              src={images[activeIndex]}
+              alt={t('productGallery.photoAlt', { name: productName, n: activeIndex + 1 })}
+              className={styles.mainImage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              draggable={false}
+              fetchPriority="high"
+            />
+          )}
         </AnimatePresence>
 
-        {onWishlistToggle && (
+        {onWishlistToggle && !showingVideo && (
           <button
             type="button"
             className={[styles.wishlistBtn, inWishlist ? styles.wishlistActive : ''].filter(Boolean).join(' ')}
@@ -175,9 +213,11 @@ export function ProductGallery({
             >
               <ChevronRight size={22} />
             </button>
-            <span className={styles.counter}>
-              {activeIndex + 1} / {images.length}
-            </span>
+            {!showingVideo && (
+              <span className={styles.counter}>
+                {activeIndex + 1} / {slideCount}
+              </span>
+            )}
           </>
         )}
       </div>
@@ -185,14 +225,18 @@ export function ProductGallery({
       {hasMultiple && (
         <>
           <div className={styles.dots} role="tablist" aria-label={t('productGallery.tabsAria')}>
-            {images.map((_, index) => (
+            {Array.from({ length: slideCount }, (_, index) => (
               <button
                 key={index}
                 type="button"
                 role="tab"
                 className={[styles.dot, activeIndex === index ? styles.dotActive : ''].filter(Boolean).join(' ')}
                 onClick={() => goTo(index)}
-                aria-label={t('productGallery.photo', { n: index + 1 })}
+                aria-label={
+                  index === videoIndex
+                    ? t('productGallery.video')
+                    : t('productGallery.photo', { n: index + 1 })
+                }
                 aria-selected={activeIndex === index}
               />
             ))}
@@ -217,6 +261,17 @@ export function ProductGallery({
                 )}
               </button>
             ))}
+            {video && (
+              <button
+                type="button"
+                className={[styles.thumb, showingVideo ? styles.thumbActive : ''].filter(Boolean).join(' ')}
+                onClick={() => goTo(videoIndex)}
+                aria-label={t('productGallery.video')}
+                aria-current={showingVideo}
+              >
+                <VideoThumb src={video} />
+              </button>
+            )}
           </div>
         </>
       )}
