@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpDown, Check } from 'lucide-react'
 import { PRODUCT_SORT_OPTIONS, type ProductSortOption } from '@/utils/sortProducts'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import styles from './ProductSort.module.scss'
+
+/** Gap kept between the menu and the screen edge. */
+const VIEWPORT_GAP = 8
 
 const SORT_LABEL_KEYS: Record<ProductSortOption, TranslationKey> = {
   default: 'sort.default',
@@ -23,7 +26,9 @@ interface ProductSortProps {
 export function ProductSort({ value, onChange }: ProductSortProps) {
   const { t } = useTranslation()
   const menuRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
   const [open, setOpen] = useState(false)
+  const [alignLeft, setAlignLeft] = useState(false)
 
   const activeLabel = t(SORT_LABEL_KEYS[value])
 
@@ -38,6 +43,19 @@ export function ProductSort({ value, onChange }: ProductSortProps) {
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  // The menu opens leftwards from the trigger. When the trigger sits near the left edge
+  // (search page, mobile), that would push it off screen, so open it rightwards instead.
+  useLayoutEffect(() => {
+    if (!open) {
+      setAlignLeft(false)
+      return
+    }
+    const trigger = menuRef.current?.getBoundingClientRect()
+    const menu = listRef.current
+    if (!trigger || !menu) return
+    setAlignLeft(trigger.right - menu.offsetWidth < VIEWPORT_GAP)
   }, [open])
 
   const handleSelect = (option: ProductSortOption) => {
@@ -62,7 +80,8 @@ export function ProductSort({ value, onChange }: ProductSortProps) {
       <AnimatePresence>
         {open && (
           <motion.ul
-            className={styles.menu}
+            ref={listRef}
+            className={[styles.menu, alignLeft ? styles.menuLeft : ''].filter(Boolean).join(' ')}
             role="listbox"
             aria-label={t('sort.listAria')}
             initial={{ opacity: 0, y: 6, scale: 0.96 }}

@@ -56,6 +56,7 @@
   right: 0;
   z-index: $z-dropdown;
   min-width: 220px;
+  max-width: calc(100vw - 2 * #{$spacing-4});
   margin: 0;
   padding: $spacing-2;
   list-style: none;
@@ -63,6 +64,11 @@
   border-radius: $radius-md;
   background: $color-white;
   box-shadow: $shadow-card;
+}
+
+.menuLeft {
+  right: auto;
+  left: 0;
 }
 
 .option {
