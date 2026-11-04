@@ -119,7 +119,7 @@
   color: $color-text;
 }
 
-// Square bead size selectors
+// Bead size selectors: a circle for short sizes ("8"), stretching into a pill for longer ones ("+-9,5*3")
 .sizeGrid {
   display: flex;
   flex-wrap: wrap;
@@ -127,9 +127,11 @@
 }
 
 .sizeChip {
-  width: 40px;
+  min-width: 40px;
   height: 40px;
-  border-radius: $radius-circle;
+  padding-inline: $spacing-2;
+  border-radius: $radius-full;
+  white-space: nowrap;
   border: 1.5px solid rgba(var(--color-primary-dark-rgb), 0.38);
   font-size: $font-size-sm;
   font-weight: $font-weight-semibold;
