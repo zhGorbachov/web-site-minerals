@@ -103,8 +103,16 @@ export function ProductGallery({
   }, [isControlled, internalIndex, lastIndex])
 
   useEffect(() => {
-    const thumb = thumbsRef.current?.children[activeIndex] as HTMLElement | undefined
-    thumb?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    // Scroll only the thumbnail strip itself. scrollIntoView would also scroll the page
+    // vertically, which dragged the product page down on mobile right after opening it.
+    const strip = thumbsRef.current
+    const thumb = strip?.children[activeIndex] as HTMLElement | undefined
+    if (!strip || !thumb) return
+    const stripRect = strip.getBoundingClientRect()
+    const thumbRect = thumb.getBoundingClientRect()
+    const left =
+      strip.scrollLeft + (thumbRect.left - stripRect.left) - (stripRect.width - thumbRect.width) / 2
+    strip.scrollTo({ left: Math.max(0, left), behavior: 'smooth' })
   }, [activeIndex])
 
   useEffect(() => {

@@ -17,6 +17,7 @@ export function useScrollLock(locked: boolean) {
       overflow: body.style.overflow,
     }
     const previousHtmlOverflow = documentElement.style.overflow
+    const lockedUrl = window.location.pathname + window.location.search
 
     body.style.position = 'fixed'
     body.style.top = `-${scrollY}px`
@@ -34,7 +35,10 @@ export function useScrollLock(locked: boolean) {
       body.style.width = previousBody.width
       body.style.overflow = previousBody.overflow
       documentElement.style.overflow = previousHtmlOverflow
-      window.scrollTo(0, scrollY)
+      // If the lock was released because the user navigated (menu / catalog link),
+      // the new page must stay at the top instead of jumping to the old offset.
+      const navigated = window.location.pathname + window.location.search !== lockedUrl
+      window.scrollTo(0, navigated ? 0 : scrollY)
     }
   }, [locked])
 }

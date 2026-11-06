@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ShoppingCart, Heart, CheckCircle, PackageSearch, Minus, Plus } from 'lucide-react'
@@ -145,6 +145,10 @@ export function ProductPage() {
     }
     setSelectedOptions(optionsWithoutVariantId(selectedOptions))
   }
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [slug])
 
   useEffect(() => {
     if (!product || maxSelectable <= 0) return
