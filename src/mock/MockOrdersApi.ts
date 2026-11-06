@@ -4,6 +4,7 @@ import { getAuthToken } from '@/api/client'
 import {
   calculateCartPricing,
   getDiscountedUnitPrice,
+  isDiscountExcluded,
   toPricingItems,
 } from '@/utils/pricing'
 import {
@@ -73,7 +74,12 @@ function buildOrder(
       productName: getVariantDisplayName(product, variant),
       productImage: variant?.image ?? product.images[0] ?? '',
       quantity: item.quantity,
-      price: getDiscountedUnitPrice(product.categorySlug, unit, pricing),
+      price: getDiscountedUnitPrice(
+        product.categorySlug,
+        unit,
+        pricing,
+        isDiscountExcluded(product, item.selectedOptions),
+      ),
       selectedOptions: item.selectedOptions ?? null,
     }
   })

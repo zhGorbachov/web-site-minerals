@@ -28,6 +28,7 @@ export {
   isStrandsProduct,
   calculateCartPricing,
   getDiscountedUnitPrice,
+  isDiscountExcluded,
   toPricingItems,
   type CartPricing,
   type CartPricingInputItem,

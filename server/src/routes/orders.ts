@@ -6,6 +6,7 @@ import { optionalAuth, requireAuth } from '../lib/auth.js'
 import {
   calculateCartPricing,
   getDiscountedUnitPrice,
+  isDiscountExcluded,
 } from '../lib/pricing.js'
 import {
   applyLinesStock,
@@ -148,6 +149,10 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         item.selectedOptions as Record<string, string> | null,
       ),
       quantity: item.quantity,
+      excluded: isDiscountExcluded(
+        item.product,
+        item.selectedOptions as Record<string, string> | null,
+      ),
     }))
     const pricing = calculateCartPricing(pricingItems, user?.discountPercent)
     const pricedLines = cart.items.map((item) => {
@@ -160,7 +165,12 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         productName: getVariantDisplayName(item.product.name, variant),
         productImage: variant?.image ?? item.product.images[0] ?? '',
         quantity: item.quantity,
-        price: getDiscountedUnitPrice(item.product.categorySlug, unit, pricing),
+        price: getDiscountedUnitPrice(
+          item.product.categorySlug,
+          unit,
+          pricing,
+          isDiscountExcluded(item.product, options),
+        ),
         selectedOptions: options ?? Prisma.JsonNull,
       }
     })
@@ -297,12 +307,18 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       categorySlug: item.product.categorySlug,
       unitPrice: item.unitPrice,
       quantity: item.quantity,
+      excluded: isDiscountExcluded(item.product, item.selectedOptions),
     })),
   )
   const pricedLines = resolvedItems.map((item) => ({
     product: item.product,
     quantity: item.quantity,
-    price: getDiscountedUnitPrice(item.product.categorySlug, item.unitPrice, pricing),
+    price: getDiscountedUnitPrice(
+      item.product.categorySlug,
+      item.unitPrice,
+      pricing,
+      isDiscountExcluded(item.product, item.selectedOptions),
+    ),
     productName: getVariantDisplayName(item.product.name, item.variant),
     productImage: item.variant?.image ?? item.product.images[0] ?? '',
     selectedOptions: item.selectedOptions,

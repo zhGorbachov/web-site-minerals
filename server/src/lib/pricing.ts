@@ -8,6 +8,27 @@ export const FREE_DELIVERY_THRESHOLD = 3000
 export const VOLUME_DISCOUNT_STEP = 1000
 export const VOLUME_DISCOUNT_MAX_PERCENT = 10
 
+/** Category slug for «Пахощі» (incense). */
+export const INCENSE_CATEGORY_SLUG = 'pahoshchi'
+
+const PALO_SANTO_NAME = /пало[\s-]*санто|palo[\s-]*santo/i
+
+/**
+ * Palo Santo sold by weight (50 g / 100 g / 1 kg) is never discounted: no volume discount,
+ * no personal discount, and it does not count toward the volume thresholds.
+ * Palo Santo sold by the piece is a normal product.
+ */
+export function isDiscountExcluded(
+  product: { categorySlug: string; name: string; attributes?: unknown },
+  selectedOptions?: Record<string, string> | null,
+): boolean {
+  if (product.categorySlug !== INCENSE_CATEGORY_SLUG) return false
+  if (!PALO_SANTO_NAME.test(product.name)) return false
+  if (selectedOptions?.pieceWeight) return false
+  const saleMode = (product.attributes as { saleMode?: string } | null | undefined)?.saleMode
+  return saleMode !== 'piece'
+}
+
 export function roundUah(value: number): number {
   return Math.round(value)
 }
@@ -42,12 +63,16 @@ export type CartPricingInputItem = {
   categorySlug: string
   unitPrice: number
   quantity: number
+  /** Sold at full price: outside both discount groups (see isDiscountExcluded). */
+  excluded?: boolean
 }
 
 export type CartPricing = {
   subtotal: number
   strandsSubtotal: number
   otherSubtotal: number
+  /** Items sold at full price (e.g. Palo Santo by weight); part of subtotal, never discounted. */
+  excludedSubtotal: number
   strandsDiscountPercent: number
   otherDiscountPercent: number
   strandsDiscountAmount: number
@@ -66,6 +91,7 @@ export type CartPricing = {
  *
  * - Низки (strands): volume % from the strands subtotal only.
  * - Everything else (minerals, bracelets, incense, pendants): volume % from their own combined subtotal.
+ * - Items flagged `excluded` (Palo Santo by weight) get no discount and sit outside both groups.
  * - A personal discount applies to both groups but never stacks with the volume %:
  *   each group gets the higher of the two.
  * - Free delivery when subtotal ≥ 3000 UAH.
@@ -76,17 +102,20 @@ export function calculateCartPricing(
 ): CartPricing {
   let strandsSubtotal = 0
   let otherSubtotal = 0
+  let excludedSubtotal = 0
 
   for (const item of items) {
     const line = item.unitPrice * item.quantity
-    if (isStrandsProduct(item.categorySlug)) {
+    if (item.excluded) {
+      excludedSubtotal += line
+    } else if (isStrandsProduct(item.categorySlug)) {
       strandsSubtotal += line
     } else {
       otherSubtotal += line
     }
   }
 
-  const subtotal = strandsSubtotal + otherSubtotal
+  const subtotal = strandsSubtotal + otherSubtotal + excludedSubtotal
   const hasPersonalDiscount =
     personalDiscountPercent != null && personalDiscountPercent > 0
 
@@ -108,6 +137,7 @@ export function calculateCartPricing(
     subtotal,
     strandsSubtotal,
     otherSubtotal,
+    excludedSubtotal,
     strandsDiscountPercent,
     otherDiscountPercent,
     strandsDiscountAmount,
@@ -125,7 +155,9 @@ export function getDiscountedUnitPrice(
   categorySlug: string,
   unitPrice: number,
   pricing: Pick<CartPricing, 'strandsDiscountPercent' | 'otherDiscountPercent'>,
+  excluded = false,
 ): number {
+  if (excluded) return unitPrice
   const percent = isStrandsProduct(categorySlug)
     ? pricing.strandsDiscountPercent
     : pricing.otherDiscountPercent
