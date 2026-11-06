@@ -431,13 +431,7 @@ export function ProductSelections({
           onSelect={(value) => handleSelect(optionKey, value)}
           renderValue={(value) => translateAttrValue(value, language)}
           invalid={isInvalid(optionKey)}
-          requiredHint={requiredHint}
           attentionKey={attentionKey}
-          hint={
-            optionKey === 'pieceWeight'
-              ? t('productOptions.saleModePieceHint')
-              : t('productOptions.saleModeWeightHint')
-          }
         />
       </div>
     )
