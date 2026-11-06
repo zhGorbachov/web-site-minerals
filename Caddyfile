@@ -17,6 +17,15 @@
 	# SPA: static files from Vite build, fallback to index.html
 	handle {
 		root * ./dist
+
+		# Vite fingerprints everything in /assets, so browsers may keep it for a year.
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		# index.html and other unhashed files must be revalidated so a deploy shows up at once.
+		@unhashed not path /assets/*
+		header @unhashed Cache-Control "no-cache"
+
 		try_files {path} /index.html
 		file_server
 	}

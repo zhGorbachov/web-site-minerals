@@ -7,10 +7,37 @@ import { useCartStore, useWishlistStore } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
 import { formatPrice, productRequiresOptions } from '@/utils'
 import { getCatalogPricing } from '@/utils/productVariants'
+import { uploadSiblingUrl } from '@/utils/uploadMedia'
 import styles from './ProductCard.module.scss'
 
 interface ProductCardProps {
   product: Product
+}
+
+/**
+ * Catalog grids show the small thumbnail sibling instead of the full 1600px photo, which keeps
+ * a page of cards light on slow mobile data. Falls back to the original when no thumbnail exists.
+ */
+function CardImage({ src, alt, className }: { src: string; alt: string; className: string }) {
+  const thumb = uploadSiblingUrl(src, 'thumb')
+  const [current, setCurrent] = useState(thumb ?? src)
+
+  useEffect(() => {
+    setCurrent(thumb ?? src)
+  }, [src, thumb])
+
+  return (
+    <img
+      src={current}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      decoding="async"
+      onError={() => {
+        if (current !== src) setCurrent(src)
+      }}
+    />
+  )
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -85,12 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
     >
       <Link to={productUrl} className={styles.cardLink}>
         <div className={styles.imageWrapper}>
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className={styles.image}
-            loading="lazy"
-          />
+          <CardImage src={product.images[0]} alt={product.name} className={styles.image} />
           {product.isNew && (
             <span className={styles.badgeNew}>{t('product.badgeNew')}</span>
           )}
