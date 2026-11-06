@@ -1,22 +1,19 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Star, Trash2, Plus } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ChevronLeft, ChevronRight, Pencil, Star, Trash2, Plus } from 'lucide-react'
 import { AdminApi, CatalogApi } from '@/api'
 import type { AdminOrder, AdminProductPayload, AdminUser } from '@/api'
 import { useAuthStore } from '@/store'
-import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
-import { Button, ConfirmDialog, Input, Select } from '@/components/ui'
+import { useTranslation } from '@/i18n/useTranslation'
+import { Button, ConfirmDialog, Input } from '@/components/ui'
 import { useCanHover } from '@/hooks/useMediaQuery'
-import type { SelectOption } from '@/components/ui'
 import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
 import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, StoreReview, SubCategory, ThreadAttributes } from '@/types'
-import { formatPrice } from '@/utils/formatPrice'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
 import { DEFAULT_STRAND_LENGTHS } from '@/utils/catalogDefaults'
 import { getThreadBeadSizes } from '@/utils/productOptions'
-import { formatOrderItemQuantity, orderItemUnitLabel } from '@/utils/orderItemDisplay'
 import { buildProductSku, slugify, uniqueSku } from '@/utils/sku'
 import {
   deriveProductPricingFromVariants,
@@ -27,93 +24,12 @@ import {
   toStoredVariants,
 } from '@/utils/productVariants'
 import { AdminShell } from './AdminShell'
-import { isAdminTab, mapAdminError, type AdminTab } from './adminShared'
+import { getVisiblePageNumbers, isAdminTab, mapAdminError, type AdminTab } from './adminShared'
+import { AdminOrdersPanel } from './AdminOrdersPanel'
 import styles from './AdminPage.module.scss'
 
-const ORDER_STATUSES: OrderStatus[] = [
-  'pending',
-  'confirmed',
-  'processing',
-  'assembling',
-  'ready',
-  'shipped',
-  'delivered',
-  'cancelled',
-  'refunded',
-]
-
-const PAYMENT_STATUSES: PaymentStatus[] = ['unpaid', 'awaiting_payment', 'paid', 'failed']
-
-const PAYMENT_TONES: Record<PaymentStatus, SelectOption['tone']> = {
-  unpaid: 'warning',
-  awaiting_payment: 'info',
-  paid: 'success',
-  failed: 'danger',
-}
-
-const STATUS_TONES: Partial<Record<OrderStatus, SelectOption['tone']>> = {
-  pending: 'warning',
-  confirmed: 'info',
-  processing: 'info',
-  assembling: 'info',
-  ready: 'success',
-  shipped: 'success',
-  delivered: 'success',
-  cancelled: 'danger',
-  refunded: 'danger',
-}
-
-const ORDERS_PAGE_SIZE = 8
 const SUBCATEGORIES_PAGE_SIZE = 10
 const REVIEWS_PAGE_SIZE = 8
-const VISIBLE_PAGE_NUMBERS = 5
-
-function getVisiblePageNumbers(currentPage: number, totalPages: number): number[] {
-  if (totalPages <= VISIBLE_PAGE_NUMBERS) {
-    return Array.from({ length: totalPages }, (_, i) => i)
-  }
-
-  let start = currentPage - Math.floor(VISIBLE_PAGE_NUMBERS / 2)
-  if (start < 0) start = 0
-  if (start + VISIBLE_PAGE_NUMBERS > totalPages) {
-    start = totalPages - VISIBLE_PAGE_NUMBERS
-  }
-
-  return Array.from({ length: VISIBLE_PAGE_NUMBERS }, (_, i) => start + i)
-}
-
-function paymentMethodLabel(
-  method: string,
-  t: (key: TranslationKey) => string,
-): string {
-  switch (method) {
-    case 'bank_transfer':
-      return t('checkout.paymentBank')
-    case 'pickup':
-    case 'cod':
-      return t('checkout.paymentPickup')
-    default:
-      return method
-  }
-}
-
-function deliveryMethodLabel(
-  method: string,
-  t: (key: TranslationKey) => string,
-): string {
-  switch (method) {
-    case 'nova_poshta':
-      return t('checkout.novaPoshta')
-    case 'ukrposhta':
-      return t('checkout.ukrposhta')
-    case 'self_pickup':
-    case 'pickup':
-      return t('checkout.selfPickup')
-    default:
-      return method
-  }
-}
-
 type ProductForm = Omit<
   AdminProductPayload,
   'price' | 'discountPrice' | 'stock' | 'subCategoryId' | 'subCategoryIds' | 'categoryId'
@@ -276,12 +192,9 @@ export function AdminPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [orderSearch, setOrderSearch] = useState('')
-  const [ordersPage, setOrdersPage] = useState(0)
   const [userSearch, setUserSearch] = useState('')
   const [reviewSearch, setReviewSearch] = useState('')
   const [reviewsPage, setReviewsPage] = useState(0)
-  const [expandedOrderIds, setExpandedOrderIds] = useState<Set<string>>(new Set())
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null)
   const [discountDrafts, setDiscountDrafts] = useState<
     Record<string, { percent: string; label: string }>
@@ -367,34 +280,6 @@ export function AdminPage() {
       (p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q),
     )
   }, [products, search])
-
-  const filteredOrders = useMemo(() => {
-    const q = orderSearch.trim().toLowerCase()
-    if (!q) return orders
-    return orders.filter((order) => order.id.toLowerCase().includes(q))
-  }, [orders, orderSearch])
-
-  const ordersTotalPages = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PAGE_SIZE))
-  const ordersVisiblePages = getVisiblePageNumbers(ordersPage, ordersTotalPages)
-  const pagedOrders = useMemo(
-    () =>
-      filteredOrders.slice(ordersPage * ORDERS_PAGE_SIZE, (ordersPage + 1) * ORDERS_PAGE_SIZE),
-    [filteredOrders, ordersPage],
-  )
-
-  useEffect(() => {
-    setOrdersPage(0)
-  }, [orderSearch])
-
-  useEffect(() => {
-    if (ordersPage > ordersTotalPages - 1) {
-      setOrdersPage(Math.max(0, ordersTotalPages - 1))
-    }
-  }, [ordersPage, ordersTotalPages])
-
-  const goToOrdersPage = (page: number) => {
-    setOrdersPage(Math.max(0, Math.min(page, ordersTotalPages - 1)))
-  }
 
   const filteredUsers = useMemo(() => {
     const q = userSearch.trim().toLowerCase()
@@ -582,15 +467,6 @@ export function AdminPage() {
     setMessage(text)
     setError(null)
     window.setTimeout(() => setMessage(null), 2500)
-  }
-
-  const toggleOrderItems = (orderId: string) => {
-    setExpandedOrderIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(orderId)) next.delete(orderId)
-      else next.add(orderId)
-      return next
-    })
   }
 
   const updateOrderField = async (
@@ -810,13 +686,6 @@ export function AdminPage() {
     }
   }
 
-  const customerLabel = (order: AdminOrder) => {
-    if (!order.customer) return t('admin.ordersGuest')
-    const name = `${order.customer.firstName} ${order.customer.lastName}`.trim()
-    const contact = [order.customer.phone, order.customer.email].filter(Boolean).join(' · ')
-    return contact ? `${name} · ${contact}` : name
-  }
-
   return (
     <AdminShell
       activeTab={tab}
@@ -830,232 +699,11 @@ export function AdminPage() {
           {loading ? (
             <p className={styles.muted}>{t('admin.loading')}</p>
           ) : tab === 'orders' ? (
-            <div className={styles.panel}>
-              <Input
-                label={t('admin.tabOrders')}
-                placeholder={t('admin.ordersSearch')}
-                value={orderSearch}
-                onChange={(e) => setOrderSearch(e.target.value)}
-              />
-              {filteredOrders.length === 0 ? (
-                <p className={styles.muted}>{t('admin.ordersEmpty')}</p>
-              ) : (
-                <>
-                <ul className={styles.orderList}>
-                  {pagedOrders.map((order) => {
-                    const expanded = expandedOrderIds.has(order.id)
-                    const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0)
-                    const busy = updatingOrderId === order.id
-                    return (
-                      <li key={order.id} className={styles.orderCard}>
-                        <div className={styles.orderTop}>
-                          <div className={styles.orderMetaBlock}>
-                            <h3 className={styles.orderId}>#{order.id}</h3>
-                            <p className={styles.orderCustomer}>
-                              {t('admin.ordersCustomer')}: {customerLabel(order)}
-                            </p>
-                            <p className={styles.orderDate}>
-                              {new Date(order.createdAt).toLocaleString(
-                                language === 'uk' ? 'uk-UA' : 'en-US',
-                              )}
-                            </p>
-                          </div>
-                          <div className={styles.orderTotal}>
-                            <span className={styles.orderTotalLabel}>{t('admin.ordersTotal')}</span>
-                            <span className={styles.orderTotalValue}>
-                              {formatPrice(order.totalPrice, language)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className={styles.orderControls}>
-                          <Select
-                            label={t('admin.ordersPayment')}
-                            value={order.paymentStatus ?? 'unpaid'}
-                            disabled={busy}
-                            options={PAYMENT_STATUSES.map((status) => ({
-                              value: status,
-                              label: t(`admin.paymentStatus.${status}`),
-                              tone: PAYMENT_TONES[status],
-                            }))}
-                            onChange={(next) =>
-                              void updateOrderField(order.id, {
-                                paymentStatus: next as PaymentStatus,
-                              })
-                            }
-                          />
-                          <Select
-                            label={t('admin.ordersFulfillment')}
-                            value={order.status}
-                            disabled={busy}
-                            options={ORDER_STATUSES.map((status) => ({
-                              value: status,
-                              label: t(`profile.orderStatus.${status}`),
-                              tone: STATUS_TONES[status] ?? 'neutral',
-                            }))}
-                            onChange={(next) =>
-                              void updateOrderField(order.id, {
-                                status: next as OrderStatus,
-                              })
-                            }
-                          />
-                        </div>
-
-                        <p className={styles.orderMethods}>
-                          {t('admin.ordersDelivery')}:{' '}
-                          {deliveryMethodLabel(order.deliveryMethod, t)}
-                          {order.deliveryAddress && (
-                            <>
-                              <br />
-                              {t('admin.ordersAddress')}: <span>{order.deliveryAddress}</span>
-                            </>
-                          )}
-                        </p>
-                        <p className={styles.orderPayer}>
-                          {t('admin.ordersPaymentMethod')}:{' '}
-                          <span>{paymentMethodLabel(order.paymentMethod, t)}</span>
-                          {(order.paymentMethod === 'pickup' ||
-                            order.paymentMethod === 'cod') && (
-                            <>
-                              <br />
-                              {t('admin.ordersCodHint')}
-                            </>
-                          )}
-                          {(order.paymentMethod === 'bank_transfer' ||
-                            order.payerFullName) && (
-                            <>
-                              <br />
-                              {t('admin.ordersPayerFullName')}:{' '}
-                              <span>{order.payerFullName?.trim() || '—'}</span>
-                            </>
-                          )}
-                        </p>
-
-                        {order.items.length > 0 && (
-                          <>
-                            <button
-                              type="button"
-                              className={styles.orderToggle}
-                              onClick={() => toggleOrderItems(order.id)}
-                              aria-expanded={expanded}
-                            >
-                              <span>
-                                {expanded ? t('admin.ordersHideItems') : t('admin.ordersShowItems')}
-                                <span className={styles.orderToggleCount}>({itemsCount})</span>
-                              </span>
-                              <ChevronDown
-                                size={16}
-                                className={[
-                                  styles.orderToggleIcon,
-                                  expanded ? styles.orderToggleIconOpen : '',
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ')}
-                              />
-                            </button>
-                            <AnimatePresence initial={false}>
-                              {expanded && (
-                                <motion.ul
-                                  className={styles.orderProducts}
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                >
-                                  {order.items.map((item) => (
-                                    <li key={item.id} className={styles.orderProduct}>
-                                      <div className={styles.orderProductImage}>
-                                        {item.productImage ? (
-                                          <img src={item.productImage} alt="" />
-                                        ) : null}
-                                      </div>
-                                      <div className={styles.orderProductBody}>
-                                        <span className={styles.orderProductName}>
-                                          {item.productName}
-                                        </span>
-                                        <span className={styles.orderProductMeta}>
-                                          {t('admin.ordersItemQty', {
-                                            count: formatOrderItemQuantity(item, language),
-                                          })}
-                                          {' · '}
-                                          {formatPrice(item.price, language)} /{' '}
-                                          {orderItemUnitLabel(item, language)}
-                                        </span>
-                                      </div>
-                                      <span className={styles.orderProductTotal}>
-                                        {formatPrice(item.price * item.quantity, language)}
-                                      </span>
-                                    </li>
-                                  ))}
-                                </motion.ul>
-                              )}
-                            </AnimatePresence>
-                          </>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
-                {ordersTotalPages > 1 && (
-                  <nav className={styles.pagination} aria-label={t('admin.ordersPaginationAria')}>
-                    <motion.button
-                      type="button"
-                      className={styles.paginationBtn}
-                      onClick={() => goToOrdersPage(ordersPage - 1)}
-                      disabled={ordersPage === 0}
-                      aria-label={t('common.paginationPrev')}
-                      whileTap={canHover ? { scale: 0.9 } : undefined}
-                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                    >
-                      <ChevronLeft size={15} />
-                    </motion.button>
-                    <div className={styles.paginationNumbers}>
-                      {ordersVisiblePages.map((pageIndex) => {
-                        const isActive = pageIndex === ordersPage
-                        return (
-                          <motion.button
-                            key={pageIndex}
-                            type="button"
-                            className={[
-                              styles.paginationNumber,
-                              isActive ? styles.paginationNumberActive : '',
-                            ]
-                              .filter(Boolean)
-                              .join(' ')}
-                            onClick={() => goToOrdersPage(pageIndex)}
-                            aria-label={t('common.paginationPage', { page: pageIndex + 1 })}
-                            aria-current={isActive ? 'page' : undefined}
-                            whileTap={canHover ? { scale: 0.92 } : undefined}
-                            transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                          >
-                            {isActive && (
-                              <motion.span
-                                layoutId="adminOrdersPaginationPill"
-                                className={styles.paginationPill}
-                                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                              />
-                            )}
-                            <span className={styles.paginationNumberLabel}>{pageIndex + 1}</span>
-                          </motion.button>
-                        )
-                      })}
-                    </div>
-                    <motion.button
-                      type="button"
-                      className={styles.paginationBtn}
-                      onClick={() => goToOrdersPage(ordersPage + 1)}
-                      disabled={ordersPage >= ordersTotalPages - 1}
-                      aria-label={t('common.paginationNext')}
-                      whileTap={canHover ? { scale: 0.9 } : undefined}
-                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                    >
-                      <ChevronRight size={15} />
-                    </motion.button>
-                  </nav>
-                )}
-                </>
-              )}
-            </div>
+            <AdminOrdersPanel
+              orders={orders}
+              updatingOrderId={updatingOrderId}
+              onUpdate={(orderId, payload) => void updateOrderField(orderId, payload)}
+            />
           ) : tab === 'products' ? (
             <div className={styles.panel}>
               <Input

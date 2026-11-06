@@ -47,3 +47,19 @@ export function mapAdminError(error: unknown): TranslationKey {
   }
   return 'admin.errorGeneric'
 }
+
+const VISIBLE_PAGE_NUMBERS = 5
+
+export function getVisiblePageNumbers(currentPage: number, totalPages: number): number[] {
+  if (totalPages <= VISIBLE_PAGE_NUMBERS) {
+    return Array.from({ length: totalPages }, (_, i) => i)
+  }
+
+  let start = currentPage - Math.floor(VISIBLE_PAGE_NUMBERS / 2)
+  if (start < 0) start = 0
+  if (start + VISIBLE_PAGE_NUMBERS > totalPages) {
+    start = totalPages - VISIBLE_PAGE_NUMBERS
+  }
+
+  return Array.from({ length: VISIBLE_PAGE_NUMBERS }, (_, i) => start + i)
+}

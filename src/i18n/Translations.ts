@@ -179,7 +179,7 @@ export const translations: Record<Language, TranslationSchema> = {
       returnsContact:
         'Звʼязатися з нами ви можете через будь-який месенджер (Telegram, WhatsApp, Viber, Instagram) або за номером телефону.',
       discountsTitle: 'Знижки та програма лояльності',
-      discountsIntro: 'Розмір знижки залежить від суми замовлення:',
+      discountsIntro: 'Знижка залежить від суми товарів (мінерали, браслети, пахощі та підвіски рахуються разом):',
       discountsTiers: [
         'від 1000 грн — 2%',
         'від 2000 грн — 3%',
@@ -188,9 +188,9 @@ export const translations: Record<Language, TranslationSchema> = {
       ],
       discountsFreeDelivery: 'Безкоштовна доставка діє на замовлення від 3000 грн.',
       discountsPersonal:
-        'Для постійних клієнтів у нас працюють персональні знижки 5% або 10% на весь асортимент, окрім низок.',
+        'Для постійних клієнтів у нас працюють персональні знижки 5% або 10% на весь асортимент, включно з низками. Вони не сумуються зі знижкою за суму: діє та, що більша.',
       discountsStrands:
-        'Низки завжди розраховуються окремо відповідно до системи знижок за сумою замовлення.',
+        'Низки рахуються окремо: знижка на них залежить лише від суми низок у замовленні за тією ж шкалою, а їхня сума не додається до інших товарів.',
       reviewsTitle: 'Відгуки',
       reviewRating: 'Оцінка {rating} з 5',
       valuesTitle: 'Наші цінності',
@@ -233,14 +233,6 @@ export const translations: Record<Language, TranslationSchema> = {
       ],
       faq: [
         {
-          q: 'Як перевірити справжність мінералу?',
-          a: 'Ми гарантуємо справжність кожного мінералу. Усі камені мають сертифікати або документи від постачальників.',
-        },
-        {
-          q: 'Чи можна замовити індивідуальний браслет?',
-          a: 'Так! Напишіть нам у Telegram і ми виготовимо браслет під ваші параметри та побажання.',
-        },
-        {
           q: 'Скільки коштує доставка?',
           a: 'Доставка — за тарифами перевізника. При замовленні від 3000 грн діє безкоштовна доставка.',
         },
@@ -250,7 +242,7 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           q: 'Чи є знижки для постійних клієнтів?',
-          a: 'Так. Від суми замовлення діє автоматична знижка (від 1000 грн — 2% і далі до 10%). Постійним клієнтам можемо призначити 5% або 10% на все, крім низок — низки рахуються окремо за сумою.',
+          a: 'Так. Діє автоматична знижка від суми (від 1000 грн — 2% і далі до 10%): окремо для мінералів, браслетів, пахощів і підвісок разом, та окремо для низок. Постійним клієнтам можемо призначити персональну знижку 5% або 10% на все, включно з низками. Вона не сумується зі знижкою за суму — діє більша.',
         },
         {
           q: 'Як правильно доглядати за браслетом?',
@@ -269,7 +261,7 @@ export const translations: Record<Language, TranslationSchema> = {
       mapTitle: 'Карта магазину',
       scheduleTitle: 'Графік роботи',
       scheduleSectionLabel: 'Коли ми працюємо',
-      scheduleValue: 'Пн–Пт: 9:30 – 17:00',
+      scheduleValue: 'Пн–Пт: 9:00 – 17:00',
       scheduleNote: 'Сб–Нд: вихідний',
       mapOpen: 'Відкрити в Google Maps',
       mapSubtext: 'Україна, доставляємо по всій країні',
@@ -353,7 +345,7 @@ export const translations: Record<Language, TranslationSchema> = {
       returnsContact:
         'You can contact us via any messenger (Telegram, WhatsApp, Viber, Instagram) or by phone.',
       discountsTitle: 'Discounts & loyalty program',
-      discountsIntro: 'The discount depends on the order total:',
+      discountsIntro: 'The discount depends on the total of your items (minerals, bracelets, incense and pendants are counted together):',
       discountsTiers: [
         'from 1000 UAH — 2%',
         'from 2000 UAH — 3%',
@@ -362,9 +354,9 @@ export const translations: Record<Language, TranslationSchema> = {
       ],
       discountsFreeDelivery: 'Free delivery applies to orders from 3000 UAH.',
       discountsPersonal:
-        'Regular customers can get personal discounts of 5% or 10% on the entire assortment, except strands.',
+        'Regular customers can get personal discounts of 5% or 10% on the entire assortment, strands included. They are not added to the volume discount: whichever is higher applies.',
       discountsStrands:
-        'Strands are always calculated separately according to the volume discount system.',
+        'Strands are counted separately: their discount depends only on the strands total in the order, on the same scale, and their sum is not added to the other items.',
       reviewsTitle: 'Reviews',
       reviewRating: 'Rating {rating} out of 5',
       valuesTitle: 'Our values',
@@ -407,14 +399,6 @@ export const translations: Record<Language, TranslationSchema> = {
       ],
       faq: [
         {
-          q: 'How can I verify a mineral is genuine?',
-          a: 'We guarantee the authenticity of every mineral. All stones come with certificates or supplier documents.',
-        },
-        {
-          q: 'Can I order a custom bracelet?',
-          a: 'Yes! Message us on Telegram and we will make a bracelet to your size and preferences.',
-        },
-        {
           q: 'How much does delivery cost?',
           a: 'Delivery follows carrier rates. Free delivery applies to orders from 3000 UAH.',
         },
@@ -424,7 +408,7 @@ export const translations: Record<Language, TranslationSchema> = {
         },
         {
           q: 'Are there discounts for regular customers?',
-          a: 'Yes. Orders get an automatic volume discount (from 1000 UAH — 2%, up to 10%). Regular customers may get a personal 5% or 10% on everything except strands — strands use the volume system separately.',
+          a: 'Yes. An automatic volume discount applies (from 1000 UAH — 2%, up to 10%): one scale for minerals, bracelets, incense and pendants together, and a separate one for strands. Regular customers may get a personal 5% or 10% on everything, strands included. It does not stack with the volume discount — the higher one applies.',
         },
         {
           q: 'How should I care for my bracelet?',
@@ -443,7 +427,7 @@ export const translations: Record<Language, TranslationSchema> = {
       mapTitle: 'Store map',
       scheduleTitle: 'Working hours',
       scheduleSectionLabel: 'When we\'re open',
-      scheduleValue: 'Mon–Fri: 9:30 AM – 5:00 PM',
+      scheduleValue: 'Mon–Fri: 9:00 AM – 5:00 PM',
       scheduleNote: 'Sat–Sun: closed',
       mapOpen: 'Open in Google Maps',
       mapSubtext: 'Ukraine, we deliver nationwide',

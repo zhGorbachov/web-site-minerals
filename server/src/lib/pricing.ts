@@ -1,4 +1,4 @@
-/** Category slug for «Низки» (strands) — personal discounts do not apply. */
+/** Category slug for «Низки» (strands) — priced as their own discount group. */
 export const STRANDS_CATEGORY_SLUG = 'nytky'
 
 /** Free delivery when cart subtotal (before %) reaches this amount (UAH). */
@@ -56,13 +56,18 @@ export type CartPricing = {
   total: number
   freeDelivery: boolean
   hasPersonalDiscount: boolean
+  /** True when the personal % beat the volume % for that group (so the personal one is applied). */
+  strandsIsPersonal: boolean
+  otherIsPersonal: boolean
 }
 
 /**
  * Cart totals with volume / personal discounts.
  *
- * - No personal discount: one volume % from full subtotal, applied to all items.
- * - With personal discount: that % on everything except низок; низок use volume % from their own subtotal.
+ * - Низки (strands): volume % from the strands subtotal only.
+ * - Everything else (minerals, bracelets, incense, pendants): volume % from their own combined subtotal.
+ * - A personal discount applies to both groups but never stacks with the volume %:
+ *   each group gets the higher of the two.
  * - Free delivery when subtotal ≥ 3000 UAH.
  */
 export function calculateCartPricing(
@@ -85,17 +90,15 @@ export function calculateCartPricing(
   const hasPersonalDiscount =
     personalDiscountPercent != null && personalDiscountPercent > 0
 
-  let strandsDiscountPercent: number
-  let otherDiscountPercent: number
-
-  if (hasPersonalDiscount) {
-    otherDiscountPercent = personalDiscountPercent
-    strandsDiscountPercent = getVolumeDiscountPercent(strandsSubtotal)
-  } else {
-    const volumePercent = getVolumeDiscountPercent(subtotal)
-    strandsDiscountPercent = volumePercent
-    otherDiscountPercent = volumePercent
-  }
+  // Two separate volume pools, each with its own subtotal. A personal discount never stacks
+  // with the volume one: each pool simply gets whichever of the two percentages is higher.
+  const personal = hasPersonalDiscount ? personalDiscountPercent : 0
+  const strandsVolumePercent = getVolumeDiscountPercent(strandsSubtotal)
+  const otherVolumePercent = getVolumeDiscountPercent(otherSubtotal)
+  const strandsDiscountPercent = Math.max(strandsVolumePercent, personal)
+  const otherDiscountPercent = Math.max(otherVolumePercent, personal)
+  const strandsIsPersonal = personal > strandsVolumePercent
+  const otherIsPersonal = personal > otherVolumePercent
 
   const strandsDiscountAmount = roundUah((strandsSubtotal * strandsDiscountPercent) / 100)
   const otherDiscountAmount = roundUah((otherSubtotal * otherDiscountPercent) / 100)
@@ -113,6 +116,8 @@ export function calculateCartPricing(
     total: subtotal - discountAmount,
     freeDelivery: subtotal >= FREE_DELIVERY_THRESHOLD,
     hasPersonalDiscount,
+    strandsIsPersonal,
+    otherIsPersonal,
   }
 }
 

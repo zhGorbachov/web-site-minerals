@@ -445,6 +445,37 @@ export type UiTranslationSchema = {
     ordersPayerFullName: string
     ordersCodHint: string
     ordersPaginationAria: string
+    ordersFilterStatus: string
+    ordersFilterPayment: string
+    ordersFilterDelivery: string
+    ordersFilterAll: string
+    ordersDateFrom: string
+    ordersDateTo: string
+    ordersToday: string
+    ordersWeek: string
+    ordersMonth: string
+    ordersSortNew: string
+    ordersSortOld: string
+    ordersReset: string
+    ordersFound: string
+    ordersClientSection: string
+    ordersPhone: string
+    ordersEmail: string
+    ordersRegistered: string
+    ordersShipTo: string
+    ordersNoAddress: string
+    ordersCopy: string
+    ordersCopied: string
+    ordersCopyShipping: string
+    ordersPaymentSection: string
+    ordersItemsSection: string
+    ordersPositions: string
+    ordersProductDeleted: string
+    ordersOpenProduct: string
+    ordersDetails: string
+    ordersCreatedAt: string
+    ordersFilterClient: string
+    ordersShippingTemplate: string
     paymentStatus: {
       unpaid: string
       awaiting_payment: string
@@ -683,7 +714,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     discount: 'Знижка',
     discountVolume: 'знижка за суму {percent}%',
     discountPersonal: 'постійна знижка {percent}%',
-    discountMixed: 'постійна {personal}% + низки {strands}%',
+    discountMixed: 'знижка {personal}% + низки {strands}%',
     delivery: 'Доставка',
     deliveryNote: 'за тарифами перевізника',
     deliveryFree: 'Безкоштовно',
@@ -954,7 +985,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     logout: 'Вийти',
     discountsTitle: 'Ваші знижки',
     discountsEmpty: 'Персональних знижок поки немає. Власник магазину може призначити їх окремим клієнтам.',
-    discountPersonal: 'Персональна знижка (на все, крім низок)',
+    discountPersonal: 'Персональна знижка (не сумується зі знижкою за суму — діє більша)',
     ordersTitle: 'Історія замовлень',
     ordersEmpty: 'Замовлень ще немає',
     orderNumber: 'Замовлення #{id}',
@@ -1028,7 +1059,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     reviewsAccount: 'Акаунт',
     reviewsPaginationAria: 'Сторінки відгуків',
     searchPlaceholder: 'Пошук за назвою або SKU...',
-    ordersSearch: 'Пошук за ID замовлення (порожньо — всі)',
+    ordersSearch: 'Пошук: № замовлення, ім’я, телефон, email, адреса, товар…',
     ordersEmpty: 'Замовлень не знайдено',
     ordersCustomer: 'Клієнт',
     ordersGuest: 'Гість',
@@ -1047,6 +1078,37 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ordersCodHint:
       'Післяплата — оформіть відправлення з наложеним платежем на пошті',
     ordersPaginationAria: 'Сторінки замовлень',
+    ordersFilterStatus: 'Статус замовлення',
+    ordersFilterPayment: 'Оплата',
+    ordersFilterDelivery: 'Доставка',
+    ordersFilterAll: 'Усі',
+    ordersDateFrom: 'Від',
+    ordersDateTo: 'До',
+    ordersToday: 'Сьогодні',
+    ordersWeek: '7 днів',
+    ordersMonth: '30 днів',
+    ordersSortNew: 'Спочатку нові',
+    ordersSortOld: 'Спочатку старі',
+    ordersReset: 'Скинути фільтри',
+    ordersFound: 'Знайдено: {count} · на суму {sum}',
+    ordersClientSection: 'Клієнт',
+    ordersPhone: 'Телефон',
+    ordersEmail: 'Email',
+    ordersRegistered: 'Зареєстрований користувач',
+    ordersShipTo: 'Куди відправляти',
+    ordersNoAddress: 'Адресу не вказано',
+    ordersCopy: 'Копіювати',
+    ordersCopied: 'Скопійовано',
+    ordersCopyShipping: 'Копіювати дані для відправки',
+    ordersPaymentSection: 'Оплата',
+    ordersItemsSection: 'Склад замовлення',
+    ordersPositions: '{count} поз.',
+    ordersProductDeleted: 'Товар видалено з каталогу',
+    ordersOpenProduct: 'Відкрити товар',
+    ordersDetails: 'Деталі',
+    ordersCreatedAt: 'Створено',
+    ordersFilterClient: 'Усі замовлення цього клієнта',
+    ordersShippingTemplate: 'Отримувач',
     paymentStatus: {
       unpaid: 'Не оплачено',
       awaiting_payment: 'Очікує оплату',
@@ -1298,7 +1360,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     discount: 'Discount',
     discountVolume: 'volume discount {percent}%',
     discountPersonal: 'loyalty discount {percent}%',
-    discountMixed: 'loyalty {personal}% + strands {strands}%',
+    discountMixed: 'discount {personal}% + strands {strands}%',
     delivery: 'Delivery',
     deliveryNote: 'carrier rates apply',
     deliveryFree: 'Free',
@@ -1569,7 +1631,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     logout: 'Log out',
     discountsTitle: 'Your discounts',
     discountsEmpty: 'No personal discounts yet. The store owner can assign them to selected customers.',
-    discountPersonal: 'Personal discount (everything except strands)',
+    discountPersonal: 'Personal discount (not combined with the volume discount — the higher one applies)',
     ordersTitle: 'Order history',
     ordersEmpty: 'No orders yet',
     orderNumber: 'Order #{id}',
@@ -1643,7 +1705,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     reviewsAccount: 'Account',
     reviewsPaginationAria: 'Review pages',
     searchPlaceholder: 'Search by name or SKU...',
-    ordersSearch: 'Search by order ID (empty — all)',
+    ordersSearch: 'Search: order no., name, phone, email, address, product…',
     ordersEmpty: 'No orders found',
     ordersCustomer: 'Customer',
     ordersGuest: 'Guest',
@@ -1662,6 +1724,37 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ordersCodHint:
       'Cash on delivery — create the shipment with COD at the post office',
     ordersPaginationAria: 'Order pages',
+    ordersFilterStatus: 'Order status',
+    ordersFilterPayment: 'Payment',
+    ordersFilterDelivery: 'Delivery',
+    ordersFilterAll: 'All',
+    ordersDateFrom: 'From',
+    ordersDateTo: 'To',
+    ordersToday: 'Today',
+    ordersWeek: '7 days',
+    ordersMonth: '30 days',
+    ordersSortNew: 'Newest first',
+    ordersSortOld: 'Oldest first',
+    ordersReset: 'Reset filters',
+    ordersFound: 'Found: {count} · totalling {sum}',
+    ordersClientSection: 'Customer',
+    ordersPhone: 'Phone',
+    ordersEmail: 'Email',
+    ordersRegistered: 'Registered user',
+    ordersShipTo: 'Ship to',
+    ordersNoAddress: 'No address provided',
+    ordersCopy: 'Copy',
+    ordersCopied: 'Copied',
+    ordersCopyShipping: 'Copy shipping details',
+    ordersPaymentSection: 'Payment',
+    ordersItemsSection: 'Order contents',
+    ordersPositions: '{count} items',
+    ordersProductDeleted: 'Product removed from catalog',
+    ordersOpenProduct: 'Open product',
+    ordersDetails: 'Details',
+    ordersCreatedAt: 'Created',
+    ordersFilterClient: 'All orders from this customer',
+    ordersShippingTemplate: 'Recipient',
     paymentStatus: {
       unpaid: 'Unpaid',
       awaiting_payment: 'Awaiting payment',
