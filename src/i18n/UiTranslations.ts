@@ -83,9 +83,18 @@ export type UiTranslationSchema = {
     itemsLabel: string
     itemsCount: string
     subtotal: string
+    strandsGroup: string
+    otherGroup: string
+    excludedGroup: string
     discount: string
     discountVolume: string
+    discountVolumeLine: string
     discountPersonal: string
+    discountPersonalLine: string
+    discountStrandsVolumeLine: string
+    discountStrandsPersonalLine: string
+    discountOtherVolumeLine: string
+    discountOtherPersonalLine: string
     discountMixed: string
     delivery: string
     deliveryNote: string
@@ -714,9 +723,18 @@ export const uiTranslationsUk: UiTranslationSchema = {
     itemsLabel: 'Товарів',
     itemsCount: '{count} шт.',
     subtotal: 'Сума',
+    strandsGroup: 'Низки',
+    otherGroup: 'Інші товари',
+    excludedGroup: 'Без знижки',
     discount: 'Знижка',
     discountVolume: 'знижка за суму {percent}%',
+    discountVolumeLine: 'Знижка за суму {percent}%',
     discountPersonal: 'постійна знижка {percent}%',
+    discountPersonalLine: 'Постійна знижка {percent}%',
+    discountStrandsVolumeLine: 'Знижка за суму низок {percent}%',
+    discountStrandsPersonalLine: 'Постійна знижка на низки {percent}%',
+    discountOtherVolumeLine: 'Знижка за суму товарів {percent}%',
+    discountOtherPersonalLine: 'Постійна знижка на товари {percent}%',
     discountMixed: 'знижка {personal}% + низки {strands}%',
     delivery: 'Доставка',
     deliveryNote: 'за тарифами перевізника',
@@ -1363,9 +1381,18 @@ export const uiTranslationsEn: UiTranslationSchema = {
     itemsLabel: 'Items',
     itemsCount: '{count} pcs.',
     subtotal: 'Subtotal',
+    strandsGroup: 'Strands',
+    otherGroup: 'Other items',
+    excludedGroup: 'No discount',
     discount: 'Discount',
     discountVolume: 'volume discount {percent}%',
+    discountVolumeLine: 'Volume discount {percent}%',
     discountPersonal: 'loyalty discount {percent}%',
+    discountPersonalLine: 'Loyalty discount {percent}%',
+    discountStrandsVolumeLine: 'Volume discount on strands {percent}%',
+    discountStrandsPersonalLine: 'Loyalty discount on strands {percent}%',
+    discountOtherVolumeLine: 'Volume discount on other items {percent}%',
+    discountOtherPersonalLine: 'Loyalty discount on other items {percent}%',
     discountMixed: 'discount {personal}% + strands {strands}%',
     delivery: 'Delivery',
     deliveryNote: 'carrier rates apply',

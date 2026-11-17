@@ -7,7 +7,7 @@ import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { attributeValueEn, strandLengthEn } from '@/i18n/CatalogEn'
 import { localizeProduct } from '@/i18n/localizeCatalog'
-import { SALE_UNIT_OPTION_KEY, formatPrice, getDiscountLabel, wristSizeNumber } from '@/utils'
+import { SALE_UNIT_OPTION_KEY, formatPrice, getCartSummaryLines, wristSizeNumber } from '@/utils'
 import {
   getAvailableStock,
   getCartUnitPrice,
@@ -43,7 +43,7 @@ export function CartPage() {
   )
   const count = totalItems()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const discountLabel = getDiscountLabel(pricing, t)
+  const summaryLines = getCartSummaryLines(pricing, t)
 
   useEffect(() => {
     const validIds = new Set(items.map((item) => item.id))
@@ -282,25 +282,15 @@ export function CartPage() {
                 <span>{t('cart.itemsLabel')}</span>
                 <span>{t('cart.itemsCount', { count })}</span>
               </div>
-              {pricing.discountAmount > 0 && (
-                <div className={styles.summaryRow}>
-                  <span>{t('cart.subtotal')}</span>
-                  <span>{formatPrice(pricing.subtotal, language)}</span>
-                </div>
-              )}
-              {pricing.discountAmount > 0 && (
-                <div className={styles.summaryRow}>
-                  <span>
-                    {t('cart.discount')}
-                    {discountLabel ? (
-                      <span className={styles.discountNote}> ({discountLabel})</span>
-                    ) : null}
-                  </span>
-                  <span className={styles.discountAmount}>
-                    −{formatPrice(pricing.discountAmount, language)}
+              {summaryLines.map((line) => (
+                <div className={styles.summaryRow} key={line.id}>
+                  <span className={line.nested ? styles.discountLabel : undefined}>{line.label}</span>
+                  <span className={line.tone === 'discount' ? styles.discountAmount : undefined}>
+                    {line.tone === 'discount' ? '−' : ''}
+                    {formatPrice(line.amount, language)}
                   </span>
                 </div>
-              )}
+              ))}
               <div className={styles.summaryRow}>
                 <span>{t('cart.delivery')}</span>
                 <span className={pricing.freeDelivery ? styles.deliveryFree : styles.deliveryNote}>

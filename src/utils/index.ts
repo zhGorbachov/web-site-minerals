@@ -33,7 +33,7 @@ export {
   type CartPricing,
   type CartPricingInputItem,
 } from './pricing'
-export { getDiscountLabel } from './discountLabel'
+export { getCartSummaryLines, getDiscountLabel, type CartSummaryLine } from './discountLabel'
 export {
   DEFAULT_WRIST_SIZES,
   wristSizeNumber,

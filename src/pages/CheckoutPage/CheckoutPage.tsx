@@ -33,7 +33,7 @@ import {
 } from '@/components/BrandIcons'
 import { useAuthStore, useCartStore, useCheckoutStore, GUEST_CHECKOUT_PROFILE_KEY } from '@/store'
 import { useTranslation } from '@/i18n/useTranslation'
-import { formatPrice, getDiscountLabel } from '@/utils'
+import { formatPrice, getCartSummaryLines } from '@/utils'
 import { formatPhoneDisplay, isValidLocalPhone, normalizeLocalPhone } from '@/utils/phone'
 import { Button, Breadcrumbs, Input, PhoneInput, EmptyState, Autocomplete } from '@/components/ui'
 import type { AutocompleteOption } from '@/components/ui'
@@ -281,7 +281,7 @@ export function CheckoutPage() {
   )
   const total = pricing.total
   const count = totalItems()
-  const discountLabel = getDiscountLabel(pricing, t)
+  const summaryLines = getCartSummaryLines(pricing, t)
 
   const loadCityOptions = async (query: string): Promise<AutocompleteOption[]> => {
     const { items } = await NovaPoshtaApi.searchCities(query)
@@ -1226,23 +1226,15 @@ export function CheckoutPage() {
               <span>{t('cart.itemsLabel')}</span>
               <span>{t('cart.itemsCount', { count })}</span>
             </div>
-            {pricing.discountAmount > 0 && (
-              <div className={styles.summaryRow}>
-                <span>{t('cart.subtotal')}</span>
-                <span>{formatPrice(pricing.subtotal, language)}</span>
-              </div>
-            )}
-            {pricing.discountAmount > 0 && (
-              <div className={styles.summaryRow}>
-                <span>
-                  {t('cart.discount')}
-                  {discountLabel ? ` (${discountLabel})` : ''}
-                </span>
-                <span className={styles.discountAmount}>
-                  −{formatPrice(pricing.discountAmount, language)}
+            {summaryLines.map((line) => (
+              <div className={styles.summaryRow} key={line.id}>
+                <span className={line.nested ? styles.discountLabel : undefined}>{line.label}</span>
+                <span className={line.tone === 'discount' ? styles.discountAmount : undefined}>
+                  {line.tone === 'discount' ? '−' : ''}
+                  {formatPrice(line.amount, language)}
                 </span>
               </div>
-            )}
+            ))}
             <div className={styles.summaryRow}>
               <span>{t('cart.delivery')}</span>
               <span className={pricing.freeDelivery ? styles.deliveryFree : undefined}>
