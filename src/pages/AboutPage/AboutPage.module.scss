@@ -626,8 +626,19 @@
 }
 
 .faqAnswer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
   padding: 0 $spacing-5 $spacing-5;
   font-size: $font-size-sm;
   color: $color-text-muted;
   line-height: $line-height-relaxed;
+
+  p {
+    margin: 0;
+  }
+
+  .contentList li {
+    font-size: $font-size-sm;
+  }
 }

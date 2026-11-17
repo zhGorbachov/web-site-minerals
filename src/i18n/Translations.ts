@@ -4,7 +4,12 @@ export type Language = 'uk' | 'en'
 
 export type DeliveryItem = { title: string; text: string }
 export type ValueItem = { title: string; text: string }
-export type FaqItem = { q: string; a: string }
+export type FaqItem = {
+  q: string
+  paragraphs: string[]
+  list?: string[]
+  after?: string[]
+}
 
 export type TranslationSchema = UiTranslationSchema & {
   nav: {
@@ -64,16 +69,14 @@ export type TranslationSchema = UiTranslationSchema & {
     storeAlt: string
     deliveryTitle: string
     returnsTitle: string
-    returnsIntro: string
-    returnsConditionsTitle: string
-    returnsConditions: string[]
-    returnsContact: string
+    returnsParagraphs: string[]
     discountsTitle: string
     discountsIntro: string
     discountsTiers: string[]
     discountsFreeDelivery: string
     discountsPersonal: string
     discountsStrands: string
+    discountsPaloSanto: string
     reviewsTitle: string
     reviewRating: string
     valuesTitle: string
@@ -111,7 +114,7 @@ export const translations: Record<Language, TranslationSchema> = {
       about: 'Про компанію',
       contacts: 'Контакти',
       delivery: 'Доставка і оплата',
-      returns: 'Обмін та повернення',
+      returns: 'Повернення та обмін',
       discounts: 'Знижки',
       reviews: 'Відгуки',
       values: 'Наші цінності',
@@ -167,30 +170,29 @@ export const translations: Record<Language, TranslationSchema> = {
       ],
       storeAlt: 'Наш магазин',
       deliveryTitle: 'Доставка і оплата',
-      returnsTitle: 'Обмін та повернення',
-      returnsIntro:
-        'Ми прагнемо, щоб кожна покупка приносила вам лише позитивні емоції. Якщо з будь-якої причини товар вам не підійшов, ви можете оформити обмін або повернення.',
-      returnsConditionsTitle: 'Повернення та обмін можливі за таких умов:',
-      returnsConditions: [
-        'Просимо повідомте нас про це якомога раніше після отримання замовлення.',
-        'Товар не був у використанні та зберіг свій первісний вигляд.',
-        'Повернення коштів здійснюється одразу після отримання та перевірки товару.',
+      returnsTitle: 'Повернення та обмін',
+      returnsParagraphs: [
+        'Повернення та обмін товарів здійснюються відповідно до чинного законодавства України.',
+        'Товар має зберігати товарний вигляд, комплектацію та споживчі властивості.',
+        'Звертаємо увагу, що натуральне каміння має природні особливості: відмінності у відтінках, малюнку, прозорості та наявність природних включень. Такі особливості є характерними для мінералів і не вважаються дефектом.',
+        'У разі отримання пошкодженого товару або невідповідності замовленню просимо звʼязатися з нами та надати фото або відео.',
+        'У разі необхідності повернення або обміну товару, будь ласка, звʼяжіться з нами за контактною інформацією, зазначеною на сайті.',
       ],
-      returnsContact:
-        'Звʼязатися з нами ви можете через будь-який месенджер (Telegram, WhatsApp, Viber, Instagram) або за номером телефону.',
       discountsTitle: 'Знижки та програма лояльності',
       discountsIntro: 'Знижка залежить від суми товарів (мінерали, браслети, пахощі та підвіски рахуються разом):',
       discountsTiers: [
         'від 1000 грн — 2%',
         'від 2000 грн — 3%',
         'від 3000 грн — 4%',
-        '…і далі до 10%.',
+        '…і далі за тією ж шкалою до 10%.',
       ],
       discountsFreeDelivery: 'Безкоштовна доставка діє на замовлення від 3000 грн.',
       discountsPersonal:
-        'Для постійних клієнтів у нас працюють персональні знижки 5% або 10% на весь асортимент, включно з низками. Вони не сумуються зі знижкою за суму: діє та, що більша.',
+        'Для постійних клієнтів діють персональні знижки 5% або 10% на весь асортимент, окрім низок та Пало Санто на вагу. Персональні знижки не сумуються зі знижкою від суми замовлення: діє та, що більша.',
       discountsStrands:
-        'Низки рахуються окремо: знижка на них залежить лише від суми низок у замовленні за тією ж шкалою, а їхня сума не додається до інших товарів.',
+        'Низки рахуються окремо: знижка на них залежить лише від загальної суми низок у замовленні за тією ж шкалою, а їхня вартість не додається до суми інших товарів.',
+      discountsPaloSanto:
+        'На Пало Санто, яке продається на вагу, знижки від суми замовлення та персональні знижки не поширюються.',
       reviewsTitle: 'Відгуки',
       reviewRating: 'Оцінка {rating} з 5',
       valuesTitle: 'Наші цінності',
@@ -234,19 +236,33 @@ export const translations: Record<Language, TranslationSchema> = {
       faq: [
         {
           q: 'Скільки коштує доставка?',
-          a: 'Доставка — за тарифами перевізника. При замовленні від 3000 грн діє безкоштовна доставка.',
+          paragraphs: ['Доставка — за тарифами перевізника. При замовленні від 3000 грн діє безкоштовна доставка.'],
         },
         {
           q: 'Коли ви відправляєте замовлення?',
-          a: 'Відправляємо з понеділка по пʼятницю Новою Поштою та Укрпоштою.',
+          paragraphs: ['Відправляємо з понеділка по пʼятницю Новою Поштою та Укрпоштою.'],
         },
         {
           q: 'Чи є знижки для постійних клієнтів?',
-          a: 'Так. Діє автоматична знижка від суми (від 1000 грн — 2% і далі до 10%): окремо для мінералів, браслетів, пахощів і підвісок разом, та окремо для низок. Постійним клієнтам можемо призначити персональну знижку 5% або 10% на все, включно з низками. Вона не сумується зі знижкою за суму — діє більша.',
+          paragraphs: ['Так. У нас діє автоматична система знижок залежно від суми замовлення:'],
+          list: [
+            'від 1000 грн — 2%',
+            'від 2000 грн — 3%',
+            'від 3000 грн — 4%',
+            'далі за тією ж шкалою до 10%.',
+          ],
+          after: [
+            'Знижка на мінерали, браслети, пахощі та підвіски розраховується разом, а на низки — окремо, залежно від їхньої загальної суми.',
+            'Для постійних клієнтів також можемо призначити персональну знижку 5% або 10% на асортимент магазину. Вона не поширюється на низки та Пало Санто, яке продається на вагу.',
+            'Знижки не сумуються: діє та, що більша. На Пало Санто на вагу знижки не поширюються.',
+          ],
         },
         {
-          q: 'Як правильно доглядати за браслетом?',
-          a: 'Знімайте браслет перед купанням та фізичними навантаженнями. Протирайте м\'якою сухою тканиною.',
+          q: 'Як доглядати за натуральним камінням?',
+          paragraphs: [
+            'Натуральне каміння потребує дбайливого догляду. Уникайте тривалого контакту з водою, парфумами, косметикою та побутовою хімією. Не допускайте падіння виробів і сильних ударів. Зберігайте прикраси окремо одна від одної, бажано в мʼяких мішечках або коробочках. Для очищення використовуйте мʼяку суху тканину.',
+            'Важливо: різні мінерали мають різну твердість і чутливість до вологи, сонячного світла та температури, тому догляд варто підбирати з урахуванням особливостей конкретного каменю.',
+          ],
         },
       ],
     },
@@ -277,7 +293,7 @@ export const translations: Record<Language, TranslationSchema> = {
       about: 'About the company',
       contacts: 'Contacts',
       delivery: 'Delivery & payment',
-      returns: 'Returns & exchanges',
+      returns: 'Returns and exchanges',
       discounts: 'Discounts',
       reviews: 'Reviews',
       values: 'Our values',
@@ -333,30 +349,29 @@ export const translations: Record<Language, TranslationSchema> = {
       ],
       storeAlt: 'Our store',
       deliveryTitle: 'Delivery & payment',
-      returnsTitle: 'Returns & exchanges',
-      returnsIntro:
-        'We want every purchase to bring you only positive emotions. If for any reason an item does not suit you, you can arrange an exchange or return.',
-      returnsConditionsTitle: 'Returns and exchanges are possible under these conditions:',
-      returnsConditions: [
-        'Please let us know as soon as possible after receiving your order.',
-        'The item has not been used and has kept its original appearance.',
-        'Refunds are processed right after we receive and inspect the item.',
+      returnsTitle: 'Returns and exchanges',
+      returnsParagraphs: [
+        'Returns and exchanges of goods are carried out in accordance with the current legislation of Ukraine.',
+        'The item must retain its commercial appearance, completeness, and consumer properties.',
+        'Please note that natural stone has natural features: differences in shade, pattern, and transparency, and the presence of natural inclusions. Such features are characteristic of minerals and are not considered a defect.',
+        'If you receive a damaged item or the order does not match what was ordered, please contact us and provide a photo or video.',
+        'If you need to return or exchange an item, please contact us using the contact information listed on the website.',
       ],
-      returnsContact:
-        'You can contact us via any messenger (Telegram, WhatsApp, Viber, Instagram) or by phone.',
       discountsTitle: 'Discounts & loyalty program',
-      discountsIntro: 'The discount depends on the total of your items (minerals, bracelets, incense and pendants are counted together):',
+      discountsIntro: 'The discount depends on the total of the items (minerals, bracelets, incense, and pendants are counted together):',
       discountsTiers: [
         'from 1000 UAH — 2%',
         'from 2000 UAH — 3%',
         'from 3000 UAH — 4%',
-        '…and so on up to 10%.',
+        '…and further on the same scale up to 10%.',
       ],
       discountsFreeDelivery: 'Free delivery applies to orders from 3000 UAH.',
       discountsPersonal:
-        'Regular customers can get personal discounts of 5% or 10% on the entire assortment, strands included. They are not added to the volume discount: whichever is higher applies.',
+        'Regular customers receive personal discounts of 5% or 10% on the entire assortment, except strands and Palo Santo sold by weight. Personal discounts are not combined with the order-amount discount: the higher one applies.',
       discountsStrands:
-        'Strands are counted separately: their discount depends only on the strands total in the order, on the same scale, and their sum is not added to the other items.',
+        'Strands are counted separately: the discount on them depends only on the total amount of strands in the order, on the same scale, and their cost is not added to the total of the other items.',
+      discountsPaloSanto:
+        'Order-amount discounts and personal discounts do not apply to Palo Santo sold by weight.',
       reviewsTitle: 'Reviews',
       reviewRating: 'Rating {rating} out of 5',
       valuesTitle: 'Our values',
@@ -400,19 +415,33 @@ export const translations: Record<Language, TranslationSchema> = {
       faq: [
         {
           q: 'How much does delivery cost?',
-          a: 'Delivery follows carrier rates. Free delivery applies to orders from 3000 UAH.',
+          paragraphs: ['Delivery follows carrier rates. Free delivery applies to orders from 3000 UAH.'],
         },
         {
           q: 'When do you ship orders?',
-          a: 'We ship Monday to Friday via Nova Poshta and Ukrposhta.',
+          paragraphs: ['We ship Monday to Friday via Nova Poshta and Ukrposhta.'],
         },
         {
           q: 'Are there discounts for regular customers?',
-          a: 'Yes. An automatic volume discount applies (from 1000 UAH — 2%, up to 10%): one scale for minerals, bracelets, incense and pendants together, and a separate one for strands. Regular customers may get a personal 5% or 10% on everything, strands included. It does not stack with the volume discount — the higher one applies.',
+          paragraphs: ['Yes. We have an automatic discount system based on the order amount:'],
+          list: [
+            'from 1000 UAH — 2%',
+            'from 2000 UAH — 3%',
+            'from 3000 UAH — 4%',
+            'and further on the same scale up to 10%.',
+          ],
+          after: [
+            'The discount on minerals, bracelets, incense, and pendants is calculated together, while strands are calculated separately, based on their total amount.',
+            'We can also assign regular customers a personal discount of 5% or 10% on the store assortment. It does not apply to strands or to Palo Santo sold by weight.',
+            'Discounts are not combined: the higher one applies. Discounts do not apply to Palo Santo sold by weight.',
+          ],
         },
         {
-          q: 'How should I care for my bracelet?',
-          a: 'Remove your bracelet before bathing or physical activity. Wipe with a soft dry cloth.',
+          q: 'How do I care for natural stone?',
+          paragraphs: [
+            'Natural stone needs careful care. Avoid prolonged contact with water, perfume, cosmetics, and household chemicals. Do not drop the pieces or expose them to strong impacts. Store jewelry separately, preferably in soft pouches or boxes. Clean with a soft dry cloth.',
+            'Important: different minerals vary in hardness and in sensitivity to moisture, sunlight, and temperature, so care should be chosen with the characteristics of the specific stone in mind.',
+          ],
         },
       ],
     },

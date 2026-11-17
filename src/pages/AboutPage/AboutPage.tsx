@@ -226,14 +226,9 @@ export function AboutPage() {
             <h2 className={styles.sectionTitle}>{t('about.returnsTitle')}</h2>
           </div>
           <div className={styles.textContent}>
-            <p>{t('about.returnsIntro')}</p>
-            <p>{t('about.returnsConditionsTitle')}</p>
-            <ul className={styles.contentList}>
-              {about.returnsConditions.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <p>{t('about.returnsContact')}</p>
+            {about.returnsParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
           </div>
         </motion.section>
 
@@ -254,6 +249,7 @@ export function AboutPage() {
             <p>{t('about.discountsFreeDelivery')}</p>
             <p>{t('about.discountsPersonal')}</p>
             <p>{t('about.discountsStrands')}</p>
+            <p>{t('about.discountsPaloSanto')}</p>
           </div>
         </motion.section>
 
@@ -449,7 +445,21 @@ export function AboutPage() {
             {about.faq.map((item) => (
               <details key={item.q} className={styles.faqItem}>
                 <summary className={styles.faqQuestion}>{item.q}</summary>
-                <p className={styles.faqAnswer}>{item.a}</p>
+                <div className={styles.faqAnswer}>
+                  {item.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                  {item.list && (
+                    <ul className={styles.contentList}>
+                      {item.list.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {item.after?.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
               </details>
             ))}
           </div>
