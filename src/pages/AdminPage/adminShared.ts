@@ -36,6 +36,19 @@ export function adminTabPath(tab: AdminTab) {
   return tab === 'orders' ? '/admin' : `/admin?tab=${tab}`
 }
 
+export function formatAdminError(
+  error: unknown,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+): string {
+  if (isAxiosError(error)) {
+    const data = error.response?.data as { error?: string; slug?: string; takenBy?: string } | undefined
+    if (data?.error === 'slug_taken' && data.takenBy) {
+      return t('admin.errorSlugTakenBy', { slug: data.slug ?? '', name: data.takenBy })
+    }
+  }
+  return t(mapAdminError(error))
+}
+
 export function mapAdminError(error: unknown): TranslationKey {
   if (isAxiosError(error)) {
     const code = error.response?.data?.error

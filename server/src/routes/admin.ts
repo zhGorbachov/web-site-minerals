@@ -406,7 +406,7 @@ adminRouter.post('/subcategories', async (req, res) => {
     where: { categorySlug: category.slug, slug },
   })
   if (clash) {
-    res.status(409).json({ error: 'slug_taken' })
+    res.status(409).json({ error: 'slug_taken', slug, takenBy: clash.name })
     return
   }
 
@@ -454,7 +454,7 @@ adminRouter.patch('/subcategories/:id', async (req, res) => {
       },
     })
     if (clash) {
-      res.status(409).json({ error: 'slug_taken' })
+      res.status(409).json({ error: 'slug_taken', slug, takenBy: clash.name })
       return
     }
   }

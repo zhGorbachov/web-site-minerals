@@ -72,6 +72,7 @@ export async function ensureCoreCategories(client: PrismaClient = prisma) {
   }
 
   await ensureDefaultSubcategories(client, categories)
+  await releaseRenamedPearlSlug(client)
 
   console.log(`Core categories ready: ${categories.map((c) => c.slug).join(', ')}`)
 }
@@ -108,4 +109,39 @@ async function ensureDefaultSubcategories(client: PrismaClient, categories: Core
   if (created.length) {
     console.log(`Default subcategories created: ${created.join(', ')}`)
   }
+}
+
+/**
+ * «Перламутр» was created as «Перли» and renamed two minutes later, but the slug
+ * stayed `перли`. That blocks a real pearls subcategory in Низки. Move the row
+ * to `перламутр` once; a later manual slug is left alone.
+ */
+async function releaseRenamedPearlSlug(client: PrismaClient) {
+  const stale = await client.subCategory.findFirst({
+    where: { categorySlug: 'nytky', name: 'Перламутр', slug: 'перли' },
+  })
+  if (!stale) return
+
+  const target = 'перламутр'
+  const clash = await client.subCategory.findFirst({
+    where: { categorySlug: stale.categorySlug, slug: target, NOT: { id: stale.id } },
+  })
+  if (clash) {
+    console.warn(`Cannot retarget subcategory ${stale.id}: slug ${target} is taken by ${clash.id}`)
+    return
+  }
+
+  await client.$transaction([
+    client.subCategory.update({ where: { id: stale.id }, data: { slug: target } }),
+    client.product.updateMany({
+      where: { subCategoryId: stale.id, subCategorySlug: stale.slug },
+      data: { subCategorySlug: target },
+    }),
+    client.productSubCategory.updateMany({
+      where: { subCategoryId: stale.id, subCategorySlug: stale.slug },
+      data: { subCategorySlug: target },
+    }),
+  ])
+
+  console.log(`Retargeted subcategory ${stale.id} slug ${stale.slug} -> ${target}`)
 }

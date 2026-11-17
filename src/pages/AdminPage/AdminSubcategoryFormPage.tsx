@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Layers } from 'lucide-react'
 import { AdminApi, CatalogApi } from '@/api'
@@ -8,8 +8,9 @@ import { Button, Input } from '@/components/ui'
 import { MediaUploader } from '@/components/MediaUploader'
 import { categoryHasSubcategories } from '@/config/Catalog'
 import type { Category } from '@/types'
+import { slugify } from '@/utils/sku'
 import { AdminShell } from './AdminShell'
-import { adminTabPath, mapAdminError } from './adminShared'
+import { adminTabPath, formatAdminError } from './adminShared'
 import styles from './AdminPage.module.scss'
 
 const emptySubForm = {
@@ -35,6 +36,8 @@ export function AdminSubcategoryFormPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
+  /** False while the slug still follows the name. A manual edit stops the sync. */
+  const slugTouched = useRef(false)
 
   const goToList = (flash?: string) => {
     navigate(adminTabPath('subcategories'), { state: flash ? { flash } : undefined })
@@ -60,6 +63,7 @@ export function AdminSubcategoryFormPage() {
             preselectedCategoryId && selectable.some((cat) => cat.id === preselectedCategoryId)
               ? preselectedCategoryId
               : ''
+          slugTouched.current = false
           setForm({
             ...emptySubForm,
             categoryId: fromQuery || selectable[0]?.id || '',
@@ -75,6 +79,7 @@ export function AdminSubcategoryFormPage() {
           return
         }
 
+        slugTouched.current = sub.slug !== slugify(sub.name)
         setForm({
           name: sub.name,
           slug: sub.slug,
@@ -82,7 +87,7 @@ export function AdminSubcategoryFormPage() {
           image: sub.image,
         })
       } catch (err) {
-        if (!cancelled) setError(t(mapAdminError(err)))
+        if (!cancelled) setError(formatAdminError(err, t))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -119,7 +124,7 @@ export function AdminSubcategoryFormPage() {
         goToList(t('admin.successSubCreated'))
       }
     } catch (err) {
-      setError(t(mapAdminError(err)))
+      setError(formatAdminError(err, t))
     } finally {
       setSaving(false)
     }
@@ -169,13 +174,27 @@ export function AdminSubcategoryFormPage() {
             <Input
               label={t('admin.subName')}
               value={form.name}
-              onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
+              onChange={(e) => {
+                const name = e.target.value
+                setForm((s) => ({
+                  ...s,
+                  name,
+                  slug: slugTouched.current ? s.slug : slugify(name),
+                }))
+              }}
               required
             />
             <Input
               label={t('admin.subSlug')}
+              hint={t('admin.subSlugHint')}
               value={form.slug}
-              onChange={(e) => setForm((s) => ({ ...s, slug: e.target.value }))}
+              onChange={(e) => {
+                const slug = e.target.value
+                setForm((s) => {
+                  slugTouched.current = slug.trim() !== '' && slug !== slugify(s.name)
+                  return { ...s, slug }
+                })
+              }}
             />
           </div>
           <div className={styles.mediaSection}>

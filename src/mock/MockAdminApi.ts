@@ -287,10 +287,11 @@ export const MockAdminApi = {
     if (!category) throw new MockApiError(400, 'Invalid category')
 
     const slug = payload.slug?.trim() || slugify(payload.name)
-    if (
-      MockDb.getSubcategories().some((s) => s.categorySlug === category.slug && s.slug === slug)
-    ) {
-      throw new MockApiError(409, 'slug_taken')
+    const clash = MockDb.getSubcategories().find(
+      (s) => s.categorySlug === category.slug && s.slug === slug,
+    )
+    if (clash) {
+      throw new MockApiError(409, 'slug_taken', { slug, takenBy: clash.name })
     }
 
     const now = new Date().toISOString()
@@ -324,12 +325,11 @@ export const MockAdminApi = {
     if (!category) throw new MockApiError(400, 'Invalid category')
 
     const slug = payload.slug?.trim() || current.slug
-    if (
-      list.some(
-        (s) => s.id !== id && s.categorySlug === category.slug && s.slug === slug,
-      )
-    ) {
-      throw new MockApiError(409, 'slug_taken')
+    const clash = list.find(
+      (s) => s.id !== id && s.categorySlug === category.slug && s.slug === slug,
+    )
+    if (clash) {
+      throw new MockApiError(409, 'slug_taken', { slug, takenBy: clash.name })
     }
 
     const updated: SubCategory = {

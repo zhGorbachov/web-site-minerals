@@ -557,6 +557,7 @@ export type UiTranslationSchema = {
     category: string
     subName: string
     subSlug: string
+    subSlugHint: string
     subImage: string
     subEmpty: string
     subSearchEmpty: string
@@ -618,6 +619,7 @@ export type UiTranslationSchema = {
     attrSize: string
     attrWeight: string
     errorSlugTaken: string
+    errorSlugTakenBy: string
     errorSkuTaken: string
     errorInOrders: string
     errorSubHasProducts: string
@@ -1194,6 +1196,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     category: 'Категорія',
     subName: 'Назва підкатегорії',
     subSlug: 'Slug підкатегорії',
+    subSlugHint: 'Береться з назви і змінюється разом із нею, поки це поле не змінити вручну.',
     subImage: 'Зображення',
     subEmpty: 'Підкатегорій ще немає',
     subSearchEmpty: 'Підкатегорій не знайдено',
@@ -1264,6 +1267,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     attrSize: 'Розмір',
     attrWeight: 'Вага',
     errorSlugTaken: 'Такий slug уже зайнятий',
+    errorSlugTakenBy: 'Slug «{slug}» уже зайнятий підкатегорією «{name}»',
     errorSkuTaken: 'Такий SKU уже зайнятий',
     errorInOrders: 'Неможливо видалити: товар є в замовленнях',
     errorSubHasProducts: 'Неможливо видалити: товари підкатегорії є в замовленнях',
@@ -1840,6 +1844,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     category: 'Category',
     subName: 'Subcategory name',
     subSlug: 'Subcategory slug',
+    subSlugHint: 'Filled from the name and follows it until you edit this field.',
     subImage: 'Image',
     subEmpty: 'No subcategories yet',
     subSearchEmpty: 'No subcategories found',
@@ -1911,6 +1916,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     attrSize: 'Size',
     attrWeight: 'Weight',
     errorSlugTaken: 'This slug is already taken',
+    errorSlugTakenBy: 'Slug “{slug}” is already used by the subcategory “{name}”',
     errorSkuTaken: 'This SKU is already taken',
     errorInOrders: 'Cannot delete: product is used in orders',
     errorSubHasProducts: 'Cannot delete: subcategory products are used in orders',
