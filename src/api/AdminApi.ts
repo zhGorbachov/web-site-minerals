@@ -46,6 +46,8 @@ export type AdminProductPayload = {
   discountPrice?: number | null
   stock: number
   images: string[]
+  videos?: string[]
+  /** First clip. Sent alongside `videos` so an older server still stores one video. */
   video?: string | null
   attributes?: Record<string, unknown>
   variants?: ProductVariant[]

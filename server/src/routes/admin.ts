@@ -25,6 +25,17 @@ function toDiscountPrice(value: number | null | undefined): number | null {
   return value
 }
 
+/** `videos` wins. A lone `video` is the old single-clip payload. `undefined` means the field was omitted. */
+function videosFromBody(data: { videos?: string[]; video?: string | null }): string[] | undefined {
+  if (data.videos !== undefined) {
+    return [...new Set(data.videos.map((item) => item.trim()).filter(Boolean))]
+  }
+  if (data.video !== undefined) {
+    return data.video ? [data.video.trim()] : []
+  }
+  return undefined
+}
+
 function resolveShortDescription(description: string, shortDescription?: string) {
   const trimmed = shortDescription?.trim()
   if (trimmed) return trimmed
@@ -56,6 +67,7 @@ const productBodySchema = z.object({
   discountPrice: z.number().min(0).nullable().optional(),
   stock: z.number().int().min(0),
   images: z.array(z.string().min(1)).min(1),
+  videos: z.array(z.string().trim().min(1)).optional(),
   video: z.string().trim().min(1).nullable().optional(),
   attributes: z.record(z.unknown()).optional(),
   variants: z.array(variantSchema).optional(),
@@ -216,6 +228,7 @@ adminRouter.post('/products', async (req, res) => {
     takenSkus.map((item) => item.sku),
   )
   const pricing = resolveVariantPricing(parsed.data)
+  const clips = videosFromBody(parsed.data) ?? []
 
   const product = await prisma.product.create({
     data: {
@@ -229,7 +242,8 @@ adminRouter.post('/products', async (req, res) => {
       discountPrice: toDiscountPrice(parsed.data.discountPrice),
       stock: pricing.stock,
       images: parsed.data.images,
-      video: parsed.data.video ?? null,
+      videos: clips,
+      video: clips[0] ?? null,
       attributes: (parsed.data.attributes ?? {}) as Prisma.InputJsonValue,
       variants: pricing.variants as Prisma.InputJsonValue,
       featured: parsed.data.featured ?? false,
@@ -292,6 +306,7 @@ adminRouter.patch('/products/:id', async (req, res) => {
     }
   }
 
+  const clips = videosFromBody(parsed.data)
   let nextPrice = parsed.data.price
   let nextStock = parsed.data.stock
   let nextVariants: Prisma.InputJsonValue | undefined
@@ -334,7 +349,12 @@ adminRouter.patch('/products/:id', async (req, res) => {
             : toDiscountPrice(parsed.data.discountPrice),
         stock: nextStock,
         images: parsed.data.images,
-        video: parsed.data.video === undefined ? undefined : parsed.data.video,
+        ...(clips === undefined
+          ? {}
+          : {
+              videos: clips,
+              video: clips[0] ?? null,
+            }),
         attributes: parsed.data.attributes as Prisma.InputJsonValue | undefined,
         variants: nextVariants,
         featured: parsed.data.featured,

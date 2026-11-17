@@ -20,6 +20,17 @@ import {
   parseVariants,
 } from '@/utils/productVariants'
 
+/** `videos` wins. A lone `video` is the old single-clip payload. `undefined` means the field was omitted. */
+function videosFromPayload(payload: { videos?: string[] | null; video?: string | null }): string[] | undefined {
+  if (payload.videos != null) {
+    return [...new Set(payload.videos.map((item) => item.trim()).filter(Boolean))]
+  }
+  if (payload.video !== undefined) {
+    return payload.video ? [payload.video.trim()] : []
+  }
+  return undefined
+}
+
 function buildOrderCustomer(
   order: Order,
   user?: { firstName: string; lastName: string; email?: string | null; phone?: string | null },
@@ -157,6 +168,7 @@ export const MockAdminApi = {
     )
 
     const now = new Date().toISOString()
+    const clips = videosFromPayload(payload) ?? []
     const variants = parseVariants(payload.variants)
     const derived = variants.length
       ? deriveProductPricingFromVariants(variants, payload.price)
@@ -173,7 +185,8 @@ export const MockAdminApi = {
       discountPrice: normalizeDiscountPrice(payload.discountPrice),
       stock: derived.stock,
       images: payload.images,
-      video: payload.video ?? undefined,
+      videos: clips,
+      video: clips[0],
       attributes: (payload.attributes ?? {}) as ProductAttributes,
       variants,
       featured: payload.featured ?? false,
@@ -221,6 +234,7 @@ export const MockAdminApi = {
       throw new MockApiError(409, 'sku_taken')
     }
 
+    const clips = videosFromPayload(payload)
     const variants =
       payload.variants !== undefined ? parseVariants(payload.variants) : current.variants
     const derived =
@@ -250,8 +264,8 @@ export const MockAdminApi = {
             : normalizeDiscountPrice(payload.discountPrice),
       stock: derived?.stock ?? payload.stock ?? current.stock,
       images: payload.images ?? current.images,
-      video:
-        payload.video === null ? undefined : (payload.video ?? current.video),
+      videos: clips ?? current.videos ?? (current.video ? [current.video] : []),
+      video: clips ? clips[0] : current.video,
       attributes: (payload.attributes as ProductAttributes | undefined) ?? current.attributes,
       variants,
       featured: payload.featured ?? current.featured,

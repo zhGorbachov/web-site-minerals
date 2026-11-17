@@ -27,20 +27,22 @@ function AdminPreviewImage({ src }: { src: string }) {
   )
 }
 
+const NO_VIDEOS: string[] = []
+
 type Props = {
   images: string[]
-  video?: string | null
+  videos?: string[]
   onImagesChange: (images: string[]) => void
-  onVideoChange?: (video: string | null) => void
+  onVideosChange?: (videos: string[]) => void
   maxImages?: number
   allowVideo?: boolean
 }
 
 export function MediaUploader({
   images,
-  video,
+  videos = NO_VIDEOS,
   onImagesChange,
-  onVideoChange,
+  onVideosChange,
   maxImages,
   allowVideo = true,
 }: Props) {
@@ -83,11 +85,11 @@ export function MediaUploader({
       try {
         const uploaded = await AdminApi.uploadFiles(files)
         let nextImages = [...images]
-        let nextVideo = video ?? null
+        let nextVideos = [...videos]
 
         for (const file of uploaded) {
           if (file.type === 'video') {
-            if (allowVideo) nextVideo = file.url
+            if (allowVideo && !nextVideos.includes(file.url)) nextVideos.push(file.url)
           } else if (!nextImages.includes(file.url)) {
             nextImages.push(file.url)
           }
@@ -98,14 +100,14 @@ export function MediaUploader({
         }
 
         onImagesChange(nextImages)
-        onVideoChange?.(nextVideo)
+        onVideosChange?.(nextVideos)
       } catch {
         setError(t('admin.uploadError'))
       } finally {
         setUploading(false)
       }
     },
-    [images, video, onImagesChange, onVideoChange, maxImages, allowVideo, t],
+    [images, videos, onImagesChange, onVideosChange, maxImages, allowVideo, t],
   )
 
   const handlePaste = async (e: React.ClipboardEvent) => {
@@ -133,6 +135,18 @@ export function MediaUploader({
 
   const removeImage = (url: string) => {
     onImagesChange(images.filter((img) => img !== url))
+  }
+
+  const removeVideo = (url: string) => {
+    onVideosChange?.(videos.filter((item) => item !== url))
+  }
+
+  const reorderVideo = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= videos.length || to >= videos.length) return
+    const next = [...videos]
+    const [item] = next.splice(from, 1)
+    next.splice(to, 0, item)
+    onVideosChange?.(next)
   }
 
   return (
@@ -194,6 +208,7 @@ export function MediaUploader({
           ref={videoInputRef}
           type="file"
           accept="video/*"
+          multiple
           hidden
           onChange={(e) => {
             const files = Array.from(e.target.files ?? [])
@@ -313,21 +328,50 @@ export function MediaUploader({
         </div>
       )}
 
-      {video && (
+      {videos.length > 0 && (
         <div className={styles.previewBlock}>
           <span className={styles.previewLabel}>{t('admin.video')}</span>
-          <div className={styles.videoPreview}>
-            <ProductVideo src={mediaUrl(video)} />
-            <button
-              type="button"
-              className={styles.removeBtn}
-              aria-label={t('admin.removeMedia')}
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={() => onVideoChange?.(null)}
-            >
-              <X size={14} />
-            </button>
-          </div>
+          <ul className={styles.videoGrid}>
+            {videos.map((src, index) => (
+              <li key={src} className={styles.videoCard}>
+                {videos.length > 1 && (
+                  <div className={styles.videoOrder}>
+                    <button
+                      type="button"
+                      className={styles.moveBtn}
+                      aria-label={t('admin.moveImageEarlier')}
+                      disabled={index === 0}
+                      onClick={() => reorderVideo(index, index - 1)}
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <span className={styles.videoIndex}>{index + 1}</span>
+                    <button
+                      type="button"
+                      className={styles.moveBtn}
+                      aria-label={t('admin.moveImageLater')}
+                      disabled={index === videos.length - 1}
+                      onClick={() => reorderVideo(index, index + 1)}
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+                <div className={styles.videoPreview}>
+                  <ProductVideo src={mediaUrl(src)} />
+                  <button
+                    type="button"
+                    className={styles.removeBtn}
+                    aria-label={t('admin.removeMedia')}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={() => removeVideo(src)}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

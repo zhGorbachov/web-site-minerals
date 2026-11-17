@@ -12,7 +12,7 @@ import { useCartStore, useWishlistStore } from '@/store'
 import { useOpenCatalog } from '@/hooks/useOpenCatalog'
 import { useTranslation, type TranslationKey } from '@/i18n/useTranslation'
 import { categoryHasSubcategories } from '@/config/Catalog'
-import { formatPrice, getMissingRequiredOptionKeys } from '@/utils'
+import { formatPrice, getMissingRequiredOptionKeys, productVideos } from '@/utils'
 import {
   buildVariantSelection,
   findBestMatchingVariant,
@@ -287,7 +287,7 @@ export function ProductPage() {
           <div className={styles.galleryCol}>
             <ProductGallery
               images={galleryImages}
-              video={product.video || undefined}
+              videos={productVideos(product)}
               productName={displayName}
               activeIndex={galleryIndex}
               onActiveIndexChange={handleGalleryIndex}

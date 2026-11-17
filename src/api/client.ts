@@ -52,6 +52,7 @@ export function withMediaUrls<
   T extends {
     image?: string
     images?: string[]
+    videos?: string[] | null
     video?: string | null
     variants?: Array<{ image?: string }>
   },
@@ -60,6 +61,7 @@ export function withMediaUrls<
     ...item,
     image: item.image ? mediaUrl(item.image) : item.image,
     images: item.images?.map(mediaUrl),
+    videos: item.videos?.map(mediaUrl),
     video: item.video ? mediaUrl(item.video) : item.video ?? undefined,
     variants: item.variants?.map((variant) => ({
       ...variant,

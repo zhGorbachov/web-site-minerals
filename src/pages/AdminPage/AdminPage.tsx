@@ -12,6 +12,7 @@ import { ProductAttributesEditor } from '@/components/ProductAttributesEditor'
 import { ProductVariantsEditor } from '@/components/ProductVariantsEditor'
 import type { Category, OrderStatus, PaymentStatus, Product, ProductVariant, StoreReview, SubCategory, ThreadAttributes } from '@/types'
 import { categoryHasSubcategories, isImplicitSubcategory } from '@/config/Catalog'
+import { productVideos } from '@/utils/productMedia'
 import { DEFAULT_STRAND_LENGTHS } from '@/utils/catalogDefaults'
 import { getThreadBeadSizes } from '@/utils/productOptions'
 import { buildProductSku, slugify, uniqueSku } from '@/utils/sku'
@@ -32,7 +33,7 @@ const SUBCATEGORIES_PAGE_SIZE = 10
 const REVIEWS_PAGE_SIZE = 8
 type ProductForm = Omit<
   AdminProductPayload,
-  'price' | 'discountPrice' | 'stock' | 'subCategoryId' | 'subCategoryIds' | 'categoryId'
+  'price' | 'discountPrice' | 'stock' | 'subCategoryId' | 'subCategoryIds' | 'categoryId' | 'video' | 'videos'
 > & {
   price: string
   discountPrice: string
@@ -43,6 +44,7 @@ type ProductForm = Omit<
   beadSaleBySize: Record<string, BeadSaleRow>
   subCategoryIds: string[]
   variants: ProductVariant[]
+  videos: string[]
 }
 
 /** Form-only strand fields that `attributesForSave` folds into the product attributes. */
@@ -146,7 +148,7 @@ const emptyForm: ProductForm = {
   beadSaleEnabled: false,
   beadSaleBySize: {},
   images: [],
-  video: null,
+  videos: [],
   subCategoryIds: [],
   featured: false,
   popular: false,
@@ -534,7 +536,7 @@ export function AdminPage() {
       halfStrandPrice: halfStrandPriceFromAttributes(product.attributes),
       ...beadFieldsFromAttributes(product.attributes),
       images: product.images,
-      video: product.video ?? null,
+      videos: productVideos(product),
       subCategoryIds: product.subCategoryIds?.length
         ? product.subCategoryIds
         : [product.subCategoryId],
@@ -620,7 +622,8 @@ export function AdminPage() {
       discountPrice: normalizeDiscountPrice(
         form.discountPrice.trim() === '' ? null : Number(form.discountPrice),
       ) ?? null,
-      video: form.video || null,
+      videos: form.videos,
+      video: form.videos[0] ?? null,
       slug: editingId ? form.slug || undefined : undefined,
       sku: skuValue || undefined,
       variants: storedVariants,
@@ -1017,14 +1020,14 @@ export function AdminPage() {
                 <span className={styles.mediaLabel}>{t('admin.media')}</span>
                 <ProductVariantsEditor
                   images={form.images}
-                  video={form.video}
+                  videos={form.videos}
                   variants={form.variants}
                   categorySlug={formCategorySlug}
                   attributes={(form.attributes as Record<string, unknown>) ?? {}}
                   defaultName={form.name}
                   defaultPrice={form.price}
                   onImagesChange={(images) => setForm((f) => ({ ...f, images }))}
-                  onVideoChange={(video) => setForm((f) => ({ ...f, video }))}
+                  onVideosChange={(videos) => setForm((f) => ({ ...f, videos }))}
                   onVariantsChange={(variants) => setForm((f) => ({ ...f, variants }))}
                 />
               </div>

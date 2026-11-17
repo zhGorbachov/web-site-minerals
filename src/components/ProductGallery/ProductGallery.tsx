@@ -7,8 +7,8 @@ import styles from './ProductGallery.module.scss'
 
 interface ProductGalleryProps {
   images: string[]
-  /** Shown as the last slide, after the photos. */
-  video?: string
+  /** Shown after the photos, in this order. */
+  videos?: string[]
   productName: string
   activeIndex?: number
   onActiveIndexChange?: (index: number) => void
@@ -60,7 +60,7 @@ function VideoThumb({ src }: { src: string }) {
 
 export function ProductGallery({
   images,
-  video,
+  videos,
   productName,
   activeIndex: activeIndexProp,
   onActiveIndexChange,
@@ -76,13 +76,15 @@ export function ProductGallery({
   const touchStartY = useRef(0)
   const isSwiping = useRef(false)
 
-  const slideCount = images.length + (video ? 1 : 0)
-  const videoIndex = video ? images.length : -1
+  const clips = (videos ?? []).filter(Boolean)
+  const slideCount = images.length + clips.length
+  const videoStart = images.length
   const hasMultiple = slideCount > 1
   const lastIndex = Math.max(0, slideCount - 1)
   const isControlled = activeIndexProp != null
   const activeIndex = Math.max(0, Math.min(isControlled ? activeIndexProp : internalIndex, lastIndex))
-  const showingVideo = activeIndex === videoIndex
+  const showingVideo = activeIndex >= videoStart
+  const activeVideo = showingVideo ? clips[activeIndex - videoStart] : undefined
 
   const goTo = useCallback((index: number) => {
     const next = Math.max(0, Math.min(index, lastIndex))
@@ -157,11 +159,11 @@ export function ProductGallery({
         onTouchEnd={hasMultiple ? handleTouchEnd : undefined}
       >
         <AnimatePresence mode="wait" initial={false}>
-          {showingVideo && video ? (
+          {showingVideo && activeVideo ? (
             <motion.video
-              key={video}
-              src={video}
-              poster={uploadSiblingUrl(video, 'poster') ?? undefined}
+              key={activeVideo}
+              src={activeVideo}
+              poster={uploadSiblingUrl(activeVideo, 'poster') ?? undefined}
               className={styles.mainVideo}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -241,8 +243,10 @@ export function ProductGallery({
                 className={[styles.dot, activeIndex === index ? styles.dotActive : ''].filter(Boolean).join(' ')}
                 onClick={() => goTo(index)}
                 aria-label={
-                  index === videoIndex
-                    ? t('productGallery.video')
+                  index >= videoStart
+                    ? clips.length > 1
+                      ? t('productGallery.videoN', { n: index - videoStart + 1 })
+                      : t('productGallery.video')
                     : t('productGallery.photo', { n: index + 1 })
                 }
                 aria-selected={activeIndex === index}
@@ -269,17 +273,26 @@ export function ProductGallery({
                 )}
               </button>
             ))}
-            {video && (
-              <button
-                type="button"
-                className={[styles.thumb, showingVideo ? styles.thumbActive : ''].filter(Boolean).join(' ')}
-                onClick={() => goTo(videoIndex)}
-                aria-label={t('productGallery.video')}
-                aria-current={showingVideo}
-              >
-                <VideoThumb src={video} />
-              </button>
-            )}
+            {clips.map((src, index) => {
+              const slideIndex = videoStart + index
+              const active = activeIndex === slideIndex
+              return (
+                <button
+                  key={`${src}-${index}`}
+                  type="button"
+                  className={[styles.thumb, active ? styles.thumbActive : ''].filter(Boolean).join(' ')}
+                  onClick={() => goTo(slideIndex)}
+                  aria-label={
+                    clips.length > 1
+                      ? t('productGallery.videoN', { n: index + 1 })
+                      : t('productGallery.video')
+                  }
+                  aria-current={active}
+                >
+                  <VideoThumb src={src} />
+                </button>
+              )
+            })}
           </div>
         </>
       )}

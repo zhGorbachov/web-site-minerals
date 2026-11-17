@@ -291,6 +291,7 @@ export type UiTranslationSchema = {
     photo: string
     thumbnailAlt: string
     video: string
+    videoN: string
   }
   subcategoryNav: {
     title: string
@@ -924,6 +925,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     photo: 'Фото {n}',
     thumbnailAlt: '{name} мініатюра {n}',
     video: 'Відео',
+    videoN: 'Відео {n}',
   },
   subcategoryNav: {
     title: 'Підкатегорії',
@@ -1140,7 +1142,7 @@ export const uiTranslationsUk: UiTranslationSchema = {
     imagesHint: 'Наприклад: /media/BeadsAgate.jpg',
     media: 'Медіа',
     mediaDropTitle: 'Вставте, перетягніть або оберіть файли',
-    mediaDropHint: 'Можна вставити одне чи кілька зображень з буфера (Ctrl+V / ⌘V), або завантажити фото та відео',
+    mediaDropHint: 'Можна вставити одне чи кілька зображень з буфера (Ctrl+V / ⌘V), або завантажити кілька фото та відео',
     mediaDropHintImage: 'Можна вставити зображення з буфера (Ctrl+V / ⌘V), перетягнути або обрати файл',
     addImage: 'Додати фото',
     addImages: 'Додати фото',
@@ -1572,6 +1574,7 @@ export const uiTranslationsEn: UiTranslationSchema = {
     photo: 'Photo {n}',
     thumbnailAlt: '{name} thumbnail {n}',
     video: 'Video',
+    videoN: 'Video {n}',
   },
   subcategoryNav: {
     title: 'Subcategories',
@@ -1788,12 +1791,12 @@ export const uiTranslationsEn: UiTranslationSchema = {
     imagesHint: 'Example: /media/BeadsAgate.jpg',
     media: 'Media',
     mediaDropTitle: 'Paste, drop or choose files',
-    mediaDropHint: 'Paste one or more images from clipboard (Ctrl+V / ⌘V), or upload photos and a video',
+    mediaDropHint: 'Paste one or more images from clipboard (Ctrl+V / ⌘V), or upload photos and videos',
     mediaDropHintImage: 'Paste an image from clipboard (Ctrl+V / ⌘V), drop or choose a file',
     addImage: 'Add photo',
     addImages: 'Add photos',
-    addVideo: 'Add video',
-    video: 'Video',
+    addVideo: 'Add videos',
+    video: 'Videos',
     uploading: 'Uploading...',
     uploadError: 'Could not upload file',
     removeMedia: 'Remove',

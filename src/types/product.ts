@@ -110,7 +110,10 @@ export interface Product {
   discountPrice?: number
   stock: number
   images: string[]
+  /** First clip. Mirrors `videos[0]` for products saved before several videos were allowed. */
   video?: string
+  /** Product clips in gallery order. */
+  videos?: string[]
   attributes: ProductAttributes
   variants?: ProductVariant[]
   featured: boolean

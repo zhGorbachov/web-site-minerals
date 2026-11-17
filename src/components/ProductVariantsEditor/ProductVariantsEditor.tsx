@@ -14,27 +14,27 @@ import styles from './ProductVariantsEditor.module.scss'
 
 type Props = {
   images: string[]
-  video?: string | null
+  videos?: string[]
   variants: ProductVariant[]
   categorySlug: string
   attributes: Record<string, unknown>
   defaultName: string
   defaultPrice: string
   onImagesChange: (images: string[]) => void
-  onVideoChange: (video: string | null) => void
+  onVideosChange: (videos: string[]) => void
   onVariantsChange: (variants: ProductVariant[]) => void
 }
 
 export function ProductVariantsEditor({
   images,
-  video,
+  videos,
   variants,
   categorySlug,
   attributes,
   defaultName,
   defaultPrice,
   onImagesChange,
-  onVideoChange,
+  onVideosChange,
   onVariantsChange,
 }: Props) {
   const { t } = useTranslation()
@@ -106,9 +106,9 @@ export function ProductVariantsEditor({
     <div className={styles.wrap}>
       <MediaUploader
         images={images}
-        video={video}
+        videos={videos}
         onImagesChange={handleImagesChange}
-        onVideoChange={onVideoChange}
+        onVideosChange={onVideosChange}
       />
 
       {drafts.length > 0 && (

@@ -86,6 +86,7 @@ export {
   isBeadSelection,
   type BeadSale,
 } from './beadSale'
+export { productVideos } from './productMedia'
 export {
   isHalfStrandLabel,
   findWholeStrandLabel,

@@ -127,7 +127,10 @@ model Product {
   discountPrice   Decimal? @db.Decimal(10, 2)
   stock           Int      @default(0)
   images          String[]
+  /// First clip. Mirrors `videos[0]` so a product saved before multi-video support still has its video.
   video           String?
+  /// Product clips in gallery order. `video` is always the first entry.
+  videos          String[] @default([])
   attributes      Json
   variants        Json     @default("[]")
   featured        Boolean  @default(false)
