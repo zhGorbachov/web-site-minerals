@@ -16,6 +16,7 @@ import { wishlistRouter } from './routes/wishlist.js'
 import { ordersRouter } from './routes/orders.js'
 import { adminRouter } from './routes/admin.js'
 import { cacheControlForUpload, optimizeUploadsDir } from './lib/mediaProcess.js'
+import { relinkProductVideos } from './lib/relinkProductVideos.js'
 import { uploadRouter, uploadsDir } from './routes/upload.js'
 import { novaPoshtaRouter } from './routes/novaPoshta.js'
 import { reviewsRouter } from './routes/reviews.js'
@@ -69,18 +70,21 @@ async function main() {
   await backfillProductSubCategories()
   await backfillProductVideos()
   await ensureBootstrapAdmin()
-  app.listen(env.port, () => {
+  const server = app.listen(env.port, () => {
     console.log(`API listening on http://localhost:${env.port}`)
     void optimizeUploadsDir(uploadsDir)
-      .then((stats) => {
+      .then(async (stats) => {
+        const relinked = await relinkProductVideos(uploadsDir, stats.renames)
         console.log(
-          `[media] ready, optimized ${stats.images} images and ${stats.videos} videos, skipped ${stats.skipped}, failed ${stats.failed}`,
+          `[media] ready, optimized ${stats.images} images and ${stats.videos} videos, skipped ${stats.skipped}, failed ${stats.failed}, relinked ${relinked}`,
         )
       })
       .catch((error) => {
         console.error('[media] background optimize failed', error)
       })
   })
+  // A slow mobile connection can spend several minutes just sending the clip.
+  server.requestTimeout = 10 * 60 * 1000
 }
 
 main().catch((error) => {

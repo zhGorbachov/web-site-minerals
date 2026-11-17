@@ -20,6 +20,11 @@ const VIDEO_EDGE = 960
 /** Caps the bitrate so a busy, shaky clip cannot balloon the file. */
 const VIDEO_MAXRATE = '1500k'
 const VIDEO_BUFSIZE = '3000k'
+/**
+ * The shop uploads from a phone and waits on this request.
+ * `medium` spent about two minutes on a 20s clip, and the phone often dropped the connection.
+ */
+const VIDEO_PRESET = 'veryfast'
 
 /**
  * Filenames already include a unique timestamp, and optimized bytes are not rewritten.
@@ -29,7 +34,7 @@ const VIDEO_BUFSIZE = '3000k'
 export const IMMUTABLE_UPLOAD_CACHE = 'public, max-age=31536000, immutable'
 
 const IN_PLACE_IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif'])
-const VIDEO_EXT = new Set(['.mp4', '.mov', '.m4v'])
+const VIDEO_EXT = new Set(['.mp4', '.mov', '.m4v', '.webm'])
 
 /** Caps the long edge at VIDEO_EDGE without upscaling. Commas stay literal: execFile does not use a shell. */
 const VIDEO_SCALE =
@@ -41,11 +46,18 @@ export type StoredUpload = {
   size: number
 }
 
+/** `clip.mov` was rewritten to `clip.mp4`. The old name stays on disk until product rows point at the new one. */
+export type UploadRename = {
+  fromName: string
+  toName: string
+}
+
 export type OptimizeStats = {
   images: number
   videos: number
   skipped: number
   failed: number
+  renames: UploadRename[]
 }
 
 type VideoInfo = {
@@ -98,11 +110,12 @@ export async function processNewUpload(filePath: string, mime: string): Promise<
 }
 
 /**
- * One pass over files already on disk. Paths stay the same, so product records,
- * orders and carts keep working. Safe to run again: finished files are skipped.
+ * One pass over files already on disk. Finished files are skipped.
+ * A clip that is not an .mp4 is written next to itself as .mp4 and reported in `renames`;
+ * the old file is removed only after product rows point at the new name.
  */
 export async function optimizeUploadsDir(dir: string): Promise<OptimizeStats> {
-  const stats: OptimizeStats = { images: 0, videos: 0, skipped: 0, failed: 0 }
+  const stats: OptimizeStats = { images: 0, videos: 0, skipped: 0, failed: 0, renames: [] }
   let names: string[]
   try {
     names = await fs.readdir(dir)
@@ -128,9 +141,10 @@ export async function optimizeUploadsDir(dir: string): Promise<OptimizeStats> {
         if (changed) stats.images += 1
         else stats.skipped += 1
       } else if (VIDEO_EXT.has(ext)) {
-        const changed = await optimizeExistingVideo(filePath)
-        if (changed) stats.videos += 1
+        const result = await optimizeExistingVideo(filePath)
+        if (result.changed) stats.videos += 1
         else stats.skipped += 1
+        if (result.rename) stats.renames.push(result.rename)
       }
     } catch (error) {
       stats.failed += 1
@@ -238,21 +252,47 @@ async function storeNewVideo(filePath: string): Promise<StoredUpload> {
   return { filePath: dest, type: 'video', size }
 }
 
-async function optimizeExistingVideo(filePath: string): Promise<boolean> {
-  const poster = posterPathFor(filePath)
+async function optimizeExistingVideo(filePath: string): Promise<{ changed: boolean; rename?: UploadRename }> {
+  const ext = path.extname(filePath).toLowerCase()
+  const dest =
+    ext === '.mp4' ? filePath : path.join(path.dirname(filePath), `${path.parse(filePath).name}.mp4`)
+  const sameFile = path.resolve(dest) === path.resolve(filePath)
+  const rename = sameFile
+    ? undefined
+    : { fromName: path.basename(filePath), toName: path.basename(dest) }
+
+  // Browsers play video/mp4. A .mov keeps that type from its extension, so the
+  // playable copy has to be a real .mp4 before product rows can point at it.
+  if (!sameFile && (await isPlayableVideo(dest))) {
+    const poster = posterPathFor(dest)
+    const hadPoster = existsSync(poster)
+    if (!hadPoster) await writePoster(dest)
+    return { changed: !hadPoster, rename }
+  }
+
   const info = await inspectVideo(filePath)
   const moovFirst = await moovBeforeMdat(filePath)
-  if (info && !info.needsTranscode && moovFirst && existsSync(poster)) return false
+  const poster = posterPathFor(dest)
+  if (sameFile && info && !info.needsTranscode && moovFirst && existsSync(poster)) {
+    return { changed: false }
+  }
 
-  if (!info || info.needsTranscode || !moovFirst) {
+  if (!sameFile || !info || info.needsTranscode || !moovFirst) {
     const before = await fileSize(filePath)
-    await prepareVideo(filePath, filePath)
+    await prepareVideo(filePath, dest)
     console.log(
-      `[media] video ${path.basename(filePath)} ${kb(before)}KB -> ${kb(await fileSize(filePath))}KB`,
+      `[media] video ${path.basename(filePath)} ${kb(before)}KB -> ${path.basename(dest)} ${kb(await fileSize(dest))}KB`,
     )
   }
-  if (!existsSync(poster)) await writePoster(filePath)
-  return true
+  if (!existsSync(posterPathFor(dest))) await writePoster(dest)
+  return { changed: true, rename }
+}
+
+async function isPlayableVideo(filePath: string): Promise<boolean> {
+  if (!existsSync(filePath)) return false
+  const info = await inspectVideo(filePath)
+  if (!info || info.needsTranscode) return false
+  return moovBeforeMdat(filePath)
 }
 
 async function prepareVideo(source: string, dest: string) {
@@ -413,7 +453,7 @@ async function transcodeVideo(source: string, dest: string) {
     '-pix_fmt',
     'yuv420p',
     '-preset',
-    'medium',
+    VIDEO_PRESET,
     '-crf',
     '26',
     '-maxrate',

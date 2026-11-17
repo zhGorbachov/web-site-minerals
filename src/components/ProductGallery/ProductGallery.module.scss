@@ -23,6 +23,11 @@
   touch-action: pan-y pinch-zoom;
   user-select: none;
 
+  // iOS freezes a video on the first frame when an ancestor clips it.
+  &:has(video) {
+    overflow: visible;
+  }
+
   @include tablet-up {
     border-radius: $radius-lg;
   }
@@ -41,6 +46,7 @@
   object-fit: contain;
   background: #111;
   display: block;
+  border-radius: inherit;
 }
 
 .navBtn {

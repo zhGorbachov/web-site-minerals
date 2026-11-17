@@ -154,26 +154,22 @@ export function ProductGallery({
     <div className={styles.gallery}>
       <div
         className={styles.mainWrapper}
-        onTouchStart={hasMultiple ? handleTouchStart : undefined}
-        onTouchMove={hasMultiple ? handleTouchMove : undefined}
-        onTouchEnd={hasMultiple ? handleTouchEnd : undefined}
+        onTouchStart={hasMultiple && !showingVideo ? handleTouchStart : undefined}
+        onTouchMove={hasMultiple && !showingVideo ? handleTouchMove : undefined}
+        onTouchEnd={hasMultiple && !showingVideo ? handleTouchEnd : undefined}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          {showingVideo && activeVideo ? (
-            <motion.video
-              key={activeVideo}
-              src={activeVideo}
-              poster={uploadSiblingUrl(activeVideo, 'poster') ?? undefined}
-              className={styles.mainVideo}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              controls
-              playsInline
-              preload="auto"
-            />
-          ) : (
+        {showingVideo && activeVideo ? (
+          <video
+            key={activeVideo}
+            src={activeVideo}
+            poster={uploadSiblingUrl(activeVideo, 'poster') ?? undefined}
+            className={styles.mainVideo}
+            controls
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          <AnimatePresence mode="wait" initial={false}>
             <motion.img
               key={images[activeIndex]}
               src={images[activeIndex]}
@@ -186,8 +182,8 @@ export function ProductGallery({
               draggable={false}
               fetchPriority="high"
             />
-          )}
-        </AnimatePresence>
+          </AnimatePresence>
+        )}
 
         {onWishlistToggle && !showingVideo && (
           <button

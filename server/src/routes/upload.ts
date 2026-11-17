@@ -23,11 +23,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 80 * 1024 * 1024, files: 12 },
+  limits: { fileSize: 200 * 1024 * 1024, files: 12 },
   fileFilter: (_req, file, cb) => {
+    // iOS often sends a library video as application/octet-stream, or with an empty type.
+    const name = file.originalname.toLowerCase()
     const ok =
       file.mimetype.startsWith('image/') ||
-      file.mimetype.startsWith('video/')
+      file.mimetype.startsWith('video/') ||
+      /\.(mp4|mov|m4v|webm|jpe?g|png|webp|gif|avif)$/.test(name)
     if (ok) cb(null, true)
     else cb(new Error('Only image and video files are allowed'))
   },
@@ -35,7 +38,11 @@ const upload = multer({
 
 export const uploadRouter = Router()
 
-uploadRouter.post('/', requireAdmin, upload.array('files', 12), async (req, res) => {
+uploadRouter.post('/', (req, res, next) => {
+  req.setTimeout(10 * 60 * 1000)
+  res.setTimeout(10 * 60 * 1000)
+  next()
+}, requireAdmin, upload.array('files', 12), async (req, res) => {
   const files = req.files as Express.Multer.File[] | undefined
   if (!files?.length) {
     res.status(400).json({ error: 'No files uploaded' })
