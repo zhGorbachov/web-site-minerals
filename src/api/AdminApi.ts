@@ -29,6 +29,7 @@ export type AdminOrderUpdatePayload = {
 function withOrderMedia(order: AdminOrder): AdminOrder {
   return {
     ...order,
+    paymentProofUrl: order.paymentProofUrl ? mediaUrl(order.paymentProofUrl) : order.paymentProofUrl,
     items: order.items.map((item) => ({
       ...item,
       productImage: item.productImage ? mediaUrl(item.productImage) : item.productImage,

@@ -340,7 +340,7 @@ export const MockDb = {
 
   updateOrder(
     orderId: string,
-    patch: Partial<Pick<Order, 'status' | 'paymentStatus'>>,
+    patch: Partial<Pick<Order, 'status' | 'paymentStatus' | 'paymentProofUrl'>>,
   ): Order | null {
     for (const [userId, orders] of Object.entries(state.orders)) {
       const index = orders.findIndex((order) => order.id === orderId)

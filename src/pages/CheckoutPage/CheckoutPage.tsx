@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import {
   Check,
   ChevronDown,
+  ImagePlus,
   ChevronUp,
   Copy,
   Package,
@@ -256,6 +257,25 @@ export function CheckoutPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [paymentProof, setPaymentProof] = useState<File | null>(null)
+  const [proofPreview, setProofPreview] = useState<string | null>(null)
+  const [placedOrder, setPlacedOrder] = useState<{
+    id: string
+    token?: string
+    proofUrl?: string | null
+  } | null>(null)
+  const [proofError, setProofError] = useState<string | null>(null)
+  const [proofUploading, setProofUploading] = useState(false)
+  const proofInputRef = useRef<HTMLInputElement>(null)
+  const proofPreviewRef = useRef<string | null>(null)
+  proofPreviewRef.current = proofPreview
+
+  useEffect(() => {
+    return () => {
+      const current = proofPreviewRef.current
+      if (current?.startsWith('blob:')) URL.revokeObjectURL(current)
+    }
+  }, [])
 
   const clearFieldError = (field: FieldKey) => {
     setFieldErrors((prev) => {
@@ -409,6 +429,32 @@ export function CheckoutPage() {
     setExpandedSteps((prev) => ({ ...prev, [step]: !prev[step] }))
   }
 
+  const pickPaymentProof = (file: File | null) => {
+    setProofError(null)
+    setPaymentProof(file)
+    setProofPreview((current) => {
+      if (current?.startsWith('blob:')) URL.revokeObjectURL(current)
+      return file ? URL.createObjectURL(file) : null
+    })
+  }
+
+  const uploadPlacedProof = async (file: File) => {
+    if (!placedOrder) return
+    setProofUploading(true)
+    setProofError(null)
+    try {
+      const updated = await OrdersApi.attachPaymentProof(placedOrder.id, file, placedOrder.token)
+      setPlacedOrder((current) =>
+        current ? { ...current, proofUrl: updated.paymentProofUrl ?? null } : current,
+      )
+      pickPaymentProof(null)
+    } catch {
+      setProofError(t('checkout.paymentProofError'))
+    } finally {
+      setProofUploading(false)
+    }
+  }
+
   if (!hydrated) return null
 
   if (success) {
@@ -425,6 +471,44 @@ export function CheckoutPage() {
             </div>
             <h1 className={styles.successTitle}>{t('checkout.successTitle')}</h1>
             <p className={styles.successDescription}>{t('checkout.successDescription')}</p>
+            {paymentMethod === 'bank_transfer' && (
+              <div className={styles.proofBlock}>
+                <p className={styles.proofTitle}>{t('checkout.paymentProofLabel')}</p>
+                {placedOrder?.proofUrl ? (
+                  <a href={placedOrder.proofUrl} target="_blank" rel="noreferrer">
+                    <img src={placedOrder.proofUrl} alt="" className={styles.proofImage} />
+                  </a>
+                ) : (
+                  <p className={styles.proofHint}>{t('checkout.paymentProofHint')}</p>
+                )}
+                {placedOrder?.proofUrl && (
+                  <p className={styles.proofAttached}>{t('checkout.paymentProofAttached')}</p>
+                )}
+                <button
+                  type="button"
+                  className={styles.proofChoose}
+                  disabled={proofUploading}
+                  onClick={() => proofInputRef.current?.click()}
+                >
+                  <ImagePlus size={16} aria-hidden />
+                  {placedOrder?.proofUrl
+                    ? t('checkout.paymentProofReplace')
+                    : t('checkout.paymentProofChoose')}
+                </button>
+                <input
+                  ref={proofInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.proofInput}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    event.target.value = ''
+                    if (file) void uploadPlacedProof(file)
+                  }}
+                />
+                {proofError && <p className={styles.error}>{proofError}</p>}
+              </div>
+            )}
             {user ? (
               <div className={styles.successActions}>
                 <Button as={Link} to="/profile" size="lg">
@@ -690,7 +774,7 @@ export function CheckoutPage() {
     setError(null)
     setErrorStep(null)
     try {
-      await OrdersApi.create({
+      const created = await OrdersApi.create({
         paymentMethod,
         deliveryMethod: location.deliveryMethod,
         language: language === 'en' ? 'en' : 'uk',
@@ -706,6 +790,20 @@ export function CheckoutPage() {
           : {}),
         ...(!user ? { items } : {}),
       })
+      let proofUrl = created.paymentProofUrl ?? null
+      if (paymentMethod === 'bank_transfer' && paymentProof) {
+        try {
+          const withProof = await OrdersApi.attachPaymentProof(
+            created.id,
+            paymentProof,
+            created.paymentProofToken,
+          )
+          proofUrl = withProof.paymentProofUrl ?? null
+        } catch {
+          setProofError(t('checkout.paymentProofError'))
+        }
+      }
+      setPlacedOrder({ id: created.id, token: created.paymentProofToken, proofUrl })
       await clearCart()
       setSuccess(true)
     } catch {
@@ -1160,6 +1258,46 @@ export function CheckoutPage() {
                             autoComplete="name"
                             required
                             invalid={Boolean(fieldErrors.payerFullName)}
+                          />
+                        </div>
+                        <div className={styles.proofBlock}>
+                          <p className={styles.proofTitle}>{t('checkout.paymentProofLabel')}</p>
+                          <p className={styles.proofHint}>{t('checkout.paymentProofHint')}</p>
+                          {proofPreview && (
+                            <img src={proofPreview} alt="" className={styles.proofImage} />
+                          )}
+                          {paymentProof && (
+                            <p className={styles.proofAttached}>{t('checkout.paymentProofAttached')}</p>
+                          )}
+                          <button
+                            type="button"
+                            className={styles.proofChoose}
+                            onClick={() => proofInputRef.current?.click()}
+                          >
+                            <ImagePlus size={16} aria-hidden />
+                            {paymentProof
+                              ? t('checkout.paymentProofReplace')
+                              : t('checkout.paymentProofChoose')}
+                          </button>
+                          {paymentProof && (
+                            <button
+                              type="button"
+                              className={styles.proofClear}
+                              onClick={() => pickPaymentProof(null)}
+                            >
+                              {paymentProof.name}
+                            </button>
+                          )}
+                          <input
+                            ref={proofInputRef}
+                            type="file"
+                            accept="image/*"
+                            className={styles.proofInput}
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null
+                              event.target.value = ''
+                              pickPaymentProof(file)
+                            }}
                           />
                         </div>
                       </div>

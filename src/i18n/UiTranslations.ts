@@ -173,6 +173,12 @@ export type UiTranslationSchema = {
     paymentBankPayerFullName: string
     paymentBankPayerFullNameHint: string
     paymentBankPayerFullNamePlaceholder: string
+    paymentProofLabel: string
+    paymentProofHint: string
+    paymentProofChoose: string
+    paymentProofReplace: string
+    paymentProofAttached: string
+    paymentProofError: string
     comment: string
     commentPlaceholder: string
     toPay: string
@@ -371,6 +377,11 @@ export type UiTranslationSchema = {
     showOrderItems: string
     hideOrderItems: string
     orderItemQty: string
+    paymentProofTitle: string
+    paymentProofChoose: string
+    paymentProofReplace: string
+    paymentProofAttached: string
+    paymentProofError: string
     orderStatus: {
       pending: string
       confirmed: string
@@ -486,6 +497,12 @@ export type UiTranslationSchema = {
     ordersCreatedAt: string
     ordersFilterClient: string
     ordersShippingTemplate: string
+    ordersQueueOpen: string
+    ordersQueueAll: string
+    ordersPackWhere: string
+    ordersPackWhat: string
+    ordersNoProof: string
+    ordersProof: string
     paymentStatus: {
       unpaid: string
       awaiting_payment: string
@@ -816,6 +833,13 @@ export const uiTranslationsUk: UiTranslationSchema = {
     paymentBankPayerFullNameHint:
       'Вкажіть ПІБ людини, яка здійснюватиме оплату. Може відрізнятися від даних отримувача.',
     paymentBankPayerFullNamePlaceholder: 'Прізвище Імʼя По батькові',
+    paymentProofLabel: 'Фото оплати',
+    paymentProofHint:
+      'Необов’язково. Якщо є фото переказу з банку, надішліть його — так нам легше знайти вашу оплату. Можна додати і пізніше в історії замовлень, якщо ви увійшли в акаунт.',
+    paymentProofChoose: 'Додати фото',
+    paymentProofReplace: 'Замінити фото',
+    paymentProofAttached: 'Фото додано',
+    paymentProofError: 'Не вийшло завантажити фото. Спробуйте ще раз.',
     comment: 'Коментар до замовлення',
     commentPlaceholder: 'Побажання до доставки або замовлення',
     toPay: 'До оплати',
@@ -1015,6 +1039,11 @@ export const uiTranslationsUk: UiTranslationSchema = {
     showOrderItems: 'Показати товари',
     hideOrderItems: 'Сховати товари',
     orderItemQty: '{count} шт.',
+    paymentProofTitle: 'Фото оплати',
+    paymentProofChoose: 'Додати фото оплати',
+    paymentProofReplace: 'Замінити фото',
+    paymentProofAttached: 'Фото додано',
+    paymentProofError: 'Не вийшло завантажити фото. Спробуйте ще раз.',
     orderStatus: {
       pending: 'Очікує',
       confirmed: 'Підтверджено',
@@ -1131,6 +1160,12 @@ export const uiTranslationsUk: UiTranslationSchema = {
     ordersCreatedAt: 'Створено',
     ordersFilterClient: 'Усі замовлення цього клієнта',
     ordersShippingTemplate: 'Отримувач',
+    ordersQueueOpen: 'В роботі',
+    ordersQueueAll: 'Усі замовлення',
+    ordersPackWhere: 'Куди',
+    ordersPackWhat: 'Що відправити',
+    ordersNoProof: 'Без фото оплати',
+    ordersProof: 'Фото оплати',
     paymentStatus: {
       unpaid: 'Не оплачено',
       awaiting_payment: 'Очікує оплату',
@@ -1474,6 +1509,13 @@ export const uiTranslationsEn: UiTranslationSchema = {
     paymentBankPayerFullNameHint:
       'Enter the full name of the person who will make the payment. It may differ from the recipient details.',
     paymentBankPayerFullNamePlaceholder: 'Surname First name Patronymic',
+    paymentProofLabel: 'Payment photo',
+    paymentProofHint:
+      'Optional. If you have a photo of the bank transfer, send it — that makes your payment easier to find. You can add it later from order history if you are signed in.',
+    paymentProofChoose: 'Add a photo',
+    paymentProofReplace: 'Replace photo',
+    paymentProofAttached: 'Photo added',
+    paymentProofError: 'The photo didn’t upload. Please try again.',
     comment: 'Order comment',
     commentPlaceholder: 'Delivery or order notes',
     toPay: 'To pay',
@@ -1673,6 +1715,11 @@ export const uiTranslationsEn: UiTranslationSchema = {
     showOrderItems: 'Show products',
     hideOrderItems: 'Hide products',
     orderItemQty: '× {count}',
+    paymentProofTitle: 'Payment photo',
+    paymentProofChoose: 'Add a payment photo',
+    paymentProofReplace: 'Replace photo',
+    paymentProofAttached: 'Photo added',
+    paymentProofError: 'The photo didn’t upload. Please try again.',
     orderStatus: {
       pending: 'Pending',
       confirmed: 'Confirmed',
@@ -1789,6 +1836,12 @@ export const uiTranslationsEn: UiTranslationSchema = {
     ordersCreatedAt: 'Created',
     ordersFilterClient: 'All orders from this customer',
     ordersShippingTemplate: 'Recipient',
+    ordersQueueOpen: 'In progress',
+    ordersQueueAll: 'All orders',
+    ordersPackWhere: 'Ship to',
+    ordersPackWhat: 'What to send',
+    ordersNoProof: 'No payment photo',
+    ordersProof: 'Payment photo',
     paymentStatus: {
       unpaid: 'Unpaid',
       awaiting_payment: 'Awaiting payment',

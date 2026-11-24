@@ -24,6 +24,7 @@ export type CreateOrderPayload = {
 function mapOrder(order: Order): Order {
   return {
     ...order,
+    paymentProofUrl: order.paymentProofUrl ? mediaUrl(order.paymentProofUrl) : order.paymentProofUrl,
     items: order.items.map((item) => ({
       ...item,
       productImage: mediaUrl(item.productImage),
@@ -69,6 +70,15 @@ export const OrdersApi = {
     }
 
     const { data } = await api.post<CreateOrderResult>('/orders', body)
+    return { ...mapOrder(data), paymentProofToken: data.paymentProofToken }
+  },
+
+  async attachPaymentProof(orderId: string, file: File, token?: string) {
+    const body = new FormData()
+    body.append('file', file)
+    const { data } = await api.post<Order>(`/orders/${orderId}/payment-proof`, body, {
+      headers: token ? { 'x-payment-token': token } : undefined,
+    })
     return mapOrder(data)
   },
 }

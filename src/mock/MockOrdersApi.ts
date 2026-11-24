@@ -39,6 +39,11 @@ function applyOrderStock(items: CartItem[]) {
 }
 
 const GUEST_USER_ID = 'guest'
+const proofTokens = new Map<string, string>()
+
+function newProofToken() {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`
+}
 
 function resolveUserId() {
   return MockDb.resolveSession(getAuthToken())?.id ?? null
@@ -103,6 +108,7 @@ function buildOrder(
     contactPhone: payload?.contact?.phone ?? null,
     contactEmail: payload?.contact?.email ?? null,
     deliveryAddress: payload?.deliveryAddress ?? null,
+    paymentProofUrl: null,
     createdAt: new Date().toISOString(),
     items,
   }
@@ -142,7 +148,9 @@ export const MockOrdersApi = {
       }
       MockDb.setOrders(userId, [order, ...MockDb.getOrders(userId)])
       MockDb.setCart(userId, { ...cart, items: [] })
-      return order
+      const paymentProofToken = newProofToken()
+      proofTokens.set(order.id, paymentProofToken)
+      return { ...order, paymentProofToken }
     }
 
     sourceItems = toCartItems(payload?.items)
@@ -156,6 +164,21 @@ export const MockOrdersApi = {
       throw new MockApiError(400, 'Insufficient stock')
     }
     MockDb.setOrders(GUEST_USER_ID, [order, ...MockDb.getOrders(GUEST_USER_ID)])
-    return order
+    const paymentProofToken = newProofToken()
+    proofTokens.set(order.id, paymentProofToken)
+    return { ...order, paymentProofToken }
+  },
+
+  async attachPaymentProof(orderId: string, file: File, token?: string) {
+    const userId = resolveUserId()
+    const existing = MockDb.getAllOrders().find((order) => order.id === orderId)
+    if (!existing) throw new MockApiError(404, 'Not found')
+    const owns = Boolean(userId && existing.userId === userId)
+    const tokenOk = Boolean(token && proofTokens.get(orderId) === token)
+    if (!owns && !tokenOk) throw new MockApiError(403, 'Forbidden')
+    if (!file.type.startsWith('image/')) throw new MockApiError(400, 'Only an image is allowed')
+    const updated = MockDb.updateOrder(orderId, { paymentProofUrl: URL.createObjectURL(file) })
+    if (!updated) throw new MockApiError(404, 'Not found')
+    return updated
   },
 }

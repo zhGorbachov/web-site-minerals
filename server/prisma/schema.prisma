@@ -224,6 +224,10 @@ model Order {
   contactEmail     String?
   /** Human-readable delivery summary (address / branch / postal index), snapshotted at order time. */
   deliveryAddress  String?
+  /** Bank-transfer screenshot uploaded by the buyer. */
+  paymentProofUrl   String?
+  /** Lets the buyer who just placed the order attach a screenshot, including guests. */
+  paymentProofToken String?
   liqpayOrderId  String?       @unique
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

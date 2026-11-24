@@ -36,6 +36,18 @@ const upload = multer({
   },
 })
 
+/** Buyer payment screenshots: one image, not a product video. */
+export const paymentProofUpload = multer({
+  storage,
+  limits: { fileSize: 12 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    const name = file.originalname.toLowerCase()
+    const ok = file.mimetype.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif)$/.test(name)
+    if (ok) cb(null, true)
+    else cb(new Error('Only image files are allowed'))
+  },
+})
+
 export const uploadRouter = Router()
 
 uploadRouter.post('/', (req, res, next) => {

@@ -320,6 +320,103 @@
   transform: rotate(180deg);
 }
 
+.pack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  padding: 0 $spacing-3 $spacing-3;
+
+  @include tablet-up {
+    padding: 0 $spacing-4 $spacing-4;
+  }
+}
+
+.packBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-2;
+  min-width: 0;
+}
+
+.packLabel {
+  margin: 0;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $color-text-muted;
+}
+
+.packWhere {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-2;
+  margin: 0;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: $color-text-muted;
+  }
+}
+
+.packItems {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  width: 100%;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-2;
+    min-width: 0;
+  }
+}
+
+.packQty {
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+}
+
+.packItemText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.packName {
+  font-size: $font-size-sm;
+}
+
+.packOptions {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  line-height: $line-height-normal;
+}
+
+.proofLink {
+  display: inline-flex;
+
+  img {
+    width: 72px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: $radius-sm;
+    border: 1px solid $color-border;
+    background: $color-surface;
+  }
+}
+
 .body {
   overflow: hidden;
 }

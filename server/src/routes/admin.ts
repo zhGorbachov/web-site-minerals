@@ -686,6 +686,7 @@ function mapAdminOrder(order: {
   contactPhone?: string | null
   contactEmail?: string | null
   deliveryAddress?: string | null
+  paymentProofUrl?: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -731,6 +732,7 @@ function mapAdminOrder(order: {
     deliveryMethod: order.deliveryMethod,
     payerFullName: order.payerFullName ?? null,
     deliveryAddress: order.deliveryAddress ?? null,
+    paymentProofUrl: order.paymentProofUrl ?? null,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,

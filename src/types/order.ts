@@ -40,8 +40,13 @@ export interface Order {
   contactEmail?: string | null
   /** Human-readable delivery summary (address / branch / postal index), snapshotted onto the order. */
   deliveryAddress?: string | null
+  /** Bank-transfer screenshot uploaded by the buyer. */
+  paymentProofUrl?: string | null
   items: OrderItem[]
   createdAt: string
 }
 
-export type CreateOrderResult = Order
+export type CreateOrderResult = Order & {
+  /** Returned only when the order is created. Used to attach a payment screenshot. */
+  paymentProofToken?: string
+}

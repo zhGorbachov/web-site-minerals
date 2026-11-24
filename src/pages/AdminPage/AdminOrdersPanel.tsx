@@ -80,6 +80,13 @@ const OPTION_LABEL_KEYS: Record<string, TranslationKey> = {
 const DELIVERY_FILTERS = ['nova_poshta', 'ukrposhta', 'self_pickup'] as const
 const ORDERS_PAGE_SIZE = 10
 const ALL = 'all'
+const OPEN_STATUSES = new Set<OrderStatus>([
+  'pending',
+  'confirmed',
+  'processing',
+  'assembling',
+  'ready',
+])
 
 const TONE_CLASS: Record<Tone, string> = {
   neutral: styles.toneNeutral,
@@ -132,7 +139,10 @@ function searchHaystack(order: AdminOrder): { text: string; digits: string } {
     order.customer?.phone,
     order.deliveryAddress,
     order.payerFullName,
-    ...order.items.map((item) => item.productName),
+    ...order.items.flatMap((item) => [
+      item.productName,
+      ...Object.values(item.selectedOptions ?? {}),
+    ]),
   ]
   const text = normalizeText(parts.filter(Boolean).join(' | '))
   return { text, digits: digitsOnly(order.customer?.phone ?? '') }
@@ -159,6 +169,7 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [newestFirst, setNewestFirst] = useState(true)
+  const [queue, setQueue] = useState<'open' | 'all'>('open')
   const [page, setPage] = useState(0)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
@@ -217,6 +228,7 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
 
     const list = orders.filter((order) => {
       if (statusFilter !== ALL && order.status !== statusFilter) return false
+      if (statusFilter === ALL && queue === 'open' && !OPEN_STATUSES.has(order.status)) return false
       if (paymentFilter !== ALL && (order.paymentStatus ?? 'unpaid') !== paymentFilter) return false
       if (deliveryFilter !== ALL && normalizeDelivery(order.deliveryMethod) !== deliveryFilter) {
         return false
@@ -237,7 +249,7 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
       const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       return newestFirst ? -diff : diff
     })
-  }, [orders, search, statusFilter, paymentFilter, deliveryFilter, dateFrom, dateTo, newestFirst])
+  }, [orders, search, statusFilter, paymentFilter, deliveryFilter, dateFrom, dateTo, newestFirst, queue])
 
   const totalSum = useMemo(
     () => filtered.reduce((sum, order) => sum + order.totalPrice, 0),
@@ -250,7 +262,7 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
 
   useEffect(() => {
     setPage(0)
-  }, [search, statusFilter, paymentFilter, deliveryFilter, dateFrom, dateTo, newestFirst])
+  }, [search, statusFilter, paymentFilter, deliveryFilter, dateFrom, dateTo, newestFirst, queue])
 
   useEffect(() => {
     if (page > totalPages - 1) setPage(Math.max(0, totalPages - 1))
@@ -262,7 +274,8 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
     paymentFilter !== ALL ||
     deliveryFilter !== ALL ||
     dateFrom !== '' ||
-    dateTo !== ''
+    dateTo !== '' ||
+    queue !== 'open'
 
   const resetFilters = () => {
     setSearch('')
@@ -271,6 +284,7 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
     setDeliveryFilter(ALL)
     setDateFrom('')
     setDateTo('')
+    setQueue('open')
   }
 
   const applyPreset = (days: number) => {
@@ -422,6 +436,30 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
           />
         </label>
         <div className={styles.presets}>
+          <button
+            type="button"
+            className={[styles.preset, queue === 'open' && statusFilter === ALL ? styles.presetActive : '']
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => {
+              setQueue('open')
+              setStatusFilter(ALL)
+            }}
+          >
+            {t('admin.ordersQueueOpen')}
+          </button>
+          <button
+            type="button"
+            className={[styles.preset, queue === 'all' && statusFilter === ALL ? styles.presetActive : '']
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => {
+              setQueue('all')
+              setStatusFilter(ALL)
+            }}
+          >
+            {t('admin.ordersQueueAll')}
+          </button>
           {[
             { days: 1, label: t('admin.ordersToday') },
             { days: 7, label: t('admin.ordersWeek') },
@@ -467,11 +505,6 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
               const unitsCount = order.items.reduce((sum, item) => sum + item.quantity, 0)
               const name = customerName(order)
               const isPickup = normalizeDelivery(order.deliveryMethod) === 'self_pickup'
-              const itemsPreview = order.items
-                .slice(0, 2)
-                .map((item) => item.productName)
-                .join(', ')
-              const more = order.items.length - 2
 
               return (
                 <li key={order.id} className={[styles.card, expanded ? styles.cardOpen : ''].join(' ')}>
@@ -494,17 +527,6 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
                             {formatPhoneDisplay(order.customer.phone)}
                           </span>
                         )}
-                      </div>
-                      <div className={styles.shipLine}>
-                        {isPickup ? <Package size={14} /> : <Truck size={14} />}
-                        <span>
-                          {deliveryMethodLabel(order.deliveryMethod)}
-                          {order.deliveryAddress ? ` — ${order.deliveryAddress}` : ''}
-                        </span>
-                      </div>
-                      <div className={styles.itemsLine}>
-                        {itemsPreview}
-                        {more > 0 ? ` +${more}` : ''}
                       </div>
                       <div className={styles.pills}>
                         {renderPill(
@@ -532,6 +554,75 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
                       />
                     </div>
                   </button>
+
+                  {!expanded && (
+                    <div className={styles.pack}>
+                      <div className={styles.packBlock}>
+                        <p className={styles.packLabel}>{t('admin.ordersPackWhere')}</p>
+                        <p className={styles.packWhere}>
+                          {isPickup ? <Package size={14} /> : <Truck size={14} />}
+                          <span>
+                            <strong>{deliveryMethodLabel(order.deliveryMethod)}</strong>
+                            {order.deliveryAddress ? ` — ${order.deliveryAddress}` : ` — ${t('admin.ordersNoAddress')}`}
+                          </span>
+                        </p>
+                        {renderCopy(
+                          `ship-${order.id}`,
+                          shippingText(order),
+                          t('admin.ordersCopyShipping'),
+                        )}
+                      </div>
+                      <div className={styles.packBlock}>
+                        <p className={styles.packLabel}>{t('admin.ordersPackWhat')}</p>
+                        <ul className={styles.packItems}>
+                          {order.items.map((item) => {
+                            const options = Object.entries(optionsWithoutVariantId(item.selectedOptions))
+                            return (
+                              <li key={item.id}>
+                                <span className={styles.packQty}>
+                                  {formatOrderItemQuantity(item, language)}
+                                </span>
+                                <span className={styles.packItemText}>
+                                  <span className={styles.packName}>{item.productName}</span>
+                                  {options.length > 0 && (
+                                    <span className={styles.packOptions}>
+                                      {options
+                                        .map(([key, value]) => {
+                                          const label = OPTION_LABEL_KEYS[key]
+                                            ? t(OPTION_LABEL_KEYS[key])
+                                            : key
+                                          return `${label}: ${formatOptionValue(key, value)}`
+                                        })
+                                        .join(' · ')}
+                                    </span>
+                                  )}
+                                </span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
+                      {order.paymentMethod === 'bank_transfer' && (
+                        <div className={styles.packBlock}>
+                          <p className={styles.packLabel}>{t('admin.ordersProof')}</p>
+                          {order.paymentProofUrl ? (
+                            <a
+                              className={styles.proofLink}
+                              href={order.paymentProofUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <img src={order.paymentProofUrl} alt="" />
+                            </a>
+                          ) : (
+                            <span className={[styles.pill, styles.toneWarning].join(' ')}>
+                              {t('admin.ordersNoProof')}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <AnimatePresence initial={false}>
                     {expanded && (
@@ -610,6 +701,19 @@ export function AdminOrdersPanel({ orders, updatingOrderId, onUpdate }: AdminOrd
                               {(order.paymentMethod === 'pickup' || order.paymentMethod === 'cod') && (
                                 <p className={styles.infoHint}>{t('admin.ordersCodHint')}</p>
                               )}
+                              {order.paymentMethod === 'bank_transfer' &&
+                                (order.paymentProofUrl ? (
+                                  <a
+                                    className={styles.proofLink}
+                                    href={order.paymentProofUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    <img src={order.paymentProofUrl} alt={t('admin.ordersProof')} />
+                                  </a>
+                                ) : (
+                                  <p className={styles.infoHint}>{t('admin.ordersNoProof')}</p>
+                                ))}
                               <p className={styles.infoHint}>
                                 {t('admin.ordersCreatedAt')}: {formatDate(order.createdAt)}
                               </p>

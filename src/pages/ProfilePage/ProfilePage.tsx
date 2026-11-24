@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { isAxiosError } from 'axios'
@@ -12,6 +12,7 @@ import {
   Heart,
   ArrowRight,
   ChevronDown,
+  ImagePlus,
   Star,
   MessageSquareQuote,
   type LucideIcon,
@@ -62,6 +63,10 @@ export function ProfilePage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [ordersLoading, setOrdersLoading] = useState(true)
   const [expandedOrderIds, setExpandedOrderIds] = useState<Set<string>>(new Set())
+  const [proofOrderId, setProofOrderId] = useState<string | null>(null)
+  const [proofBusyId, setProofBusyId] = useState<string | null>(null)
+  const [proofError, setProofError] = useState<string | null>(null)
+  const proofInputRef = useRef<HTMLInputElement>(null)
   const [favourites, setFavourites] = useState<Product[]>([])
   const [favouritesLoading, setFavouritesLoading] = useState(true)
   const [myReview, setMyReview] = useState<StoreReview | null>(null)
@@ -129,6 +134,20 @@ export function ProfilePage() {
   const hasDiscount = Boolean(user.discountPercent && user.discountPercent > 0)
 
   const statusLabel = (status: Order['status']) => t(`profile.orderStatus.${status}`)
+
+  const uploadOrderProof = async (orderId: string, file: File) => {
+    setProofBusyId(orderId)
+    setProofError(null)
+    try {
+      const updated = await OrdersApi.attachPaymentProof(orderId, file)
+      setOrders((current) => current.map((order) => (order.id === orderId ? updated : order)))
+    } catch {
+      setProofOrderId(orderId)
+      setProofError(t('profile.paymentProofError'))
+    } finally {
+      setProofBusyId(null)
+    }
+  }
 
   const toggleOrderItems = (orderId: string) => {
     setExpandedOrderIds((prev) => {
@@ -305,6 +324,17 @@ export function ProfilePage() {
             ) : orders.length === 0 ? (
               <p className={styles.emptyText}>{t('profile.ordersEmpty')}</p>
             ) : (
+              <input
+                ref={proofInputRef}
+                type="file"
+                accept="image/*"
+                className={styles.proofInput}
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  event.target.value = ''
+                  if (file && proofOrderId) void uploadOrderProof(proofOrderId, file)
+                }}
+              />
               <ul className={styles.orderList}>
                 {orders.map((order) => {
                   const expanded = expandedOrderIds.has(order.id)
@@ -326,6 +356,34 @@ export function ProfilePage() {
                         </span>
                         <span>{formatPrice(order.totalPrice, language)}</span>
                       </div>
+
+                      {order.paymentMethod === 'bank_transfer' && (
+                        <div className={styles.proofRow}>
+                          {order.paymentProofUrl && (
+                            <a href={order.paymentProofUrl} target="_blank" rel="noreferrer">
+                              <img src={order.paymentProofUrl} alt="" className={styles.proofThumb} />
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            className={styles.proofButton}
+                            disabled={proofBusyId === order.id}
+                            onClick={() => {
+                              setProofOrderId(order.id)
+                              setProofError(null)
+                              proofInputRef.current?.click()
+                            }}
+                          >
+                            <ImagePlus size={16} aria-hidden />
+                            {order.paymentProofUrl
+                              ? t('profile.paymentProofReplace')
+                              : t('profile.paymentProofChoose')}
+                          </button>
+                          {proofOrderId === order.id && proofError && (
+                            <p className={styles.proofError}>{proofError}</p>
+                          )}
+                        </div>
+                      )}
 
                       {order.items.length > 0 && (
                         <>

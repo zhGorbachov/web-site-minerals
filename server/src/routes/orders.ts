@@ -1,8 +1,13 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { randomBytes } from 'node:crypto'
 import { Router } from 'express'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { optionalAuth, requireAuth } from '../lib/auth.js'
+import { processNewUpload } from '../lib/mediaProcess.js'
+import { paymentProofUpload, uploadsDir } from './upload.js'
 import {
   calculateCartPricing,
   getDiscountedUnitPrice,
@@ -65,6 +70,7 @@ function mapOrder(order: {
   contactPhone?: string | null
   contactEmail?: string | null
   deliveryAddress?: string | null
+  paymentProofUrl?: string | null
   createdAt: Date
   items: Array<{
     id: string
@@ -91,6 +97,7 @@ function mapOrder(order: {
     contactPhone: order.contactPhone ?? null,
     contactEmail: order.contactEmail ?? null,
     deliveryAddress: order.deliveryAddress ?? null,
+    paymentProofUrl: order.paymentProofUrl ?? null,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((item) => ({
       id: item.id,
@@ -196,6 +203,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
             contactPhone: parsed.data.contact?.phone ?? null,
             contactEmail: parsed.data.contact?.email ?? null,
             deliveryAddress: parsed.data.deliveryAddress ?? null,
+            paymentProofToken: randomBytes(24).toString('hex'),
             items: {
               create: pricedLines,
             },
@@ -236,7 +244,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
         return created
       })
 
-      res.status(201).json(mapOrder(order))
+      res.status(201).json({ ...mapOrder(order), paymentProofToken: order.paymentProofToken })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not create order'
       if (message === 'Insufficient stock') {
@@ -345,6 +353,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
           contactPhone: parsed.data.contact?.phone ?? null,
           contactEmail: parsed.data.contact?.email ?? null,
           deliveryAddress: parsed.data.deliveryAddress ?? null,
+          paymentProofToken: randomBytes(24).toString('hex'),
           items: {
             create: pricedLines.map((item) => ({
               productId: item.product.id,
@@ -391,7 +400,7 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
       return created
     })
 
-    res.status(201).json(mapOrder(order))
+    res.status(201).json({ ...mapOrder(order), paymentProofToken: order.paymentProofToken })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Could not create order'
     if (message === 'Product not found' || message === 'Insufficient stock') {
@@ -400,4 +409,60 @@ ordersRouter.post('/', optionalAuth, async (req, res) => {
     }
     res.status(500).json({ error: 'Could not create order' })
   }
+})
+
+function proofFilePath(url: string | null | undefined): string | null {
+  if (!url?.startsWith('/uploads/')) return null
+  const name = path.basename(url)
+  if (!name || name !== url.slice('/uploads/'.length)) return null
+  return path.join(uploadsDir, name)
+}
+
+ordersRouter.post('/:id/payment-proof', optionalAuth, (req, res, next) => {
+  paymentProofUpload.single('file')(req, res, (error) => {
+    if (error) {
+      res.status(400).json({ error: 'Only an image up to 12 MB is allowed' })
+      return
+    }
+    next()
+  })
+}, async (req, res) => {
+  const file = req.file
+  if (!file) {
+    res.status(400).json({ error: 'Image is required' })
+    return
+  }
+
+  const orderId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+  const order = await prisma.order.findUnique({ where: { id: orderId } })
+  if (!order) {
+    await fs.rm(file.path, { force: true })
+    res.status(404).json({ error: 'Not found' })
+    return
+  }
+
+  const token = req.header('x-payment-token')
+  const owns = Boolean(req.userId && order.userId === req.userId)
+  const tokenOk = Boolean(token && order.paymentProofToken && token === order.paymentProofToken)
+  if (!owns && !tokenOk) {
+    await fs.rm(file.path, { force: true })
+    res.status(403).json({ error: 'Forbidden' })
+    return
+  }
+
+  const stored = await processNewUpload(file.path, file.mimetype || 'image/jpeg')
+  const url = `/uploads/${path.basename(stored.filePath)}`
+  const previous = proofFilePath(order.paymentProofUrl)
+
+  const updated = await prisma.order.update({
+    where: { id: order.id },
+    data: { paymentProofUrl: url },
+    include: { items: true },
+  })
+
+  if (previous && previous !== stored.filePath) {
+    await fs.rm(previous, { force: true })
+  }
+
+  res.json(mapOrder(updated))
 })

@@ -255,6 +255,54 @@
   color: $color-text-muted;
 }
 
+.proofRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  margin-bottom: $spacing-2;
+}
+
+.proofThumb {
+  width: 44px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border;
+}
+
+.proofButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-height: 36px;
+  padding: 0 $spacing-3;
+  font-family: inherit;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-primary-dark;
+  background: transparent;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.proofError {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: $font-size-xs;
+  color: $color-error;
+}
+
+.proofInput {
+  display: none;
+}
+
 .orderToggle {
   display: flex;
   align-items: center;
