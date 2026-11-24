@@ -324,18 +324,19 @@ export function ProfilePage() {
             ) : orders.length === 0 ? (
               <p className={styles.emptyText}>{t('profile.ordersEmpty')}</p>
             ) : (
-              <input
-                ref={proofInputRef}
-                type="file"
-                accept="image/*"
-                className={styles.proofInput}
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  event.target.value = ''
-                  if (file && proofOrderId) void uploadOrderProof(proofOrderId, file)
-                }}
-              />
-              <ul className={styles.orderList}>
+              <>
+                <input
+                  ref={proofInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.proofInput}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    event.target.value = ''
+                    if (file && proofOrderId) void uploadOrderProof(proofOrderId, file)
+                  }}
+                />
+                <ul className={styles.orderList}>
                 {orders.map((order) => {
                   const expanded = expandedOrderIds.has(order.id)
                   const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0)
@@ -450,7 +451,8 @@ export function ProfilePage() {
                     </li>
                   )
                 })}
-              </ul>
+                </ul>
+              </>
             )}
           </section>
 
